@@ -1,13 +1,19 @@
 // jshint eqnull: true
 // jshint esversion: 6
 
-const { first, rest, cons, isEmpty, map, reduce, print, memoize, range } = universe.core;
+const { first, rest, next, cons, isEmpty, map, reduce, print, memoize, range, partition, str, apply, html, renderTo, appendTo } = universe.core;
 
-function fib(n) {
-    if (n <= 0) return 0;
-    else if (n === 1) return 1;
+const fib = memoize(function(n) {
+    if (n <= 1) return 1;
     else {
         return fib(n - 1) + fib(n - 2);
+    }
+});
+
+function fibNaive(n) {
+    if (n <= 1) return 1;
+    else {
+        return fibNaive(n - 1) + fibNaive(n - 2);
     }
 }
 
@@ -38,5 +44,3 @@ function map2(f, xs) {
         return a.concat(f(x));
     }, xs, []);
 }
-
-//print(map(memoize(fib), range(10)));

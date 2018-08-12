@@ -27,6 +27,30 @@ window.universe.core = (function() {
         return Object.prototype.toString.call(x) === '[object Array]';
     }
 
+    function toArray(x) {
+        if (x == null) {
+            return [];
+        }
+        else if (isFunction(x.toArray)) {
+            return x.toArray();
+        }
+        else {
+            return Array.prototype.slice.call(x);
+        }
+    }
+
+    function isObject(x) {
+        return Object.prototype.toString.call(x) === '[object Object]';
+    }
+
+    function isUndefined(x) {
+        return x === void(0);
+    }
+
+    function isNull(x) {
+        return x === null;
+    }
+
     function exists(x) {
         return x != null;
     }
@@ -45,10 +69,14 @@ window.universe.core = (function() {
         }
     }
 
-    function next(x) {
-        if (x == null) return null;
+    function rest(x) {
+        if (x == null) return [];
+        else if (isFunction(x.rest)) {
+            return x.rest();
+        }
         else if (isFunction(x.next)) {
-            return x.next();
+            var val = x.next();
+            return val == null ? [] : val;
         }
         else if (isArrayLike(x)) {
             if (isFunction(x.slice)) {
@@ -63,9 +91,31 @@ window.universe.core = (function() {
         }
     }
 
-    function rest(x) {
-        var val = next(x);
-        return val == null ? [] : val;
+    function next(x) {
+        if (x == null) return null;
+        else if (isFunction(x.next)) {
+            return x.next();
+        }
+        else if (isFunction(x.rest)) {
+            var val = x.rest();
+            return isEmpty(val) ? null : val;
+        }
+        else if (isArrayLike(x)) {
+            if (x.length <= 1) {
+                return null;
+            }
+            else {
+                if (isFunction(x.slice)) {
+                    return x.slice(1);
+                }
+                else {
+                    return Array.prototype.slice.call(x, 1);
+                }
+            }
+        }
+        else {
+            throw new Error("Cannot get the rest of the elements of: " + x);
+        }
     }
 
     function cons(x, seq) {
@@ -102,9 +152,10 @@ window.universe.core = (function() {
                 return [];
             }
             else {
-                var a = [], i = 0, x;
-                for (x = first(xs); xs != null; xs = next(xs)) {
-                    a.push(f.call(null, x, i));
+                var a = [], i = 0;
+                while (xs != null) {
+                    a.push(f.call(null, first(xs), i));
+                    xs = next(xs);
                     i++;
                 }
                 return a;
@@ -152,20 +203,20 @@ window.universe.core = (function() {
             return '';
         }
         else {
-            Array.prototype.join.call(arguments, '');
+            return Array.prototype.join.call(arguments, '');
         }
     }
     
     function memoize(f) {
-        var memoized = function memoized() {
-            var hash = str.apply(null, arguments);
-            if (memoized.cache[hash] == null) {
+        var memoized = function() {
+            var hash = arguments[0]; // str.apply(null, arguments);
+            if (memoized.cache[hash] === void(0)) {
                 memoized.cache[hash] = f.apply(this, arguments);
             }
             return memoized.cache[hash];
         };
         memoized.cache = {};
-        return f;
+        return memoized;
     }
     
     function drop(n, xs) {
@@ -188,7 +239,7 @@ window.universe.core = (function() {
             for (i = 0; i < xs.length; i = i + n) {
                 x = [];
                 for (j = 0; j < n; j++) { 
-                    x.push(xs[i]);
+                    x.push(xs[i + j]);
                 }
                 a.push(x);
             }
@@ -217,10 +268,107 @@ window.universe.core = (function() {
         }
         else {
             var a = [], i;
-            for (i = start; i <= stop; i = i + step) {
+            for (i = start; a.length < stop; i = i + step) {
                 a.push(i);
             }
             return a;
+        }
+    }
+
+    function apply(f, args, ctx) {
+        if (arguments.length === 1) {
+            return function(args, ctx) {
+                return f.apply(ctx, args);
+            };
+        }
+        else if (arguments.length >= 2) {
+            return f.apply(ctx, args);
+        }
+        else {
+            throw new Error("Wrong number of arguments, expected at least 1, got: " + arguments.length);
+        }
+    }
+
+    const html = function() {
+        function renderAttrs(attrs) {
+            return map(function(x) { return str(x[0], '=', x[1]); }, Object.entries(attrs)).join(', ');
+        }
+
+        function renderTag(form) {
+            var tag = first(form),
+                body = rest(form),
+                attrs = first(body);
+            if (isObject(attrs) && isUndefined(attrs.__proto___)) {
+                return str("<", tag, " ", renderAttrs(attrs), ">", map(html, rest(body)), "</", tag, ">");
+            }
+            else {
+                return str("<", tag, ">", map(html, body), "</", tag, ">");
+            }
+        }
+
+        function renderComponent(form) {
+            var comp = first(form);
+                args = rest(form);
+            return html(apply(comp, args));
+        }
+    
+        return function(form) {
+            if (isArray(form)) {
+                if (isString(first(form))) {
+                    return renderTag(form);
+                }
+                else if (isFunction(first(form))) {
+                    return renderComponent(form);
+                }
+                else {
+                    return map(html, form);
+                }
+            }
+            else {
+                return str(form);
+            }
+        };
+    }();
+
+    function renderTo(elem, s) {
+        if (elem instanceof Document) {
+            elem.write(s);
+        }
+        else if (elem instanceof Element) {
+            elem.innerHTML = s;
+        }
+        else if (isString(elem)) {
+            toArray(document.querySelectorAll(elem)).forEach(function(e) {
+                e.innerHTML = s;
+            });
+        }
+    }
+
+    function appendTo(elem, s) {
+        if (elem instanceof Document) {
+            elem.write(s);
+        }
+        else if (elem instanceof Element) {
+            elem.innerHTML = str(elem.innerHTML, s);
+        }
+        else if (isString(elem)) {
+            toArray(document.querySelectorAll(elem)).forEach(function(e) {
+                e.innerHTML = str(e.innerHTML, s);
+            });
+        }
+    }
+    
+    function prependTo(elem, s) {
+        if (elem instanceof Document) {
+            elem.write(s);
+        }
+        else if (elem instanceof Element) {
+            elem.innerHTML = str(s, elem.innerHTML);
+        }
+        else if (isString(elem)) {
+            toArray(document.querySelectorAll(elem)).forEach(function(e) {
+                e.innerHTML = str(s, e.innerHTML);
+            });
         }
     }
     
@@ -244,6 +392,11 @@ window.universe.core = (function() {
         partition,
         range,
         memoize,
+        apply,
+        html,
+        renderTo,
+        appendTo,
+        prependTo,
         print
     };
 
