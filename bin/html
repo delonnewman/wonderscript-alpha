@@ -1,0 +1,5 @@
+#!/usr/bin/env node
+// jshint esversion: 6
+var fs = require('fs'),
+    { html, print } = require('../src/universe/core.js');
+print(html(JSON.parse(fs.readFileSync(process.argv[2], 'utf8'))));

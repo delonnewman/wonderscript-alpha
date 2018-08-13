@@ -1,0 +1,18 @@
+[
+  ["!!!"],
+  ["html", {"lang": "en"},
+    ["head",
+      ["title", "How to Build a Universe - An Introduction to Computing"],
+      ["link", {"rel": "stylesheet", "href": "./node_modules/boostrap/dist/css/bootstrap.min.css"}],
+      ["style", {"type": "text/css", "media": "screen"},
+        ["comment", "TODO: add CSS processing"]]],
+    ["body",
+      ["div", {"class": "container-fluid"},
+        ["div", {"class": "row"},
+          ["div", {"class": "col-md-auto"},
+            ["div", {"id": "editor"}]]]],
+      ["script", {"type": "text/javascript", "src": "./src/universe/core.js"}],
+      ["script", {"type": "text/javascript", "src": "./vendor/ace-builds/src/ace.js"}],
+      ["script", {"type": "text/javascript"},
+        ["comment", "TODO: add JS processing"]]]]
+]

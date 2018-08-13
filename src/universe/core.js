@@ -152,11 +152,10 @@ universe.core = (function() {
                 return [];
             }
             else {
-                var a = [], i = 0;
+                var a = [];
                 while (xs != null) {
-                    a.push(f.call(null, first(xs), i));
+                    a.push(f.call(null, first(xs)));
                     xs = next(xs);
-                    i++;
                 }
                 return a;
             }
@@ -176,11 +175,12 @@ universe.core = (function() {
                 return init;
             }
             else {
-                var x;
-                for (x = first(xs); xs != null; xs = next(xs)) {
-                    init = f.call(null, init, x);
+                var x = init;
+                while (xs != null) {
+                    x = f.call(null, x, first(xs));
+                    xs = next(xs);
                 }
-                return init;
+                return x;
             }
         }
         else {
@@ -300,20 +300,71 @@ universe.core = (function() {
         };
     }
 
+    function get(m, key, alt) {
+        var alt_ = alt == null ? null : alt;
+        if (m == null || key == null) return alt_;
+        var val = isFunction(m.get) ? m.get(key, alt) : m[key];
+        if (val == null) return alt_;
+        return val;
+    }
+
+    function maybe(val, act, alt) {
+        if (val == null) return alt != null ? alt : null;
+        else {
+          if (act != null) {
+            return act.call(null, val);
+          }
+          else {
+            return val;
+          }
+        }
+    }
+    
+    function either(val, right, left) {
+        if (val == null) {
+            return right.call();
+        }
+        else {
+            return left != null ? left.call(null, val) : val;
+        }
+    }
+
+
+    // TODO: see if there's a way to make the trace start with the callee
+    function raise(msg) {
+        var e = isString(msg) ? new Error(msg) : msg;
+        return function() {
+            throw msg;
+        };
+    }
+
     var html = function() {
         function renderAttrs(attrs) {
-            return map(function(x) { return str(x[0], '=', x[1]); }, Object.entries(attrs)).join(', ');
+            return map(function(x) { return str(x[0], '="', x[1], '"'); }, Object.entries(attrs)).join(', ');
         }
 
         function renderTag(form) {
             var tag = first(form),
                 body = rest(form),
-                attrs = first(body);
+                attrs = first(body),
+                head;
             if (isObject(attrs) && isUndefined(attrs.__proto___)) {
-                return str("<", tag, " ", renderAttrs(attrs), ">", map(html, rest(body)), "</", tag, ">");
+                head = str("<", tag, " ", renderAttrs(attrs), ">");
+                if (html.singletons[tag] != null) {
+                    return head;
+                }
+                else {
+                    return str(head, map(html, rest(body)), "</", tag, ">");
+                }
             }
             else {
-                return str("<", tag, ">", map(html, body), "</", tag, ">");
+                head = str("<", tag, ">");
+                if (html.singletons[tag] != null) {
+                    return head;
+                }
+                else {
+                    return str(head, map(html, rest(body)), "</", tag, ">");
+                }
             }
         }
 
@@ -322,11 +373,40 @@ universe.core = (function() {
                 args = rest(form);
             return html(apply(comp, args));
         }
+
+        function evalDefinition(form) {
+            var attrs = form[1], value = form[2],
+                comp  = Object.assign({value: value}, attrs),
+                name  = either(get(attrs, 'name'), raise('name is required'));
+            html.components[name] = comp;
+            return '';
+        }
     
-        return function(form) {
-            if (isArray(form)) {
-                if (isString(first(form))) {
-                    return renderTag(form);
+        var html = function(form) {
+            if (isString(form) && !isUndefined(html.components[form])) {
+                return html.components[form].value;
+            }
+            else if (isArray(form)) {
+                var tag = first(form);
+                if (isString(tag)) {
+                    if (tag === 'define') {
+                        return evalDefinition(form);
+                    }
+                    else {
+                        var x = html(tag);
+                        if (isFunction(x)) {
+                            return renderComponent([x].concat(rest(form)));
+                        }
+                        else if (isString(x)) {
+                            if (x !== tag) {
+                                return x;
+                            }
+                            return renderTag([x].concat(rest(form)));
+                        }
+                        else {
+                            throw new Error('Unable to evaluate tag value: "' + tag + '"');
+                        }
+                    }
                 }
                 else if (isFunction(first(form))) {
                     return renderComponent(form);
@@ -339,6 +419,16 @@ universe.core = (function() {
                 return str(form);
             }
         };
+        html.components = {};
+        html.singletons = {
+            img: true,
+            link: true
+        };
+
+        html(['define', {name: "!!!", doc: "A doctype tag"}, "<!DOCTYPE html>"]);
+        html(['define', {name: "comment", doc: "Include a comment"}, function() { return str("<!-- ", Array.prototype.join.call(arguments, ''), " -->"); }]);
+
+        return html;
     }();
 
     function renderTo(elem, s) {
@@ -390,11 +480,16 @@ universe.core = (function() {
         isFunction,
         isArrayLike,
         isArray,
+        isNull,
+        isUndefined,
+        isObject,
         exists,
+        toArray,
         first,
         rest,
         next,
         cons,
+        get,
         map,
         reduce,
         take,
@@ -408,6 +503,9 @@ universe.core = (function() {
         renderTo,
         appendTo,
         prependTo,
+        either,
+        maybe,
+        raise,
         print
     };
 
