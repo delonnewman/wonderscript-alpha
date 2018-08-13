@@ -1,0 +1,22 @@
+{
+  "name": "universe",
+  "version": "0.0.1",
+  "description": "How to Build a Universe - An Introduction to Computing",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/delonnewman/universe.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/delonnewman/universe/issues"
+  },
+  "homepage": "https://github.com/delonnewman/universe#readme",
+  "dependencies": {
+    "bootstrap": "^4.1.3"
+  }
+}

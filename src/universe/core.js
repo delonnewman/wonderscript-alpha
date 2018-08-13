@@ -1,7 +1,7 @@
 // jshint eqnull: true
 // jshint esversion: 6
-window.universe = window.universe || {};
-window.universe.core = (function() {
+var universe = universe || {};
+universe.core = (function() {
     
     function isNumber(x) {
         return Object.prototype.toString.call(x) === '[object Number]';
@@ -289,7 +289,18 @@ window.universe.core = (function() {
         }
     }
 
-    const html = function() {
+    function compose() {
+        var fns = arguments;
+        return function() {
+            var i, x = fns[0].apply(null, arguments);
+            for (i = 1; i < fns.length; i++) {
+                x = fns[i].call(null, x);
+            }
+            return x;
+        };
+    }
+
+    var html = function() {
         function renderAttrs(attrs) {
             return map(function(x) { return str(x[0], '=', x[1]); }, Object.entries(attrs)).join(', ');
         }
@@ -321,7 +332,7 @@ window.universe.core = (function() {
                     return renderComponent(form);
                 }
                 else {
-                    return map(html, form);
+                    return reduce(str, map(html, form));
                 }
             }
             else {
@@ -401,3 +412,7 @@ window.universe.core = (function() {
     };
 
 }());
+
+if (typeof module !== 'undefined') {
+    module.exports = universe.core;
+}
