@@ -2,14 +2,20 @@
 // jshint eqnull: true
 var wonderscript = wonderscript || {};
 wonderscript.core = function() {
-    var core, edn;
-    if (typeof require !== 'undefined') {
+    const IS_NODE = typeof module !== 'undefined' ? true : false;
+    const IS_BROWSER = typeof window !== 'undefined' ? true : false;
+
+    var GLOBAL, core, edn;
+    if (IS_NODE) {
         core = require('./core.js');
         edn = require('./edn.js');
+        GLOBAL = global;
     }
-    else {
+
+    if (IS_BROWSER) {
         core = universal.core;
         edn  = universal.edn;
+        GLOBAL = window;
     }
 
     const {
@@ -19,6 +25,7 @@ wonderscript.core = function() {
         partition,
         cons,
         first,
+        next,
         rest,
         isObject,
         isObjectLiteral,
@@ -29,7 +36,8 @@ wonderscript.core = function() {
         isBoolean,
         isUndefined,
         isArray,
-        print
+        print,
+        isEmpty
     } = core;
 
     const { read, PushBackReader } = edn;
@@ -716,6 +724,62 @@ wonderscript.core = function() {
         return buff.join(';\n');
     }
 
+    function prStr(x) {
+        if (x == null) return "nil";
+        else if (isNumber(x)) return str(x);
+        else if (isBoolean(x)) {
+            return x ? "true" : "false";
+        }
+        else if (isString(x)) {
+            return x;
+        }
+        else if (isArray(x)) {
+            if (x.length === 0) {
+                return '()';
+            } else {
+                var y;
+                var ys = x;
+                var buffer = [];
+                while (ys !== null) {
+                    y = first(ys);
+                    ys = next(ys);
+                    buffer.push(prStr(y));
+                }
+                return str('(', buffer.join(' '), ')');
+            }
+        }
+        else if (isArray(x)) {
+            if (x.length === 0) {
+                return '(array)';
+            }
+            return str('(array ', x.map(function(x) {
+                return prStr(x);
+            }).join(' '), ')');
+        } else if (isFunction(x)) {
+            return str('#js/function "', x.toString(), '"');
+        } else if (isArrayLike(x)) {
+            if (x.toString) {
+                return x.toString();
+            }
+            else {
+                return str('#js/object {',
+                    Array.prototype.slice.call(x)
+                        .map(function(x, i) { return str(i, ' ', prStr(x)); })
+                        .join(', '),
+                    '}');
+            }
+        } else {
+            return "" + x;
+        }
+    }
+
+    if (IS_NODE) {
+        const fs = require('fs');
+        CORE_MOD.loadFile = function(f) {
+            return evalString(fs.readFileSync(f, 'utf8'));  
+        };
+    }
+
     CORE_MOD.array = function() {
         return Array.prototype.slice.call(arguments);
     };
@@ -731,19 +795,17 @@ wonderscript.core = function() {
     };
     CORE_MOD.defmacro.$ws$isMacro = true;
 
+    CORE_MOD.NS = CURRENT_NS;
+
     define(TOP, CORE_NS.name, CORE_NS);
     define(TOP, 'js', typeof module !== 'undefined' ? {name: 'global', module: global} : {name: 'window', module: window});
 
     Object.assign(CORE_MOD, core);
-    Object.assign(CORE_MOD, {compile: emit, eval: evaluate, RecursionPoint, evalString, compileString});
+    Object.assign(CORE_MOD, {compile: emit, eval: evaluate, RecursionPoint, evalString, compileString, prStr});
+
+    GLOBAL.wonderscript = GLOBAL.wonderscript || {};
+    GLOBAL.wonderscript.core = CORE_MOD;
+    if (IS_NODE) module.exports = CORE_MOD;
 
     return CORE_MOD;
 }();
-
-if (typeof module !== 'undefined') {
-    module.exports = wonderscript.core;
-    global.wonderscript = wonderscript;
-}
-if (typeof window !== 'undefined') {
-    window.wonderscript = wonderscript;
-}

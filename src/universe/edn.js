@@ -146,7 +146,7 @@ wonderscript.edn = function() {
     function vectorReader(r, openbracket, opts) {
         var a = readDelimitedList(']', r, true, opts);
         //return new Vector(null, a);
-        return a;
+        return ['array'].concat(a);
     }
 
     function mapReader(r, openbracket, opts) {
@@ -366,7 +366,7 @@ wonderscript.edn = function() {
     function matchSymbol(s) {
         if (s.charAt(0) === ':') {
             //return Keyword.intern(Sym.intern(s.substring(1)));
-            return s.slice(1);
+            return ['quote', s.slice(1)];
         }
         //return Sym.intern(s);
         return s;
