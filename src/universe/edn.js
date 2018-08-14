@@ -1,6 +1,6 @@
 // jshint esversion: 6
 var GLOBAL = typeof module !== 'undefined' ? global : window;
-GLOBAL.wonderscript = wonderscript || {};
+GLOBAL.wonderscript = GLOBAL.wonderscript || {};
 wonderscript.edn = function() {
     //
     // Reader
@@ -130,10 +130,10 @@ wonderscript.edn = function() {
     }
 
     function listReader(r, openparen, opts) {
-        var meta = arrayMap(
+        /*var meta = arrayMap(
             Keyword.intern('line'), r.line(),
             Keyword.intern('column'), r.column()
-        );
+        );*/
         var a = readDelimitedList(')', r, true, opts);
         //return list.apply(null, a).withMeta(meta);
         return a;
@@ -174,9 +174,11 @@ wonderscript.edn = function() {
         }
     }
 
+    /*
     var TAG_KEY    = Keyword.intern('tag');
     var LINE_KEY   = Keyword.intern('line');
     var COLUMN_KEY = Keyword.intern('colunm');
+    */
 
     function metaReader(r, hat, opts) {
         var line = r.line();
@@ -258,8 +260,8 @@ wonderscript.edn = function() {
     var MACROS = {
         '"': stringReader,
         ';': commentReader,
-        "'": wrappingReader(Sym.intern('quote')),
-        '@': wrappingReader(Sym.intern('deref')),
+        "'": wrappingReader('quote'),
+        '@': wrappingReader('deref'),
         '^': metaReader,
         '(': listReader,
         ')': unmatchedDelimiterReader,
@@ -437,9 +439,8 @@ wonderscript.edn = function() {
         PushBackReader
     };
 
-    if (typeof module === 'undefined') {
+    if (typeof module !== 'undefined') {
         module.exports = api;
     }
 
 }();
-

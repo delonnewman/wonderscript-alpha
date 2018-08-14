@@ -32,6 +32,8 @@ wonderscript.core = function() {
         print
     } = core;
 
+    const { read, PushBackReader } = edn;
+
     const QUOTE_SYM   = 'quote';
     const DEF_SYM     = 'def';
     const COND_SYM    = 'cond';
@@ -706,7 +708,7 @@ wonderscript.core = function() {
         while (true) {
             res = read(r, {eofIsError: false, eofValue: null});
             if (res != null) {
-                ret = compile(res);
+                ret = emit(res);
                 if (ret != null) buff.push(ret);
             }
             if (res == null) break;
@@ -733,7 +735,7 @@ wonderscript.core = function() {
     define(TOP, 'js', typeof module !== 'undefined' ? {name: 'global', module: global} : {name: 'window', module: window});
 
     Object.assign(CORE_MOD, core);
-    Object.assign(CORE_MOD, {compile: emit, eval: evaluate, RecursionPoint});
+    Object.assign(CORE_MOD, {compile: emit, eval: evaluate, RecursionPoint, evalString, compileString});
 
     return CORE_MOD;
 }();
