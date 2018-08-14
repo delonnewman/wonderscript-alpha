@@ -1,7 +1,5 @@
 #!/usr/bin/env node
 // jshint esversion: 6
-var fs = require('fs'),
-    { print } = require('../src/universe/core.js'),
-    { compileString } = require('../src/universe/wonderscript.js');
-var src = fs.readFileSync(process.argv[2], 'utf8');
+const fs = require('fs'), { print, compileString } = require('../index.js');
+const src = fs.readFileSync(process.argv[2], 'utf8');
 print(compileString(src));
