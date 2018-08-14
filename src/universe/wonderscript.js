@@ -1,12 +1,36 @@
 // jshint esversion: 6
 // jshint eqnull: true
-var universe = universe || {};
-universe.wonderscript = function() {
+var wonderscript = wonderscript || {};
+wonderscript.core = function() {
+    var core, edn;
     if (typeof require !== 'undefined') {
-        universe.core = require('./core.js');
+        core = require('./core.js');
+        edn = require('./edn.js');
+    }
+    else {
+        core = universal.core;
+        edn  = universal.edn;
     }
 
-    const { str, map, reduce, partition, first, rest, isObject, isObjectLiteral, isNull, isString, isNumber, isBoolean, isUndefined, isArray, print } = universe.core;
+    const {
+        str,
+        map,
+        reduce,
+        partition,
+        cons,
+        first,
+        rest,
+        isObject,
+        isObjectLiteral,
+        isNull,
+        isString,
+        isFunction,
+        isNumber,
+        isBoolean,
+        isUndefined,
+        isArray,
+        print
+    } = core;
 
     const QUOTE_SYM   = 'quote';
     const DEF_SYM     = 'def';
@@ -25,8 +49,27 @@ universe.wonderscript = function() {
     const NEW_SYM     = 'new';
     const SET_SYM     = 'set!';
 
+    const SPECIAL_FORMS = {
+        quote: true,
+        def: true,
+        cond: true,
+        js: true,
+        'fn*': true,
+        loop: true,
+        recur: true,
+        throw: true,
+        try: true,
+        catch: true,
+        finally: true,
+        do: true,
+        let: true,
+        '.': true,
+        new: true,
+        'set!': true
+    };
+
     const CORE_MOD = {};
-    const CORE_NS = {name: 'universe.wonderscript', module: CORE_MOD};
+    const CORE_NS = {name: 'wonderscript.core', module: CORE_MOD};
     const CURRENT_NS = {
         value: CORE_NS
     };
@@ -39,6 +82,42 @@ universe.wonderscript = function() {
 
     const RECUR_ERROR = new Error('recur can only be used in a tail position within a loop or function');
 
+    var names = {
+        '=': 'eq',
+        'not=': 'noteq',
+        '<': 'lt',
+        '>': 'gt',
+        '<=': 'lteq',
+        '>=': 'gteq',
+        '+': 'add',
+        '-': 'sub',
+        '*': 'mult',
+        '/': 'div'
+    };
+
+    function cap(x) {
+        if (x.length === 0) return x;
+        return str(x[0].toUpperCase(), x.slice(1));
+    }
+
+    function wsNameToJS(x) {
+        if (names[x]) return names[x];
+        var prefix = null, parts;
+        if (x.endsWith('?')) {
+            prefix = 'is';
+            x = x.slice(0, x.length - 1);
+        }
+        else if (x.endsWith('!')) {
+            x = x.slice(0, x.length - 1);
+        }
+        else if (x.startsWith('*') && x.endsWith('*')) {
+            return x.slice(0, x.length - 1).slice(1).split('-').map(function(s) { return s.toUpperCase(); }).join('_');
+        }
+        if (x.indexOf("->") !== -1) parts = x.split("->").reduce(function(a, x) { return [].concat(a, "to", x); });
+        else parts = prefix ? [].concat(prefix, x.split('-')) : x.split('-');
+        return [].concat(parts[0], parts.slice(1).map(cap)).join('');
+    }
+
     const SPECIAL_CHARS = {
         '=': '_EQ_',
         '\\-': '_DASH_',
@@ -48,12 +127,13 @@ universe.wonderscript = function() {
     };
 
     function escapeChars(string) {
-        if (string.indexOf('.') !== -1) throw new Error('"."s are reserved for namespaces');
+        /*if (string.indexOf('.') !== -1) throw new Error('"."s are reserved for namespaces');
         var ch;
         for (ch in SPECIAL_CHARS) {
             string = string.replace(new RegExp(ch, 'g'), SPECIAL_CHARS[ch]);
         }
-        return string;
+        return string;*/
+        return wsNameToJS(string);
     }
 
     function env(parent) {
@@ -106,7 +186,7 @@ universe.wonderscript = function() {
         }
     }
 
-    function findVar(env, name) {
+    function findLexicalVar(env, name) {
         var scope = lookup(env, name);
         if (scope == null) {
             throw new Error(str('Undefined variable: "', name, '"'));
@@ -116,21 +196,82 @@ universe.wonderscript = function() {
         }
     }
 
+    function findNamespaceVar(s) {
+        if (s.indexOf('/') !== -1) {
+            var parts = s.split('/');
+            if (parts[1].indexOf('.') !== -1) throw new Error('"." are reserved for namespaces');
+            if (parts.length !== 2) throw new Error('A symbol should only have 2 parts');
+            var scope = lookup(env, parts[0]);
+            if (scope === null) return null;
+            else {
+                var ns = scope.vars[parts[0]],
+                    val = ns.module[parts[1]];
+                if (isUndefined(val)) return null;
+                return val;
+            }
+        }
+        else {
+            var s = escapeChars(s),
+                val = CURRENT_NS.value.module[s];
+            if (!isUndefined(val)) {
+                return val;
+            }
+            else if (!isUndefined(val = CORE_NS.module[s])) {
+                return val;
+            }
+            return null;
+        }
+    }
+
+    function isMacro(x) {
+        return isFunction(x) && x.$ws$isMacro === true;
+    }
+
+    function macroexpand(form) {
+        if (!isArray(form)) {
+            return form;
+        }
+        else {
+            if (SPECIAL_FORMS[form[0]]) return form;
+            else if (isString(form[0])) {
+                var val = findNamespaceVar(form[0]);
+                if (val === null) return form;
+                else {
+                    if (isMacro(val)) {
+                        return macroexpand(val.apply(null, form.slice(1)));
+                    }
+                    else {
+                        return form;
+                    }
+                }
+            }
+            else {
+                return form;
+            }
+        }
+    }
+
     const TOP = env();
-    // TODO: quote, macros, try/catch/finally
-    function emit(form, env_) {
-        var env_ = env_ || TOP;
-        //if (isMacro(form)) form = macroexpand(form);
-        if (isString(form)) return emitSymbol(form, env_);
+    // TODO: try/catch/finally
+    function emit(form_, env_) {
+        var env_ = env_ || TOP,
+            form = macroexpand(form_);
+        if (isString(form)) {
+            if (form === 'nil') return 'null';
+            return emitSymbol(form, env_);
+        }
         else if (isNumber(form)) return str(form);
         else if (isBoolean(form)) return form === true ? 'true' : 'false';
         else if (isNull(form)) return 'null';
-        else if (isUndefined(form)) return 'undefined';
-        else if (isObject(form)) {
+        else if (isUndefined(form)) {
+            return 'undefined';
+        }
+        else if (isObjectLiteral(form)) {
             return str('({', map(function(xs) { return str(xs[0], ':', emit(xs[1], env_)); }, Object.entries(form)).join(', '), '})');
         }
         else if (isArray(form)) {
-            if (isString(form[0])) {
+            if (form.length === 0) return '[]';
+            else if (isString(form[0])) {
                 switch(form[0]) {
                   case DEF_SYM:
                     return emitDef(form, env_);
@@ -262,7 +403,7 @@ universe.wonderscript = function() {
                 return str(CORE_NS.name, '.', s);
             }
             else {
-                findVar(env, s); // throws error if undefined
+                findLexicalVar(env, s); // throws error if undefined
                 return s;
             }
         }
@@ -407,16 +548,22 @@ universe.wonderscript = function() {
     }
 
     function emitDef(form, env, opts) {
-      var name = escapeChars(form[1]);
-      if (form[2])
-        return str(CURRENT_NS.value, ".", name, " = ", emit(form[2], env), ";");
-      else
-        return str(CURRENT_NS.value, ".", name, " = null;");
+        var name = escapeChars(form[1]), code, value, def;
+        if (form[2]) {
+            code = emit(form[2], env); value = eval(code);
+            def = str(CURRENT_NS.value.name, ".", name, " = ", code, ";");
+        }
+        else {
+            code = 'null'; value = null;
+            def = str(CURRENT_NS.value.name, ".", name, " = null;");
+        }
+        CURRENT_NS.value.module[name] = value;
+        return def;
     }
   
-    function emitAssignment(form, env, opts) {
-      var name = escapeChars(form[1]);
-      return str(escapeChars(name), " = ", emit(form[2], env));
+    function emitAssignment(form, env) {
+        if (form.length !== 3) throw new Error('set! should have 3 and only 3 elements');
+        return str(emit(form[1], env), " = ", emit(form[2], env));
     }
   
     function parseArgs(args) {
@@ -459,16 +606,16 @@ universe.wonderscript = function() {
         else {
             if (!isArray(args)) throw new Error("an arguments list is required");
   
-            for (i = 0; i < args.length; i++) {
-                define(env_, args[i], true);
-            }
-
             argsBuf = parseArgs(args);
             argsAssign = genArgAssigns(argsBuf);
             argsDef = genArgsDef(argsBuf);
+
+            for (i = 0; i < argsBuf.length; i++) {
+                define(env_, argsBuf[i].name, true);
+            }
     
             var buf = [argsAssign];
-            buf.push(compileRecursiveBody(form.slice(2), args, env_));
+            buf.push(compileRecursiveBody(form.slice(2), argsBuf.map(function(x) { return x.name }), env_));
   
             return str("(function(", argsDef, ") { ", buf.join('; '), "; })");
         }
@@ -511,6 +658,7 @@ universe.wonderscript = function() {
     }
 
     function emitFuncApplication(form, env) {
+      if (isString(form[0]) && isMacro(findNamespaceVar(form[0]))) throw new Error('Macros cannot be evaluated in this context');
       var fn = emit(form[0], env),
           args = form.slice(1, form.length),
           argBuffer = [], i, value;
@@ -540,23 +688,60 @@ universe.wonderscript = function() {
         return eval(emit(form));
     }
 
+    function evalString(s) {
+        var r = new PushBackReader(s);
+        var res, ret;
+        while (true) {
+            res = read(r, {eofIsError: false, eofValue: null});
+            if (res != null) {
+                ret = evaluate(res);
+            }
+            if (res == null) return ret;
+        }
+    }
+
+    function compileString(s) {
+        var r = new PushBackReader(s);
+        var res, ret, buff = [];
+        while (true) {
+            res = read(r, {eofIsError: false, eofValue: null});
+            if (res != null) {
+                ret = compile(res);
+                if (ret != null) buff.push(ret);
+            }
+            if (res == null) break;
+        }
+        return buff.join(';\n');
+    }
+
     CORE_MOD.array = function() {
         return Array.prototype.slice.call(arguments);
     };
 
-    define(TOP, 'wonderscript.core', CORE_NS);
+    CORE_MOD.isNil = core.isNull;
+
+    CORE_MOD.defmacro = function(name, args) {
+        var body = Array.prototype.slice.call(arguments, 2);
+        return [DO_SYM,
+                [DEF_SYM, name, cons(FN_SYM, cons(args, body))],
+                [SET_SYM, [DOT_SYM, name, '-$ws$isMacro'], true],
+                [QUOTE_SYM, name]]; 
+    };
+    CORE_MOD.defmacro.$ws$isMacro = true;
+
+    define(TOP, CORE_NS.name, CORE_NS);
     define(TOP, 'js', typeof module !== 'undefined' ? {name: 'global', module: global} : {name: 'window', module: window});
 
+    Object.assign(CORE_MOD, core);
     Object.assign(CORE_MOD, {compile: emit, eval: evaluate, RecursionPoint});
-    Object.assign(CORE_MOD, universe.core);
 
     return CORE_MOD;
 }();
 
 if (typeof module !== 'undefined') {
-    module.exports = universe.wonderscript;
-    global.universe = universe;
+    module.exports = wonderscript.core;
+    global.wonderscript = wonderscript;
 }
 if (typeof window !== 'undefined') {
-    window.universe = universe;
+    window.wonderscript = wonderscript;
 }

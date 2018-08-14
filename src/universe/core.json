@@ -1,0 +1,5 @@
+["do",
+  ["defmacro", "fn", ["name", "args", "&body"],
+    ["cons", "fn*", ["cons", "args", "body"]]],
+  ["print", ["fn", ["x"], "x"]]
+]

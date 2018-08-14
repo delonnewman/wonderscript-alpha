@@ -123,8 +123,8 @@ universe.core = (function() {
         else if (isFunction(seq.cons)) {
             return seq.cons(x);
         }
-        else if (isArrayLike(x)) {
-            if (isString(x)) {
+        else if (isArrayLike(seq)) {
+            if (isString(seq)) {
                 return [x, seq].join('');
             }
             else {
