@@ -1,13 +1,11 @@
 #!/usr/bin/env node
 // jshint esversion: 6
-var fs = require('fs'),
-    { print, str } = require('../src/universe/core.js'),
-    { evalString, NS, loadFile, prStr } = require('../src/universe/wonderscript.js');
-const readline = require('readline');
-const argv = require('yargs').argv;
+const fs = require('fs'),
+      readline = require('readline'),
+      argv = require('yargs').argv;
 
 // load runtime and core library
-require(__dirname + '/../index.js');
+const { print, str, evalString, NS, loadFile, prStr } = require(__dirname + '/../index.js');
 
 function interactive() {
   const rl = readline.createInterface({

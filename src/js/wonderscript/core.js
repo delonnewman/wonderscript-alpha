@@ -7,7 +7,7 @@ wonderscript.core = function() {
 
     var GLOBAL, core, edn;
     if (IS_NODE) {
-        core = require('./core.js');
+        core = require('../pbnj/core.js');
         edn = require('./edn.js');
         GLOBAL = global;
     }
@@ -798,7 +798,7 @@ wonderscript.core = function() {
     CORE_MOD.NS = CURRENT_NS;
 
     define(TOP, CORE_NS.name, CORE_NS);
-    define(TOP, 'js', typeof module !== 'undefined' ? {name: 'global', module: global} : {name: 'window', module: window});
+    define(TOP, 'js', IS_NODE ? {name: 'global', module: global} : {name: 'window', module: window});
 
     Object.assign(CORE_MOD, core);
     Object.assign(CORE_MOD, {compile: emit, eval: evaluate, RecursionPoint, evalString, compileString, prStr});

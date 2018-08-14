@@ -1,7 +1,7 @@
 // jshint eqnull: true
 // jshint esversion: 6
-var universe = universe || {};
-universe.core = (function() {
+var pbnj = pbnj || {};
+pbnj.core = (function() {
     
     function isNumber(x) {
         return Object.prototype.toString.call(x) === '[object Number]';
@@ -538,5 +538,5 @@ universe.core = (function() {
 }());
 
 if (typeof module !== 'undefined') {
-    module.exports = universe.core;
+    module.exports = pbnj.core;
 }
