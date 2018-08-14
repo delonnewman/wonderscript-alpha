@@ -4,8 +4,16 @@
     ["head",
       ["title", "How to Build a Universe - An Introduction to Computing"],
       ["link", {"rel": "stylesheet", "href": "./node_modules/boostrap/dist/css/bootstrap.min.css"}],
-      ["style", {"type": "text/css", "media": "screen"},
-        ["comment", "TODO: add CSS processing"]]],
+      ["css",
+        {"body": {"overflow": "hidden"},
+         "#editor":
+            {"margin": 0,
+             "position": "absolute",
+             "top": 0,
+             "bottom": 0,
+             "left": 0,
+             "right": 0,
+             "font-size": "14pt"}}]],
     ["body",
       ["div", {"class": "container-fluid"},
         ["div", {"class": "row"},
@@ -13,6 +21,21 @@
             ["div", {"id": "editor"}]]]],
       ["script", {"type": "text/javascript", "src": "./src/universe/core.js"}],
       ["script", {"type": "text/javascript", "src": "./vendor/ace-builds/src/ace.js"}],
-      ["script", {"type": "text/javascript"},
-        ["comment", "TODO: add JS processing"]]]]
+      ["comment",
+      ["javascript",
+        ["def", "editor", ["ace.edit", "editor"]],
+        ["editor.setTheme", "ace/theme/solarized_dark"],
+        ["editor.session.setMode", "ace/mode/javascript"],
+        ["setInterval", ["fn", [],
+          ["def", "content", ["editor.getValue"]],
+          ["if", ["=", null, ["content.match", ["regex", "^\\s*$"]]],
+            ["var", "val"],
+            ["try",
+              ["set!", "val", ["js.eval", "content"]],
+              ["console.log", "val"],
+              ["catch", ["e"],
+                ["console.error", "e"]]]]
+          ], 1000]
+      ]
+      ]]]
 ]

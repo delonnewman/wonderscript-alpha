@@ -338,17 +338,41 @@ universe.core = (function() {
         };
     }
 
+    function isObjectLiteral(x) {
+        return isObject(x) && Object.getPrototypeOf(Object.getPrototypeOf(x)) == null;
+    }
+
     var html = function() {
+        function renderCSSDef(def) {
+            return str(def[0], ' { ', renderCSSRules(def[1]), ' }');
+        }
+
+        function renderCSSDefs(defs) {
+            return map(renderCSSDef, Object.entries(defs)).join('\n');
+        }
+
+        function renderCSSRules(rules) {
+            return map(function(x) { return str(x[0], ': ', x[1], ';'); }, Object.entries(rules)).join(' ');
+        }
+
+        function renderAttr(attr) {
+            var name = attr[0], value = attr[1];
+            if (name === 'style' && isObjectLiteral(value)) {
+                value = renderCSSRules(value);
+            }
+            return str(name, '="', value, '"');
+        }
+
         function renderAttrs(attrs) {
-            return map(function(x) { return str(x[0], '="', x[1], '"'); }, Object.entries(attrs)).join(', ');
+            return map(renderAttr, Object.entries(attrs)).join(', ');
         }
 
         function renderTag(form) {
-            var tag = first(form),
+            var head,
+                tag = first(form),
                 body = rest(form),
-                attrs = first(body),
-                head;
-            if (isObject(attrs) && isUndefined(attrs.__proto___)) {
+                attrs = first(body);
+            if (isObjectLiteral(attrs)) {
                 head = str("<", tag, " ", renderAttrs(attrs), ">");
                 if (html.singletons[tag] != null) {
                     return head;
@@ -426,7 +450,8 @@ universe.core = (function() {
         };
 
         html(['define', {name: "!!!", doc: "A doctype tag"}, "<!DOCTYPE html>"]);
-        html(['define', {name: "comment", doc: "Include a comment"}, function() { return str("<!-- ", Array.prototype.join.call(arguments, ''), " -->"); }]);
+        html(['define', {name: "comment", doc: "Include a comment"}, function() { return str("<!-- ", toArray(arguments).join(''), " -->"); }]);
+        html(['define', {name: "css", doc: "Interpret CSS"}, function(defs) { return ['style', {type: "text/css"}, renderCSSDefs(defs)]; }]);
 
         return html;
     }();
@@ -483,6 +508,7 @@ universe.core = (function() {
         isNull,
         isUndefined,
         isObject,
+        isObjectLiteral,
         exists,
         toArray,
         first,
