@@ -130,13 +130,12 @@ wonderscript.edn = function() {
     }
 
     function listReader(r, openparen, opts) {
-        /*var meta = arrayMap(
-            Keyword.intern('line'), r.line(),
-            Keyword.intern('column'), r.column()
-        );*/
+        var meta = {
+            line: r.line(),
+            column: r.column()
+        };
         var a = readDelimitedList(')', r, true, opts);
-        //return list.apply(null, a).withMeta(meta);
-        return a;
+        return ['list', a, meta];
     }
 
     function unmatchedDelimiterReader(r, delim, opts) {
@@ -145,14 +144,12 @@ wonderscript.edn = function() {
 
     function vectorReader(r, openbracket, opts) {
         var a = readDelimitedList(']', r, true, opts);
-        //return new Vector(null, a);
-        return ['array'].concat(a);
+        return ['vector', a];
     }
 
     function mapReader(r, openbracket, opts) {
         var a = readDelimitedList('}', r, true, opts);
-        //return arrayMap.apply(null, a);
-        return a;
+        return ['hash-map', a];
     }
 
     function characterReader(r, slash, opts) {
@@ -254,7 +251,8 @@ wonderscript.edn = function() {
 
     function setReader(r, leftbracket, opts) {
         //return HashSet.createFromArray(readDelimitedList('}', r, true, opts));
-        return readDelimitedList('}', r, true, opts);
+        var a = readDelimitedList('}', r, true, opts);
+        return ['set', a];
     }
 
     var MACROS = {
@@ -286,6 +284,7 @@ wonderscript.edn = function() {
     }
 
     function isDigit(ch) {
+        if (ch == null) return false;
         return ch.match(/^\d$/);
     }
 
@@ -309,7 +308,7 @@ wonderscript.edn = function() {
         while (true) {
             res = read(r, {eofIsError: false, eofValue: null});
             if (res != null) ret = res;
-            if (res == null) return ret;
+            if (res == null) return ['string', ret];
         }
     }
 
@@ -366,10 +365,10 @@ wonderscript.edn = function() {
     function matchSymbol(s) {
         if (s.charAt(0) === ':') {
             //return Keyword.intern(Sym.intern(s.substring(1)));
-            return ['quote', s.slice(1)];
+            return ['keyword', s.slice(1)];
         }
         //return Sym.intern(s);
-        return s;
+        return ['symbol', s];
     }
 
     function interpretToken(s) {

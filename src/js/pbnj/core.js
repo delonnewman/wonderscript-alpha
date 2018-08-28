@@ -20,7 +20,7 @@ pbnj.core = (function() {
     }
 
     function isArrayLike(x) {
-        return x != null && isNumber(x.length);
+        return x != null && isNumber(x.length) && !isFunction(x);
     }
 
     function isArray(x) {
@@ -144,6 +144,22 @@ pbnj.core = (function() {
         else {
             return next(x) == null;
         }
+    }
+
+    function list() {
+        return toArray(arguments);
+    }
+
+    function hashMap() {
+        return new Map(partition(2, arguments));
+    }
+
+    function vector() {
+        return toArray(arguments);
+    }
+
+    function set(xs) {
+        return new Set(xs);
     }
 
     function map(f, xs) {

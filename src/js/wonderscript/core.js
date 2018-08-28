@@ -37,7 +37,8 @@ wonderscript.core = function() {
         isUndefined,
         isArray,
         print,
-        isEmpty
+        isEmpty,
+        isArrayLike
     } = core;
 
     const { read, PushBackReader } = edn;
@@ -261,6 +262,50 @@ wonderscript.core = function() {
         }
     }
 
+    function isSymbol(x) {
+        return isArray(x) && x[0] === 'symbol';
+    }
+
+    function isTaggedString(x) {
+        return isArray(x) && x[0] === 'string';
+    }
+
+    function isList(x) {
+        return isArray(x) && x[0] === 'list';
+    }
+
+    function emitCollection(open, close, list, env) {
+        return str(open, list.map(function(x) { return emit(x, env); }).join(', '), close);
+    }
+
+    function emitList(form, env) {
+        return emitCollection('wonderscript.core.list(', ')', form[1], env);
+    }
+
+    function isHashMap(x) {
+        return isArray(x) && x[0] === 'hash-map';
+    }
+
+    function emitHashMap(form, env) {
+        return emitCollection('wonderscript.core.hashMap(', ')', form[1], env);
+    }
+
+    function isVector(x) {
+        return isArray(x) && x[0] === 'vector';
+    }
+
+    function emitVector(form, env) {
+        return emitCollection('wonderscript.core.vector(', ')', form[1], env);
+    }
+
+    function isSet(x) {
+        return isArray(x) && x[0] === 'set';
+    }
+
+    function emitSet(form, env) {
+        return emitCollection('wonderscript.core.set([', '])', form[1], env);
+    }
+
     const TOP = env();
     // TODO: try/catch/finally
     function emit(form_, env_) {
@@ -270,19 +315,39 @@ wonderscript.core = function() {
             if (form === 'nil') return 'null';
             return emitSymbol(form, env_);
         }
+        else if (isSymbol(form)) {
+            console.log(form);
+            return emitSymbol(form[1], env_);
+        }
+        else if (isTaggedString(form)) {
+            return form[1];
+        }
         else if (isNumber(form)) return str(form);
         else if (isBoolean(form)) return form === true ? 'true' : 'false';
         else if (isNull(form)) return 'null';
         else if (isUndefined(form)) {
             return 'undefined';
         }
+        // TODO: make this emit a hash map
         else if (isObjectLiteral(form)) {
             return str('({', map(function(xs) { return str(xs[0], ':', emit(xs[1], env_)); }, Object.entries(form)).join(', '), '})');
         }
+        else if (isList(form)) {
+            return emitList(form, env);
+        }
+        else if (isHashMap(form)) {
+            return emitHashMap(form, env);
+        }
+        else if (isVector(form)) {
+            return emitVector(form, env);
+        }
+        else if (isSet(form)) {
+            return emitSet(form, env);
+        }
         else if (isArray(form)) {
             if (form.length === 0) return '[]';
-            else if (isString(form[0])) {
-                switch(form[0]) {
+            else if (isSymbol(form[0])) {
+                switch(form[0][1]) {
                   case DEF_SYM:
                     return emitDef(form, env_);
                   case QUOTE_SYM:
@@ -755,9 +820,11 @@ wonderscript.core = function() {
             return str('(array ', x.map(function(x) {
                 return prStr(x);
             }).join(' '), ')');
-        } else if (isFunction(x)) {
+        }
+        else if (isFunction(x)) {
             return str('#js/function "', x.toString(), '"');
-        } else if (isArrayLike(x)) {
+        }
+        else if (isArrayLike(x)) {
             if (x.toString) {
                 return x.toString();
             }
