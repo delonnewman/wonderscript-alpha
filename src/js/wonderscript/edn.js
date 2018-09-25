@@ -2,6 +2,22 @@
 var GLOBAL = typeof module !== 'undefined' ? global : window;
 GLOBAL.wonderscript = GLOBAL.wonderscript || {};
 wonderscript.edn = function() {
+    const IS_NODE = typeof module !== 'undefined' ? true : false;
+    const IS_BROWSER = typeof window !== 'undefined' ? true : false;
+
+    var core;
+    if (IS_NODE) {
+        core = require('./core.js');
+    }
+
+    if (IS_BROWSER) {
+        core = GLOBAL.wonderscript.core;
+    }
+
+    const THE_VAR = core.symbol('var');
+    const QUOTE = core.symbol('quote');
+    const DEREF = core.symbol('deref');
+
     //
     // Reader
     // 
@@ -88,7 +104,7 @@ wonderscript.edn = function() {
             }
             buff.push(ch);
         }
-        return ['quote', buff.join('')];
+        return buff.join('');
     }
 
     function commentReader(r, semicolon, opts) {
@@ -129,13 +145,14 @@ wonderscript.edn = function() {
         return a;
     }
 
+    // FIXME: meta?
     function listReader(r, openparen, opts) {
         var meta = {
             line: r.line(),
             column: r.column()
         };
         var a = readDelimitedList(')', r, true, opts);
-        return ['list', a, meta];
+        return core.list.apply(null, a);
     }
 
     function unmatchedDelimiterReader(r, delim, opts) {
@@ -144,12 +161,12 @@ wonderscript.edn = function() {
 
     function vectorReader(r, openbracket, opts) {
         var a = readDelimitedList(']', r, true, opts);
-        return ['vector', a];
+        return core.vector.apply(null, a);
     }
 
     function mapReader(r, openbracket, opts) {
         var a = readDelimitedList('}', r, true, opts);
-        return ['hash-map', a];
+        return core.hashMap.apply(null, a);
     }
 
     function characterReader(r, slash, opts) {
@@ -238,28 +255,25 @@ wonderscript.edn = function() {
     function wrappingReader(sym) {
         return function(r, quote, opts) {
             var x = _read(r, true, null, true, opts);
-            //return list(sym, x);
-            return [sym, x];
+            return core.list(sym, x);
         };
     }
 
     function varReader(r, quote, opts) {
         var x = _read(r, true, null, true, opts);
-        //return list(THE_VAR, x);
-        return [THE_VAR, x];
+        return core.list(THE_VAR, x);
     }
 
     function setReader(r, leftbracket, opts) {
-        //return HashSet.createFromArray(readDelimitedList('}', r, true, opts));
         var a = readDelimitedList('}', r, true, opts);
-        return ['set', a];
+        return core.set(a);
     }
 
     var MACROS = {
         '"': stringReader,
         ';': commentReader,
-        "'": wrappingReader('quote'),
-        '@': wrappingReader('deref'),
+        "'": wrappingReader(QUOTE),
+        '@': wrappingReader(DEREF),
         '^': metaReader,
         '(': listReader,
         ')': unmatchedDelimiterReader,
@@ -308,7 +322,7 @@ wonderscript.edn = function() {
         while (true) {
             res = read(r, {eofIsError: false, eofValue: null});
             if (res != null) ret = res;
-            if (res == null) return ['string', ret];
+            if (res == null) return ret;
         }
     }
 
@@ -363,12 +377,27 @@ wonderscript.edn = function() {
     }
 
     function matchSymbol(s) {
-        if (s.charAt(0) === ':') {
-            //return Keyword.intern(Sym.intern(s.substring(1)));
-            return ['keyword', s.slice(1)];
+        var ns, name;
+        if (s.indexOf('/') != -1) {
+            var parts = s.split('/');
+            ns = parts[0];
+            name = parts[1];
         }
-        //return Sym.intern(s);
-        return ['symbol', s];
+        else {
+            ns = null;
+            name = s;
+        }
+        if (s.charAt(0) === ':') {
+            if (ns == null) {
+                return core.keyword(null, s.slice(1));
+            }
+            else {
+                return core.keyword(ns.slice(1), name);
+            }
+        }
+        else {
+            return core.symbol(ns, name);
+        }
     }
 
     function interpretToken(s) {
@@ -441,5 +470,7 @@ wonderscript.edn = function() {
     if (typeof module !== 'undefined') {
         module.exports = api;
     }
+
+    return api;
 
 }();
