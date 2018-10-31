@@ -85,8 +85,12 @@ wonderscript.edn = function() {
                         ch = '\n';
                         break;
                     case '\\':
+                        // FIXME: this doesn't seem to be working
+                        ch = '\\';
                         break;
                     case '"':
+                        // FIXME: this doesn't seem to be working
+                        ch = '"';
                         break;
                     case 'b':
                         ch = '\b';

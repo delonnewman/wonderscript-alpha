@@ -29,39 +29,54 @@ wonderscript.compiler = function() {
         isObject,
         isSingleton,
         isNull,
+        isNil,
         isString,
         isFunction,
         isNumber,
         isBoolean,
         isUndefined,
         isArray,
+        isMap,
+        isList,
+        isVector,
+        isSet,
         print,
         isEmpty,
         isArrayLike,
         isSymbol,
         isKeyword,
         name,
-        namespace
+        namespace,
+        mapcat,
+        identity,
+        intoArray,
+        symbol
     } = core;
 
     const { read, PushBackReader } = edn;
 
-    const QUOTE_SYM   = 'quote';
-    const DEF_SYM     = 'def';
-    const COND_SYM    = 'cond';
-    const JS_SYM      = 'js';
-    const FN_SYM      = 'fn*';
-    const LOOP_SYM    = 'loop';
-    const RECUR_SYM   = 'recur';
-    const THROW_SYM   = 'throw';
-    const TRY_SYM     = 'try';
-    const CATCH_SYM   = 'catch';
-    const FINALLY_SYM = 'finally';
-    const DO_SYM      = 'do';
-    const LET_SYM     = 'let';
-    const DOT_SYM     = '.';
-    const NEW_SYM     = 'new';
-    const SET_SYM     = 'set!';
+    // operators
+    const MOD_SYM = symbol('mod');
+    const LT_SYM  = symbol('<');
+    const GT_SYM  = symbol('>');
+
+    // special form tags
+    const QUOTE_SYM   = symbol('quote');
+    const DEF_SYM     = symbol('def');
+    const COND_SYM    = symbol('cond');
+    const JS_SYM      = symbol('js');
+    const FN_SYM      = symbol('fn*');
+    const LOOP_SYM    = symbol('loop');
+    const RECUR_SYM   = symbol('recur');
+    const THROW_SYM   = symbol('throw');
+    const TRY_SYM     = symbol('try');
+    const CATCH_SYM   = symbol('catch');
+    const FINALLY_SYM = symbol('finally');
+    const DO_SYM      = symbol('do');
+    const LET_SYM     = symbol('let');
+    const DOT_SYM     = symbol('.');
+    const NEW_SYM     = symbol('new');
+    const SET_SYM     = symbol('set!');
 
     const SPECIAL_FORMS = {
         quote: true,
@@ -253,17 +268,18 @@ wonderscript.compiler = function() {
     }
 
     function macroexpand(form) {
-        if (!isArray(form)) {
+        if (!isList(form)) {
             return form;
         }
         else {
-            if (SPECIAL_FORMS[form[0]]) return form;
-            else if (isString(form[0])) {
-                var val = findNamespaceVar(form[0]);
+            var tag = first(form);
+            if (SPECIAL_FORMS[str(tag)]) return form;
+            else if (isSymbol(tag)) {
+                var val = findNamespaceVar(tag);
                 if (val === null) return form;
                 else {
                     if (isMacro(val)) {
-                        return macroexpand(val.apply(null, form.slice(1)));
+                        return macroexpand(val.apply(null, intoArray(rest(form))));
                     }
                     else {
                         return form;
@@ -280,63 +296,67 @@ wonderscript.compiler = function() {
         return isArray(x) && x[0] === 'string';
     }
 
-    function isList(x) {
-        return isArray(x) && x[0] === 'list';
-    }
-
     function emitCollection(open, close, list, env) {
         return str(open, list.map(function(x) { return emit(x, env); }).join(', '), close);
     }
 
     function emitList(form, env) {
-        return emitCollection('wonderscript.core.list(', ')', form[1], env);
-    }
-
-    function isHashMap(x) {
-        return isArray(x) && x[0] === 'hash-map';
+        var a = intoArray(form);
+        return emitCollection('wonderscript.core.list(', ')', a, env);
     }
 
     function emitHashMap(form, env) {
-        return emitCollection('wonderscript.core.hashMap(', ')', form[1], env);
-    }
-
-    function isVector(x) {
-        return isArray(x) && x[0] === 'vector';
+        var a = intoArray(mapcat(identity, form));
+        return emitCollection('wonderscript.core.hashMap(', ')', a, env);
     }
 
     function emitVector(form, env) {
-        return emitCollection('wonderscript.core.vector(', ')', form[1], env);
-    }
-
-    function isSet(x) {
-        return isArray(x) && x[0] === 'set';
+        var a = intoArray(form);
+        return emitCollection('wonderscript.core.vector(', ')', a, env);
     }
 
     function emitSet(form, env) {
-        return emitCollection('wonderscript.core.set([', '])', form[1], env);
+        var a = intoArray(form);
+        return emitCollection('wonderscript.core.set([', '])', a, env);
+    }
+
+    function emitKeyword(form) {
+        var nm = name(form), ns = namespace(form);
+        if (nm != null && ns != null) {
+            return str('wonderscript.core.keyword("', ns, '", "', nm, '")');
+        }
+        else if (ns == null) {
+            return str('wonderscript.core.keyword("', nm, '")');
+        }
+        else {
+            throw new Error('keyword must at least have a name');
+        }
     }
 
     const TOP = env();
     // TODO: try/catch/finally
     function emit(form_, env_) {
-        var env_ = env_ || TOP,
-            form = macroexpand(form_);
+        var env_ = env_ || TOP;
+        var form = macroexpand(form_);
         if (isSymbol(form)) {
-            return emitSymbol(form[1], env_);
+            return emitSymbol(form, env_);
         }
         else if (isString(form)) {
-            return form;
+            return JSON.stringify(form);
         }
-        else if (isNumber(form)) return str(form);
-        else if (isBoolean(form)) return form === true ? 'true' : 'false';
-        else if (isNull(form)) return 'null';
-        else if (isUndefined(form)) {
-            return 'undefined';
+        else if (isNumber(form)) {
+            return str(form);
         }
-        else if (isList(form)) {
-            return emitList(form, env);
+        else if (isBoolean(form)) {
+            return form === true ? 'true' : 'false';
         }
-        else if (isHashMap(form)) {
+        else if (isNil(form)) {
+            return 'null';
+        }
+        else if (isKeyword(form)) {
+            return emitKeyword(form);
+        }
+        else if (isMap(form)) {
             return emitHashMap(form, env);
         }
         else if (isVector(form)) {
@@ -345,18 +365,17 @@ wonderscript.compiler = function() {
         else if (isSet(form)) {
             return emitSet(form, env);
         }
-        else if (isArray(form)) {
-            if (form.length === 0) return '[]';
-            else if (isSymbol(form[0])) {
-                switch(form[0][1]) {
+        else if (isList(form)) {
+            var tag = first(form);
+            if (isEmpty(form)) return 'wonderscript.core.EMPTY_LIST';
+            else if (isSymbol(tag)) {
+                switch(tag) {
                   case DEF_SYM:
                     return emitDef(form, env_);
                   case QUOTE_SYM:
                     return emitQuote(form, env_);
                   case COND_SYM:
                     return emitCond(form, env_);
-                  case JS_SYM:
-                    return form[1];
                   case FN_SYM:
                     return emitFunc(form, env_);
                   case LOOP_SYM:
@@ -461,7 +480,7 @@ wonderscript.compiler = function() {
         var nm = name(sym);
         var s = str(sym);
         if (ns != null) {
-            if (name.indexOf('.') !== -1) throw new Error('"." are reserved for namespaces');
+            if (nm.indexOf('.') !== -1) throw new Error('"." are reserved for namespaces');
             var scope = lookup(env, ns);
             if (scope === null) throw new Error('Unknown namespace: ' + ns);
             else {
@@ -469,7 +488,7 @@ wonderscript.compiler = function() {
                 if (isUndefined(ns_.module[nm])) {
                     throw new Error('Undefined variable: ' + nm + ' in namespace: ' + ns);
                 }
-                return str(ns.name, '.', escapeChars(nm));
+                return str(ns_.name, '.', escapeChars(nm));
             }
         }
         // unqualified
@@ -627,9 +646,11 @@ wonderscript.compiler = function() {
     }
 
     function emitDef(form, env, opts) {
-        var name = escapeChars(form[1]), code, value, def;
-        if (form[2]) {
-            code = emit(form[2], env); value = eval(code);
+        var tag  = first(rest(form));
+        var name = escapeChars(tag), code, value, def;
+        var val  = first(rest(rest(form)));
+        if (val != null) {
+            code = emit(val, env); value = eval(code);
             def = str(CURRENT_NS.value.name, ".", name, " = ", code, ";");
         }
         else {
@@ -828,16 +849,18 @@ wonderscript.compiler = function() {
         }
     }
 
+    const EOF = {eof: true};
+
     function compileString(s) {
         var r = new PushBackReader(s);
         var res, ret, buff = [];
         while (true) {
-            res = read(r, {eofIsError: false, eofValue: null});
-            if (res != null) {
+            res = read(r, {eofIsError: false, eofValue: EOF});
+            if (res !== EOF) {
                 ret = emit(res);
                 if (ret != null) buff.push(ret);
             }
-            if (res == null) break;
+            if (res === EOF) break;
         }
         return buff.join(';\n');
     }

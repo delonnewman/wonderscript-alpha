@@ -18,6 +18,8 @@ wonderscript.core = (function() {
         mori   = window.mori;
     }
 
+    const EMPTY_LIST = mori.list();
+
     function isNumber(x) {
         return Object.prototype.toString.call(x) === '[object Number]';
     }
@@ -121,7 +123,8 @@ wonderscript.core = (function() {
         str,
         print,
         name,
-        namespace
+        namespace,
+        EMPTY_LIST
     };
 
     Object.assign(api, mori);
