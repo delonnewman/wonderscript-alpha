@@ -17,6 +17,8 @@ wonderscript.compiler = function() {
         edn  = wonderscript.edn;
     }
 
+    const p = console.log.bind();
+
     const {
         str,
         map,
@@ -24,8 +26,11 @@ wonderscript.compiler = function() {
         partition,
         cons,
         first,
+        last,
         next,
         rest,
+        nth,
+        count,
         isObject,
         isSingleton,
         isNull,
@@ -61,22 +66,39 @@ wonderscript.compiler = function() {
     const GT_SYM  = symbol('>');
 
     // special form tags
-    const QUOTE_SYM   = symbol('quote');
-    const DEF_SYM     = symbol('def');
-    const COND_SYM    = symbol('cond');
-    const JS_SYM      = symbol('js');
-    const FN_SYM      = symbol('fn*');
-    const LOOP_SYM    = symbol('loop');
-    const RECUR_SYM   = symbol('recur');
-    const THROW_SYM   = symbol('throw');
-    const TRY_SYM     = symbol('try');
-    const CATCH_SYM   = symbol('catch');
-    const FINALLY_SYM = symbol('finally');
-    const DO_SYM      = symbol('do');
-    const LET_SYM     = symbol('let');
-    const DOT_SYM     = symbol('.');
-    const NEW_SYM     = symbol('new');
-    const SET_SYM     = symbol('set!');
+    const QUOTE_STR   = 'quote';
+    const DEF_STR     = 'def';
+    const COND_STR    = 'cond';
+    const JS_STR      = 'js';
+    const FN_STR      = 'fn*';
+    const LOOP_STR    = 'loop';
+    const RECUR_STR   = 'recur';
+    const THROW_STR   = 'throw';
+    const TRY_STR     = 'try';
+    const CATCH_STR   = 'catch';
+    const FINALLY_STR = 'finally';
+    const DO_STR      = 'do';
+    const LET_STR     = 'let';
+    const DOT_STR     = '.';
+    const NEW_STR     = 'new';
+    const SET_STR     = 'set!';
+
+    const QUOTE_SYM   = symbol(QUOTE_STR);
+    const DEF_SYM     = symbol(DEF_STR);
+    const COND_SYM    = symbol(COND_STR);
+    const JS_SYM      = symbol(JS_STR);
+    const FN_SYM      = symbol(FN_STR);
+    const LOOP_SYM    = symbol(LOOP_STR);
+    const RECUR_SYM   = symbol(RECUR_STR);
+    const THROW_SYM   = symbol(THROW_STR);
+    const TRY_SYM     = symbol(TRY_STR);
+    const CATCH_SYM   = symbol(CATCH_STR);
+    const FINALLY_SYM = symbol(FINALLY_STR);
+    const DO_SYM      = symbol(DO_STR);
+    const LET_SYM     = symbol(LET_STR);
+    const DOT_SYM     = symbol(DOT_STR);
+    const NEW_SYM     = symbol(NEW_STR);
+    const SET_SYM     = symbol(SET_STR);
 
     const SPECIAL_FORMS = {
         quote: true,
@@ -192,7 +214,6 @@ wonderscript.compiler = function() {
 
     function lookup(env, name) {
         if (env == null) {
-            p('env null');
             return null;
         }
         else if (env.vars != null && env.vars[name] != null) {
@@ -227,6 +248,7 @@ wonderscript.compiler = function() {
     }
 
     function findLexicalVar(env, name) {
+        p('looking for:', name, 'in:', env);
         var scope = lookup(env, name);
         if (scope == null) {
             throw new Error(str('Undefined variable: "', name, '"'));
@@ -236,7 +258,8 @@ wonderscript.compiler = function() {
         }
     }
 
-    function findNamespaceVar(s) {
+    function findNamespaceVar(sym) {
+        var s = sym.toString(); // TODO: fix this
         if (s.indexOf('/') !== -1) {
             var parts = s.split('/');
             if (parts[1].indexOf('.') !== -1) throw new Error('"." are reserved for namespaces');
@@ -366,35 +389,35 @@ wonderscript.compiler = function() {
             return emitSet(form, env);
         }
         else if (isList(form)) {
-            var tag = first(form);
+            var tag = first(form), stag = tag.toString();
             if (isEmpty(form)) return 'wonderscript.core.EMPTY_LIST';
             else if (isSymbol(tag)) {
-                switch(tag) {
-                  case DEF_SYM:
+                switch(stag) {
+                  case DEF_STR:
                     return emitDef(form, env_);
-                  case QUOTE_SYM:
+                  case QUOTE_STR:
                     return emitQuote(form, env_);
-                  case COND_SYM:
+                  case COND_STR:
                     return emitCond(form, env_);
-                  case FN_SYM:
+                  case FN_STR:
                     return emitFunc(form, env_);
-                  case LOOP_SYM:
+                  case LOOP_STR:
                     return emitLoop(form, env_);
-                  case RECUR_SYM:
+                  case RECUR_STR:
                     throw RECUR_ERROR;
-                  case THROW_SYM:
+                  case THROW_STR:
                     return emitThrownException(form, env_);
-                  case TRY_SYM:
+                  case TRY_STR:
                     throw new Error("not implemented");
-                  case DO_SYM:
+                  case DO_STR:
                     return emitDo(form, env_);
-                  case LET_SYM:
+                  case LET_STR:
                     return emitLet(form, env_);
-                  case DOT_SYM:
+                  case DOT_STR:
                     return emitObjectRes(form, env_);
-                  case NEW_SYM:
+                  case NEW_STR:
                     return emitClassInit(form, env_);
-                  case SET_SYM:
+                  case SET_STR:
                     return emitAssignment(form, env_);
                   // operators
                   case 'mod':
@@ -450,13 +473,35 @@ wonderscript.compiler = function() {
     }
 
     function emitQuote(form) {
-        if (form.length !== 2) throw new Error('One value should be quoted');
-        return emitQuotedValue(form[1]);
+        var aform = intoArray(form);
+        if (aform.length !== 2) throw new Error('One value should be quoted');
+        return emitQuotedValue(aform[1]);
+    }
+
+    function emitMapEntry(xs) {
+        return str(emitQuotedValue(nth(xs, 0)), ', ', emitQuotedValue(nth(xs, 1))); 
     }
 
     function emitQuotedValue(val) {
+        var ns, nm;
         if (isString(val)) {
             return JSON.stringify(val);
+        }
+        else if (isSymbol(val)) {
+            ns = namespace(val);
+            nm = name(val);
+            if (ns == null) {
+                return str('wonderscript.core.symbol("', nm, '")');
+            }
+            return str('wonderscript.core.symbol("', ns, '", "', nm, '"');
+        }
+        else if (isKeyword(val)) {
+            ns = namespace(val);
+            nm = name(val);
+            if (ns == null) {
+                return str('wonderscript.core.keyword("', nm, '")');
+            }
+            return str('wonderscript.core.keyword("', ns, '", "', nm, '"');
         }
         else if (isNumber(val)) {
             return str(val);
@@ -465,11 +510,17 @@ wonderscript.compiler = function() {
         else if (val === false) return 'false';
         else if (val === null) return 'null';
         else if (isUndefined(val)) return 'undefined';
-        else if (isArray(val)) {
-            return str('[', map(emitQuotedValue, val).join(', '), ']');
+        else if (isList(val)) {
+            return str('wonderscript.core.list(', intoArray(map(emitQuotedValue, val)).join(', '), ')');
         }
-        else if (isObjectLiteral(val)) {
-            return str('({', map(function(xs) { return str(xs[0], ':', emitQuotedValue(xs[1])); }, Object.entries(val)).join(', '), '})');
+        else if (isVector(val)) {
+            return str('wonderscript.core.vector(', intoArray(map(emitQuotedValue, val)).join(', '), ')');
+        }
+        else if (isSet(val)) {
+            return str('wonderscript.core.set([', intoArray(map(emitQuotedValue, val)).join(', '), '])');
+        }
+        else if (isMap(val)) {
+            return str('wonderscript.core.hashMap(', intoArray(map(emitMapEntry, val)).join(', '), ')');
         }
         throw new Error('Invalid form: ' + val);
     }
@@ -540,17 +591,20 @@ wonderscript.compiler = function() {
     }
 
     function emitCond(form, env) {
-        var i, cond, x,
-            exprs = partition(2, rest(form)),
+        var i, cond, x, pred,
+            body = rest(form),
+            exprs = intoArray(partition(2, body)),
             buff = [];
+        if (count(body) % 2 === 1) throw new Error('cond expression body should have an even number of elements');
         for (i = 0; i < exprs.length; ++i) {
             cond = i === 0 ? 'if' : 'else if';
-            if ( exprs[i][0] === 'else' ) {
-                buff.push(str('else { ', emitTailPosition(exprs[i][1], env), ' }')); 
+            pred = nth(exprs[i], 0);
+            if ( isKeyword(pred) && pred.toString() === ':else' ) {
+                buff.push(str('else { ', emitTailPosition(nth(exprs[i], 1), env), ' }')); 
             }
             else {
-                x = emit(exprs[i][0], env);
-                buff.push(str(cond, '(', x, ' != null && ', x, ' !== false){ ', emitTailPosition(exprs[i][1], env), ' }')); 
+                x = emit(pred, env);
+                buff.push(str(cond, '(', x, ' != null && ', x, ' !== false){ ', emitTailPosition(nth(exprs[i], 1), env), ' }')); 
             }
         }
         return str('(function(){ ', buff.join(' '), '}())');
@@ -559,7 +613,7 @@ wonderscript.compiler = function() {
     function compileBody(body, env, tailDef, isRecursive) {
         var last = body[body.length - 1],
             head = body.slice(0, body.length - 1);
-        return map(function(x) { return emit(x, env); }, head)
+        return intoArray(map(function(x) { return emit(x, env); }, head))
                 .concat(emitTailPosition(last, env, tailDef, isRecursive)).join('; ');
     }
 
@@ -647,7 +701,7 @@ wonderscript.compiler = function() {
 
     function emitDef(form, env, opts) {
         var tag  = first(rest(form));
-        var name = escapeChars(tag), code, value, def;
+        var name = escapeChars(tag.toString()), code, value, def;
         var val  = first(rest(rest(form)));
         if (val != null) {
             code = emit(val, env); value = eval(code);
@@ -667,68 +721,80 @@ wonderscript.compiler = function() {
     }
   
     function parseArgs(args) {
-      var splat = false, name, argsBuf = [];
-      for (var i = 0; i < args.length; ++i) {
-        if ( /^&/.test(args[i]) ) {
-          name = args[i].replace(/^&/, '');
-          splat = true;
+        var splat = false, name, arg, argsBuf = [];
+        for (var i = 0; i < args.length; ++i) {
+            arg = args[i].toString();
+            if ( /^&/.test(arg) ) {
+                name = arg.replace(/^&/, '');
+                splat = true;
+            }
+            else {
+                name = arg;
+            }
+            argsBuf.push({name: name, order: i, splat: splat});
         }
-        else {
-          name = args[i];
-        }
-        argsBuf.push({name: name, order: i, splat: splat});
-      }
-      return argsBuf;
+        return argsBuf;
     }
   
     function genArgAssigns(argsBuf) {
-      var argsAssign = [], i;
-      for (i = 0; i < argsBuf.length; ++i) {
-        if (argsBuf[i].splat) argsAssign.push(str('var ', argsBuf[i].name, " = Array.prototype.slice.call(arguments, ", i, ")"));
-      }
-      return argsAssign.join('');
+        var argsAssign = [], i;
+        for (i = 0; i < argsBuf.length; ++i) {
+            if (argsBuf[i].splat) {
+                argsAssign.push(str('var ', argsBuf[i].name, " = Array.prototype.slice.call(arguments, ", i, ")"));
+            }
+        }
+        return argsAssign.join('');
     }
   
     function genArgsDef(argsBuf) {
-      var i, argsDef = [];
-      for (i = 0; i < argsBuf.length; ++i) {
-        argsDef.push(argsBuf[i].name);
-      }
-      return argsDef.join(',');
+        var i, argsDef = [];
+        for (i = 0; i < argsBuf.length; ++i) {
+            argsDef.push(argsBuf[i].name);
+        }
+        return argsDef.join(',');
     }
   
     function emitFunc(form, env_, opts) {
         var env_ = env(env_),
-            args = form[1],
+            aform = intoArray(form),
+            args = aform[1],
             argsDef, argsAssign, argsBuf, expr, i, value;
   
-        if (form.length < 3) throw new Error("a function requires at least an arguments list and a body");
+        if (aform.length < 3) throw new Error("a function requires at least an arguments list and a body");
         else {
-            if (!isArray(args)) throw new Error("an arguments list is required");
+            if (!isList(args)) throw new Error("an arguments list is required");
   
-            argsBuf = parseArgs(args);
+            argsBuf = parseArgs(intoArray(args));
             argsAssign = genArgAssigns(argsBuf);
             argsDef = genArgsDef(argsBuf);
+
+            p('argsBuf:', argsBuf);
+            p('argsAssign:', argsAssign);
+            p('argsDef:', argsDef);
 
             for (i = 0; i < argsBuf.length; i++) {
                 define(env_, argsBuf[i].name, true);
             }
+
+            p('env_:', env_);
     
             var buf = [argsAssign];
-            buf.push(compileRecursiveBody(form.slice(2), argsBuf.map(function(x) { return x.name }), env_));
+            buf.push(compileRecursiveBody(aform.slice(2), argsBuf.map(function(x) { return x.name; }), env_));
   
             return str("(function(", argsDef, ") { ", buf.join('; '), "; })");
         }
     }
   
     function emitDo(form, env) {
-        var exprs = form.slice(0, form.length - 1).slice(1),
+        var i,
+            aform = intoArray(form),
+            exprs = aform.slice(0, aform.length - 1).slice(1),
             buf = [],
-            last = form[form.length - 1];
+            last = aform[aform.length - 1];
         for (i = 0; i < exprs.length; ++i) {
             buf.push(emit(exprs[i], env, env));
         }
-        buf.push(emitTailPosition(last));
+        buf.push(emitTailPosition(last, env));
   
         return str("(function(){ ", buf.join('; '), "; }())");
     }

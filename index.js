@@ -1,4 +1,4 @@
-const ws = require('./src/js/wonderscript/core.js');
+const ws = require('./src/js/wonderscript/compiler.js');
 if (process.env.NODE_ENV === 'production') {
     require('./dist/wonderscript/core.ws.js');
 }
