@@ -1,24 +1,22 @@
 {
-  "name": "universe",
+  "name": "wonderscript-alpha",
   "version": "0.0.1",
-  "description": "How to Build a Universe - An Introduction to Computing",
+  "description": "A simple lisp for webdevelopment",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/delonnewman/universe.git"
+    "url": "git+https://github.com/delonnewman/wonderscript-alpha.git"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Delon Newman",
+  "license": "MIT",
   "bugs": {
-    "url": "https://github.com/delonnewman/universe/issues"
+    "url": "https://github.com/delonnewman/wonderscript-alpha/issues"
   },
-  "homepage": "https://github.com/delonnewman/universe#readme",
+  "homepage": "https://github.com/delonnewman/wonderscript-alpha#readme",
   "dependencies": {
-    "bootstrap": "^4.1.3",
-    "mori": "^0.3.2",
     "yargs": "^12.0.1"
   }
 }
