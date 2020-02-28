@@ -1,811 +1,439 @@
-// jshint esversion: 6
 // jshint eqnull: true
-var wonderscript = wonderscript || {};
-wonderscript.core = function() {
-    const IS_NODE = typeof module !== 'undefined' ? true : false;
-    const IS_BROWSER = typeof window !== 'undefined' ? true : false;
+// jshint esversion: 6
+const GLOBAL = typeof module !== 'undefined' ? global : window;
+(function() {
 
-    var GLOBAL, core, edn;
-    if (IS_NODE) {
-        core = require('../pbnj/core.js');
-        edn = require('./edn.js');
-        GLOBAL = global;
+    this.wonderscript = this.wonderscript || {};
+    this.wonderscript.core = this.wonderscript.core || {};
+
+    function Sym(namespace, name) {
+        this._namespace = namespace;
+        this._name = name;
     }
-
-    if (IS_BROWSER) {
-        core = universal.core;
-        edn  = universal.edn;
-        GLOBAL = window;
-    }
-
-    const {
-        str,
-        map,
-        reduce,
-        partition,
-        cons,
-        first,
-        next,
-        rest,
-        isObject,
-        isObjectLiteral,
-        isNull,
-        isString,
-        isFunction,
-        isNumber,
-        isBoolean,
-        isUndefined,
-        isArray,
-        print,
-        isEmpty
-    } = core;
-
-    const { read, PushBackReader } = edn;
-
-    const QUOTE_SYM   = 'quote';
-    const DEF_SYM     = 'def';
-    const COND_SYM    = 'cond';
-    const JS_SYM      = 'js';
-    const FN_SYM      = 'fn*';
-    const LOOP_SYM    = 'loop';
-    const RECUR_SYM   = 'recur';
-    const THROW_SYM   = 'throw';
-    const TRY_SYM     = 'try';
-    const CATCH_SYM   = 'catch';
-    const FINALLY_SYM = 'finally';
-    const DO_SYM      = 'do';
-    const LET_SYM     = 'let';
-    const DOT_SYM     = '.';
-    const NEW_SYM     = 'new';
-    const SET_SYM     = 'set!';
-
-    const SPECIAL_FORMS = {
-        quote: true,
-        def: true,
-        cond: true,
-        js: true,
-        'fn*': true,
-        loop: true,
-        recur: true,
-        throw: true,
-        try: true,
-        catch: true,
-        finally: true,
-        do: true,
-        let: true,
-        '.': true,
-        new: true,
-        'set!': true
-    };
-
-    const CORE_MOD = {};
-    const CORE_NS = {name: 'wonderscript.core', module: CORE_MOD};
-    const CURRENT_NS = {
-        value: CORE_NS
-    };
-
-    const RECURSION_POINT_CLASS = str(CORE_NS.name, '.RecursionPoint');
-
-    function RecursionPoint(args) {
-        this.args = args;
-    }
-
-    const RECUR_ERROR = new Error('recur can only be used in a tail position within a loop or function');
-
-    var names = {
-        '=': 'eq',
-        'not=': 'noteq',
-        '<': 'lt',
-        '>': 'gt',
-        '<=': 'lteq',
-        '>=': 'gteq',
-        '+': 'add',
-        '-': 'sub',
-        '*': 'mult',
-        '/': 'div'
-    };
-
-    function cap(x) {
-        if (x.length === 0) return x;
-        return str(x[0].toUpperCase(), x.slice(1));
-    }
-
-    function wsNameToJS(x) {
-        if (names[x]) return names[x];
-        var prefix = null, parts;
-        if (x.endsWith('?')) {
-            prefix = 'is';
-            x = x.slice(0, x.length - 1);
-        }
-        else if (x.endsWith('!')) {
-            x = x.slice(0, x.length - 1);
-        }
-        else if (x.startsWith('*') && x.endsWith('*')) {
-            return x.slice(0, x.length - 1).slice(1).split('-').map(function(s) { return s.toUpperCase(); }).join('_');
-        }
-        if (x.indexOf("->") !== -1) parts = x.split("->").reduce(function(a, x) { return [].concat(a, "to", x); });
-        else parts = prefix ? [].concat(prefix, x.split('-')) : x.split('-');
-        return [].concat(parts[0], parts.slice(1).map(cap)).join('');
-    }
-
-    const SPECIAL_CHARS = {
-        '=': '_EQ_',
-        '\\-': '_DASH_',
-        '\\*': '_STAR_',
-        '!': '_BANG_',
-        '\\?': '_QUEST_'
-    };
-
-    function escapeChars(string) {
-        /*if (string.indexOf('.') !== -1) throw new Error('"."s are reserved for namespaces');
-        var ch;
-        for (ch in SPECIAL_CHARS) {
-            string = string.replace(new RegExp(ch, 'g'), SPECIAL_CHARS[ch]);
-        }
-        return string;*/
-        return wsNameToJS(string);
-    }
-
-    function env(parent) {
-        if (parent) {
-            return {
-                vars: {},
-                parent: parent
-            };
-        } else {
-            return {
-                vars: {},
-                parent: null
-            };
-        }
-    }
-
-    function lookup(env, name) {
-        if (env == null) {
-            p('env null');
-            return null;
-        }
-        else if (env.vars != null && env.vars[name] != null) {
-            return env;
+    
+    Sym.fromString = function(str) {
+        if ( str.indexOf('/') === -1 ) {
+            return new Sym(null, str);
         }
         else {
-            if (env.parent == null) {
+            var parts = str.split('/');
+            return new Sym(parts[0], parts.slice(1).join('/'));
+        }
+    };
+
+    Sym.protoytpe = Object.create(null);
+    
+    Sym.prototype.name = function() {
+        return this._name;
+    };
+    
+    Sym.prototype.namespace = function() {
+        return this._namespace;
+    };
+
+    Sym.prototype.toString = function() {
+        if ( this._namespace ) {
+            return str(this._namespace, '/', this._name);
+        }
+        else {
+            return str(this._name);
+        }
+    };
+
+    function isSymbol(x) {
+        return x instanceof Sym;
+    }
+
+    function symbol() {
+        if (arguments.length === 1) {
+            return new Sym(null, arguments[0]);
+        }
+        else if (arguments.length === 2) {
+            return new Sym(arguments[0], arguments[1]);
+        }
+        else {
+            throw new Error("Wrong number of arguments expected 1 or 2, got: " + arguments.length);
+        }
+    }
+
+    function str() {
+        if (arguments.length === 0) return '';
+        return Array.prototype.join.call(arguments, '');
+    }
+
+    function isNumber(x) {
+        return Object.prototype.toString.call(x) === '[object Number]';
+    }
+
+    function isString(x) {
+        return Object.prototype.toString.call(x) === '[object String]';
+    }
+
+    function isBoolean(x) {
+        return Object.prototype.toString.call(x) === '[object Boolean]';
+    }
+
+    function isFunction(x) {
+        return Object.prototype.toString.call(x) === '[object Function]';
+    }
+
+    function isArrayLike(x) {
+        return x != null && isNumber(x.length);
+    }
+
+    function isArray(x) {
+        return Object.prototype.toString.call(x) === '[object Array]';
+    }
+
+    function toArray(x) {
+        if (x == null) {
+            return [];
+        }
+        else if (isFunction(x.toArray)) {
+            return x.toArray();
+        }
+        else {
+            return Array.prototype.slice.call(x);
+        }
+    }
+
+    function array() {
+        return Array.prototype.slice.call(arguments);
+    }
+
+    function isObject(x) {
+        return Object.prototype.toString.call(x) === '[object Object]';
+    }
+
+    function isUndefined(x) {
+        return x === void(0);
+    }
+
+    function isNull(x) {
+        return x === null;
+    }
+
+    function isNil(x) {
+        return x == null;
+    }
+
+    // TODO: add support for maps, sets, and objects
+    function first(x) {
+        if (x == null) return null;
+        else if (isFunction(x.first)) {
+            return x.first();
+        }
+        else if (isArrayLike(x)) {
+            return x[0];
+        }
+        else {
+            throw new Error("Cannot get the first element of: " + x);
+        }
+    }
+
+    function rest(x) {
+        if (x == null) return [];
+        else if (isFunction(x.rest)) {
+            return x.rest();
+        }
+        else if (isFunction(x.next)) {
+            var val = x.next();
+            return val == null ? [] : val;
+        }
+        else if (isArrayLike(x)) {
+            if (isFunction(x.slice)) {
+                return x.slice(1);
+            }
+            else {
+                return Array.prototype.slice.call(x, 1);
+            }
+        }
+        else {
+            throw new Error("Cannot get the rest of the elements of: " + x);
+        }
+    }
+
+    function next(x) {
+        if (x == null) return null;
+        else if (isFunction(x.next)) {
+            return x.next();
+        }
+        else if (isFunction(x.rest)) {
+            var val = x.rest();
+            return isEmpty(val) ? null : val;
+        }
+        else if (isArrayLike(x)) {
+            if (x.length <= 1) {
                 return null;
             }
             else {
-                var scope = env.parent;
-                while (scope != null) {
-                    if (scope.vars != null && scope.vars[name] != null) {
-                        return scope;
-                    }
-                    scope = scope.parent;
+                if (isFunction(x.slice)) {
+                    return x.slice(1);
                 }
-                return null;
-            }
-        }
-    }
-
-    function define(env, name, value) {
-        if (typeof value !== 'undefined') {
-            env.vars[name] = value;
-            return null;
-        }
-        else {
-            env.vars[name] = null;
-            return null;
-        }
-    }
-
-    function findLexicalVar(env, name) {
-        var scope = lookup(env, name);
-        if (scope == null) {
-            throw new Error(str('Undefined variable: "', name, '"'));
-        }
-        else {
-            return scope.vars[name];
-        }
-    }
-
-    function findNamespaceVar(s) {
-        if (s.indexOf('/') !== -1) {
-            var parts = s.split('/');
-            if (parts[1].indexOf('.') !== -1) throw new Error('"." are reserved for namespaces');
-            if (parts.length !== 2) throw new Error('A symbol should only have 2 parts');
-            var scope = lookup(env, parts[0]);
-            if (scope === null) return null;
-            else {
-                var ns = scope.vars[parts[0]],
-                    val = ns.module[parts[1]];
-                if (isUndefined(val)) return null;
-                return val;
-            }
-        }
-        else {
-            var s = escapeChars(s),
-                val = CURRENT_NS.value.module[s];
-            if (!isUndefined(val)) {
-                return val;
-            }
-            else if (!isUndefined(val = CORE_NS.module[s])) {
-                return val;
-            }
-            return null;
-        }
-    }
-
-    function isMacro(x) {
-        return isFunction(x) && x.$ws$isMacro === true;
-    }
-
-    function macroexpand(form) {
-        if (!isArray(form)) {
-            return form;
-        }
-        else {
-            if (SPECIAL_FORMS[form[0]]) return form;
-            else if (isString(form[0])) {
-                var val = findNamespaceVar(form[0]);
-                if (val === null) return form;
                 else {
-                    if (isMacro(val)) {
-                        return macroexpand(val.apply(null, form.slice(1)));
-                    }
-                    else {
-                        return form;
-                    }
+                    return Array.prototype.slice.call(x, 1);
                 }
             }
-            else {
-                return form;
-            }
+        }
+        else {
+            throw new Error("Cannot get the rest of the elements of: " + x);
         }
     }
 
-    const TOP = env();
-    // TODO: try/catch/finally
-    function emit(form_, env_) {
-        var env_ = env_ || TOP,
-            form = macroexpand(form_);
-        if (isString(form)) {
-            if (form === 'nil') return 'null';
-            return emitSymbol(form, env_);
+    function cons(x, seq) {
+        if (seq == null) return [x];
+        else if (isFunction(seq.cons)) {
+            return seq.cons(x);
         }
-        else if (isNumber(form)) return str(form);
-        else if (isBoolean(form)) return form === true ? 'true' : 'false';
-        else if (isNull(form)) return 'null';
-        else if (isUndefined(form)) {
-            return 'undefined';
+        else if (isArrayLike(seq)) {
+            if (isString(seq)) {
+                return [x, seq].join('');
+            }
+            else {
+                return [x].concat(seq);
+            }
         }
-        else if (isObjectLiteral(form)) {
-            return str('({', map(function(xs) { return str(xs[0], ':', emit(xs[1], env_)); }, Object.entries(form)).join(', '), '})');
+        else {
+            throw new Error("Cannot cons and element to: " + seq);
         }
-        else if (isArray(form)) {
-            if (form.length === 0) return '[]';
-            else if (isString(form[0])) {
-                switch(form[0]) {
-                  case DEF_SYM:
-                    return emitDef(form, env_);
-                  case QUOTE_SYM:
-                    return emitQuote(form, env_);
-                  case COND_SYM:
-                    return emitCond(form, env_);
-                  case JS_SYM:
-                    return form[1];
-                  case FN_SYM:
-                    return emitFunc(form, env_);
-                  case LOOP_SYM:
-                    return emitLoop(form, env_);
-                  case RECUR_SYM:
-                    throw RECUR_ERROR;
-                  case THROW_SYM:
-                    return emitThrownException(form, env_);
-                  case TRY_SYM:
-                    throw new Error("not implemented");
-                  case DO_SYM:
-                    return emitDo(form, env_);
-                  case LET_SYM:
-                    return emitLet(form, env_);
-                  case DOT_SYM:
-                    return emitObjectRes(form, env_);
-                  case NEW_SYM:
-                    return emitClassInit(form, env_);
-                  case SET_SYM:
-                    return emitAssignment(form, env_);
-                  // operators
-                  case 'mod':
-                    return str('(', emit(form[1], env_), '%', emit(form[2], env_), ')');
-                  case '<':
-                    return str('(', emit(form[1], env_), '<', emit(form[2], env_), ')');
-                  case '>':
-                    return str('(', emit(form[1], env_), '>', emit(form[2], env_), ')');
-                  case '<=':
-                    return str('(', emit(form[1], env_), '<=', emit(form[2], env_), ')');
-                  case '>=':
-                    return str('(', emit(form[1], env_), '>=', emit(form[2], env_), ')');
-                  case 'not':
-                    return str('!(', emit(form[1], env_), ')');
-                  case 'or':
-                    return emitBinOperator(['||'].concat(form.slice(1)), env_);
-                  case 'and':
-                    return emitBinOperator(['&&'].concat(form.slice(1)), env_);
-                  case 'bit-not':
-                    return str('~(', emit(form[1], env_), ')');
-                  case 'bit-or':
-                    return emitBinOperator(['|'].concat(form.slice(1)), env_);
-                  case 'bit-xor':
-                    return emitBinOperator(['^'].concat(form.slice(1)), env_);
-                  case 'bit-and':
-                    return emitBinOperator(['&'].concat(form.slice(1)), env_);
-                  case 'bit-shift-left':
-                    return emitBinOperator(['<<'].concat(form.slice(1)), env_);
-                  case 'bit-shift-right':
-                    return emitBinOperator(['>>'].concat(form.slice(1)), env_);
-                  case 'unsigned-bit-shift-right':
-                    return emitBinOperator(['>>>'].concat(form.slice(1)), env_);
-                  case 'identical?':
-                    return emitBinOperator(['==='].concat(form.slice(1)), env_);
-                  case 'equiv?':
-                    return emitBinOperator(['=='].concat(form.slice(1)), env_);
-                  case '+':
-                  case '-':
-                  case '/':
-                  case '*':
-                    return emitBinOperator(form, env_);
-                  default:
-                    return emitFuncApplication(form, env_);
+    }
+
+    function isEmpty(x) {
+        if (x == null) return true;
+        else if (isArrayLike(x)) {
+            return x.length === 0;
+        }
+        else {
+            return next(x) == null;
+        }
+    }
+
+    function map(f, xs) {
+        if (arguments.length === 2) {
+            if (isEmpty(xs)) {
+                return [];
+            }
+            else {
+                var a = [];
+                while (xs != null) {
+                    a.push(f.call(null, first(xs)));
+                    xs = next(xs);
                 }
-            }
-            else {
-                return emitFuncApplication(form, env_);
+                return a;
             }
         }
         else {
-            throw new Error("Invalid form: " + form);
+            throw new Error('Wrong number of arguments expected 2, got: ' + arguments.length);
         }
     }
 
-    function emitQuote(form) {
-        if (form.length !== 2) throw new Error('One value should be quoted');
-        return emitQuotedValue(form[1]);
-    }
-
-    function emitQuotedValue(val) {
-        if (isString(val)) {
-            return JSON.stringify(val);
-        }
-        else if (isNumber(val)) {
-            return str(val);
-        }
-        else if (val === true) return 'true';
-        else if (val === false) return 'false';
-        else if (val === null) return 'null';
-        else if (isUndefined(val)) return 'undefined';
-        else if (isArray(val)) {
-            return str('[', map(emitQuotedValue, val).join(', '), ']');
-        }
-        else if (isObjectLiteral(val)) {
-            return str('({', map(function(xs) { return str(xs[0], ':', emitQuotedValue(xs[1])); }, Object.entries(val)).join(', '), '})');
-        }
-        throw new Error('Invalid form: ' + val);
-    }
-
-    function emitSymbol(s, env) {
-        if (s.indexOf('/') !== -1) {
-            var parts = s.split('/');
-            if (parts[1].indexOf('.') !== -1) throw new Error('"." are reserved for namespaces');
-            if (parts.length !== 2) throw new Error('A symbol should only have 2 parts');
-            var scope = lookup(env, parts[0]);
-            if (scope === null) throw new Error('Unknown namespace: ' + parts[0]);
+    function reduce(f, xs, init) {
+        if (arguments.length >= 2) {
+            if (init == null) {
+                init = first(xs);
+                xs   = next(xs);
+            }
+            if (isEmpty(xs)) {
+                return init;
+            }
             else {
-                var ns = scope.vars[parts[0]];
-                if (isUndefined(ns.module[parts[1]])) {
-                    throw new Error('Undefined variable: ' + parts[1] + ' in namespace: ' + parts[0]);
+                var x = init;
+                while (xs != null) {
+                    x = f.call(null, x, first(xs));
+                    xs = next(xs);
                 }
-                return str(ns.name, '.', escapeChars(parts[1]));
+                return x;
             }
         }
         else {
-            var s = escapeChars(s);
-            if (!isUndefined(CURRENT_NS.value.module[s])) {
-                return str(CURRENT_NS.value.name, '.', s);
-            }
-            else if (!isUndefined(CORE_NS.module[s])) {
-                return str(CORE_NS.name, '.', s);
-            }
-            else {
-                findLexicalVar(env, s); // throws error if undefined
-                return s;
-            }
+            throw new Error('Wrong number of arguments expected at least 2, got: ' + arguments.length);
         }
     }
 
-    function emitRecursionPoint(form, env) {
-        return str("throw new ", RECURSION_POINT_CLASS, "([",
-            form.slice(1).map(function(x) { return emit(x, env); }).join(', '), "])");
-    }
+    const print = console.log.bind(console);
 
-    function emitThrownException(form, env) {
-        if (form.length === 2) throw new Error('throw should have 2 elements');
-        return str("throw ", emit(form[1], env));
-    }
-
-    function isRecur(x) {
-        return isArray(x) && x[0] === RECUR_SYM;
-    }
-
-    function isThrow(x) {
-        return isArray(x) && x[0] === THROW_SYM;
+    function take(n, xs) {
+        if (n === 0) return xs;
+        else if (isEmpty(xs)) return [];
+        else {
+            return Array.prototype.slice.call(xs, 0, n);
+        }
     }
     
-    function emitTailPosition(x, env, def, isRecursive) {
-        var def_ = def || 'return';
-        if (isRecur(x)) {
-            if (!isRecursive) throw RECUR_ERROR;
-            return emitRecursionPoint(x, env);
-        }
-        else if (isThrow(x)) {
-            return emitTrownException(x, env);
-        }
-        else {
-            return str(def_, ' ', emit(x, env));
-        }
-    }
-
-    function emitCond(form, env) {
-        var i, cond, x,
-            exprs = partition(2, rest(form)),
-            buff = [];
-        for (i = 0; i < exprs.length; ++i) {
-            cond = i === 0 ? 'if' : 'else if';
-            if ( exprs[i][0] === 'else' ) {
-                buff.push(str('else { ', emitTailPosition(exprs[i][1], env), ' }')); 
+    function memoize(f) {
+        var memoized = function() {
+            var hash = arguments[0]; // str.apply(null, arguments);
+            if (memoized.cache[hash] === void(0)) {
+                memoized.cache[hash] = f.apply(this, arguments);
             }
-            else {
-                x = emit(exprs[i][0], env);
-                buff.push(str(cond, '(', x, ' != null && ', x, ' !== false){ ', emitTailPosition(exprs[i][1], env), ' }')); 
-            }
-        }
-        return str('(function(){ ', buff.join(' '), '}())');
-    }
-
-    function compileBody(body, env, tailDef, isRecursive) {
-        var last = body[body.length - 1],
-            head = body.slice(0, body.length - 1);
-        return map(function(x) { return emit(x, env); }, head)
-                .concat(emitTailPosition(last, env, tailDef, isRecursive)).join('; ');
-    }
-
-    function compileRecursiveBody(body, names, env) {
-        var i, rebinds, buff = [];
-        for (i = 0; i < names.length; i++) {
-            buff.push(str(names[i], ' = e.args[', i, ']'));
-        }
-        rebinds = buff.join('; ');
-        return str(
-            "var retval;\nloop:\n\twhile (true) { try { ",
-            compileBody(body, env, 'retval =', true),
-            "; break loop; } catch (e) { if (e instanceof ", RECURSION_POINT_CLASS,
-            ") { ", rebinds, "; continue loop; } else { throw e; } } };\nreturn retval"
-        );
-    }
-
-    function emitLoop(form, env) {
-        if (form.length < 3) throw new Error('A loop expression should have at least 3 elements');
-        var i, bind,
-            buff = ['(function('],
-            rest = form.slice(1),
-            binds = rest[0],
-            body = rest.slice(1);
-
-        // add names to function scope
-        var names = [];
-        for (i = 0; i < binds.length; i += 2) {
-            bind = binds[i];
-            if (!isString(bind)) throw new Error('Invalid binding name');
-            names.push(bind);
-        }
-        buff.push(names.join(', '));
-        buff.push('){');
-
-        // body
-        buff.push(compileRecursiveBody(body, names, env));
-        buff.push('}(');
-
-        // add values to function scope
-        var values = [];
-        for (i = 0; i < binds.length; i += 2) {
-            values.push(emit(binds[i + 1], env));
-        }
-        buff.push(values.join(', '));
-        buff.push('))');
-
-        return buff.join('');
-    }
-  
-    function emitLet(form, env_) {
-        var env_ = env(env_);
-        if (form.length < 3) throw new Error('A let expression should have at least 3 elements');
-        var i, bind,
-            buff = ['(function('],
-            rest = form.slice(1),
-            binds = rest[0],
-            body = rest.slice(1);
-
-        // add names to function scope
-        var names = [];
-        for (i = 0; i < binds.length; i += 2) {
-            bind = binds[i];
-            if (!isString(bind)) throw new Error('Invalid binding name');
-            define(env_, bind, true);
-            names.push(bind);
-        }
-        buff.push(names.join(', '));
-        buff.push('){');
-
-        // body
-        buff.push(compileBody(body, env_));
-        buff.push('}(');
-
-        // add values to function scope
-        var values = [];
-        for (i = 0; i < binds.length; i += 2) {
-            values.push(emit(binds[i + 1], env));
-        }
-        buff.push(values.join(', '));
-        buff.push('))');
-
-        return buff.join('');
-    }
-
-    function emitDef(form, env, opts) {
-        var name = escapeChars(form[1]), code, value, def;
-        if (form[2]) {
-            code = emit(form[2], env); value = eval(code);
-            def = str(CURRENT_NS.value.name, ".", name, " = ", code, ";");
-        }
-        else {
-            code = 'null'; value = null;
-            def = str(CURRENT_NS.value.name, ".", name, " = null;");
-        }
-        CURRENT_NS.value.module[name] = value;
-        return def;
-    }
-  
-    function emitAssignment(form, env) {
-        if (form.length !== 3) throw new Error('set! should have 3 and only 3 elements');
-        return str(emit(form[1], env), " = ", emit(form[2], env));
-    }
-  
-    function parseArgs(args) {
-      var splat = false, name, argsBuf = [];
-      for (var i = 0; i < args.length; ++i) {
-        if ( /^&/.test(args[i]) ) {
-          name = args[i].replace(/^&/, '');
-          splat = true;
-        }
-        else {
-          name = args[i];
-        }
-        argsBuf.push({name: name, order: i, splat: splat});
-      }
-      return argsBuf;
-    }
-  
-    function genArgAssigns(argsBuf) {
-      var argsAssign = [], i;
-      for (i = 0; i < argsBuf.length; ++i) {
-        if (argsBuf[i].splat) argsAssign.push(str('var ', argsBuf[i].name, " = Array.prototype.slice.call(arguments, ", i, ")"));
-      }
-      return argsAssign.join('');
-    }
-  
-    function genArgsDef(argsBuf) {
-      var i, argsDef = [];
-      for (i = 0; i < argsBuf.length; ++i) {
-        argsDef.push(argsBuf[i].name);
-      }
-      return argsDef.join(',');
-    }
-  
-    function emitFunc(form, env_, opts) {
-        var env_ = env(env_),
-            args = form[1],
-            argsDef, argsAssign, argsBuf, expr, i, value;
-  
-        if (form.length < 3) throw new Error("a function requires at least an arguments list and a body");
-        else {
-            if (!isArray(args)) throw new Error("an arguments list is required");
-  
-            argsBuf = parseArgs(args);
-            argsAssign = genArgAssigns(argsBuf);
-            argsDef = genArgsDef(argsBuf);
-
-            for (i = 0; i < argsBuf.length; i++) {
-                define(env_, argsBuf[i].name, true);
-            }
-    
-            var buf = [argsAssign];
-            buf.push(compileRecursiveBody(form.slice(2), argsBuf.map(function(x) { return x.name }), env_));
-  
-            return str("(function(", argsDef, ") { ", buf.join('; '), "; })");
-        }
-    }
-  
-    function emitDo(form, env) {
-        var exprs = form.slice(0, form.length - 1).slice(1),
-            buf = [],
-            last = form[form.length - 1];
-        for (i = 0; i < exprs.length; ++i) {
-            buf.push(emit(exprs[i], env, env));
-        }
-        buf.push(emitTailPosition(last));
-  
-        return str("(function(){ ", buf.join('; '), "; }())");
-    }
-  
-    function emitObjectRes(form, env) {
-        var obj = form[1], prop = form[2];
-        if (isArray(prop)) {
-            return str('(', emit(obj, env), ').', escapeChars(prop[0]), '(',
-                map(function(x) { return emit(x, env); }, prop.slice(1)).join(', '), ')');
-        }
-        else if (isString(prop)) {
-            if (prop.startsWith('-')) {
-                return str('(', emit(obj, env), ').', escapeChars(prop.slice(1)));
-            }
-            else {
-                return str('(', emit(obj, env), ').', escapeChars(prop), '()');
-            }
-        }
-        else {
-            throw new Error("'.' form requires at least 3 elements");
-        }
-    }
-  
-    function emitClassInit(form, env) {
-      var args = map(emit, form.slice(2)).join(', ');
-      return str('new ', emit(form[1], env), '(', args, ')');
-    }
-
-    function emitFuncApplication(form, env) {
-      if (isString(form[0]) && isMacro(findNamespaceVar(form[0]))) throw new Error('Macros cannot be evaluated in this context');
-      var fn = emit(form[0], env),
-          args = form.slice(1, form.length),
-          argBuffer = [], i, value;
-    
-      for (i = 0; i < args.length; ++i) {
-        value = emit(args[i], env);
-        argBuffer.push(value);
-      }
-    
-      if (argBuffer.length === 0) {
-        return str('(', fn, ')()');
-      }
-      return str('(', fn, ')(', argBuffer.join(', ') ,")");
+            return memoized.cache[hash];
+        };
+        memoized.cache = {};
+        return memoized;
     }
     
-    function emitBinOperator(form, env) {
-      var op = form[0],
-          values = form.slice(1, form.length),
-          valBuffer = [], i;
-      for (i = 0; i < values.length; ++i) {
-        valBuffer.push(emit(values[i], env));
-      }
-      return str('(', valBuffer.join(op), ')');
+    function drop(n, xs) {
+        if (n === 0) return xs;
+        else if (isEmpty(xs)) return [];
+        else {
+            return Array.prototype.slice.call(xs, n);
+        }
     }
-
-    function evaluate(form) {
-        return eval(emit(form));
-    }
-
-    function evalString(s) {
-        var r = new PushBackReader(s);
-        var res, ret;
-        while (true) {
-            res = read(r, {eofIsError: false, eofValue: null});
-            if (res != null) {
-                ret = evaluate(res);
+    
+    function partition(n, xs) {
+        if (isEmpty(xs)) {
+            return [];
+        }
+        else if (xs.length === n) {
+            return [xs];
+        }
+        else {
+            var a = [], i, j, x;
+            for (i = 0; i < xs.length; i = i + n) {
+                x = [];
+                for (j = 0; j < n; j++) { 
+                    x.push(xs[i + j]);
+                }
+                a.push(x);
             }
-            if (res == null) return ret;
+            return a;
         }
     }
-
-    function compileString(s) {
-        var r = new PushBackReader(s);
-        var res, ret, buff = [];
-        while (true) {
-            res = read(r, {eofIsError: false, eofValue: null});
-            if (res != null) {
-                ret = emit(res);
-                if (ret != null) buff.push(ret);
+    
+    function range() {
+        if (arguments.length === 1) {
+            start = 0;
+            stop  = arguments[0];
+            step  = 1;
+        }
+        else if (arguments.length === 2) {
+            start = arguments[0];
+            stop  = arguments[1];
+            step  = 1;
+        }
+        else if (arguments.length >= 3) {
+            start = arguments[0];
+            stop  = arguments[1];
+            step  = arguments[2];
+        }
+        if (start === stop) {
+            return [start];
+        }
+        else {
+            var a = [], i;
+            for (i = start; a.length < stop; i = i + step) {
+                a.push(i);
             }
-            if (res == null) break;
+            return a;
         }
-        return buff.join(';\n');
     }
 
-    function prStr(x) {
-        if (x == null) return "nil";
-        else if (isNumber(x)) return str(x);
-        else if (isBoolean(x)) {
-            return x ? "true" : "false";
+    function apply(f, args, ctx) {
+        if (arguments.length === 1) {
+            return function(args, ctx) {
+                return f.apply(ctx, args);
+            };
         }
-        else if (isString(x)) {
+        else if (arguments.length >= 2) {
+            return f.apply(ctx, args);
+        }
+        else {
+            throw new Error("Wrong number of arguments, expected at least 1, got: " + arguments.length);
+        }
+    }
+
+    function compose() {
+        var fns = arguments;
+        return function() {
+            var i, x = fns[0].apply(null, arguments);
+            for (i = 1; i < fns.length; i++) {
+                x = fns[i].call(null, x);
+            }
             return x;
-        }
-        else if (isArray(x)) {
-            if (x.length === 0) {
-                return '()';
-            } else {
-                var y;
-                var ys = x;
-                var buffer = [];
-                while (ys !== null) {
-                    y = first(ys);
-                    ys = next(ys);
-                    buffer.push(prStr(y));
-                }
-                return str('(', buffer.join(' '), ')');
-            }
-        }
-        else if (isArray(x)) {
-            if (x.length === 0) {
-                return '(array)';
-            }
-            return str('(array ', x.map(function(x) {
-                return prStr(x);
-            }).join(' '), ')');
-        } else if (isFunction(x)) {
-            return str('#js/function "', x.toString(), '"');
-        } else if (isArrayLike(x)) {
-            if (x.toString) {
-                return x.toString();
-            }
-            else {
-                return str('#js/object {',
-                    Array.prototype.slice.call(x)
-                        .map(function(x, i) { return str(i, ' ', prStr(x)); })
-                        .join(', '),
-                    '}');
-            }
-        } else {
-            return "" + x;
-        }
-    }
-
-    if (IS_NODE) {
-        const fs = require('fs');
-        CORE_MOD.loadFile = function(f) {
-            return evalString(fs.readFileSync(f, 'utf8'));  
         };
     }
 
-    CORE_MOD.array = function() {
-        return Array.prototype.slice.call(arguments);
-    };
+    function get(m, key, alt) {
+        var alt_ = alt == null ? null : alt;
+        if (m == null || key == null) return alt_;
+        var val = isFunction(m.get) ? m.get(key, alt) : m[key];
+        if (val == null) return alt_;
+        return val;
+    }
 
-    CORE_MOD.isNil = core.isNull;
+    function maybe(val, act, alt) {
+        if (val == null) return alt != null ? alt : null;
+        else {
+          if (act != null) {
+            return act.call(null, val);
+          }
+          else {
+            return val;
+          }
+        }
+    }
+    
+    function either(val, right, left) {
+        if (val == null) {
+            return right.call();
+        }
+        else {
+            return left != null ? left.call(null, val) : val;
+        }
+    }
 
-    CORE_MOD.defmacro = function(name, args) {
-        var body = Array.prototype.slice.call(arguments, 2);
-        return [DO_SYM,
-                [DEF_SYM, name, cons(FN_SYM, cons(args, body))],
-                [SET_SYM, [DOT_SYM, name, '-$ws$isMacro'], true],
-                [QUOTE_SYM, name]]; 
-    };
-    CORE_MOD.defmacro.$ws$isMacro = true;
 
-    CORE_MOD.NS = CURRENT_NS;
+    // TODO: see if there's a way to make the trace start with the callee
+    function raise(msg) {
+        var e = isString(msg) ? new Error(msg) : msg;
+        return function() {
+            throw msg;
+        };
+    }
 
-    define(TOP, CORE_NS.name, CORE_NS);
-    define(TOP, 'js', IS_NODE ? {name: 'global', module: global} : {name: 'window', module: window});
+    function isObjectLiteral(x) {
+        return isObject(x) && Object.getPrototypeOf(Object.getPrototypeOf(x)) == null;
+    }
 
-    Object.assign(CORE_MOD, core);
-    Object.assign(CORE_MOD, {compile: emit, eval: evaluate, RecursionPoint, evalString, compileString, prStr});
+    Object.assign(this.wonderscript.core, {
+        isNumber,
+        isString,
+        isBoolean,
+        isFunction,
+        isArrayLike,
+        isArray,
+        isNull,
+        isNil,
+        isUndefined,
+        isObject,
+        isObjectLiteral,
+        toArray,
+        array,
+        first,
+        rest,
+        next,
+        cons,
+        get,
+        map,
+        reduce,
+        take,
+        drop,
+        str,
+        symbol,
+        isSymbol,
+        Sym,
+        partition,
+        range,
+        memoize,
+        apply,
+        either,
+        maybe,
+        raise,
+        print
+    });
 
-    GLOBAL.wonderscript = GLOBAL.wonderscript || {};
-    GLOBAL.wonderscript.core = CORE_MOD;
-    if (IS_NODE) module.exports = CORE_MOD;
+    if (typeof module !== 'undefined') {
+        module.exports = this.wonderscript.core;
+    }
 
-    return CORE_MOD;
-}();
+}.call(GLOBAL));
