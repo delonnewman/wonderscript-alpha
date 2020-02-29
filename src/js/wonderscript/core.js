@@ -6,56 +6,6 @@ const GLOBAL = typeof module !== 'undefined' ? global : window;
     this.wonderscript = this.wonderscript || {};
     this.wonderscript.core = this.wonderscript.core || {};
 
-    function Sym(namespace, name) {
-        this._namespace = namespace;
-        this._name = name;
-    }
-    
-    Sym.fromString = function(str) {
-        if ( str.indexOf('/') === -1 ) {
-            return new Sym(null, str);
-        }
-        else {
-            var parts = str.split('/');
-            return new Sym(parts[0], parts.slice(1).join('/'));
-        }
-    };
-
-    Sym.protoytpe = Object.create(null);
-    
-    Sym.prototype.name = function() {
-        return this._name;
-    };
-    
-    Sym.prototype.namespace = function() {
-        return this._namespace;
-    };
-
-    Sym.prototype.toString = function() {
-        if ( this._namespace ) {
-            return str(this._namespace, '/', this._name);
-        }
-        else {
-            return str(this._name);
-        }
-    };
-
-    function isSymbol(x) {
-        return x instanceof Sym;
-    }
-
-    function symbol() {
-        if (arguments.length === 1) {
-            return new Sym(null, arguments[0]);
-        }
-        else if (arguments.length === 2) {
-            return new Sym(arguments[0], arguments[1]);
-        }
-        else {
-            throw new Error("Wrong number of arguments expected 1 or 2, got: " + arguments.length);
-        }
-    }
-
     function str() {
         if (arguments.length === 0) return '';
         return Array.prototype.join.call(arguments, '');
