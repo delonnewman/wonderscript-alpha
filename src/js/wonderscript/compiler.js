@@ -863,6 +863,7 @@ GLOBAL.wonderscript.compiler = function() {
         RecursionPoint,
         evalString,
         compileString,
+        readString,
         prStr
     });
 
