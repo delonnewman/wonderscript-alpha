@@ -87,6 +87,8 @@ GLOBAL.wonderscript.compiler = function() {
     const DIV_SYM         = '/';
     const MULT_SYM        = '*';
 
+    const MACRO_DEF_SYM   = 'defmacro';
+
     const SPECIAL_FORMS = {
         quote: true,
         def: true,
@@ -738,18 +740,50 @@ GLOBAL.wonderscript.compiler = function() {
         }
     }
 
-    function compileString(s) {
+    function readString(s) {
         var r = new PushBackReader(s);
-        var res, ret, buff = [];
+        var res, ret, seq = [];
         while (true) {
             res = read(r, {eofIsError: false, eofValue: null});
-            if (res != null) {
-                ret = emit(res);
-                if (ret != null) buff.push(ret);
-            }
-            if (res == null) break;
+            if (res != null) seq.push(res);
+            if (res == null) return seq;
         }
-        return buff.join(';\n');
+    }
+
+
+    function evalMacros(seq) {
+        var i, form, evaled = [];
+        for (i = 0; i < seq.length; i++) {
+            form = seq[i];
+            if (isArray(form) && form[0] === MACRO_DEF_SYM) {
+                evaluate(form);
+            }
+            else {
+                evaled.push(form);
+            }
+        }
+        return evaled;
+    }
+
+    function expandMacros(seq) {
+        var i, expanded = [];
+        for (i = 0; i < seq.length; i++) {
+            expanded.push(macroexpand(seq[i]));
+        }
+        return expanded;
+    }
+
+    // Compilation happens in three phases
+    // 1) evaluate macros into JS functions
+    // 2) expand macros into special forms
+    // 3) compile special forms into code
+    function compileString(s) {
+        var seq = expandMacros(evalMacros(readString(s)));
+        var i, buffer = [];
+        for (i = 0; i < seq.length; i++) {
+            buffer.push(emit(seq[i]));
+        }
+        return buffer.join(';\n');
     }
 
     function prStr(x) {
@@ -808,14 +842,14 @@ GLOBAL.wonderscript.compiler = function() {
         };
     }
 
-    CORE_MOD.defmacro = function(name, args) {
+    CORE_MOD[MACRO_DEF_SYM] = function(name, args) {
         var body = Array.prototype.slice.call(arguments, 2);
         return [DO_SYM,
                 [DEF_SYM, name, cons(FN_SYM, cons(args, body))],
                 [SET_SYM, [DOT_SYM, name, '-$ws$isMacro'], true],
                 [QUOTE_SYM, name]]; 
     };
-    CORE_MOD.defmacro.$ws$isMacro = true;
+    CORE_MOD[MACRO_DEF_SYM].$ws$isMacro = true;
 
     CORE_MOD.NS = CURRENT_NS;
 
@@ -823,7 +857,14 @@ GLOBAL.wonderscript.compiler = function() {
     define(TOP, 'js', IS_NODE ? {name: 'global', module: global} : {name: 'window', module: window});
 
     Object.assign(CORE_MOD, core);
-    Object.assign(CORE_MOD, {compile: emit, eval: evaluate, RecursionPoint, evalString, compileString, prStr});
+    Object.assign(CORE_MOD, {
+        compile: emit,
+        eval: evaluate,
+        RecursionPoint,
+        evalString,
+        compileString,
+        prStr
+    });
 
     GLOBAL.wonderscript = GLOBAL.wonderscript || {};
     GLOBAL.wonderscript.core = CORE_MOD;

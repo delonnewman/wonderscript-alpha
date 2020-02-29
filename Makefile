@@ -8,3 +8,8 @@ dist/wonderscript/core.ws.js: dist/wonderscript
 
 clean:
 	rm -rf dist
+
+deps:
+	npm install .
+
+.PHONY: all clean deps
