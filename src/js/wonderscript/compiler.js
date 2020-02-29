@@ -86,6 +86,9 @@ GLOBAL.wonderscript.compiler = function() {
     const MINUS_SYM       = '-';
     const DIV_SYM         = '/';
     const MULT_SYM        = '*';
+    const AGET_SYM        = 'aget';
+    const ASET_SYM        = 'aset';
+    const ALENGTH_SYM     = 'alength';
 
     const MACRO_DEF_SYM   = 'defmacro';
 
@@ -264,7 +267,7 @@ GLOBAL.wonderscript.compiler = function() {
     }
 
     function isMacro(x) {
-        return isFunction(x) && x.$ws$isMacro === true;
+        return isFunction(x) && x.$ws$macro === true;
     }
 
     function macroexpand(form) {
@@ -381,6 +384,12 @@ GLOBAL.wonderscript.compiler = function() {
                   case DIV_SYM:
                   case MULT_SYM:
                     return emitBinOperator(form, env_);
+                  case AGET_SYM:
+                    return emitArrayAccess(form, env_);
+                  case ASET_SYM:
+                    return emitArrayMutation(form, env_);
+                  case ALENGTH_SYM:
+                    return emitArrayLength(form, env_);
                   default:
                     return emitFuncApplication(form, env_);
                 }
@@ -392,6 +401,27 @@ GLOBAL.wonderscript.compiler = function() {
         else {
             throw new Error("Invalid form: " + form);
         }
+    }
+
+    function emitArrayAccess(form, env) {
+        if (form.length !== 3)
+            throw new Error(str('Wrong number of arguments expected 2, got ', form.length));
+
+        return str(emit(form[1], env), '[', emit(form[2], env), ']');
+    }
+
+    function emitArrayMutation(form, env) {
+        if (form.length !== 4)
+            throw new Error(str('Wrong number of arguments expected 3, got ', form.length));
+
+        return str(emit(form[1], env), '[', emit(form[2], env), ']=', emit(form[3], env));
+    }
+
+    function emitArrayLength(form, env) {
+        if (form.length !== 2)
+            throw new Error(str('Wrong number of arguments expected 1, got ', form.length));
+
+        return str(emit(form[1], env), '.length');
     }
 
     function emitQuote(form) {
@@ -455,7 +485,8 @@ GLOBAL.wonderscript.compiler = function() {
     }
 
     function emitThrownException(form, env) {
-        if (form.length === 2) throw new Error('throw should have 2 elements');
+        if (form.length !== 2)
+            throw new Error(str('Wrong number of arguments should have 2, got', form.length));
         return str("throw ", emit(form[1], env));
     }
 
@@ -474,7 +505,7 @@ GLOBAL.wonderscript.compiler = function() {
             return emitRecursionPoint(x, env);
         }
         else if (isThrow(x)) {
-            return emitTrownException(x, env);
+            return emitThrownException(x, env);
         }
         else {
             return str(def_, ' ', emit(x, env));
@@ -698,20 +729,23 @@ GLOBAL.wonderscript.compiler = function() {
     }
 
     function emitFuncApplication(form, env) {
-      if (isString(form[0]) && isMacro(findNamespaceVar(form[0]))) throw new Error('Macros cannot be evaluated in this context');
-      var fn = emit(form[0], env),
-          args = form.slice(1, form.length),
-          argBuffer = [], i, value;
+        if (isString(form[0]) && isMacro(findNamespaceVar(form[0])))
+            throw new Error('Macros cannot be evaluated in this context');
+
+        var fn = emit(form[0], env),
+            args = form.slice(1, form.length),
+            argBuffer = [], i, value;
     
-      for (i = 0; i < args.length; ++i) {
-        value = emit(args[i], env);
-        argBuffer.push(value);
-      }
+        for (i = 0; i < args.length; ++i) {
+            value = emit(args[i], env);
+            argBuffer.push(value);
+        }
     
-      if (argBuffer.length === 0) {
-        return str('(', fn, ')()');
-      }
-      return str('(', fn, ')(', argBuffer.join(', ') ,")");
+        if (argBuffer.length === 0) {
+            return str('(', fn, ')()');
+        }
+
+        return str('(', fn, ')(', argBuffer.join(', ') ,")");
     }
     
     function emitBinOperator(form, env) {
@@ -755,7 +789,7 @@ GLOBAL.wonderscript.compiler = function() {
         var i, form, evaled = [];
         for (i = 0; i < seq.length; i++) {
             form = seq[i];
-            if (isArray(form) && form[0] === MACRO_DEF_SYM) {
+            if (isArray(form) && isString(form[0])) {
                 evaluate(form);
             }
             else {
@@ -842,14 +876,20 @@ GLOBAL.wonderscript.compiler = function() {
         };
     }
 
-    CORE_MOD[MACRO_DEF_SYM] = function(name, args) {
-        var body = Array.prototype.slice.call(arguments, 2);
-        return [DO_SYM,
-                [DEF_SYM, name, cons(FN_SYM, cons(args, body))],
-                [SET_SYM, [DOT_SYM, name, '-$ws$isMacro'], true],
-                [QUOTE_SYM, name]]; 
-    };
-    CORE_MOD[MACRO_DEF_SYM].$ws$isMacro = true;
+    function setMeta(obj, key, value) {
+        obj[str("$ws$", key)] = value;
+        return obj;
+    }
+
+    function meta(obj) {
+        return Object.keys(obj)
+                .filter(function (k) { return k.startsWith('$ws$'); })
+                .reduce(function(meta, k) { meta[k] = obj[k]; return meta; }, {}); 
+    }
+
+    function setMacro(obj) {
+        return setMeta(obj, 'macro', true);
+    }
 
     CORE_MOD.NS = CURRENT_NS;
 
@@ -864,6 +904,9 @@ GLOBAL.wonderscript.compiler = function() {
         evalString,
         compileString,
         readString,
+        setMeta,
+        setMacro,
+        meta,
         prStr
     });
 
