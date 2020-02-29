@@ -5,7 +5,6 @@
 (defmacro defn (name args &body)
   (array 'def name (cons 'fn (cons args body))))
 
-; TODO: one of these fail to compile statically, but work fine when compiled dynamically
 (def identity (fn (x) x))
 
 (def constantly
