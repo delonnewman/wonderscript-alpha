@@ -1,5 +1,5 @@
 ; vim: ft=clojure
-
+nil
 ; Intial fn definition, will redefine below
 (def fn
   (fn* (args &body)
@@ -14,7 +14,7 @@
     (array 'do
            (array 'def name (cons 'fn (cons args body)))
            (array 'setMacro name)
-           (array 'quote name))))
+           name)))
 (set-macro defmacro)
 (set-meta :doc "define a macro")
 (set-meta :arglists '(name args &body))

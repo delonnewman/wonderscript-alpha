@@ -762,15 +762,20 @@ GLOBAL.wonderscript.compiler = function() {
         return eval(emit(form));
     }
 
+    var EOF = {eof: true};
+    function isEOF(x) {
+        return x && x.eof === true;
+    }
+
     function evalString(s) {
         var r = new PushBackReader(s);
         var res, ret;
         while (true) {
-            res = read(r, {eofIsError: false, eofValue: null});
+            res = read(r, {eofIsError: false, eofValue: EOF});
             if (res != null) {
                 ret = evaluate(res);
             }
-            if (res == null) return ret;
+            if (isEOF(res)) return ret;
         }
     }
 
@@ -778,9 +783,9 @@ GLOBAL.wonderscript.compiler = function() {
         var r = new PushBackReader(s);
         var res, ret, seq = [];
         while (true) {
-            res = read(r, {eofIsError: false, eofValue: null});
+            res = read(r, {eofIsError: false, eofValue: EOF});
+            if (isEOF(res)) return seq;
             if (res != null) seq.push(res);
-            if (res == null) return seq;
         }
     }
 
@@ -789,20 +794,34 @@ GLOBAL.wonderscript.compiler = function() {
         var i, form, evaled = [];
         for (i = 0; i < seq.length; i++) {
             form = seq[i];
-            if (isArray(form) && isString(form[0])) {
+            //if (isArray(form) && form[0] === MACRO_DEF_SYM) {
                 evaluate(form);
-            }
-            else {
+            //}
+            //else {
                 evaled.push(form);
-            }
+            //}
         }
         return evaled;
     }
 
-    function expandMacros(seq) {
+    // Walk tree and expand all macros
+    function expandMacros(form) {
+        if (isArray(form) && isString(form[0])) {
+            var args = form.slice(1);
+            return expandMacros(macroexpand(cons(form[0], args.map(expandMacros))));
+        }
+        else if (isArray(form)) {
+            return form.map(expandMacros);
+        }
+        else {
+            return form;
+        }
+    }
+
+    function expandAllMacros(seq) {
         var i, expanded = [];
         for (i = 0; i < seq.length; i++) {
-            expanded.push(macroexpand(seq[i]));
+            expanded.push(expandMacros(seq[i]));
         }
         return expanded;
     }
@@ -812,9 +831,11 @@ GLOBAL.wonderscript.compiler = function() {
     // 2) expand macros into special forms
     // 3) compile special forms into code
     function compileString(s) {
-        var seq = expandMacros(evalMacros(readString(s)));
+        var seq = expandAllMacros(evalMacros(readString(s)));
+        console.log('sequence', seq);
         var i, buffer = [];
         for (i = 0; i < seq.length; i++) {
+            console.log('compiling:', seq[i]);
             buffer.push(emit(seq[i]));
         }
         return buffer.join(';\n');
@@ -912,7 +933,16 @@ GLOBAL.wonderscript.compiler = function() {
 
     GLOBAL.wonderscript = GLOBAL.wonderscript || {};
     GLOBAL.wonderscript.core = CORE_MOD;
-    if (IS_NODE) module.exports = CORE_MOD;
+    GLOBAL.wonderscript.compiler = {
+        compile: emit,
+        eval: evaluate,
+        evalString,
+        compileString,
+        readString,
+        evalMacros,
+        expandMacros
+    };
 
-    return CORE_MOD;
+    if (IS_NODE) module.exports = GLOBAL.wonderscript.compiler;
+
 }.call(GLOBAL);
