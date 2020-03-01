@@ -790,38 +790,35 @@ GLOBAL.wonderscript.compiler = function() {
     }
 
 
-    function evalMacros(seq) {
+    function evalAll(seq) {
         var i, form, evaled = [];
         for (i = 0; i < seq.length; i++) {
             form = seq[i];
-            //if (isArray(form) && form[0] === MACRO_DEF_SYM) {
-                evaluate(form);
-            //}
-            //else {
-                evaled.push(form);
-            //}
+            evaluate(form);
+            evaled.push(form);
         }
         return evaled;
     }
 
     // Walk tree and expand all macros
     function expandMacros(form) {
-        if (isArray(form) && isString(form[0])) {
-            var args = form.slice(1);
-            return expandMacros(macroexpand(cons(form[0], args.map(expandMacros))));
+        if (!isArray(form)) {
+            return form;
         }
-        else if (isArray(form)) {
-            return form.map(expandMacros);
+        else if (isArray(form) && isString(form[0])) {
+            var args = form.slice(1);
+            return macroexpand(cons(form[0], args.map(expandMacros)));
         }
         else {
-            return form;
+            return map(expandMacros, form);
         }
     }
 
     function expandAllMacros(seq) {
-        var i, expanded = [];
+        var i, form_, expanded = [];
         for (i = 0; i < seq.length; i++) {
-            expanded.push(expandMacros(seq[i]));
+            form_= expandMacros(expandMacros(seq[i]));
+            expanded.push(form_);
         }
         return expanded;
     }
@@ -831,11 +828,9 @@ GLOBAL.wonderscript.compiler = function() {
     // 2) expand macros into special forms
     // 3) compile special forms into code
     function compileString(s) {
-        var seq = expandAllMacros(evalMacros(readString(s)));
-        console.log('sequence', seq);
+        var seq = expandAllMacros(evalAll(readString(s)));
         var i, buffer = [];
         for (i = 0; i < seq.length; i++) {
-            console.log('compiling:', seq[i]);
             buffer.push(emit(seq[i]));
         }
         return buffer.join(';\n');
@@ -939,7 +934,8 @@ GLOBAL.wonderscript.compiler = function() {
         evalString,
         compileString,
         readString,
-        evalMacros,
+        evalAll,
+        expandAllMacros,
         expandMacros
     };
 
