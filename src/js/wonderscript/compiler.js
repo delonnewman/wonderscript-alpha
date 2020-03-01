@@ -508,7 +508,7 @@ GLOBAL.wonderscript.compiler = function() {
             return emitThrownException(x, env);
         }
         else {
-            return str(def_, ' ', emit(x, env, isRecursive));
+            return str(def_, ' ', emit(x, env));
         }
     }
 
@@ -551,18 +551,21 @@ GLOBAL.wonderscript.compiler = function() {
     }
 
     function emitLoop(form, env) {
-        if (form.length < 3) throw new Error('A loop expression should have at least 3 elements');
+        if (form.length < 3)
+            throw new Error('A loop expression should have at least 3 elements');
+
         var i, bind,
             buff = ['(function('],
             rest = form.slice(1),
             binds = rest[0],
             body = rest.slice(1);
 
-        // add names to function scope
+        // TODO: add names to scope
         var names = [];
         for (i = 0; i < binds.length; i += 2) {
             bind = binds[i];
-            if (!isString(bind)) throw new Error('Invalid binding name');
+            if (!isString(bind))
+                throw new Error('Invalid binding name');
             names.push(bind);
         }
         buff.push(names.join(', '));
@@ -850,10 +853,6 @@ GLOBAL.wonderscript.compiler = function() {
         return expanded;
     }
 
-    // Compilation happens in three phases
-    // 1) evaluate macros into JS functions
-    // 2) expand macros into special forms
-    // 3) compile special forms into code
     function compileString(s) {
         var seq = expandAllMacros(evalAll(readString(s)));
         var i, buffer = [];
