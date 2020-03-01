@@ -1,13 +1,12 @@
 ; vim: ft=clojure
-nil
+
 ; Intial fn definition, will redefine below
 (def fn
   (fn* (args &body)
     (cons 'fn* (cons args body))))
-(set-macro fn)
+(setMacro fn)
 
 ; TODO: add optional doc string and meta data map
-; FIXME: this breaks evalMacros step in static compilation
 
 (def defmacro
   (fn* (name args &body)
@@ -15,9 +14,9 @@ nil
            (array 'def name (cons 'fn (cons args body)))
            (array 'setMacro name)
            name)))
-(set-macro defmacro)
-(set-meta :doc "define a macro")
-(set-meta :arglists '(name args &body))
+(setMacro defmacro)
+(setMeta :doc "define a macro")
+(setMeta :arglists '(name args &body))
 
 ; TODO: redefine fn with multi arity bodies
 
@@ -33,6 +32,16 @@ nil
 
 (defn inc (x) (+ x 1))
 (defn dec (x) (- x 1))
+
+(defn add (&xs)
+  (cond (identical? 0 (alength xs))
+          0
+        (identical? 1 (alength xs))
+          (aget xs 0)
+        :else
+          (eval (cons '+ xs))))
+
+(defn sub (a b) (- a b))
 
 (defmacro comment (&xs) nil)
 

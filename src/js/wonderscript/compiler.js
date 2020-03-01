@@ -123,7 +123,7 @@ GLOBAL.wonderscript.compiler = function() {
         this.args = args;
     }
 
-    const RECUR_ERROR = new Error('recur can only be used in a tail position within a loop or function');
+    const RECUR_ERROR_MSG = 'recur can only be used in a tail position within a loop or function';
 
     var names = {
         '=': 'eq',
@@ -329,7 +329,7 @@ GLOBAL.wonderscript.compiler = function() {
                   case LOOP_SYM:
                     return emitLoop(form, env_);
                   case RECUR_SYM:
-                    throw RECUR_ERROR;
+                    throw new Error(RECUR_ERROR_MSG);
                   case THROW_SYM:
                     return emitThrownException(form, env_);
                   case TRY_SYM:
@@ -501,14 +501,14 @@ GLOBAL.wonderscript.compiler = function() {
     function emitTailPosition(x, env, def, isRecursive) {
         var def_ = def || 'return';
         if (isRecur(x)) {
-            if (!isRecursive) throw RECUR_ERROR;
+            if (!isRecursive) throw new Error(RECUR_ERROR_MSG);
             return emitRecursionPoint(x, env);
         }
         else if (isThrow(x)) {
             return emitThrownException(x, env);
         }
         else {
-            return str(def_, ' ', emit(x, env));
+            return str(def_, ' ', emit(x, env, isRecursive));
         }
     }
 
@@ -640,7 +640,7 @@ GLOBAL.wonderscript.compiler = function() {
     function parseArgs(args) {
       var splat = false, name, argsBuf = [];
       for (var i = 0; i < args.length; ++i) {
-        if ( /^&/.test(args[i]) ) {
+        if ( args[i].startsWith('&') ) {
           name = args[i].replace(/^&/, '');
           splat = true;
         }
@@ -653,27 +653,48 @@ GLOBAL.wonderscript.compiler = function() {
     }
   
     function genArgAssigns(argsBuf) {
-      var argsAssign = [], i;
-      for (i = 0; i < argsBuf.length; ++i) {
-        if (argsBuf[i].splat) argsAssign.push(str('var ', argsBuf[i].name, " = Array.prototype.slice.call(arguments, ", i, ")"));
-      }
-      return argsAssign.join('');
+        var argsAssign = [], i;
+        for (i = 0; i < argsBuf.length; ++i) {
+            if (argsBuf[i].splat) {
+                argsAssign.push(str('var ', argsBuf[i].name, " = Array.prototype.slice.call(arguments, ", i, ")"));
+            }
+        }
+        return argsAssign.join('');
     }
   
     function genArgsDef(argsBuf) {
-      var i, argsDef = [];
-      for (i = 0; i < argsBuf.length; ++i) {
-        argsDef.push(argsBuf[i].name);
-      }
-      return argsDef.join(',');
+        var i, argsDef = [];
+        for (i = 0; i < argsBuf.length; ++i) {
+            argsDef.push(argsBuf[i].name);
+        }
+        return argsDef.join(',');
     }
   
+    function hasTailCall(form) {
+        if (isArray(form) && form[0] === RECUR_SYM) {
+            return true;
+        }
+        else if (isArray(form) && form[0] === COND_SYM) {
+            return form.slice(1).some(hasTailCall);
+        }
+        else if (isArray(form) && form[0] === FN_SYM) {
+            return form.slice(2).some(hasTailCall);
+        }
+        else if (isArray(form)) {
+            return form.some(hasTailCall);
+        }
+        else {
+            return false;
+        }
+    }
+
     function emitFunc(form, env_, opts) {
         var env_ = env(env_),
             args = form[1],
             argsDef, argsAssign, argsBuf, expr, i, value;
   
-        if (form.length < 3) throw new Error("a function requires at least an arguments list and a body");
+        if (form.length < 3)
+            throw new Error("a function requires at least an arguments list and a body");
         else {
             if (!isArray(args)) throw new Error("an arguments list is required");
   
@@ -685,8 +706,16 @@ GLOBAL.wonderscript.compiler = function() {
                 define(env_, argsBuf[i].name, true);
             }
     
-            var buf = [argsAssign];
-            buf.push(compileRecursiveBody(form.slice(2), argsBuf.map(function(x) { return x.name }), env_));
+            var buf = [argsAssign],
+                body = form.slice(2)
+                names = map(function(x) { return x.name; }, argsBuf);
+
+            if (hasTailCall(body)) {
+                buf.push(compileRecursiveBody(body, names, env_));
+            }
+            else {
+                buf.push(compileBody(body, env_));
+            }
   
             return str("(function(", argsDef, ") { ", buf.join('; '), "; })");
         }
@@ -772,10 +801,8 @@ GLOBAL.wonderscript.compiler = function() {
         var res, ret;
         while (true) {
             res = read(r, {eofIsError: false, eofValue: EOF});
-            if (res != null) {
-                ret = evaluate(res);
-            }
             if (isEOF(res)) return ret;
+            if (res != null) ret = evaluate(res);
         }
     }
 

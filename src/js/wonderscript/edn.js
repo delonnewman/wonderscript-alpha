@@ -286,7 +286,7 @@ wonderscript.edn = function() {
     }
 
     function isDigit(ch) {
-        return ch.match(/^\d$/);
+        return ch && ch.match(/^\d$/);
     }
 
     function isMacro(ch) {
