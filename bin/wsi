@@ -1,72 +1,61 @@
 #!/usr/bin/env node
 // jshint esversion: 6
-const fs = require('fs'),
-      readline = require('readline'),
-      argv = require('yargs').argv;
+const fs = require("fs"),
+    readline = require("readline");
 
 // load runtime and core library
-const { print, str, evalString, NS, loadFile, prStr } = require(__dirname + '/../index.js');
+const { print, str, evalString, NS, loadFile, prStr } = require(`${__dirname}/../index.js`);
 
 function interactive() {
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-    removeHistoryDuplicates: true,
-    terminal: true
-  });
-  
-  rl.setPrompt(str(NS.value.name, "> "));
-  rl.prompt();
+    const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout,
+        removeHistoryDuplicates: true,
+        terminal: true
+    });
 
-  rl.on('line', function(line) {
-    try {
-      var input = line.trim();
-      if (input === 'exit') {
+    rl.setPrompt(str(NS.value.name, "> "));
+    rl.prompt();
+
+    rl.on("line", function(line) {
+        try {
+            var input = line.trim();
+            if (input === "exit") {
+                console.log("Bye for now!");
+                process.exit(0);
+            } else {
+                var res = evalString(input);
+                console.log(str("=> ", prStr(res)));
+                rl.setPrompt(str(NS.value.name, "> "));
+            }
+        } catch (e) {
+            console.error(e);
+        }
+        rl.prompt();
+    }).on("close", function() {
         console.log("Bye for now!");
         process.exit(0);
-      }
-      else {
-        var res = evalString(input);
-        console.log(str("=> ", prStr(res)));
-        rl.setPrompt(str(NS.value.name, "> "));
-      }
-    }
-    catch (e) {
-      console.error(e);
-    }
-    rl.prompt();
-  }).on('close', function() {
-    console.log("Bye for now!");
-    process.exit(0);
-  });
-  process.exitCode = 0;
+    });
+    process.exitCode = 0;
 }
 
-if (argv.i || argv.interactive) {
-  interactive();
-}
-else if (argv.c || argv.compile) {
-    console.log(zera.compileFile([process.cwd(), process.argv[3]].join('/')));
-}
-else if (process.argv.length >= 3) {
-  try {
-    loadFile([process.cwd(), process.argv[2]].join('/'));
-    process.exitCode = 0;
-  }
-  catch (e) {
-    console.error(e);
-    process.exitCode = 1;
-  }
-}
-else {
-  var INTERATIVE = false;
-  setTimeout(() => {
-    interactive();
-    INTERACTIVE = true;
-  }, 1);
-  process.stdin.on('data', (chunk) => {
-    if (!INTERACTIVE) {
-      zera.evalString(chunk.toString('utf8'));
+if (process.argv.length >= 3) {
+    try {
+        loadFile([process.cwd(), process.argv[2]].join("/"));
+        process.exitCode = 0;
+    } catch (e) {
+        console.error(e);
+        process.exitCode = 1;
     }
-  });
+} else {
+    var INTERATIVE = false;
+    setTimeout(() => {
+        interactive();
+        INTERACTIVE = true;
+    }, 1);
+    process.stdin.on("data", chunk => {
+        if (!INTERACTIVE) {
+            zera.evalString(chunk.toString("utf8"));
+        }
+    });
 }

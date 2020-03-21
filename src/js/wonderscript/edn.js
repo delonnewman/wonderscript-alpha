@@ -51,7 +51,6 @@ wonderscript.edn = function() {
 
     function stringReader(r, doublequote, opts) {
         var buff = [];
-    
         var ch;
         for (ch = r.read(); ch !== '"'; ch = r.read()) {
             if (ch === null) throw new Error('EOF while reading string');
@@ -186,10 +185,10 @@ wonderscript.edn = function() {
         var meta = _read(r, true, null, true, opts);
         // FIXME: we probably don't have any use for tags
         //if (isSymbol(meta) || isString(meta)) {
-        if (isString(meta)) {
+        //if (isString(meta)) {
             //meta = arrayMap(TAG_KEY, meta);
-            meta = {tag: meta};
-        }
+        //    meta = {tag: meta};
+        //}
         /*else if (isKeyword(meta)) {
             meta = arrayMap(meta, true);
         }

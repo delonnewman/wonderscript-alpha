@@ -1,22 +1,23 @@
 // jshint esversion: 6
 // jshint eqnull: true
+// jshint evil: true
 const GLOBAL = typeof module !== 'undefined' ? global : window;
 GLOBAL.wonderscript = GLOBAL.wonderscript || {};
 GLOBAL.wonderscript.compiler = function() {
+    "use strict";
+
     const IS_NODE = typeof module !== 'undefined' ? true : false;
     const IS_BROWSER = typeof window !== 'undefined' ? true : false;
 
-    var GLOBAL, core, edn;
+    var core, edn;
     if (IS_NODE) {
         core = require('./core.js');
         edn = require('./edn.js');
-        GLOBAL = global;
     }
 
     if (IS_BROWSER) {
         core = wonderscript.core;
         edn = wonderscript.edn;
-        GLOBAL = window;
     }
 
     const {
@@ -39,7 +40,8 @@ GLOBAL.wonderscript.compiler = function() {
         isArray,
         isArrayLike,
         print,
-        isEmpty
+        isEmpty,
+        createNs
     } = core;
 
     const { read, PushBackReader } = edn;
@@ -112,7 +114,7 @@ GLOBAL.wonderscript.compiler = function() {
     };
 
     const CORE_MOD = {};
-    const CORE_NS = {name: 'wonderscript.core', module: CORE_MOD};
+    const CORE_NS = createNs('wonderscript.core', CORE_MOD);
     const CURRENT_NS = {
         value: CORE_NS
     };
@@ -144,8 +146,8 @@ GLOBAL.wonderscript.compiler = function() {
     }
 
     function wsNameToJS(x) {
-        if (names[x]) return names[x];
         var prefix = null, parts;
+        if (names[x]) return names[x];
         if (x.endsWith('?')) {
             prefix = 'is';
             x = x.slice(0, x.length - 1);
@@ -166,17 +168,17 @@ GLOBAL.wonderscript.compiler = function() {
         '\\-': '_DASH_',
         '\\*': '_STAR_',
         '!': '_BANG_',
-        '\\?': '_QUEST_'
+        '\\?': '_QUEST_',
+        '\\^': '_HAT_',
+        '\\+': '_PLUS_'
     };
 
     function escapeChars(string) {
-        /*if (string.indexOf('.') !== -1) throw new Error('"."s are reserved for namespaces');
         var ch;
         for (ch in SPECIAL_CHARS) {
             string = string.replace(new RegExp(ch, 'g'), SPECIAL_CHARS[ch]);
         }
-        return string;*/
-        return wsNameToJS(string);
+        return string;
     }
 
     function env(parent) {
@@ -242,7 +244,6 @@ GLOBAL.wonderscript.compiler = function() {
     function findNamespaceVar(s) {
         if (s.indexOf('/') !== -1) {
             var parts = s.split('/');
-            if (parts[1].indexOf('.') !== -1) throw new Error('"." are reserved for namespaces');
             if (parts.length !== 2) throw new Error('A symbol should only have 2 parts');
             var scope = lookup(env, parts[0]);
             if (scope === null) return null;
@@ -267,15 +268,31 @@ GLOBAL.wonderscript.compiler = function() {
     }
 
     function isMacro(x) {
-        return isFunction(x) && x.$ws$macro === true;
+        return isFunction(x) && getMeta(x, "macro") === true;
+    }
+
+    function isTaggedValue(x) {
+        return isArray(x) && isString(x[0]);
     }
 
     function macroexpand(form) {
-        if (!isArray(form)) {
+        if (!isTaggedValue(form)) {
             return form;
         }
         else {
-            if (SPECIAL_FORMS[form[0]]) return form;
+            var name = form[0];
+            if (SPECIAL_FORMS[name]) {
+                return form;
+            }
+            else if (name !== '.-' && name.startsWith('.-')) {
+                return [DOT_SYM, form.slice(1)[0], name.slice(1)];
+            }
+            else if (name !== DOT_SYM && name.startsWith(DOT_SYM)) {
+                return [DOT_SYM, form.slice(1)[0], [name.slice(1)].concat(form.slice(2))];
+            }
+            else if (name.endsWith(DOT_SYM)) {
+                return [NEW_SYM, name.replace(/\.$/, '')].concat(form.slice(1));
+            }
             else if (isString(form[0])) {
                 var val = findNamespaceVar(form[0]);
                 if (val === null) return form;
@@ -297,10 +314,9 @@ GLOBAL.wonderscript.compiler = function() {
     const TOP = env();
     // TODO: try/catch/finally
     function emit(form_, env_) {
-        var env_ = env_ || TOP,
-            form = macroexpand(form_);
+        var env_ = env_ || TOP;
+        var form = macroexpand(form_);
         if (isString(form)) {
-            if (form === 'nil') return 'null';
             return emitSymbol(form, env_);
         }
         else if (isNumber(form)) return str(form);
@@ -452,7 +468,6 @@ GLOBAL.wonderscript.compiler = function() {
     function emitSymbol(s, env) {
         if (s.indexOf('/') !== -1) {
             var parts = s.split('/');
-            if (parts[1].indexOf('.') !== -1) throw new Error('"." are reserved for namespaces');
             if (parts.length !== 2) throw new Error('A symbol should only have 2 parts');
             var scope = lookup(env, parts[0]);
             if (scope === null) throw new Error('Unknown namespace: ' + parts[0]);
@@ -465,16 +480,16 @@ GLOBAL.wonderscript.compiler = function() {
             }
         }
         else {
-            var s = escapeChars(s);
-            if (!isUndefined(CURRENT_NS.value.module[s])) {
-                return str(CURRENT_NS.value.name, '.', s);
+            var s_ = escapeChars(s);
+            if (!isUndefined(CURRENT_NS.value.module[s_])) {
+                return str(CURRENT_NS.value.name, '.', s_);
             }
-            else if (!isUndefined(CORE_NS.module[s])) {
-                return str(CORE_NS.name, '.', s);
+            else if (!isUndefined(CORE_NS.module[s_])) {
+                return str(CORE_NS.name, '.', s_);
             }
             else {
-                findLexicalVar(env, s); // throws error if undefined
-                return s;
+                findLexicalVar(env, s_); // throws error if undefined
+                return s_;
             }
         }
     }
@@ -613,7 +628,7 @@ GLOBAL.wonderscript.compiler = function() {
         // add values to function scope
         var values = [];
         for (i = 0; i < binds.length; i += 2) {
-            values.push(emit(binds[i + 1], env));
+            values.push(emit(binds[i + 1], env_));
         }
         buff.push(values.join(', '));
         buff.push('))');
@@ -696,7 +711,7 @@ GLOBAL.wonderscript.compiler = function() {
             args = form[1],
             argsDef, argsAssign, argsBuf, expr, i, value;
   
-        if (form.length < 3)
+        if (form.length < 2)
             throw new Error("a function requires at least an arguments list and a body");
         else {
             if (!isArray(args)) throw new Error("an arguments list is required");
@@ -710,11 +725,14 @@ GLOBAL.wonderscript.compiler = function() {
             }
     
             var buf = [argsAssign],
-                body = form.slice(2)
+                body = form.slice(2),
                 names = map(function(x) { return x.name; }, argsBuf);
 
             if (hasTailCall(body)) {
                 buf.push(compileRecursiveBody(body, names, env_));
+            }
+            else if (body.length === 0) {
+                buf = [];
             }
             else {
                 buf.push(compileBody(body, env_));
@@ -739,8 +757,9 @@ GLOBAL.wonderscript.compiler = function() {
     function emitObjectRes(form, env) {
         var obj = form[1], prop = form[2];
         if (isArray(prop)) {
-            return str('(', emit(obj, env), ').', escapeChars(prop[0]), '(',
-                map(function(x) { return emit(x, env); }, prop.slice(1)).join(', '), ')');
+            var method = prop[0], args = prop.slice(1);
+            return str('(', emit(obj, env), ').', escapeChars(method), '(',
+                map(function(x) { return emit(x, env); }, args).join(', '), ')');
         }
         else if (isString(prop)) {
             if (prop.startsWith('-')) {
@@ -767,7 +786,7 @@ GLOBAL.wonderscript.compiler = function() {
         var fn = emit(form[0], env),
             args = form.slice(1, form.length),
             argBuffer = [], i, value;
-    
+
         for (i = 0; i < args.length; ++i) {
             value = emit(args[i], env);
             argBuffer.push(value);
@@ -794,18 +813,47 @@ GLOBAL.wonderscript.compiler = function() {
         return eval(emit(form));
     }
 
-    var EOF = {eof: true};
+    var EOF = { eof: true };
     function isEOF(x) {
         return x && x.eof === true;
     }
 
-    function evalString(s) {
+    function stacktrace(stack) {
+        var i, frame, buffer = [];
+        for (i = 0; i < stack.length; i++) {
+            frame = stack[i];
+            buffer.push(str(frame[0], ' - ', frame[1], ':', frame[2]));
+        }
+        return buffer.join('\n');
+    }
+
+    function evalString(s, source) {
         var r = new PushBackReader(s);
-        var res, ret;
+        var src = source || 'inline';
+        var res, ret, line, scope = TOP, stack = [], evalingTaggedValue = false;
         while (true) {
-            res = read(r, {eofIsError: false, eofValue: EOF});
+            if (line) line = r.line();
+            res = read(r, { eofIsError: false, eofValue: EOF });
+            if (!line) line = r.line();
+            console.log(prStr(res), str(src, ':', line));
             if (isEOF(res)) return ret;
-            if (res != null) ret = evaluate(res);
+            if (isTaggedValue(res)) {
+                evalingTaggedValue = true;
+                stack.unshift([res[0], src, line]);
+            }
+            if (res != null) {
+                try {
+                    ret = eval(emit(res, scope, stack));
+                }
+                catch (e) {
+                    console.log(stacktrace(stack));
+                    throw e;
+                }
+            }
+            if (evalingTaggedValue) {
+                evalingTaggedValue = false;
+                stack.shift();
+            }
         }
     }
 
@@ -813,7 +861,7 @@ GLOBAL.wonderscript.compiler = function() {
         var r = new PushBackReader(s);
         var res, ret, seq = [];
         while (true) {
-            res = read(r, {eofIsError: false, eofValue: EOF});
+            res = read(r, { eofIsError: false, eofValue: EOF });
             if (isEOF(res)) return seq;
             if (res != null) seq.push(res);
         }
@@ -914,19 +962,33 @@ GLOBAL.wonderscript.compiler = function() {
     if (IS_NODE) {
         const fs = require('fs');
         CORE_MOD.loadFile = function(f) {
-            return evalString(fs.readFileSync(f, 'utf8'));  
+            return evalString(fs.readFileSync(f, 'utf8'), f);  
         };
     }
 
+    const SYMBOL_META = {};
+    const META_SYMBOL = Symbol('wonderscriptMetaData');
+
     function setMeta(obj, key, value) {
-        obj[str("$ws$", key)] = value;
+        var meta;
+        if (isString(obj)) {
+            meta = SYMBOL_META[obj];
+            if (!meta) SYMBOL_META[obj] = {};
+            SYMBOL_META[obj][key] = value;
+        } else {
+            meta = obj[META_SYMBOL];
+            if (!meta) obj[META_SYMBOL] = {};
+            obj[META_SYMBOL][key] = value;
+        }
         return obj;
     }
 
     function meta(obj) {
-        return Object.keys(obj)
-                .filter(function (k) { return k.startsWith('$ws$'); })
-                .reduce(function(meta, k) { meta[k] = obj[k]; return meta; }, {}); 
+        return (isString(obj) ? SYMBOL_META[obj] : obj[META_SYMBOL]) || {};
+    }
+
+    function getMeta(obj, key) {
+        return meta(obj)[key];
     }
 
     function setMacro(obj) {
@@ -936,20 +998,80 @@ GLOBAL.wonderscript.compiler = function() {
     CORE_MOD.NS = CURRENT_NS;
 
     define(TOP, CORE_NS.name, CORE_NS);
-    define(TOP, 'js', IS_NODE ? {name: 'global', module: global} : {name: 'window', module: window});
+    define(TOP, 'js', IS_NODE ? createNs('global', global) : createNs('window', window));
 
     Object.assign(CORE_MOD, core);
-    Object.assign(CORE_MOD, {
+
+    const CORE_NAMES = {
+        'eq'    : '=',
+        'noteq' : 'not=',
+        'lt'    : '<',
+        'gt'    : '>',
+        'lteq'  : '<=',
+        'gteq'  : '>=',
+        'add'   : '+',
+        'sub'   : '-',
+        'mult'  : '*',
+        'div'   : '/'
+    };
+
+    const DASH = '-';
+    const UNDERSCORE = '_';
+
+    function dasherize(string) {
+        var i, ch, buffer = [];
+
+        for (i = 0; i < string.length; i++) {
+            ch = string[i];
+            if (ch.match(/[A-Z]/)) { // TODO: replace this with a numerical method
+                buffer.push(DASH);
+                buffer.push(ch.toLowerCase());
+            }
+            else if (ch === UNDERSCORE) {
+                buffer.push(DASH);
+            }
+            else {
+                buffer.push(ch);
+            }
+        }
+
+        return buffer.join('');
+    }
+
+    function importSymbol(name, obj) {
+        var wsName = CORE_NAMES[name];
+        if (wsName) {
+            wsName = escapeChars(dasherize(wsName));
+        }
+        else if (name.startsWith('is')) {
+            wsName = str(name.slice(2).toLowerCase(), '?');
+            wsName = escapeChars(dasherize(wsName));
+        }
+        else {
+            wsName = escapeChars(dasherize(name));
+        }
+        CORE_MOD[wsName] = obj;
+    }
+
+    function importModule(module) {
+        Object.keys(module).forEach(function(name) {
+            importSymbol(name, module[name]);
+        });
+    }
+
+    importModule(core);
+
+    importModule({
         compile: emit,
         eval: evaluate,
-        RecursionPoint,
         evalString,
         compileString,
         readString,
         setMeta,
         setMacro,
+        prStr,
         meta,
-        prStr
+        macroexpand
     });
 
     GLOBAL.wonderscript = GLOBAL.wonderscript || {};
@@ -962,8 +1084,12 @@ GLOBAL.wonderscript.compiler = function() {
         readString,
         evalAll,
         expandAllMacros,
-        expandMacros
+        expandMacros,
+        prStr
     };
+
+    const COMPILER_NS = createNs('wonderscript.compiler');
+    importSymbol(COMPILER_NS.name, COMPILER_NS);
 
     if (IS_NODE) module.exports = GLOBAL.wonderscript.compiler;
 

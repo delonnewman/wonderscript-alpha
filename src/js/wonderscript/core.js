@@ -51,6 +51,11 @@ const GLOBAL = typeof module !== 'undefined' ? global : window;
         return Array.prototype.slice.call(arguments);
     }
 
+    var EMPTY_ARRAY = [];
+    function concat() {
+        return Array.prototype.concat.apply(EMPTY_ARRAY, arguments);
+    }
+
     function isObject(x) {
         return Object.prototype.toString.call(x) === '[object Object]';
     }
@@ -345,6 +350,25 @@ const GLOBAL = typeof module !== 'undefined' ? global : window;
         return isObject(x) && Object.getPrototypeOf(Object.getPrototypeOf(x)) == null;
     }
 
+    function Namespace(name, module) {
+        this.name = name;
+        this.module = module || {};
+    }
+
+    Namespace.prototype = Object.create(null);
+
+    Namespace.prototype.toString = function() {
+        return str("#<Namespace ", this.name, ">");
+    };
+
+    function createNs(name, module) {
+        return new Namespace(name, module);
+    }
+
+    function isNamespace(x) {
+        return x instanceof Namespace;
+    }
+
     Object.assign(this.wonderscript.core, {
         isNumber,
         isString,
@@ -359,6 +383,7 @@ const GLOBAL = typeof module !== 'undefined' ? global : window;
         isObjectLiteral,
         toArray,
         array,
+        concat,
         first,
         rest,
         next,
@@ -376,7 +401,9 @@ const GLOBAL = typeof module !== 'undefined' ? global : window;
         either,
         maybe,
         raise,
-        print
+        print,
+        isNamespace,
+        createNs
     });
 
     if (typeof module !== 'undefined') {
