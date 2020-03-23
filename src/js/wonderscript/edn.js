@@ -10,12 +10,24 @@ wonderscript.edn = function() {
         this.limit  = str.length - 1;
         this.stream = str.split('');
         this.position = 0;
-        this._line = 1;
-        this._column = 1;
+        this._line = 0;
+        this._column = 0;
     }
 
     PushBackReader.prototype.line = function() {
         return this._line;
+    };
+
+    PushBackReader.prototype.incrementLine = function() {
+        this._line++;
+    };
+
+    PushBackReader.prototype.incrementColumn = function() {
+        this._column++;
+    };
+
+    PushBackReader.prototype.resetColumn = function() {
+        this._column = 0;
     };
 
     PushBackReader.prototype.column = function() {
@@ -26,12 +38,14 @@ wonderscript.edn = function() {
         if (this.position > this.limit) return null;
         var ch = this.stream[this.position];
         this.position++;
+        //console.log(JSON.stringify(ch));
         if (ch === '\n') {
-            this._column = 1;
-            this._line++;
+            //console.log('line:', this.line());
+            this.resetColumn();
+            this.incrementLine();
         }
         else {
-            this._column++;
+            this.incrementColumn();
         }
         return ch;
     };
@@ -401,7 +415,10 @@ wonderscript.edn = function() {
         while (true) {
             var ch = r.read();
 
-            while (isWhitespace(ch)) ch = r.read();
+            while (isWhitespace(ch)) {
+                //if (ch === '\n') r.incrementLine();
+                ch = r.read();
+            }
             if (ch === null) {
                 if (eofIsError) throw new Error('EOF while reading');
                 return eofValue;

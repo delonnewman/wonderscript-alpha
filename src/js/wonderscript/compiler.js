@@ -746,6 +746,7 @@ GLOBAL.wonderscript.compiler = function() {
         var exprs = form.slice(0, form.length - 1).slice(1),
             buf = [],
             last = form[form.length - 1];
+        var i;
         for (i = 0; i < exprs.length; ++i) {
             buf.push(emit(exprs[i], env, env));
         }
@@ -830,16 +831,17 @@ GLOBAL.wonderscript.compiler = function() {
     function evalString(s, source) {
         var r = new PushBackReader(s);
         var src = source || 'inline';
-        var res, ret, line, scope = TOP, stack = [], evalingTaggedValue = false;
+        var res, ret, scope = TOP, stack = [], evalingTaggedValue = false;
+        var a, b;
         while (true) {
-            if (line) line = r.line();
+            console.log('line before: ', r.line());
             res = read(r, { eofIsError: false, eofValue: EOF });
-            if (!line) line = r.line();
-            console.log(prStr(res), str(src, ':', line));
+            console.log('line after: ', r.line());
+            console.log(prStr(res), str(src, ':', r.line()));
             if (isEOF(res)) return ret;
             if (isTaggedValue(res)) {
                 evalingTaggedValue = true;
-                stack.unshift([res[0], src, line]);
+                stack.unshift([res[0], src, r.line()]);
             }
             if (res != null) {
                 try {
@@ -866,7 +868,6 @@ GLOBAL.wonderscript.compiler = function() {
             if (res != null) seq.push(res);
         }
     }
-
 
     function evalAll(seq) {
         var i, form, evaled = [];
@@ -963,6 +964,9 @@ GLOBAL.wonderscript.compiler = function() {
         const fs = require('fs');
         CORE_MOD.loadFile = function(f) {
             return evalString(fs.readFileSync(f, 'utf8'), f);  
+        };
+        CORE_MOD.readFile = function(f) {
+            return readString(fs.readFileSync(f, 'utf8'), f);  
         };
     }
 

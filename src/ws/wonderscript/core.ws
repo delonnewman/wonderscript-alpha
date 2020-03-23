@@ -12,7 +12,7 @@
   (fn* (name args &body)
     (array 'do
            (array 'def name (cons 'fn (cons args body)))
-           (array 'setMacro name)
+           (array 'set-macro name)
            name)))
 (set-macro defmacro)
 (set-meta :doc "define a macro")
