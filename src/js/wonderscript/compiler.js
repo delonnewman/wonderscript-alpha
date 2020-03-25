@@ -41,7 +41,10 @@ GLOBAL.wonderscript.compiler = function() {
         isArrayLike,
         print,
         isEmpty,
-        createNs
+        createNs,
+        setMeta,
+        getMeta,
+        meta
     } = core;
 
     const { read, PushBackReader } = edn;
@@ -100,8 +103,8 @@ GLOBAL.wonderscript.compiler = function() {
 
     const SPECIAL_FORMS = {
         quote: true,
-        def: true,
-        cond: true,
+        def:   true,
+        cond:  true,
         js: true,
         'fn*': true,
         loop: true,
@@ -168,21 +171,41 @@ GLOBAL.wonderscript.compiler = function() {
     }
 
     const SPECIAL_CHARS = {
-        '=': '_EQ_',
-        '\\-': '_DASH_',
-        '\\*': '_STAR_',
-        '!': '_BANG_',
-        '\\?': '_QUEST_',
-        '\\^': '_HAT_',
-        '\\+': '_PLUS_'
+        '='   : '_EQ_',
+        '\\-' : '_DASH_',
+        '\\*' : '_STAR_',
+        '!'   : '_BANG_',
+        '\\?' : '_QUEST_',
+        '\\^' : '_HAT_',
+        '\\+' : '_PLUS_',
+        '\\.' : '_DOT_'
     };
 
     function escapeChars(string) {
-        var ch;
+        var ch, str = string;
         for (ch in SPECIAL_CHARS) {
-            string = string.replace(new RegExp(ch, 'g'), SPECIAL_CHARS[ch]);
+            str = str.replace(new RegExp(ch, 'g'), SPECIAL_CHARS[ch]);
         }
-        return string;
+        return str;
+    }
+
+    const UNESCAPE_MAPPING = {
+        _EQ_: '=',
+        _DASH_: '-',
+        _STAR_: '*',
+        _BANG_: '!',
+        _QUEST_: '?',
+        _HAT_: '^',
+        _PLUS_: '+',
+        _DOT_: '.'
+    };
+
+    function unescapeChars(string) {
+        var entry, str = string;
+        for (entry in Object.entries(UNESCAPE_MAPPING)) {
+            str = str.replace(new RegExp(entry[0], 'g'), entry[1]);
+        }
+        return str;
     }
 
     function env(parent) {
@@ -316,9 +339,7 @@ GLOBAL.wonderscript.compiler = function() {
     }
 
     function emitMapEntry(env) {
-        return function(entry) {
-            return str(entry[0], ':', emit(entry[1], env));
-        };
+        return (entry) => str(entry[0], ':', emit(entry[1], env));
     }
 
     function emitMap(m, env) {
@@ -476,15 +497,24 @@ GLOBAL.wonderscript.compiler = function() {
         else if (isNumber(val)) {
             return str(val);
         }
-        else if (val === true) return 'true';
-        else if (val === false) return 'false';
-        else if (val === null) return 'null';
-        else if (isUndefined(val)) return 'undefined';
+        else if (val === true) {
+            return TRUE_SYM;
+        }
+        else if (val === false) {
+            return FALSE_SYM;
+        }
+        else if (val === null) {
+            return NULL_SYM;
+        }
+        else if (isUndefined(val)) {
+            return UNDEFINED_SYM;
+        }
         else if (isArray(val)) {
+            if (val.length === 0) return EMPTY_ARRAY;
             return str('[', map(emitQuotedValue, val).join(', '), ']');
         }
-        else if (isObjectLiteral(val)) {
-            return str('({', map(function(xs) { return str(xs[0], ':', emitQuotedValue(xs[1])); }, Object.entries(val)).join(', '), '})');
+        else if (isMap(val)) {
+            return str('({', map((xs) => str(xs[0], ':', emitQuotedValue(xs[1])), Object.entries(val)).join(', '), '})');
         }
         throw new Error('Invalid form: ' + val);
     }
@@ -936,10 +966,10 @@ GLOBAL.wonderscript.compiler = function() {
     }
 
     function prStr(x) {
-        if (x == null) return "nil";
+        if (x == null) return NIL_SYM;
         else if (isNumber(x)) return str(x);
         else if (isBoolean(x)) {
-            return x ? "true" : "false";
+            return x ? TRUE_SYM : FALSE_SYM;
         }
         else if (isString(x)) {
             return x;
@@ -947,7 +977,8 @@ GLOBAL.wonderscript.compiler = function() {
         else if (isArray(x)) {
             if (x.length === 0) {
                 return '()';
-            } else {
+            }
+            else {
                 var y;
                 var ys = x;
                 var buffer = [];
@@ -963,23 +994,27 @@ GLOBAL.wonderscript.compiler = function() {
             if (x.length === 0) {
                 return '(array)';
             }
-            return str('(array ', x.map(function(x) {
-                return prStr(x);
-            }).join(' '), ')');
-        } else if (isFunction(x)) {
+            return str('(array ', x.map(prStr).join(' '), ')');
+        }
+        else if (isMap(x)) {
+            return str('{', map((entry) => str(prStr(entry[0]), ' ', prStr(entry[1])), Object.entries(x)).join(' '), '}');
+        }
+        else if (isFunction(x)) {
             return str('#js/function "', x.toString(), '"');
-        } else if (isArrayLike(x)) {
+        }
+        else if (isArrayLike(x)) {
             if (x.toString) {
                 return x.toString();
             }
             else {
                 return str('#js/object {',
                     Array.prototype.slice.call(x)
-                        .map(function(x, i) { return str(i, ' ', prStr(x)); })
+                        .map((x, i) => str(i, ' ', prStr(x)))
                         .join(', '),
                     '}');
             }
-        } else {
+        }
+        else {
             return "" + x;
         }
     }
@@ -992,31 +1027,6 @@ GLOBAL.wonderscript.compiler = function() {
         CORE_MOD.readFile = function(f) {
             return readString(fs.readFileSync(f, 'utf8'), f);  
         };
-    }
-
-    const SYMBOL_META = {};
-    const META_SYMBOL = Symbol('wonderscriptMetaData');
-
-    function setMeta(obj, key, value) {
-        var meta;
-        if (isString(obj)) {
-            meta = SYMBOL_META[obj];
-            if (!meta) SYMBOL_META[obj] = {};
-            SYMBOL_META[obj][key] = value;
-        } else {
-            meta = obj[META_SYMBOL];
-            if (!meta) obj[META_SYMBOL] = {};
-            obj[META_SYMBOL][key] = value;
-        }
-        return obj;
-    }
-
-    function meta(obj) {
-        return (isString(obj) ? SYMBOL_META[obj] : obj[META_SYMBOL]) || {};
-    }
-
-    function getMeta(obj, key) {
-        return meta(obj)[key];
     }
 
     function setMacro(obj) {
@@ -1115,6 +1125,8 @@ GLOBAL.wonderscript.compiler = function() {
         expandMacros,
         prStr
     };
+
+    importSymbol(CORE_NS.name, CORE_NS);
 
     const COMPILER_NS = createNs('wonderscript.compiler');
     importSymbol(COMPILER_NS.name, COMPILER_NS);

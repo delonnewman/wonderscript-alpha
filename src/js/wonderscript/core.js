@@ -355,7 +355,7 @@ const GLOBAL = typeof module !== 'undefined' ? global : window;
             this.name = name;
             this.module = module || {};
         }
-    
+
         toString() {
             return str("#<Namespace ", this.name, ">");
         }
@@ -374,6 +374,35 @@ const GLOBAL = typeof module !== 'undefined' ? global : window;
             this.docString = docString;
             this.methods = methods;
         }
+    }
+
+    const SYMBOL_META = {};
+    const META_SYMBOL = Symbol('wonderscriptMetaData');
+
+    function setMeta(obj, key, value) {
+        var meta;
+        if (isString(obj)) {
+            obj = new String(obj);
+        }
+        else {
+            meta = obj[META_SYMBOL];
+            if (!meta) obj[META_SYMBOL] = {};
+            obj[META_SYMBOL][key] = value;
+        }
+        return obj;
+    }
+
+    function resetMeta(obj, meta) {
+        obj[META_SYMBOL] = meta;
+        return obj;
+    }
+
+    function meta(obj) {
+        return obj[META_SYMBOL] || {};
+    }
+
+    function getMeta(obj, key) {
+        return meta(obj)[key];
     }
 
     Object.assign(this.wonderscript.core, {
@@ -410,7 +439,11 @@ const GLOBAL = typeof module !== 'undefined' ? global : window;
         raise,
         print,
         isNamespace,
-        createNs
+        createNs,
+        setMeta,
+        getMeta,
+        resetMeta,
+        meta
     });
 
     if (typeof module !== 'undefined') {

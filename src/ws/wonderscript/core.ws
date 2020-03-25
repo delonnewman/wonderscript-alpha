@@ -66,6 +66,9 @@
         :else
           (array? (aget a 0))))
 
+(defn ns-map
+  (ns) (.-module ns))
+
 ; (fn^
 ;   ((x) x)
 ;   ((x y) [x y])

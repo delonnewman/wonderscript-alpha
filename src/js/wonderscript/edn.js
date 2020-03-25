@@ -2,6 +2,21 @@
 var GLOBAL = typeof module !== 'undefined' ? global : window;
 GLOBAL.wonderscript = GLOBAL.wonderscript || {};
 wonderscript.edn = function() {
+    
+    const IS_NODE = typeof module !== 'undefined' ? true : false;
+    const IS_BROWSER = typeof window !== 'undefined' ? true : false;
+
+    var core;
+    if (IS_NODE) {
+        core = require('./core.js');
+    }
+
+    if (IS_BROWSER) {
+        core = wonderscript.core;
+    }
+
+    const { resetMeta } = core;
+
     //
     // Reader
     // 
@@ -217,8 +232,8 @@ wonderscript.edn = function() {
         else if (!isMap(meta)) {
             throw new Error('Metadata must be a Symbol, Keyword, String or Map');
         }*/
-        
         var x = _read(r, true, null, true, opts);
+        resetMeta(x, meta);
         return x;
         /*
         if (isa(x, IMeta)) {
