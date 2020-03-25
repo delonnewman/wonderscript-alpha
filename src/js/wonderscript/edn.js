@@ -165,7 +165,15 @@ wonderscript.edn = function() {
     function mapReader(r, openbracket, opts) {
         var a = readDelimitedList('}', r, true, opts);
         //return arrayMap.apply(null, a);
-        return a;
+        var i, obj = {}, key, val;
+        for (i = 0; i < a.length; i += 2) {
+            key = a[i]; val = a[i + 1];
+            if (Array.isArray(key) && key[0] === 'quote') {
+                key = key[1];
+            }
+            obj[key] = val;
+        }
+        return obj;
     }
 
     function characterReader(r, slash, opts) {

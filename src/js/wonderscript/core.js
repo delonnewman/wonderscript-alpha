@@ -350,16 +350,16 @@ const GLOBAL = typeof module !== 'undefined' ? global : window;
         return isObject(x) && Object.getPrototypeOf(Object.getPrototypeOf(x)) == null;
     }
 
-    function Namespace(name, module) {
-        this.name = name;
-        this.module = module || {};
+    class Namespace {
+        constructor(name, module) {
+            this.name = name;
+            this.module = module || {};
+        }
+    
+        toString() {
+            return str("#<Namespace ", this.name, ">");
+        }
     }
-
-    Namespace.prototype = Object.create(null);
-
-    Namespace.prototype.toString = function() {
-        return str("#<Namespace ", this.name, ">");
-    };
 
     function createNs(name, module) {
         return new Namespace(name, module);
@@ -367,6 +367,13 @@ const GLOBAL = typeof module !== 'undefined' ? global : window;
 
     function isNamespace(x) {
         return x instanceof Namespace;
+    }
+
+    class Protocol {
+        constructor(docString, methods) {
+            this.docString = docString;
+            this.methods = methods;
+        }
     }
 
     Object.assign(this.wonderscript.core, {

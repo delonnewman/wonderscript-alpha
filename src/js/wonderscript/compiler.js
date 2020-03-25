@@ -94,6 +94,10 @@ GLOBAL.wonderscript.compiler = function() {
 
     const MACRO_DEF_SYM   = 'defmacro';
 
+    const NULL_SYM        = 'null';
+    const UNDEFINED_SYM   = 'undefined';
+    const EMPTY_ARRAY     = '[]';
+
     const SPECIAL_FORMS = {
         quote: true,
         def: true,
@@ -311,6 +315,18 @@ GLOBAL.wonderscript.compiler = function() {
         }
     }
 
+    function emitMapEntry(env) {
+        return function(entry) {
+            return str(entry[0], ':', emit(entry[1], env));
+        };
+    }
+
+    function emitMap(m, env) {
+        return str('({', map(emitMapEntry(env), Object.entries(m)).join(', '), '})');
+    }
+
+    const isMap = isObjectLiteral;
+
     const TOP = env();
     // TODO: try/catch/finally
     function emit(form_, env_) {
@@ -319,17 +335,25 @@ GLOBAL.wonderscript.compiler = function() {
         if (isString(form)) {
             return emitSymbol(form, env_);
         }
-        else if (isNumber(form)) return str(form);
-        else if (isBoolean(form)) return form === true ? TRUE_SYM : FALSE_SYM;
-        else if (isNull(form)) return 'null';
-        else if (isUndefined(form)) {
-            return 'undefined';
+        else if (isNumber(form)) {
+            return str(form);
         }
-        else if (isObjectLiteral(form)) {
-            return str('({', map(function(xs) { return str(xs[0], ':', emit(xs[1], env_)); }, Object.entries(form)).join(', '), '})');
+        else if (isBoolean(form)) {
+            return form === true ? TRUE_SYM : FALSE_SYM;
+        }
+        else if (isNull(form)) {
+            return NULL_SYM;
+        }
+        else if (isUndefined(form)) {
+            return UNDEFINED_SYM;
+        }
+        else if (isMap(form)) {
+            return emitMap(form);
         }
         else if (isArray(form)) {
-            if (form.length === 0) return '[]';
+            if (form.length === 0) {
+                return EMPTY_ARRAY;
+            }
             else if (isString(form[0])) {
                 switch(form[0]) {
                   case DEF_SYM:
@@ -834,10 +858,10 @@ GLOBAL.wonderscript.compiler = function() {
         var res, ret, scope = TOP, stack = [], evalingTaggedValue = false;
         var a, b;
         while (true) {
-            console.log('line before: ', r.line());
+            //console.log('line before: ', r.line());
             res = read(r, { eofIsError: false, eofValue: EOF });
-            console.log('line after: ', r.line());
-            console.log(prStr(res), str(src, ':', r.line()));
+            //console.log('line after: ', r.line());
+            //console.log(prStr(res), str(src, ':', r.line()));
             if (isEOF(res)) return ret;
             if (isTaggedValue(res)) {
                 evalingTaggedValue = true;
