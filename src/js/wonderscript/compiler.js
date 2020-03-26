@@ -619,7 +619,8 @@ GLOBAL.wonderscript.compiler = function() {
         );
     }
 
-    function emitLoop(form, env) {
+    function emitLoop(form, env_) {
+        var env_ = env(env_);
         if (form.length < 3)
             throw new Error('A loop expression should have at least 3 elements');
 
@@ -635,19 +636,20 @@ GLOBAL.wonderscript.compiler = function() {
             bind = binds[i];
             if (!isString(bind))
                 throw new Error('Invalid binding name');
+            define(env_, bind, true);
             names.push(bind);
         }
         buff.push(names.join(', '));
         buff.push('){');
 
         // body
-        buff.push(compileRecursiveBody(body, names, env));
+        buff.push(compileRecursiveBody(body, names, env_));
         buff.push('}(');
 
         // add values to function scope
         var values = [];
         for (i = 0; i < binds.length; i += 2) {
-            values.push(emit(binds[i + 1], env));
+            values.push(emit(binds[i + 1], env_));
         }
         buff.push(values.join(', '));
         buff.push('))');
@@ -668,7 +670,8 @@ GLOBAL.wonderscript.compiler = function() {
         var names = [];
         for (i = 0; i < binds.length; i += 2) {
             bind = binds[i];
-            if (!isString(bind)) throw new Error('Invalid binding name');
+            if (!isString(bind))
+                throw new Error('Invalid binding name');
             define(env_, bind, true);
             names.push(bind);
         }
