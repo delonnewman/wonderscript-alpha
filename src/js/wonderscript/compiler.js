@@ -807,7 +807,7 @@ GLOBAL.wonderscript.compiler = function() {
         for (i = 0; i < exprs.length; ++i) {
             buf.push(emit(exprs[i], env, env));
         }
-        buf.push(emitTailPosition(last));
+        buf.push(emitTailPosition(last, env));
   
         return str("(function(){ ", buf.join('; '), "; }())");
     }
