@@ -52,7 +52,7 @@ GLOBAL.wonderscript.compiler = function() {
     const QUOTE_SYM   = 'quote';
     const DEF_SYM     = 'def';
     const COND_SYM    = 'cond';
-    const JS_SYM      = 'js';
+    const JS_SYM      = 'js*';
     const FN_SYM      = 'fn*';
     const LOOP_SYM    = 'loop';
     const RECUR_SYM   = 'recur';
@@ -105,7 +105,7 @@ GLOBAL.wonderscript.compiler = function() {
         quote: true,
         def:   true,
         cond:  true,
-        js: true,
+        'js*': true,
         'fn*': true,
         loop: true,
         recur: true,
@@ -567,10 +567,10 @@ GLOBAL.wonderscript.compiler = function() {
         return isArray(x) && x[0] === THROW_SYM;
     }
     
-    function emitTailPosition(x, env, def, isRecursive) {
+    function emitTailPosition(x, env, def) {
         var def_ = def || 'return';
         if (isRecur(x)) {
-            if (!isRecursive) throw new Error(RECUR_ERROR_MSG);
+            if (!env.isRecursive) throw new Error(RECUR_ERROR_MSG);
             return emitRecursionPoint(x, env);
         }
         else if (isThrow(x)) {
@@ -598,11 +598,11 @@ GLOBAL.wonderscript.compiler = function() {
         return str('(function(){ ', buff.join(' '), '}())');
     }
 
-    function compileBody(body, env, tailDef, isRecursive) {
+    function compileBody(body, env, tailDef) {
         var last = body[body.length - 1],
             head = body.slice(0, body.length - 1);
         return map(function(x) { return emit(x, env); }, head)
-                .concat(emitTailPosition(last, env, tailDef, isRecursive)).join('; ');
+                .concat(emitTailPosition(last, env, tailDef)).join('; ');
     }
 
     function compileRecursiveBody(body, names, env) {
@@ -611,9 +611,10 @@ GLOBAL.wonderscript.compiler = function() {
             buff.push(str(names[i], ' = e.args[', i, ']'));
         }
         rebinds = buff.join('; ');
+        env.isRecursive = true;
         return str(
             "var retval;\nloop:\n\twhile (true) { try { ",
-            compileBody(body, env, 'retval =', true),
+            compileBody(body, env, 'retval ='),
             "; break loop; } catch (e) { if (e instanceof ", RECURSION_POINT_CLASS,
             ") { ", rebinds, "; continue loop; } else { throw e; } } };\nreturn retval"
         );
@@ -1130,6 +1131,7 @@ GLOBAL.wonderscript.compiler = function() {
     };
 
     importSymbol(CORE_NS.name, CORE_NS);
+    CORE_MOD.RecursionPoint = RecursionPoint;
 
     const COMPILER_NS = createNs('wonderscript.compiler');
     importSymbol(COMPILER_NS.name, COMPILER_NS);
