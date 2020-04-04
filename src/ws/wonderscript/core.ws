@@ -81,3 +81,16 @@
           :else
             ; single body fn
             (cons 'fn xs))))
+
+(defmacro when (pred &acts)
+  (array 'cond pred (cons 'do acts)))
+
+(defmacro dotimes
+  (bindings &body)
+  (let (nm (aget bindings 0)
+        init (aget bindings 1))
+    (array 'loop (array nm 0)
+          (cons 'when
+                (cons (array '< nm init)
+                      (concat body (array (array 'recur (array '+ nm 1))))))
+          init)))
