@@ -1061,8 +1061,6 @@ JSGLOBAL.wonderscript.compiler = function() {
         return setMeta(obj, 'macro', true);
     }
 
-    CORE_MOD.NS = CURRENT_NS;
-
     define(TOP, CORE_NS.name, CORE_NS);
     define(TOP, 'js', IS_NODE ? createNs('global', global) : createNs('window', window));
 
@@ -1155,6 +1153,8 @@ JSGLOBAL.wonderscript.compiler = function() {
         prStr
     };
 
+    CORE_MOD.NS = CURRENT_NS;
+    importSymbol('*ns*', CURRENT_NS.value);
     importSymbol(CORE_NS.name, CORE_NS);
     CORE_MOD.RecursionPoint = RecursionPoint;
 

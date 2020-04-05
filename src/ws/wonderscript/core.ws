@@ -18,6 +18,9 @@
 (set-meta :doc "define a macro")
 (set-meta :arglists '(name args &body))
 
+(defmacro ns
+  (nm) (array 'set! '(. NS -value) (array 'create-ns (array 'quote nm))))
+
 ; TODO: redefine fn with multi arity bodies
 
 (defmacro defn (name args &body)
