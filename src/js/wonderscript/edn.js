@@ -1,6 +1,6 @@
 // jshint esversion: 6
-var GLOBAL = typeof module !== 'undefined' ? global : window;
-GLOBAL.wonderscript = GLOBAL.wonderscript || {};
+JSGLOBAL = typeof module !== 'undefined' ? global : window;
+JSGLOBAL.wonderscript = JSGLOBAL.wonderscript || {};
 wonderscript.edn = function() {
     
     const IS_NODE = typeof module !== 'undefined' ? true : false;
@@ -481,5 +481,7 @@ wonderscript.edn = function() {
     if (typeof module !== 'undefined') {
         module.exports = api;
     }
+
+    return api;
 
 }();

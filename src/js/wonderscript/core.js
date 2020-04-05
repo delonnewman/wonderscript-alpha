@@ -1,6 +1,6 @@
 // jshint eqnull: true
 // jshint esversion: 6
-const GLOBAL = typeof module !== 'undefined' ? global : window;
+JSGLOBAL = typeof module !== 'undefined' ? global : window;
 (function() {
 
     this.wonderscript = this.wonderscript || {};
@@ -450,4 +450,4 @@ const GLOBAL = typeof module !== 'undefined' ? global : window;
         module.exports = this.wonderscript.core;
     }
 
-}.call(GLOBAL));
+}.call(JSGLOBAL));

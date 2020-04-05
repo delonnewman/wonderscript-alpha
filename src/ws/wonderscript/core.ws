@@ -54,13 +54,12 @@
           (throw (new js/Error "Wrong number of arguments expected 2 or 3"))))
 
 (defn even? (x)
-  (identical? (mod x 2) 0))
+  (identical? (bit-and x 1) 0))
 
 (defn odd? (x)
-  (identical? (mod x 2) 1))
+  (identical? (bit-and x 1) 1))
 
-(defn assoc-array?
-  (a)
+(defn assoc-array? (a)
   (cond (not (array? a))
           false
         :else
@@ -94,3 +93,93 @@
                 (cons (array '< nm init)
                       (concat body (array (array 'recur (array '+ nm 1))))))
           init)))
+
+(defmacro while
+  (pred &body)
+  (array 'loop ()
+         (cons 'when (cons pred (concat body (array (array 'recur)))))))
+
+
+(defn partition (n a)
+  (let (pairs (array))
+    (dotimes (i (.floor js/Math (/ (alength a) n)))
+      (let (p (array))
+        (dotimes (j n)
+          (aset p j (aget a (+ (* n i) j))))
+        (aset pairs i p)))
+    pairs))
+
+(defn slice
+  (a n) (.slice a n))
+
+(defn true?
+  (x) (identical? true x))
+
+(defn false?
+  (x) (identical? false x))
+
+(defn zero?
+  (x) (identical? 0 x))
+
+(defn pos?
+  (x) (> 0 x))
+
+(defn neg?
+  (x) (< 0 x))
+
+(defn entries
+  (obj) (.entries js/Object obj))
+
+(defn tag?
+  (x) (array? x) (string? (aget x 0)))
+
+(defn has-attr?
+  (x) (objectliteral? (aget x 1)))
+
+(defn component?
+  (x) (array? x) (function? (aget x 0)))
+
+(def tag-list? array?)
+
+(defn render-attr (form)
+  (reduce (fn (s x) (str s " " x))
+          (map (fn (x) (str (aget x 0) "=\"" (aget x 1) "\"")) (entries form))))
+
+(def html) ; render-tag-list and html are mutually recursive
+
+(defn render-tag-list
+  (form) (.join (map html form) ""))
+
+(defn render-attr-tag (form)
+  (let (t (aget form 0)
+        attr (render-attr (aget form 1)))
+    (str "<" t " " attr ">" (render-tag-list (slice form 2)) "</" t ">")))
+
+(defn render-tag (form)
+  (let (t (aget form 0))
+    (str "<" t ">" (render-tag-list (slice form 1)) "</" t ">")))
+
+(defn render-component (form)
+  (let (f (aget form 0)
+        args (slice form 1))
+    (html (apply f args))))
+
+(defn html (form)
+  (cond (nil? form) ""
+        (true? form) "Yes"
+        (false? form) "No"
+        (string? form) form
+        (tag? form)
+          (if (has-attr? form)
+            (render-attr-tag form)
+            (render-tag form))
+        (component? form) (render-component form)
+        (tag-list? form) (render-tag-list form)
+        :else
+          (throw (js/Error. "Unknown form"))))
+
+(defn pr
+  (x) (print (pr-str x)))
+
+(defmacro ENV
+  () (array 'quote (pr-str &env)))

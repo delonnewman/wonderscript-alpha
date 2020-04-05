@@ -1,9 +1,9 @@
 // jshint esversion: 6
 // jshint eqnull: true
 // jshint evil: true
-const GLOBAL = typeof module !== 'undefined' ? global : window;
-GLOBAL.wonderscript = GLOBAL.wonderscript || {};
-GLOBAL.wonderscript.compiler = function() {
+JSGLOBAL = typeof module !== 'undefined' ? global : window;
+JSGLOBAL.wonderscript = JSGLOBAL.wonderscript || {};
+JSGLOBAL.wonderscript.compiler = function() {
     "use strict";
 
     const IS_NODE = typeof module !== 'undefined' ? true : false;
@@ -208,23 +208,42 @@ GLOBAL.wonderscript.compiler = function() {
         return str;
     }
 
-    function env(parent) {
-        if (parent) {
-            return {
-                vars: {},
-                parent: parent
-            };
-        } else {
-            return {
-                vars: {},
-                parent: null
-            };
+    function Env(vars, parent) {
+        this.vars = vars || {};
+        this.parent = parent || null;
+        this._isRecursive = false;
+    }
+
+    Env.prototype = Object.create(null);
+
+    Env.prototype.toString = function() {
+        var buffer = ['#<Env vars: ', Object.keys(this.vars).join(', ')];
+        if (this.parent) {
+            buffer.push('parent: ', this.parent.toString());
         }
+        buffer.push('>');
+        return buffer.join('');
+    };
+
+    Env.prototype.setRecursive = function() {
+        this._isRecursive = true;
+        return this;
+    };
+
+    Env.prototype.isRecursive = function() {
+        return this._isRecursive;
+    };
+
+    function isEnv(x) {
+        return x instanceof Env;
+    }
+
+    function env(parent) {
+        return new Env(null, parent);
     }
 
     function lookup(env, name) {
         if (env == null) {
-            p('env null');
             return null;
         }
         else if (env.vars != null && env.vars[name] != null) {
@@ -302,7 +321,7 @@ GLOBAL.wonderscript.compiler = function() {
         return isArray(x) && isString(x[0]);
     }
 
-    function macroexpand(form) {
+    function macroexpand(form, scope) {
         if (!isTaggedValue(form)) {
             return form;
         }
@@ -325,7 +344,9 @@ GLOBAL.wonderscript.compiler = function() {
                 if (val === null) return form;
                 else {
                     if (isMacro(val)) {
-                        return macroexpand(val.apply(null, form.slice(1)));
+                        var args = form.slice(1);
+                        var ctx = { env: env(scope), form: form };
+                        return macroexpand(val.apply(ctx, args));
                     }
                     else {
                         return form;
@@ -352,7 +373,7 @@ GLOBAL.wonderscript.compiler = function() {
     // TODO: try/catch/finally
     function emit(form_, env_) {
         var env_ = env_ || TOP;
-        var form = macroexpand(form_);
+        var form = macroexpand(form_, env_);
         if (isString(form)) {
             return emitSymbol(form, env_);
         }
@@ -466,7 +487,7 @@ GLOBAL.wonderscript.compiler = function() {
 
     function emitArrayAccess(form, env) {
         if (form.length !== 3)
-            throw new Error(str('Wrong number of arguments expected 2, got ', form.length));
+            throw new Error(str('Wrong number of arguments expected 2, got ', form.length - 1));
 
         return str(emit(form[1], env), '[', emit(form[2], env), ']');
     }
@@ -520,7 +541,13 @@ GLOBAL.wonderscript.compiler = function() {
     }
 
     function emitSymbol(s, env) {
-        if (s.indexOf('/') !== -1) {
+        if (s === '&env') {
+            return 'this.env';
+        }
+        else if (s === '&form') {
+            return 'this.form';
+        }
+        else if (s.indexOf('/') !== -1) {
             var parts = s.split('/');
             if (parts.length !== 2) throw new Error('A symbol should only have 2 parts');
             var scope = lookup(env, parts[0]);
@@ -570,7 +597,7 @@ GLOBAL.wonderscript.compiler = function() {
     function emitTailPosition(x, env, def) {
         var def_ = def || 'return';
         if (isRecur(x)) {
-            if (!env.isRecursive) throw new Error(RECUR_ERROR_MSG);
+            if (!env.isRecursive()) throw new Error(RECUR_ERROR_MSG);
             return emitRecursionPoint(x, env);
         }
         else if (isThrow(x)) {
@@ -611,7 +638,7 @@ GLOBAL.wonderscript.compiler = function() {
             buff.push(str(names[i], ' = e.args[', i, ']'));
         }
         rebinds = buff.join('; ');
-        env.isRecursive = true;
+        env.setRecursive();
         return str(
             "var retval;\nloop:\n\twhile (true) { try { ",
             compileBody(body, env, 'retval ='),
@@ -660,7 +687,7 @@ GLOBAL.wonderscript.compiler = function() {
   
     function emitLet(form, env_) {
         var env_ = env(env_);
-        if (form.length < 3) throw new Error('A let expression should have at least 3 elements');
+        if (form.length < 2) throw new Error('A let expression should have at least 2 elements');
         var i, bind,
             buff = ['(function('],
             rest = form.slice(1),
@@ -1000,23 +1027,20 @@ GLOBAL.wonderscript.compiler = function() {
             }
             return str('(array ', x.map(prStr).join(' '), ')');
         }
-        else if (isMap(x)) {
-            return str('{', map((entry) => str(prStr(entry[0]), ' ', prStr(entry[1])), Object.entries(x)).join(' '), '}');
-        }
         else if (isFunction(x)) {
             return str('#js/function "', x.toString(), '"');
         }
+        else if (x.toString) {
+            return x.toString();
+        }
+        else if (isMap(x)) {
+            return str('{', map((entry) => str(prStr(entry[0]), ' ', prStr(entry[1])), Object.entries(x)).join(' '), '}');
+        }
         else if (isArrayLike(x)) {
-            if (x.toString) {
-                return x.toString();
-            }
-            else {
-                return str('#js/object {',
-                    Array.prototype.slice.call(x)
-                        .map((x, i) => str(i, ' ', prStr(x)))
-                        .join(', '),
-                    '}');
-            }
+            return str('#js/object {',
+                Array.prototype.slice.call(x)
+                     .map((x, i) => str(i, ' ', prStr(x)))
+                     .join(', '), '}');
         }
         else {
             return "" + x;
@@ -1113,12 +1137,13 @@ GLOBAL.wonderscript.compiler = function() {
         setMacro,
         prStr,
         meta,
-        macroexpand
+        macroexpand,
+        isEnv
     });
 
-    GLOBAL.wonderscript = GLOBAL.wonderscript || {};
-    GLOBAL.wonderscript.core = CORE_MOD;
-    GLOBAL.wonderscript.compiler = {
+    JSGLOBAL.wonderscript = JSGLOBAL.wonderscript || {};
+    JSGLOBAL.wonderscript.core = CORE_MOD;
+    JSGLOBAL.wonderscript.compiler = {
         compile: emit,
         eval: evaluate,
         evalString,
@@ -1136,6 +1161,6 @@ GLOBAL.wonderscript.compiler = function() {
     const COMPILER_NS = createNs('wonderscript.compiler');
     importSymbol(COMPILER_NS.name, COMPILER_NS);
 
-    if (IS_NODE) module.exports = GLOBAL.wonderscript.compiler;
+    if (IS_NODE) module.exports = JSGLOBAL.wonderscript.compiler;
 
-}.call(GLOBAL);
+}.call(JSGLOBAL);
