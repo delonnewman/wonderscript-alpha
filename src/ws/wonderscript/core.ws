@@ -143,9 +143,6 @@
 (defn neg?
   (x) (> 0 x))
 
-(defn entries
-  (obj) (.entries js/Object obj))
-
 (defn tag?
   (x) (array? x) (string? (aget x 0)))
 
