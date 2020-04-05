@@ -541,6 +541,7 @@ JSGLOBAL.wonderscript.compiler = function() {
     }
 
     function emitSymbol(s, env) {
+        var scope;
         if (s === '&env') {
             return 'this.env';
         }
@@ -550,7 +551,7 @@ JSGLOBAL.wonderscript.compiler = function() {
         else if (s.indexOf('/') !== -1) {
             var parts = s.split('/');
             if (parts.length !== 2) throw new Error('A symbol should only have 2 parts');
-            var scope = lookup(env, parts[0]);
+            scope = lookup(env, parts[0]);
             if (scope === null) throw new Error('Unknown namespace: ' + parts[0]);
             else {
                 var ns = scope.vars[parts[0]];
@@ -562,15 +563,18 @@ JSGLOBAL.wonderscript.compiler = function() {
         }
         else {
             var s_ = escapeChars(s);
-            if (!isUndefined(CURRENT_NS.value.module[s_])) {
+            scope = lookup(env, s_);
+            if (scope !== null) {
+                return s_;
+            }
+            else if (!isUndefined(CURRENT_NS.value.module[s_])) {
                 return str(CURRENT_NS.value.name, '.', s_);
             }
             else if (!isUndefined(CORE_NS.module[s_])) {
                 return str(CORE_NS.name, '.', s_);
             }
             else {
-                findLexicalVar(env, s_); // throws error if undefined
-                return s_;
+                throw new Error(str('Undefined variable: "', s, '"'));
             }
         }
     }

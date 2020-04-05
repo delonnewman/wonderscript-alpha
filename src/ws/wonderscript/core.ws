@@ -182,4 +182,4 @@
   (x) (print (pr-str x)))
 
 (defn ns-map
-  (x) (.-module x))
+  (ns) (.-module ns))
