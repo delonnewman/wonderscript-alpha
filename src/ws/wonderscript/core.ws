@@ -68,9 +68,6 @@
         :else
           (array? (aget a 0))))
 
-(defn ns-map
-  (ns) (.-module ns))
-
 ; (fn^
 ;   ((x) x)
 ;   ((x y) [x y])
@@ -184,5 +181,5 @@
 (defn pr
   (x) (print (pr-str x)))
 
-(defmacro ENV
-  () (array 'quote (pr-str &env)))
+(defn ns-map
+  (x) (.-module x))

@@ -354,6 +354,7 @@ JSGLOBAL = typeof module !== 'undefined' ? global : window;
         constructor(name, module) {
             this.name = name;
             this.module = module || {};
+            JSGLOBAL[name] = this.module;
         }
 
         toString() {
