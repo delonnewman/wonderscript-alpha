@@ -405,7 +405,7 @@ JSGLOBAL.wonderscript.compiler = function() {
                   case COND_SYM:
                     return emitCond(form, env_);
                   case JS_SYM:
-                    return form[1];
+                    return form[1][1];
                   case FN_SYM:
                     return emitFunc(form, env_);
                   case LOOP_SYM:
@@ -665,9 +665,9 @@ JSGLOBAL.wonderscript.compiler = function() {
         // TODO: add names to scope
         var names = [];
         for (i = 0; i < binds.length; i += 2) {
-            bind = binds[i];
-            if (!isString(bind))
+            if (!isString(binds[i]))
                 throw new Error('Invalid binding name');
+            bind = escapeChars(binds[i]);
             define(env_, bind, true);
             names.push(bind);
         }
@@ -701,9 +701,9 @@ JSGLOBAL.wonderscript.compiler = function() {
         // add names to function scope
         var names = [];
         for (i = 0; i < binds.length; i += 2) {
-            bind = binds[i];
-            if (!isString(bind))
+            if (!isString(binds[i]))
                 throw new Error('Invalid binding name');
+            bind = escapeChars(binds[i]);
             define(env_, bind, true);
             names.push(bind);
         }
@@ -754,7 +754,7 @@ JSGLOBAL.wonderscript.compiler = function() {
         else {
           name = args[i];
         }
-        argsBuf.push({name: name, order: i, splat: splat});
+        argsBuf.push({name: escapeChars(name), order: i, splat: splat});
       }
       return argsBuf;
     }

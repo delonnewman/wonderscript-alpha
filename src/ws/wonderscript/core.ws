@@ -18,9 +18,6 @@
 (set-meta :doc "define a macro")
 (set-meta :arglists '(name args &body))
 
-(defmacro ns
-  (nm) (array 'set! '(. NS -value) (array 'create-ns (array 'quote nm))))
-
 ; TODO: redefine fn with multi arity bodies
 
 (defmacro defn (name args &body)
@@ -112,6 +109,25 @@
 (defn slice
   (a n) (.slice a n))
 
+(defn seq (xs)
+  (cond (nil? xs) []
+        (array? xs) xs
+        (objectliteral? xs) (.entries js/Object xs)
+        :else
+          (throw (js/Error. "The given value is not seqable"))))
+
+(defn first
+  (xs) (aget (seq xs) 0))
+
+(defn second
+  (xs) (aget (seq xs) 1))
+
+(defn rest
+  (xs) (.slice (seq xs) 1))
+
+(defn nth
+  (xs n) (aget (seq xs) n))
+
 (defn true?
   (x) (identical? true x))
 
@@ -122,10 +138,10 @@
   (x) (identical? 0 x))
 
 (defn pos?
-  (x) (> 0 x))
+  (x) (< 0 x))
 
 (defn neg?
-  (x) (< 0 x))
+  (x) (> 0 x))
 
 (defn entries
   (obj) (.entries js/Object obj))
@@ -183,3 +199,6 @@
 
 (defn ns-map
   (ns) (.-module ns))
+
+(defmacro ns
+  (nm) (array 'set! '(. NS -value) (array 'create-ns (array 'quote nm))))
