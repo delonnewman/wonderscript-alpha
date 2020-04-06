@@ -555,7 +555,7 @@ JSGLOBAL.wonderscript.compiler = function() {
             if (scope === null) throw new Error('Unknown namespace: ' + parts[0]);
             else {
                 var ns = scope.vars[parts[0]];
-                if (isUndefined(ns.module[parts[1]])) {
+                if (isUndefined(ns.module[escapeChars(parts[1])])) {
                     throw new Error('Undefined variable: ' + parts[1] + ' in namespace: ' + parts[0]);
                 }
                 return str(ns.name, '.', escapeChars(parts[1]));
@@ -662,7 +662,6 @@ JSGLOBAL.wonderscript.compiler = function() {
             binds = rest[0],
             body = rest.slice(1);
 
-        // TODO: add names to scope
         var names = [];
         for (i = 0; i < binds.length; i += 2) {
             if (!isString(binds[i]))

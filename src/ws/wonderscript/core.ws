@@ -156,7 +156,7 @@
 
 (defn render-attr (form)
   (reduce (fn (s x) (str s " " x))
-          (map (fn (x) (str (aget x 0) "=\"" (aget x 1) "\"")) (entries form))))
+          (map (fn (x) (str (aget x 0) "=\"" (aget x 1) "\"")) (.entries js/Object form))))
 
 (def html) ; render-tag-list and html are mutually recursive
 
