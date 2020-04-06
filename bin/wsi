@@ -4,7 +4,7 @@ const fs = require("fs"),
     readline = require("readline");
 
 // load runtime and core library
-const { print, str, evalString, NS, loadFile, prStr } = require(`${__dirname}/../index.js`);
+const { print, str, evalString, NS, loadFile, prStr, createNs, importSymbol } = require(`${__dirname}/../index.js`);
 
 function interactive() {
     const rl = readline.createInterface({
@@ -14,6 +14,8 @@ function interactive() {
         terminal: true
     });
 
+    NS.value = createNs('user');
+    wonderscript.core.import('user', NS.value);
     rl.setPrompt(str(NS.value.name, "> "));
     rl.prompt();
 

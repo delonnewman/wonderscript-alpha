@@ -199,3 +199,23 @@
 
 (defmacro ns
   (nm) (array 'set! '(. NS -value) (array 'create-ns (array 'quote nm))))
+
+(def failure-tag "FAILURE: ")
+(def assertion-msg " is false")
+
+(defmacro is
+  (&args)
+  (cond (identical? 1 (alength args))
+        (array 'is (aget args 0) (array 'str 'wonderscript.core/failure-tag (array 'quote (pr-str (aget args 0))) 'wonderscript.core/assertion-msg))
+        (identical? 2 (alength args))
+        (array 'cond
+               (array 'not (aget args 0)) (array 'print (aget args 1)))))
+
+(defmacro is-not (body &args)
+  (cons 'is (cons (array 'not body) args)))
+
+(defmacro deftest
+  (nm &body)
+  (array 'do
+    (array 'def nm (cons 'fn (cons '() body)))
+    (array 'set-meta nm ':test true)))

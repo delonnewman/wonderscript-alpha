@@ -1105,6 +1105,22 @@ JSGLOBAL.wonderscript.compiler = function() {
         return buffer.join('');
     }
 
+    CORE_MOD.import = function(name, value) {
+        var value = value || eval(name);
+        var wsName = CORE_NAMES[name];
+        if (wsName) {
+            wsName = escapeChars(dasherize(wsName));
+        }
+        else if (name.startsWith('is')) {
+            wsName = str(name.slice(2).toLowerCase(), '?');
+            wsName = escapeChars(dasherize(wsName));
+        }
+        else {
+            wsName = escapeChars(dasherize(name));
+        }
+        define(TOP, name, value);
+    };
+
     function importSymbol(name, obj) {
         var wsName = CORE_NAMES[name];
         if (wsName) {
@@ -1153,7 +1169,9 @@ JSGLOBAL.wonderscript.compiler = function() {
         evalAll,
         expandAllMacros,
         expandMacros,
-        prStr
+        prStr,
+        importSymbol,
+        importModule
     };
 
     CORE_MOD.NS = CURRENT_NS;
