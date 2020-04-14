@@ -1030,8 +1030,14 @@ JSGLOBAL.wonderscript.compiler = function() {
         else if (isBoolean(x)) {
             return x ? TRUE_SYM : FALSE_SYM;
         }
+        else if (isSymbol(x)) {
+            return str(x);
+        }
         else if (isString(x)) {
-            return x;
+            return JSON.stringify(x);
+        }
+        else if (isKeyword(x)) {
+            return str(":", x[1]);
         }
         else if (isArray(x)) {
             if (x.length === 0) {
