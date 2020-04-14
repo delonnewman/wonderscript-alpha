@@ -402,7 +402,7 @@ wonderscript.edn = function() {
     function matchSymbol(s) {
         if (s.charAt(0) === ':') {
             //return Keyword.intern(Sym.intern(s.substring(1)));
-            return ['quote', s.slice(1)];
+            return ['keyword', s.slice(1)];
         }
         //return Sym.intern(s);
         return s;

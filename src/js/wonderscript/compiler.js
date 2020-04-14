@@ -94,6 +94,8 @@ JSGLOBAL.wonderscript.compiler = function() {
     const AGET_SYM        = 'aget';
     const ASET_SYM        = 'aset';
     const ALENGTH_SYM     = 'alength';
+    const INSTANCE_SYM    = 'instance?';
+    const TYPE_SYM        = 'type?';
 
     const MACRO_DEF_SYM   = 'defmacro';
 
@@ -367,15 +369,34 @@ JSGLOBAL.wonderscript.compiler = function() {
         return str('({', map(emitMapEntry(env), Object.entries(m)).join(', '), '})');
     }
 
+    function isKeyword(x) {
+        return isArray(x) && x[0] === 'keyword';
+    }
+
+    function emitKeyword(kw) {
+        var name = '' + kw[1];
+        if (name.startsWith(':')) {
+            name = str(CURRENT_NS.value.name, '/', name.slice(1));
+        }
+        return JSON.stringify(name);
+    }
+
     const isMap = isObjectLiteral;
+
+    function isSymbol(x) {
+        return typeof x === 'string';
+    }
 
     const TOP = env();
     // TODO: try/catch/finally
     function emit(form_, env_) {
         var env_ = env_ || TOP;
         var form = macroexpand(form_, env_);
-        if (isString(form)) {
+        if (isSymbol(form)) {
             return emitSymbol(form, env_);
+        }
+        else if (isKeyword(form)) {
+            return emitKeyword(form);
         }
         else if (isNumber(form)) {
             return str(form);
@@ -396,7 +417,7 @@ JSGLOBAL.wonderscript.compiler = function() {
             if (form.length === 0) {
                 return EMPTY_ARRAY;
             }
-            else if (isString(form[0])) {
+            else if (isSymbol(form[0])) {
                 switch(form[0]) {
                   case DEF_SYM:
                     return emitDef(form, env_);
@@ -461,6 +482,10 @@ JSGLOBAL.wonderscript.compiler = function() {
                     return emitBinOperator(['==='].concat(form.slice(1)), env_);
                   case EQUIV_SYM:
                     return emitBinOperator(['=='].concat(form.slice(1)), env_);
+                  case INSTANCE_SYM:
+                    return emitBinOperator([' instanceof '].concat(form.slice(1)), env_);
+                  case TYPE_SYM:
+                    return str('typeof(', emit(form[1], env_), ')');
                   case PLUS_SYM:
                   case MINUS_SYM:
                   case DIV_SYM:
