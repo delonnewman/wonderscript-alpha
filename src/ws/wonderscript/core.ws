@@ -65,6 +65,10 @@
         :else
           (array? (aget a 0))))
 
+(defn mapcat
+  (f coll)
+  (apply concat (map f coll)))
+
 ; (fn^
 ;   ((x) x)
 ;   ((x y) [x y])
@@ -73,7 +77,8 @@
   (let (x (aget xs 0))
     (cond (assoc-array? x)
             ; compile multi-body fn
-            (map (fn (x) (array 'identical? (.-length x) 'args)) x)
+            ; TODO: collect arguments
+            (array 'fn (array '&args) (cons 'cond (mapcat (fn (x) (array (array 'identical? (.-length (aget x 0)) 'args) (aget x 1))) xs)))
           :else
             ; single body fn
             (cons 'fn xs))))
