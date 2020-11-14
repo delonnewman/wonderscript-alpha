@@ -204,7 +204,7 @@ JSGLOBAL.wonderscript.compiler = function() {
         }
         return str;
     }
-    
+
     function Env(vars, parent) {
         this.vars = vars || {};
         this.parent = parent || null;
@@ -766,6 +766,7 @@ JSGLOBAL.wonderscript.compiler = function() {
     function parseArgs(args) {
         var splat = false, name, argsBuf = [];
         for (var i = 0; i < args.length; ++i) {
+            if ( !isSymbol(args[i]) ) continue;
             if ( args[i].startsWith('&') ) {
                 name = args[i].replace(/^&/, '');
                 splat = true;

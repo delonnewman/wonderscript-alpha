@@ -202,11 +202,8 @@
 (defn ns-map
   (ns) (.-module ns))
 
-(comment
  (defmacro ns
-   (nm) (array 'set! '*ns* (array 'create-ns (array 'quote nm)))) 
-  )
-
+   (nm) (array 'set! '(. NS -value) (array 'create-ns (array 'quote nm))))
 
 (def failure-tag "FAILURE: ")
 (def assertion-msg " is false")
