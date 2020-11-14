@@ -224,3 +224,6 @@
   (array 'do
     (array 'def nm (cons 'fn (cons '() body)))
     (array 'set-meta nm ':test true)))
+
+(defn class (object)
+  (.-name (.-constructor object)))
