@@ -1,8 +1,12 @@
 <html lang="en">
+  <head>
+    <title>WonderScript</title>
+  </head>
   <body>
-    <script src="src/js/wonderscript/core.js"></script>
-    <script src="src/js/wonderscript/edn.js"></script>
-    <script src="src/js/wonderscript/compiler.js"></script>
-    <script src="dist/wonderscript/core.ws.js"></script>
+    <main></main>
+    <script src="dist/wonderscript.js"></script>
+    <script>
+      document.getElementsByTagName('main').innerHTML = wonderscript.core.html(['a', {href: '#'}, "test"]);
+    </script>
   </body>
 </html>

@@ -90,7 +90,7 @@ JSGLOBAL.wonderscript.compiler = function() {
     const ASET_SYM        = 'aset';
     const ALENGTH_SYM     = 'alength';
     const INSTANCE_SYM    = 'instance?';
-    const TYPE_SYM        = 'type?';
+    const TYPE_SYM        = 'type';
 
     const MACRO_DEF_SYM   = 'defmacro';
 
