@@ -15,7 +15,8 @@ wonderscript.edn = function() {
         core = wonderscript.core;
     }
 
-    const { resetMeta } = core;
+    // imports
+    const resetMeta = core.resetMeta;
 
     //
     // Reader
@@ -474,8 +475,8 @@ wonderscript.edn = function() {
     }
 
     var api = {
-        read,
-        PushBackReader
+        read: read,
+        PushBackReader: PushBackReader
     };
 
     if (typeof module !== 'undefined') {

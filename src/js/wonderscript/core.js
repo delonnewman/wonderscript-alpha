@@ -182,6 +182,26 @@ JSGLOBAL = typeof module !== 'undefined' ? global : window;
         }
     }
 
+    function filter(f, xs) {
+        if (arguments.length === 2) {
+            if (isEmpty(xs)) {
+                return [];
+            }
+            else {
+                var a = [], x;
+                while (xs != null) {
+                    x = first(xs);
+                    if (f.call(null, x)) a.push(x);
+                    xs = next(xs);
+                }
+                return a;
+            }
+        }
+        else {
+            throw new Error('Wrong number of arguments expected 2, got: ' + arguments.length);
+        }
+    }
+
     function reduce(f, xs, init) {
         if (arguments.length >= 2) {
             if (init == null) {
@@ -337,7 +357,6 @@ JSGLOBAL = typeof module !== 'undefined' ? global : window;
         }
     }
 
-
     // TODO: see if there's a way to make the trace start with the callee
     function raise(msg) {
         var e = isString(msg) ? new Error(msg) : msg;
@@ -350,17 +369,17 @@ JSGLOBAL = typeof module !== 'undefined' ? global : window;
         return isObject(x) && Object.getPrototypeOf(Object.getPrototypeOf(x)) == null;
     }
 
-    class Namespace {
-        constructor(name, module) {
-            this.name = name;
-            this.module = module || {};
-            JSGLOBAL[name] = this.module;
-        }
-
-        toString() {
-            return str("#<Namespace ", this.name, ">");
-        }
+    function Namespace(name, module) {
+        this.name = name;
+        this.module = module || {};
+        JSGLOBAL[name] = this.module;
     }
+
+    Namespace.prototype = Object.create(null);
+
+    Namespace.prototype.toString = function() {
+        return str("#<Namespace ", this.name, ">");
+    };
 
     function createNs(name, module) {
         return new Namespace(name, module);
@@ -370,11 +389,9 @@ JSGLOBAL = typeof module !== 'undefined' ? global : window;
         return x instanceof Namespace;
     }
 
-    class Protocol {
-        constructor(docString, methods) {
-            this.docString = docString;
-            this.methods = methods;
-        }
+    function Protocol(docString, methods) {
+        this.docString = docString;
+        this.methods = methods;
     }
 
     const SYMBOL_META = {};
@@ -407,44 +424,45 @@ JSGLOBAL = typeof module !== 'undefined' ? global : window;
     }
 
     Object.assign(this.wonderscript.core, {
-        isNumber,
-        isString,
-        isBoolean,
-        isFunction,
-        isArrayLike,
-        isArray,
-        isNull,
-        isNil,
-        isUndefined,
-        isObject,
-        isObjectLiteral,
-        toArray,
-        array,
-        concat,
-        first,
-        rest,
-        next,
-        cons,
-        get,
-        map,
-        reduce,
-        take,
-        drop,
-        str,
-        partition,
-        range,
-        memoize,
-        apply,
-        either,
-        maybe,
-        raise,
-        print,
-        isNamespace,
-        createNs,
-        setMeta,
-        getMeta,
-        resetMeta,
-        meta
+        isNumber: isNumber,
+        isString: isString,
+        isBoolean: isBoolean,
+        isFunction: isFunction,
+        isArrayLike: isArrayLike,
+        isArray: isArray,
+        isNull: isNull,
+        isNil: isNil,
+        isUndefined: isUndefined,
+        isObject: isObject,
+        isObjectLiteral: isObjectLiteral,
+        toArray: toArray,
+        array: array,
+        concat: concat,
+        first: first,
+        rest: rest,
+        next: next,
+        cons: cons,
+        get: get,
+        map: map,
+        reduce: reduce,
+        filter: filter,
+        take: take,
+        drop: drop,
+        str: str,
+        partition: partition,
+        range: range,
+        memoize: memoize,
+        apply: apply,
+        either: either,
+        maybe: maybe,
+        raise: raise,
+        print: print,
+        isNamespace: isNamespace,
+        createNs: createNs,
+        setMeta: setMeta,
+        getMeta: getMeta,
+        resetMeta: resetMeta,
+        meta: meta
     });
 
     if (typeof module !== 'undefined') {

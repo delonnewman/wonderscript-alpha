@@ -20,34 +20,29 @@ JSGLOBAL.wonderscript.compiler = function() {
         edn = wonderscript.edn;
     }
 
-    const {
-        str,
-        map,
-        reduce,
-        partition,
-        cons,
-        first,
-        next,
-        rest,
-        isObject,
-        isObjectLiteral,
-        isNull,
-        isString,
-        isFunction,
-        isNumber,
-        isBoolean,
-        isUndefined,
-        isArray,
-        isArrayLike,
-        print,
-        isEmpty,
-        createNs,
-        setMeta,
-        getMeta,
-        meta
-    } = core;
+    const
+        str = core.str,
+        map = core.map,
+        partition = core.partition,
+        cons = core.cons,
+        first = core.first,
+        next = core.next,
+        rest = core.rest,
+        isObjectLiteral = core.isObjectLiteral,
+        isNull = core.isNull,
+        isString = core.isString,
+        isFunction = core.isFunction,
+        isNumber = core.isNumber,
+        isBoolean = core.isBoolean,
+        isUndefined = core.isUndefined,
+        isArray = core.isArray,
+        isArrayLike = core.isArrayLike,
+        createNs = core.createNs,
+        setMeta = core.setMeta,
+        getMeta = core.getMeta,
+        meta = core.meta;
 
-    const { read, PushBackReader } = edn;
+    const read = edn.read, PushBackReader = edn.PushBackReader;
 
     const QUOTE_SYM   = 'quote';
     const DEF_SYM     = 'def';
@@ -209,7 +204,7 @@ JSGLOBAL.wonderscript.compiler = function() {
         }
         return str;
     }
-
+    
     function Env(vars, parent) {
         this.vars = vars || {};
         this.parent = parent || null;
@@ -362,7 +357,7 @@ JSGLOBAL.wonderscript.compiler = function() {
     }
 
     function emitMapEntry(env) {
-        return (entry) => str(entry[0], ':', emit(entry[1], env));
+        return function(entry) { return str(entry[0], ':', emit(entry[1], env)); };
     }
 
     function emitMap(m, env) {
@@ -560,7 +555,7 @@ JSGLOBAL.wonderscript.compiler = function() {
             return str('[', map(emitQuotedValue, val).join(', '), ']');
         }
         else if (isMap(val)) {
-            return str('({', map((xs) => str(xs[0], ':', emitQuotedValue(xs[1])), Object.entries(val)).join(', '), '})');
+            return str('({', map(function(xs) { return str(xs[0], ':', emitQuotedValue(xs[1])); }, Object.entries(val)).join(', '), '})');
         }
         throw new Error('Invalid form: ' + val);
     }
@@ -769,18 +764,18 @@ JSGLOBAL.wonderscript.compiler = function() {
     }
   
     function parseArgs(args) {
-      var splat = false, name, argsBuf = [];
-      for (var i = 0; i < args.length; ++i) {
-        if ( args[i].startsWith('&') ) {
-          name = args[i].replace(/^&/, '');
-          splat = true;
+        var splat = false, name, argsBuf = [];
+        for (var i = 0; i < args.length; ++i) {
+            if ( args[i].startsWith('&') ) {
+                name = args[i].replace(/^&/, '');
+                splat = true;
+            }
+            else {
+                name = args[i];
+            }
+            argsBuf.push({name: escapeChars(name), order: i, splat: splat});
         }
-        else {
-          name = args[i];
-        }
-        argsBuf.push({name: escapeChars(name), order: i, splat: splat});
-      }
-      return argsBuf;
+        return argsBuf;
     }
   
     function genArgAssigns(argsBuf) {
@@ -1068,12 +1063,12 @@ JSGLOBAL.wonderscript.compiler = function() {
             return x.toString();
         }
         else if (isMap(x)) {
-            return str('{', map((entry) => str(prStr(entry[0]), ' ', prStr(entry[1])), Object.entries(x)).join(' '), '}');
+            return str('{', map(function(entry) { return str(prStr(entry[0]), ' ', prStr(entry[1])); }, Object.entries(x)).join(' '), '}');
         }
         else if (isArrayLike(x)) {
             return str('#js/object {',
                 Array.prototype.slice.call(x)
-                     .map((x, i) => str(i, ' ', prStr(x)))
+                     .map(function(x, i) { return str(i, ' ', prStr(x)); })
                      .join(', '), '}');
         }
         else {
@@ -1178,15 +1173,15 @@ JSGLOBAL.wonderscript.compiler = function() {
     importModule({
         compile: emit,
         eval: evaluate,
-        evalString,
-        compileString,
-        readString,
-        setMeta,
-        setMacro,
-        prStr,
-        meta,
-        macroexpand,
-        isEnv
+        evalString: evalString,
+        compileString: compileString,
+        readString: readString,
+        setMeta: setMeta,
+        setMacro: setMacro,
+        prStr: prStr,
+        meta: meta,
+        macroexpand: macroexpand,
+        isEnv: isEnv
     });
 
     JSGLOBAL.wonderscript = JSGLOBAL.wonderscript || {};
@@ -1194,15 +1189,15 @@ JSGLOBAL.wonderscript.compiler = function() {
     JSGLOBAL.wonderscript.compiler = {
         compile: emit,
         eval: evaluate,
-        evalString,
-        compileString,
-        readString,
-        evalAll,
-        expandAllMacros,
-        expandMacros,
-        prStr,
-        importSymbol,
-        importModule
+        evalString: evalString,
+        compileString: compileString,
+        readString: readString,
+        evalAll: evalAll,
+        expandAllMacros: expandAllMacros,
+        expandMacros: expandMacros,
+        prStr: prStr,
+        importSymbol: importSymbol,
+        importModule: importModule
     };
 
     CORE_MOD.NS = CURRENT_NS;
