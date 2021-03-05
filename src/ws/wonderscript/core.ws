@@ -53,6 +53,7 @@
         :else
           (throw (new js/Error "Wrong number of arguments expected 2 or 3"))))
 
+
 (defn even? (x)
   (identical? (bit-and x 1) 0))
 
@@ -86,6 +87,9 @@
 (defmacro when (pred &acts)
   (array 'cond pred (cons 'do acts)))
 
+(defmacro unless (pred &acts)
+  (array 'cond (array 'not pred) (cons 'do acts)))
+
 (defmacro dotimes
   (bindings &body)
   (let (nm (aget bindings 0)
@@ -96,11 +100,20 @@
                       (concat body (array (array 'recur (array '+ nm 1))))))
           init)))
 
+(defmacro doeach
+  (bindings &body)
+  (let (nm (aget bindings 0)
+        col (aget bindings 1))
+    (array 'loop (array nm (array 'aget col 0) 'i 0)
+           (cons 'when
+                 (cons (array 'not (array 'nil? nm))
+                       (concat body (array (array 'recur (array 'aget col (array 'inc 'i)) (array 'inc 'i))))))
+           col)))
+
 (defmacro while
   (pred &body)
   (array 'loop ()
          (cons 'when (cons pred (concat body (array (array 'recur)))))))
-
 
 (defn partition (n a)
   (let (pairs (array))
