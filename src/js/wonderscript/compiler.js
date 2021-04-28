@@ -3,21 +3,23 @@
 // jshint evil: true
 JSGLOBAL = typeof module !== 'undefined' ? global : window;
 JSGLOBAL.wonderscript = JSGLOBAL.wonderscript || {};
-JSGLOBAL.wonderscript.compiler = function() {
+JSGLOBAL.wonderscript.compilerBuilder = function(global, platform) {
     "use strict";
 
-    const IS_NODE = typeof module !== 'undefined' ? true : false;
-    const IS_BROWSER = typeof window !== 'undefined' ? true : false;
+    const IS_NODE    = platform === 'node';
+    const IS_BROWSER = platform == 'browser';
 
     var core, edn;
     if (IS_NODE) {
         core = require('./core.js');
         edn = require('./edn.js');
+        global.window = global; // mock brower's global object
     }
 
     if (IS_BROWSER) {
         core = wonderscript.core;
         edn = wonderscript.edn;
+        global.global = global; // mock node's global object
     }
 
     const
@@ -1092,7 +1094,7 @@ JSGLOBAL.wonderscript.compiler = function() {
     }
 
     define(TOP, CORE_NS.name, CORE_NS);
-    define(TOP, 'js', IS_NODE ? createNs('global', global) : createNs('window', window));
+    define(TOP, 'js', IS_NODE ? createNs('global', global) : createNs('window', global.window));
 
     Object.assign(CORE_MOD, core);
 
@@ -1206,9 +1208,11 @@ JSGLOBAL.wonderscript.compiler = function() {
     importSymbol(CORE_NS.name, CORE_NS);
     CORE_MOD.RecursionPoint = RecursionPoint;
 
-    const COMPILER_NS = createNs('wonderscript.compiler');
-    importSymbol(COMPILER_NS.name, COMPILER_NS);
-
     if (IS_NODE) module.exports = JSGLOBAL.wonderscript.compiler;
 
-}.call(JSGLOBAL);
+    return JSGLOBAL.wonderscript.compiler;
+
+};
+JSGLOBAL.wonderscript.compiler = JSGLOBAL.wonderscript.compilerBuilder.call(JSGLOBAL, JSGLOBAL, typeof module !== 'undefined' ? 'node' : 'browser');
+const WS_COMPILER_NS = JSGLOBAL.wonderscript.core.createNs('wonderscript.compiler');
+JSGLOBAL.wonderscript.compiler.importSymbol(WS_COMPILER_NS.name, WS_COMPILER_NS);

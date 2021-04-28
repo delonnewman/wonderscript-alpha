@@ -1,4 +1,4 @@
-UGLIFY=uglifyjs
+UGLIFY=npx uglifyjs
 
 all: dist/wonderscript dist/wonderscript.js
 
@@ -6,7 +6,7 @@ dist/wonderscript:
 	mkdir -p dist/wonderscript
 
 dist/wonderscript/core.ws.js:
-	./bin/wsc ./src/ws/wonderscript/core.ws > dist/wonderscript/core.ws.js
+	./bin/wsc browser ./src/ws/wonderscript/core.ws > dist/wonderscript/core.ws.js
 
 dist/wonderscript/core.js:
 	$(UGLIFY) src/js/wonderscript/core.js > dist/wonderscript/core.js
