@@ -7,7 +7,7 @@ JSGLOBAL.wonderscript.compilerBuilder = function(global, platform) {
     "use strict";
 
     const IS_NODE    = platform === 'node';
-    const IS_BROWSER = platform == 'browser';
+    const IS_BROWSER = platform === 'browser';
 
     var core, edn;
     if (IS_NODE) {
