@@ -1,4 +1,5 @@
-; Intial fn definition, will redefine below
+; Initial fn definition, will redefine below
+; TODO: add arity checks here
 (def fn
   (fn* (args &body)
     (cons 'fn* (cons args body))))
@@ -21,10 +22,12 @@
 (defmacro defn (name args &body)
   (array 'def name (cons 'fn (cons args body))))
 
-(defmacro == (a b) (array 'identical? a b))
+(defn == (a b) (array 'identical? a b))
 
+; TODO: Is there a preferable name less mathy perhaps what about "reflect"?
 (def identity (fn (x) x))
 
+; TODO: Should be named "always"?
 (def constantly
   (fn (x)
     (fn ()
@@ -80,9 +83,12 @@
 (defmacro func (&xs)
   (let (x (aget xs 0))
     (cond (assoc-array? x)
-            ; compile multi-body fn
-            ; TODO: collect arguments
-            (array 'fn (array '&args) (cons 'cond (mapcat (fn (x) (array (array 'identical? (.-length (aget x 0)) 'args) (aget x 1))) xs)))
+          ; compile multi-body fn
+          ; TODO: collect arguments
+          (array 'fn (array '&args)
+                 (cons 'cond
+                       (mapcat (fn (x)
+                                 (array (array 'identical? (.-length (aget x 0)) 'args) (aget x 1))) xs)))
           :else
             ; single body fn
             (cons 'fn xs))))
