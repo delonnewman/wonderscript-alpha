@@ -1,14 +1,15 @@
-// jshint eqnull: true
-// jshint esversion: 6
 JSGLOBAL = typeof module !== 'undefined' ? global : window;
 (function() {
 
     this.wonderscript = this.wonderscript || {};
     this.wonderscript.core = this.wonderscript.core || {};
 
+    var EMPTY_ARRAY  = Object.freeze([]);
+    var EMPTY_STRING = '';
+
     function str() {
-        if (arguments.length === 0) return '';
-        return Array.prototype.join.call(arguments, '');
+        if (arguments.length === 0) return EMPTY_STRING;
+        return Array.prototype.join.call(arguments, EMPTY_STRING);
     }
 
     function isNumber(x) {
@@ -35,23 +36,39 @@ JSGLOBAL = typeof module !== 'undefined' ? global : window;
         return Object.prototype.toString.call(x) === '[object Array]';
     }
 
-    function toArray(x) {
-        if (x == null) {
-            return [];
+    function isSet(x) {
+        return Object.prototype.toString.call(x) === '[object Set]';
+    }
+
+    function isMap(x) {
+        return Object.prototype.toString.call(x) === '[object Map]';
+    }
+
+    function toArray(col) {
+        if (col == null) {
+            return EMPTY_ARRAY;
         }
-        else if (isFunction(x.toArray)) {
-            return x.toArray();
+
+        if (isArrayLike(col)) {
+            return Array.prototype.slice.call(col);
         }
-        else {
-            return Array.prototype.slice.call(x);
+
+        if (isFunction(col.toArray)) {
+            return col.toArray();
         }
+
+        var a = [];
+        while (col != null) {
+            a.push(first(col));
+            col = next(col);
+        }
+        return a;
     }
 
     function array() {
         return Array.prototype.slice.call(arguments);
     }
 
-    var EMPTY_ARRAY = [];
     function concat() {
         return Array.prototype.concat.apply(EMPTY_ARRAY, arguments);
     }
@@ -72,114 +89,109 @@ JSGLOBAL = typeof module !== 'undefined' ? global : window;
         return x == null;
     }
 
-    // TODO: add support for maps, sets, and objects
-    function first(x) {
-        if (x == null) return null;
-        else if (isFunction(x.first)) {
-            return x.first();
-        }
-        else if (isArrayLike(x)) {
-            return x[0];
-        }
-        else {
-            throw new Error("Cannot get the first element of: " + x);
-        }
+    function isIterator(x) {
+        return x != null && isFunction(x[Symbol.iterator])
     }
 
-    function rest(x) {
-        if (x == null) return [];
-        else if (isFunction(x.rest)) {
-            return x.rest();
+    function first(col) {
+        if (col == null) return null;
+
+        if (isFunction(col.first)) {
+            return col.first();
         }
-        else if (isFunction(x.next)) {
-            var val = x.next();
-            return val == null ? [] : val;
+
+        if (isArrayLike(col)) {
+            return col[0] || null;
         }
-        else if (isArrayLike(x)) {
-            if (isFunction(x.slice)) {
-                return x.slice(1);
-            }
-            else {
-                return Array.prototype.slice.call(x, 1);
-            }
+
+        if (isIterator(col)) {
+            return col[Symbol.iterator]().next().value || null
         }
-        else {
-            throw new Error("Cannot get the rest of the elements of: " + x);
-        }
+
+        throw new Error("Cannot get the first element of: " + x);
     }
 
-    function next(x) {
-        if (x == null) return null;
-        else if (isFunction(x.next)) {
-            return x.next();
+    function rest(col) {
+        var val = next(col)
+        return val == null ? EMPTY_ARRAY : val;
+    }
+
+    function next(col) {
+        if (col == null) return null;
+
+        if (isFunction(col.next)) {
+            return col.next();
         }
-        else if (isFunction(x.rest)) {
-            var val = x.rest();
-            return isEmpty(val) ? null : val;
-        }
-        else if (isArrayLike(x)) {
-            if (x.length <= 1) {
+
+        if (isArrayLike(col)) {
+            if (col.length <= 1) {
                 return null;
             }
             else {
-                if (isFunction(x.slice)) {
-                    return x.slice(1);
-                }
-                else {
-                    return Array.prototype.slice.call(x, 1);
-                }
+                return Array.prototype.slice.call(col, 1);
             }
         }
-        else {
-            throw new Error("Cannot get the rest of the elements of: " + x);
+
+        if (isIterator(col)) {
+            var a = [], i = 0;
+            for (var val of col) {
+                if (i === 0) {
+                    i++
+                    continue;
+                }
+                a.push(val);
+            }
+            return i === 0 ? null : a
         }
+
+        throw new Error("Cannot get the next element of: " + col);
     }
 
-    function cons(x, seq) {
-        if (seq == null) return [x];
-        else if (isFunction(seq.cons)) {
-            return seq.cons(x);
+    function cons(x, col) {
+        if (col == null) return [x];
+
+        if (isFunction(col.cons)) {
+            return col.cons(x);
         }
-        else if (isArrayLike(seq)) {
-            if (isString(seq)) {
-                return [x, seq].join('');
+
+        if (isArrayLike(col)) {
+            if (isString(col)) {
+                return [x, col].join('');
             }
             else {
-                return [x].concat(seq);
+                return [x].concat(col);
             }
         }
-        else {
-            throw new Error("Cannot cons and element to: " + seq);
-        }
+
+        throw new Error("Cannot cons and element to: " + col);
     }
 
     function isEmpty(x) {
         if (x == null) return true;
-        else if (isArrayLike(x)) {
+
+        if (isArrayLike(x)) {
             return x.length === 0;
         }
-        else {
-            return next(x) == null;
-        }
+
+        return next(x) == null;
     }
 
     function map(f, xs) {
-        if (arguments.length === 2) {
-            if (isEmpty(xs)) {
-                return [];
-            }
-            else {
-                var a = [];
-                while (xs != null) {
-                    a.push(f.call(null, first(xs)));
-                    xs = next(xs);
-                }
-                return a;
-            }
-        }
-        else {
+        if (arguments.length !== 2) {
             throw new Error('Wrong number of arguments expected 2, got: ' + arguments.length);
         }
+
+        if (isEmpty(xs)) {
+            return EMPTY_ARRAY;
+        }
+
+        var a = [];
+        while (xs != null) {
+            a.push(f.call(xs, first(xs)));
+            xs = next(xs);
+            if (isEmpty(xs)) break;
+        }
+        return a;
     }
 
     function filter(f, xs) {
@@ -191,7 +203,7 @@ JSGLOBAL = typeof module !== 'undefined' ? global : window;
                 var a = [], x;
                 while (xs != null) {
                     x = first(xs);
-                    if (f.call(null, x)) a.push(x);
+                    if (f.call(xs, x)) a.push(x);
                     xs = next(xs);
                 }
                 return a;
@@ -214,7 +226,7 @@ JSGLOBAL = typeof module !== 'undefined' ? global : window;
             else {
                 var x = init;
                 while (xs != null) {
-                    x = f.call(null, x, first(xs));
+                    x = f.call(xs, x, first(xs));
                     xs = next(xs);
                 }
                 return x;
@@ -276,6 +288,8 @@ JSGLOBAL = typeof module !== 'undefined' ? global : window;
     }
     
     function range() {
+        var start, stop, step;
+
         if (arguments.length === 1) {
             start = 0;
             stop  = arguments[0];
@@ -361,7 +375,7 @@ JSGLOBAL = typeof module !== 'undefined' ? global : window;
     function raise(msg) {
         var e = isString(msg) ? new Error(msg) : msg;
         return function() {
-            throw msg;
+            throw e;
         };
     }
 
@@ -389,6 +403,7 @@ JSGLOBAL = typeof module !== 'undefined' ? global : window;
         return x instanceof Namespace;
     }
 
+    // TODO: add protocols
     function Protocol(docString, methods) {
         this.docString = docString;
         this.methods = methods;
@@ -430,11 +445,15 @@ JSGLOBAL = typeof module !== 'undefined' ? global : window;
         isFunction: isFunction,
         isArrayLike: isArrayLike,
         isArray: isArray,
+        isIterator: isIterator,
+        isSet: isSet,
+        isMap: isMap,
         isNull: isNull,
         isNil: isNil,
         isUndefined: isUndefined,
         isObject: isObject,
         isObjectLiteral: isObjectLiteral,
+        isEmpty: isEmpty,
         toArray: toArray,
         array: array,
         concat: concat,
@@ -453,6 +472,7 @@ JSGLOBAL = typeof module !== 'undefined' ? global : window;
         range: range,
         memoize: memoize,
         apply: apply,
+        compose: compose,
         either: either,
         maybe: maybe,
         raise: raise,

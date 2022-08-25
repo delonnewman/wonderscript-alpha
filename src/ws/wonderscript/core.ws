@@ -1,5 +1,3 @@
-; vim: ft=clojure
-
 ; Intial fn definition, will redefine below
 (def fn
   (fn* (args &body)
@@ -127,24 +125,11 @@
 (defn slice
   (a n) (.slice a n))
 
-(defn seq (xs)
-  (cond (nil? xs) []
-        (array? xs) xs
-        (objectliteral? xs) (.entries js/Object xs)
-        :else
-          (throw (js/Error. "The given value is not seqable"))))
-
-(defn first
-  (xs) (aget (seq xs) 0))
-
 (defn second
-  (xs) (aget (seq xs) 1))
-
-(defn rest
-  (xs) (.slice (seq xs) 1))
+  (xs) (first (rest xs)))
 
 (defn nth
-  (xs n) (aget (seq xs) n))
+  (xs n) (aget xs n))
 
 (defn true?
   (x) (identical? true x))
@@ -165,7 +150,7 @@
   (x) (array? x) (string? (aget x 0)))
 
 (defn has-attr?
-  (x) (objectliteral? (aget x 1)))
+  (x) (map? (aget x 1)))
 
 (defn component?
   (x) (array? x) (function? (aget x 0)))

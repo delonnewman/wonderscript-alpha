@@ -1,6 +1,3 @@
-// jshint esversion: 6
-// jshint eqnull: true
-// jshint evil: true
 JSGLOBAL = typeof module !== 'undefined' ? global : window;
 JSGLOBAL.wonderscript = JSGLOBAL.wonderscript || {};
 JSGLOBAL.wonderscript.compilerBuilder = function(global, platform) {
@@ -359,11 +356,13 @@ JSGLOBAL.wonderscript.compilerBuilder = function(global, platform) {
     }
 
     function emitMapEntry(env) {
-        return function(entry) { return str(entry[0], ':', emit(entry[1], env)); };
+        return function(entry) {
+            return str('[', emit(entry[0], env), ', ', emit(entry[1], env), ']');
+        };
     }
 
     function emitMap(m, env) {
-        return str('({', map(emitMapEntry(env), Object.entries(m)).join(', '), '})');
+        return str('(new Map([', map(emitMapEntry(env), m).join(', '), ']))');
     }
 
     function isKeyword(x) {
@@ -378,22 +377,19 @@ JSGLOBAL.wonderscript.compilerBuilder = function(global, platform) {
         return JSON.stringify(name);
     }
 
-    const isMap = isObjectLiteral;
-
-    function isSymbol(x) {
-        return typeof x === 'string';
-    }
+    const isMap = core.isMap;
+    const isSymbol = isString;
 
     const TOP = env();
     // TODO: try/catch/finally
     function emit(form_, env_) {
         var env_ = env_ || TOP;
         var form = macroexpand(form_, env_);
-        if (isSymbol(form)) {
-            return emitSymbol(form, env_);
-        }
-        else if (isKeyword(form)) {
+        if (isKeyword(form)) {
             return emitKeyword(form);
+        }
+        else if (isSymbol(form)) {
+            return emitSymbol(form, env_);
         }
         else if (isNumber(form)) {
             return str(form);
@@ -1062,11 +1058,12 @@ JSGLOBAL.wonderscript.compilerBuilder = function(global, platform) {
         else if (isFunction(x)) {
             return str('#js/function "', x.toString(), '"');
         }
+        else if (isMap(x)) {
+            var s = map(function(entry) { return str(prStr(entry[0]), ' ', prStr(entry[1])); }, x).join(' ');
+            return str('{', s, '}');
+        }
         else if (x.toString) {
             return x.toString();
-        }
-        else if (isMap(x)) {
-            return str('{', map(function(entry) { return str(prStr(entry[0]), ' ', prStr(entry[1])); }, Object.entries(x)).join(' '), '}');
         }
         else if (isArrayLike(x)) {
             return str('#js/object {',
@@ -1133,22 +1130,6 @@ JSGLOBAL.wonderscript.compilerBuilder = function(global, platform) {
 
         return buffer.join('');
     }
-
-    CORE_MOD.import = function(name, value) {
-        var value = value || eval(name);
-        var wsName = CORE_NAMES[name];
-        if (wsName) {
-            wsName = escapeChars(dasherize(wsName));
-        }
-        else if (name.startsWith('is')) {
-            wsName = str(name.slice(2).toLowerCase(), '?');
-            wsName = escapeChars(dasherize(wsName));
-        }
-        else {
-            wsName = escapeChars(dasherize(name));
-        }
-        define(TOP, name, value);
-    };
 
     function importSymbol(name, obj) {
         var wsName = CORE_NAMES[name];

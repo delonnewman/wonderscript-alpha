@@ -1,10 +1,9 @@
-// jshint esversion: 6
 JSGLOBAL = typeof module !== 'undefined' ? global : window;
 JSGLOBAL.wonderscript = JSGLOBAL.wonderscript || {};
 wonderscript.edn = function() {
     
-    const IS_NODE = typeof module !== 'undefined' ? true : false;
-    const IS_BROWSER = typeof window !== 'undefined' ? true : false;
+    const IS_NODE = typeof module !== 'undefined';
+    const IS_BROWSER = typeof window !== 'undefined';
 
     var core;
     if (IS_NODE) {
@@ -174,22 +173,19 @@ wonderscript.edn = function() {
 
     function vectorReader(r, openbracket, opts) {
         var a = readDelimitedList(']', r, true, opts);
-        //return new Vector(null, a);
-        return ['array'].concat(a);
+        // return new Vector(null, a);
+        // return ['array'].concat(a);
+        return ['quote', a]
     }
 
     function mapReader(r, openbracket, opts) {
         var a = readDelimitedList('}', r, true, opts);
-        //return arrayMap.apply(null, a);
-        var i, obj = {}, key, val;
+        var i, map = new Map(), key, val;
         for (i = 0; i < a.length; i += 2) {
             key = a[i]; val = a[i + 1];
-            if (Array.isArray(key) && key[0] === 'quote') {
-                key = key[1];
-            }
-            obj[key] = val;
+            map.set(key, val);
         }
-        return obj;
+        return map;
     }
 
     function characterReader(r, slash, opts) {

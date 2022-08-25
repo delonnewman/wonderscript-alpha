@@ -14,8 +14,8 @@ function interactive() {
         terminal: true
     });
 
-    NS.value = createNs('user');
-    wonderscript.core.import('user', NS.value);
+    // NS.value = createNs('user');
+    // wonderscript.core.import('user', NS.value);
     rl.setPrompt(str(NS.value.name, "> "));
     rl.prompt();
 
