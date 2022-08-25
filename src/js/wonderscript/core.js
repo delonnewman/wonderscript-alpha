@@ -132,15 +132,14 @@ JSGLOBAL = typeof module !== 'undefined' ? global : window;
             }
         }
 
-        if (isIterator(col)) {
+        if (isFunction(col.forEach)) {
             var a = [], i = 0;
-            for (var val of col) {
-                if (i === 0) {
-                    i++
-                    continue;
+            col.forEach(function (val) {
+                if (i > 0) {
+                    a.push(val);
                 }
-                a.push(val);
-            }
+                i++
+            });
             return i === 0 ? null : a
         }
 
@@ -288,7 +287,7 @@ JSGLOBAL = typeof module !== 'undefined' ? global : window;
     }
     
     function range() {
-        var start, stop, step;
+        let start, stop, step;
 
         if (arguments.length === 1) {
             start = 0;
@@ -305,16 +304,16 @@ JSGLOBAL = typeof module !== 'undefined' ? global : window;
             stop  = arguments[1];
             step  = arguments[2];
         }
+
         if (start === stop) {
             return [start];
         }
-        else {
-            var a = [], i;
-            for (i = start; a.length < stop; i = i + step) {
-                a.push(i);
-            }
-            return a;
+
+        const a = [];
+        for (let i = start; a.length < stop; i = i + step) {
+            a.push(i);
         }
+        return a;
     }
 
     function apply(f, args, ctx) {

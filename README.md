@@ -1,6 +1,6 @@
 # WonderScript
 
-A simple Lisp for web development 
+A simple lisp for web development 
 
 # Synopsis
 

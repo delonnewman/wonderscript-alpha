@@ -27,7 +27,6 @@ JSGLOBAL.wonderscript.compilerBuilder = function(global, platform) {
         first = core.first,
         next = core.next,
         rest = core.rest,
-        isObjectLiteral = core.isObjectLiteral,
         isNull = core.isNull,
         isString = core.isString,
         isFunction = core.isFunction,
@@ -90,8 +89,6 @@ JSGLOBAL.wonderscript.compilerBuilder = function(global, platform) {
     const ALENGTH_SYM     = 'alength';
     const INSTANCE_SYM    = 'instance?';
     const TYPE_SYM        = 'type';
-
-    const MACRO_DEF_SYM   = 'defmacro';
 
     const NULL_SYM        = 'null';
     const UNDEFINED_SYM   = 'undefined';
@@ -167,14 +164,16 @@ JSGLOBAL.wonderscript.compilerBuilder = function(global, platform) {
     }
 
     const SPECIAL_CHARS = {
-        '='   : '_EQ_',
-        '\\-' : '_DASH_',
-        '\\*' : '_STAR_',
-        '!'   : '_BANG_',
-        '\\?' : '_QUEST_',
-        '\\^' : '_HAT_',
-        '\\+' : '_PLUS_',
-        '\\.' : '_DOT_'
+        '='    : '_EQ_',
+        '\\-'  : '_DASH_',
+        '\\*'  : '_STAR_',
+        '!'    : '_BANG_',
+        '\\?'  : '_QUEST_',
+        '\\^'  : '_HAT_',
+        '\\+'  : '_PLUS_',
+        '\\.'  : '_DOT_',
+        '/'    : '_BSLASH_',
+        '\\\\' : '_FSLASH_',
     };
 
     function escapeChars(string) {
@@ -189,6 +188,8 @@ JSGLOBAL.wonderscript.compilerBuilder = function(global, platform) {
         _EQ_: '=',
         _DASH_: '-',
         _STAR_: '*',
+        _BSLASH_: '/',
+        _FSLASH_: '\\',
         _BANG_: '!',
         _QUEST_: '?',
         _HAT_: '^',
@@ -404,7 +405,7 @@ JSGLOBAL.wonderscript.compilerBuilder = function(global, platform) {
             return UNDEFINED_SYM;
         }
         else if (isMap(form)) {
-            return emitMap(form);
+            return emitMap(form, env_);
         }
         else if (isArray(form)) {
             if (form.length === 0) {
@@ -566,7 +567,7 @@ JSGLOBAL.wonderscript.compilerBuilder = function(global, platform) {
         else if (s === '&form') {
             return 'this.form';
         }
-        else if (s.indexOf('/') !== -1) {
+        else if (s !== DIV_SYM && s.indexOf('/') !== -1) {
             var parts = s.split('/');
             if (parts.length !== 2) throw new Error('A symbol should only have 2 parts');
             scope = lookup(env, parts[0]);
@@ -955,7 +956,7 @@ JSGLOBAL.wonderscript.compilerBuilder = function(global, platform) {
                     ret = eval(emit(res, scope, stack));
                 }
                 catch (e) {
-                    console.log(stacktrace(stack));
+                    console.error(stacktrace(stack));
                     throw e;
                 }
             }
@@ -1048,12 +1049,6 @@ JSGLOBAL.wonderscript.compilerBuilder = function(global, platform) {
                 }
                 return str('(', buffer.join(' '), ')');
             }
-        }
-        else if (isArray(x)) {
-            if (x.length === 0) {
-                return '(array)';
-            }
-            return str('(array ', x.map(prStr).join(' '), ')');
         }
         else if (isFunction(x)) {
             return str('#js/function "', x.toString(), '"');

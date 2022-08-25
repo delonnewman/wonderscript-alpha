@@ -17,6 +17,6 @@
   },
   "homepage": "https://github.com/delonnewman/wonderscript-alpha#readme",
   "devDependencies": {
-    "uglify-js": "^3.11.5"
+    "uglify-js": "^3.17.0"
   }
 }

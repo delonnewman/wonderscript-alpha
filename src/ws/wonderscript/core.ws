@@ -13,13 +13,15 @@
            (array 'set-macro name)
            name)))
 (set-macro defmacro)
-(set-meta :doc "define a macro")
-(set-meta :arglists '(name args &body))
+(set-meta defmacro :doc "define a macro")
+(set-meta defmacro :arglists '(name args &body))
 
 ; TODO: redefine fn with multi arity bodies
 
 (defmacro defn (name args &body)
   (array 'def name (cons 'fn (cons args body))))
+
+(defmacro == (a b) (array 'identical? a b))
 
 (def identity (fn (x) x))
 
@@ -39,7 +41,10 @@
         :else
           (eval (cons '+ xs))))
 
+; TODO: improve these definitions
 (defn - (a b) (- a b))
+(defn * (a b) (* a b))
+(defn / (a b) (/ a b))
 
 (defmacro comment (&xs) nil)
 
@@ -47,7 +52,7 @@
   (cond (identical? 2 (alength args))
           (array 'cond (aget args 0) (aget args 1))
         (identical? 3 (alength args))
-          (array 'cond (aget args 0) (aget args 1) :else (aget args 2))
+         (array 'cond (aget args 0) (aget args 1) :else (aget args 2))
         :else
           (throw (new js/Error "Wrong number of arguments expected 2 or 3"))))
 
@@ -223,5 +228,10 @@
     (array 'def nm (cons 'fn (cons '() body)))
     (array 'set-meta nm ':test true)))
 
-(defn class (object)
-  (.-name (.-constructor object)))
+(defn class
+  (object)
+  (.-constructor object))
+
+(defn class-name
+  (object)
+  (.-name (class object)))
