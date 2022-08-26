@@ -6,7 +6,7 @@
     <main id="main"></main>
     <script src="dist/wonderscript.js"></script>
     <script>
-      document.getElementById('main').innerHTML = wonderscript.core.html(['a', {href: '#'}, "test"]);
+      document.getElementById('main').innerHTML = wonderscript.core.html(['a', new Map([['href', '#']]), "test"]);
     </script>
   </body>
 </html>

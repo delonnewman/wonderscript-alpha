@@ -19,6 +19,8 @@
 (set-meta defmacro :doc "define a macro")
 (set-meta defmacro :arglists '(name args &body))
 
+(defmacro comment (&xs) nil)
+
 ; TODO: redefine fn with multi arity bodies
 
 (defmacro defn (name args &body)
@@ -32,10 +34,34 @@
 (def identity (fn (x) x))
 
 ; TODO: Should be named "always"?
-(def constantly
+(def always
   (fn (x)
     (fn ()
       x)))
+
+;; Boolean & Logic
+
+(defmacro if (&args)
+  (cond (identical? 2 (alength args))
+          (array 'cond (aget args 0) (aget args 1))
+        (identical? 3 (alength args))
+         (array 'cond (aget args 0) (aget args 1) :else (aget args 2))
+        :else
+          (throw (new js/Error "Wrong number of arguments expected 2 or 3"))))
+
+(defn true?
+  (x) (identical? true x))
+
+(defn false?
+  (x) (identical? false x))
+
+(defn falsy?
+  (obj) (and (identical? false) (nil? obj)))
+
+(defn truthy?
+  (obj) (not (falsy? obj)))
+
+;; Numerical
 
 (defn inc (x) (+ x 1))
 (defn dec (x) (- x 1))
@@ -53,16 +79,14 @@
 (defn * (a b) (* a b))
 (defn / (a b) (/ a b))
 
-(defmacro comment (&xs) nil)
+(defn zero?
+  (x) (identical? 0 x))
 
-(defmacro if (&args)
-  (cond (identical? 2 (alength args))
-          (array 'cond (aget args 0) (aget args 1))
-        (identical? 3 (alength args))
-         (array 'cond (aget args 0) (aget args 1) :else (aget args 2))
-        :else
-          (throw (new js/Error "Wrong number of arguments expected 2 or 3"))))
+(defn pos?
+  (x) (< 0 x))
 
+(defn neg?
+  (x) (> 0 x))
 
 (defn even? (x)
   (identical? (bit-and x 1) 0))
@@ -84,16 +108,17 @@
 ;   ((x) x)
 ;   ((x y) [x y])
 ;   ((x y &zs) (cons x (cons y zs))))
-(defmacro func (&xs)
+(defmacro fn- (&xs)
   (let (x (aget xs 0))
-    (cond (assoc-array? x)
-          ; compile multi-body fn
-          ; TODO: collect arguments
-          (array 'fn (array '&args)
-                 (cons 'cond
-                       (mapcat (fn (x)
-                                 (array (array 'identical? (.-length (aget x 0)) 'args) (aget x 1))) xs)))
-          :else
+    (cond
+      (assoc-array? x)
+        ; compile multi-body fn
+        ; TODO: collect arguments
+      (array 'fn (array '&args)
+             (cons 'cond
+                   (mapcat (fn (x)
+                             (array (array 'identical? (.-length (aget x 0)) 'args) (aget x 1))) xs)))
+          else
             ; single body fn
             (cons 'fn xs))))
 
@@ -130,32 +155,11 @@
   (array 'loop ()
          (cons 'when (cons pred (concat body (array (array 'recur)))))))
 
-(defn true?
-  (x) (identical? true x))
-
-(defn false?
-  (x) (identical? false x))
-
-(defn falsy?
-  (obj) (and (identical? false) (nil? obj)))
-
-(defn truthy?
-  (obj) (not (falsy? obj)))
-
-(defn zero?
-  (x) (identical? 0 x))
-
-(defn pos?
-  (x) (< 0 x))
-
-(defn neg?
-  (x) (> 0 x))
-
 (defn pr
   (x)
   (print (pr-str x)))
 
-;; ;; Assertions and Testing
+;; Assertions and Testing
 
 (def $failure-tag "FAILURE: ")
 (def $assertion-msg " is false")
@@ -231,11 +235,28 @@
   (object)
   (.call (.-toString (.-prototype js/Object))) object)
 
-(defn satisfies?
+(defn arity
+  (f)
+  (if (function? f)
+    (.-length f)
+    (throw (js/Error. "arity cannot be found"))))
+
+(defn js-property-value
+  (obj property-name)
+  (aget obj property-name))
+
+(defn method
+  (obj method-name)
+  (let (val (js-property-value obj method-name))
+    (if (function? val)
+      val
+      (throw (js/Error. "undefined method")))))
+
+(defn method?
   (obj method)
   (function? (aget obj method)))
 
-;; Array & ArrayLike
+;; Array, Strings & ArrayLike
 
 
 (def $empty-array (freeze! []))
@@ -250,8 +271,12 @@
        (number? (.-length object))))
 
 (defn slice
-  (array n)
-  (.call (.-slice (.-prototype js/Array)) array n))
+  (col start end)
+  (.slice col start end))
+
+; TODO: add support for seqs
+(defn at
+  (col n) (.at col n))
 
 (defn push!
   (array value)
@@ -305,6 +330,27 @@
         (aset pairs i p)))
     pairs))
 
+;; Strings
+
+(def $white-space-regex (js/RegExp. "\\s+"))
+(def $empty-string "")
+
+(defn blank?
+  (object)
+  (or (nil? object) (empty? object)
+      (and (string? object)
+           (identical? 0 (.-length (.replace object $white-space-regex $empty-string))))))
+
+(defn present?
+  (object)
+  (not (blank? object)))
+
+(defn presence
+  (object)
+  (if (blank? object)
+    nil
+    object))
+
 ;; Maps & Sets
 
 ;; TODO: Add merge and merge!
@@ -320,7 +366,7 @@
 (defn entries
   (map) (->array (.entries map)))
 
-(defn (defn size
+(defn size
   (map) (.-size map))
 
 ;; These are map specific
@@ -346,11 +392,11 @@
 (defn seq?
   (obj)
   (or (nil? obj) (array? obj) (map? obj) (set? obj)
-      (and (satisfies? obj 'first) (satisfies? 'next))))
+      (and (method? obj 'first) (method? obj 'next))))
 
 (defn seqable?
   (obj)
-  (or (seq? obj) (satisfies? obj 'seq)))
+  (or (seq? obj) (method? obj 'seq)))
 
 (defn seq
   (obj)
@@ -370,17 +416,13 @@
 (defn fourth
   (xs) (first (rest (rest (rest xs)))))
 
-; TODO: add support for seqs
-(defn at
-  (col n) (.at col n))
-
 (defn add!
   (col value)
   (cond
     (array-like? col) (do (push! col value) col)
     (map? col) (add-key! col (at value 0) (at value 1))
     (set? col) (add-member! col value)
-    (satisfies? col 'add) (.add col value)
+    (method? col 'add) (.add col value)
     else
       (throw "don't know how to add a value to this collection")))
 
@@ -392,7 +434,7 @@
   (col ref)
   (cond
     (array-like? col) (do (.splice col ref 1) col)
-    (satisfies? col 'delete) (do (.delete col ref) col)
+    (method? col 'delete) (do (.delete col ref) col)
     else
       (throw "don't know how to add a value to this collection")))
 
@@ -414,7 +456,7 @@
   (cond
     (array-like? col) (length col)
     (or (map? col) (set? col)) (size col)
-    (satisfies? col 'count) (.count col)
+    (method? col 'count) (.count col)
     else
      (reduce (fn (n _) (inc n)) col 0)))
 
@@ -424,7 +466,7 @@
     (array-like? col) (not (identical? -1 (index-of col value)))
     (map? col) (key? col value)
     (set? col) (member? col value)
-    (satisfies? col 'includes) (.includes col value)
+    (method? col 'includes) (.includes col value)
     else
       (throw "can't test inclusion")))
 
@@ -455,28 +497,9 @@
   (cond
     (and (nil? a) (nil? b)) (equiv? a b)
     (and (js-primitive-type? a) (js-primitive-type? b)) (identical? a b)
-    (and (satisfies? a 'equal) (satisfies? b 'equal)) (.equal a b)
+    (and (method? a 'equal) (method? b 'equal)) (.equal a b)
     else
       (throw "both values must implement equality protocol")))
-
-(def $white-space-regex (js/RegExp. "\\s+"))
-(def $empty-string "")
-
-(defn blank?
-  (object)
-  (or (nil? object) (empty? object)
-      (and (string? object)
-           (identical? 0 (.-length (.replace object $white-space-regex $empty-string))))))
-
-(defn present?
-  (object)
-  (not (blank? object)))
-
-(defn presence
-  (object)
-  (if (blank? object)
-    nil
-    object))
 
 ;; HTML Rendering
 
@@ -491,9 +514,11 @@
 
 (def tag-list? array?)
 
-(defn render-attr (form)
+(defn render-attr
+  (form)
   (reduce (fn (s x) (str s " " x))
-          (map (fn (x) (str (aget x 0) "=\"" (aget x 1) "\"")) (.entries js/Object form))))
+          (map (fn (x) (str (aget x 0) "=\"" (aget x 1) "\""))
+               (entries form))))
 
 (def html) ; render-tag-list and html are mutually recursive
 
@@ -501,9 +526,9 @@
   (form) (.join (map html form) ""))
 
 (defn render-attr-tag (form)
-  (let (t (aget form 0)
+  (let (tag  (aget form 0)
         attr (render-attr (aget form 1)))
-    (str "<" t " " attr ">" (render-tag-list (slice form 2)) "</" t ">")))
+    (str "<" tag " " attr ">" (render-tag-list (slice form 2)) "</" tag ">")))
 
 (defn render-tag (form)
   (let (t (aget form 0))

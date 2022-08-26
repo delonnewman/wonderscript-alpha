@@ -570,7 +570,7 @@ JSGLOBAL.wonderscript.compilerBuilder = function(global, platform) {
             return str('[', map(emitQuotedValue, val).join(', '), ']');
         }
         else if (isMap(val)) {
-            return str('({', map(function(xs) { return str(xs[0], ':', emitQuotedValue(xs[1])); }, Object.entries(val)).join(', '), '})');
+            return str('(new Map([', map(function(xs) { return str('[', emitQuotedValue(xs[0]), ',', emitQuotedValue(xs[1]) ,']'); }, val).join(', '), ']))');
         }
         throw new Error('Invalid form: ' + val);
     }

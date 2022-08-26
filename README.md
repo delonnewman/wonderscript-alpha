@@ -4,14 +4,16 @@ A simple lisp for web development
 
 # Synopsis
 
-    user> (+ 3 4)
-    => 7
-    user> (defn square (x) (* x x))
-    => #js/function "function(x) { return (x*x); }"
-    user> (square 5)
-    => 25
-    user> (reduce + (range 10))
-    => 45
+```clojure
+user> (+ 3 4)
+=> 7
+user> (defn square (x) (* x x))
+=> #js/function "function(x) { return (x*x); }"
+user> (square 5)
+=> 25
+user> (reduce + (range 10))
+=> 45
+```
 
 # Language
 
@@ -37,7 +39,9 @@ A simple lisp for web development
 - `loop`
 - `recur`
 - `throw`
-- `try`, `catch`, `finally` (not implemented)
+- ~~`try`, `catch`, `finally`~~ (not implemented)
+- ~~`do`~~
+- `begin`, `rescue`, `ensure`, `else`?
 - `new`
 - `.`
 
@@ -76,7 +80,8 @@ A simple lisp for web development
 - `true?`, `false?`
 - `map`, `reduce`, `filter`, `mapcat`
 - `first`, `next`, `rest`, `second`, `cons`, `drop`, `take`
-- `nth`, `concat`
+- ~~`nth`~~, `at`
+- `concat`
 - `range`
 - `empty?`
 - `partition`
@@ -94,6 +99,49 @@ A simple lisp for web development
 - `maybe`?, `either`?, `raise`?
 - `set-meta`, `meta`, `get-meta`, `reset-meta`
 - `atom`, `reset!`, `swap!`, `deref`, `compare-and-swap!` (TODO)
+
+## Equality
+
+- `=`  value equality
+- `==` object identity
+- `=~` pattern match overloaded by different classes by implementing match(value)
+
+## Protocols
+
+A collection of properties/shapes and doc strings
+
+- Meta
+  - meta()
+  - set-meta(key, value)
+  - get-meta(key)
+- Named?
+  - name()
+  - namespace()
+- Collection
+  - add(col, value)
+- Seq < Collection
+  - first()
+  - next()
+- Seqable < Collection
+  - seq() 
+- Associative < Seqable
+  - get(key, alt = nil)
+  - remove(key)
+- Indexed < Associative
+  - at(index)
+- Stack
+  - pop()
+  - peek()
+  - push()
+- Queue
+- Matchable =~
+  - match(pattern)
+- Equality =
+  - equal(other)
+- Comparable <=>
+  - cmp(other)
+- js/ArrayLike
+  - length:number
 
 # TODO
 
