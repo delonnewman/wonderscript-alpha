@@ -1,3 +1,5 @@
+; -*- mode: clojure -*-
+
 ;(ns wonderscript.repl)
 
 (defn repl.input ()

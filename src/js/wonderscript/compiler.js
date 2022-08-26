@@ -10,7 +10,7 @@ JSGLOBAL.wonderscript.compilerBuilder = function(global, platform) {
     if (IS_NODE) {
         core = require('./core.js');
         edn = require('./edn.js');
-        global.window = global; // mock brower's global object
+        global.window = global; // mock browser's global object
     }
 
     if (IS_BROWSER) {
@@ -174,6 +174,14 @@ JSGLOBAL.wonderscript.compilerBuilder = function(global, platform) {
         '\\.'  : '_DOT_',
         '/'    : '_BSLASH_',
         '\\\\' : '_FSLASH_',
+        '>'    : '_GT_',
+        '<'    : '_LT_',
+        '\\['  : '_OBRACK_',
+        '\\]'  : '_CBRACK_',
+        '\\$'  : '_DOLLAR_',
+        '\\@'  : '_AT_',
+        '\\%'  : '_PERCENT_',
+        '~'    : '_TILDE_',
     };
 
     function escapeChars(string) {
@@ -188,13 +196,21 @@ JSGLOBAL.wonderscript.compilerBuilder = function(global, platform) {
         _EQ_: '=',
         _DASH_: '-',
         _STAR_: '*',
-        _BSLASH_: '/',
-        _FSLASH_: '\\',
         _BANG_: '!',
         _QUEST_: '?',
         _HAT_: '^',
         _PLUS_: '+',
-        _DOT_: '.'
+        _DOT_: '.',
+        _BSLASH_: '/',
+        _FSLASH_: '\\',
+        _GT_: '>',
+        _LT_: '<',
+        _OBRACK_: '[',
+        _CBRACK_: ']',
+        _DOLLAR_: '$',
+        _AT_: '@',
+        _PERCENT_: '%',
+        _TILDE_: '~',
     };
 
     function unescapeChars(string) {
@@ -593,6 +609,7 @@ JSGLOBAL.wonderscript.compilerBuilder = function(global, platform) {
                 return str(CORE_NS.name, '.', s_);
             }
             else {
+                console.error("env", env)
                 throw new Error(str('Undefined variable: "', s, '"'));
             }
         }

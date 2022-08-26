@@ -1,3 +1,5 @@
+; -*- mode: clojure -*-
+
 ; Initial fn definition, will redefine below
 ; TODO: add arity checks here
 (def fn
@@ -22,7 +24,9 @@
 (defmacro defn (name args &body)
   (array 'def name (cons 'fn (cons args body))))
 
-(defn == (a b) (array 'identical? a b))
+(defn ==
+  (a b)
+  (identical? a b))
 
 ; TODO: Is there a preferable name less mathy perhaps what about "reflect"?
 (def identity (fn (x) x))
@@ -93,6 +97,8 @@
             ; single body fn
             (cons 'fn xs))))
 
+;; Imperative Programming
+
 (defmacro when (pred &acts)
   (array 'cond pred (cons 'do acts)))
 
@@ -124,29 +130,17 @@
   (array 'loop ()
          (cons 'when (cons pred (concat body (array (array 'recur)))))))
 
-(defn partition (n a)
-  (let (pairs (array))
-    (dotimes (i (.floor js/Math (/ (alength a) n)))
-      (let (p (array))
-        (dotimes (j n)
-          (aset p j (aget a (+ (* n i) j))))
-        (aset pairs i p)))
-    pairs))
-
-(defn slice
-  (a n) (.slice a n))
-
-(defn second
-  (xs) (first (rest xs)))
-
-(defn nth
-  (xs n) (aget xs n))
-
 (defn true?
   (x) (identical? true x))
 
 (defn false?
   (x) (identical? false x))
+
+(defn falsy?
+  (obj) (and (identical? false) (nil? obj)))
+
+(defn truthy?
+  (obj) (not (falsy? obj)))
 
 (defn zero?
   (x) (identical? 0 x))
@@ -156,6 +150,335 @@
 
 (defn neg?
   (x) (> 0 x))
+
+(defn pr
+  (x)
+  (print (pr-str x)))
+
+;; ;; Assertions and Testing
+
+(def $failure-tag "FAILURE: ")
+(def $assertion-msg " is false")
+
+(defmacro is
+  (&args)
+  (cond (identical? 1 (alength args))
+        (array 'is (aget args 0) (array 'str '$failure-tag (array 'quote (pr-str (aget args 0))) '$assertion-msg))
+        (identical? 2 (alength args))
+        (array 'cond
+               (array 'not (aget args 0)) (array 'print (aget args 1)))))
+
+(defmacro is-not (body &args)
+  (cons 'is (cons (array 'not body) args)))
+
+(defmacro deftest
+  (nm &body)
+  (array 'do
+    (array 'def nm (cons 'fn (cons '() body)))
+    (array 'set-meta nm ':test true)))
+
+;; OOP & JS reflection
+
+(defn js-constructor
+  (object)
+  (.-constructor object))
+
+(defn js-prototype
+  (object)
+  (.-prototype object))
+
+(defn js-constructor-name
+  (object)
+  (.-name (js-constructor object)))
+
+(defn js-define-singleton-method
+  (obj method-name f)
+  (aset obj method-name f))
+
+(defn js-define-prototype-method
+  (object method-name f)
+  (aset (js-prototype object) method-name f))
+
+(defn freeze!
+  (object) (.freeze js/Object object))
+
+(defn frozen?
+  (object) (.isFrozen js/Object object))
+
+(defn clone
+  (object)
+  (if (.isArray js/Array object)
+    (.slice object 0)
+    (.assign js/Object (.create js/Object nil) object)))
+
+(defn seal!
+  (object) (.seal js/Object object))
+
+(defn sealed?
+  (object) (.isSealed js/Object object))
+
+(defn extensible?
+  (object) (.isExtensible js/Object object))
+
+(defn prevent-extensions!
+  (object) (.preventExtensions js/Object object))
+
+(defn js-primitive-type?
+  (obj)
+  (not (identical? "object" (type obj))))
+
+(defn js-object-tag
+  (object)
+  (.call (.-toString (.-prototype js/Object))) object)
+
+(defn satisfies?
+  (obj method)
+  (function? (aget obj method)))
+
+;; Array & ArrayLike
+
+
+(def $empty-array (freeze! []))
+
+(defn array?
+  (object)
+  (.isArray js/Array object))
+
+(defn array-like?
+  (object)
+  (and (identical? "object" (type object))
+       (number? (.-length object))))
+
+(defn slice
+  (array n)
+  (.call (.-slice (.-prototype js/Array)) array n))
+
+(defn push!
+  (array value)
+  (.call (.-push (.-prototype js/Array)) array value))
+
+(defn pop!
+  (array)
+  (.call (.-pop (.-prototype js/Array)) array))
+
+(defn unshift!
+  (array value)
+  (.call (.-unshift (.-prototype js/Array)) array value))
+
+(defn shift!
+  (array)
+  (.call (.-shift (.-prototype js/Array)) array))
+
+(defn sort!
+  (array)
+  (.call (.-shift (.-prototype js/Array)) array))
+
+(defn sort
+  (array)
+  (sort! (clone array)))
+
+(defn reverse!
+  (array)
+  (.call (.-reverse (.-prototype js/Array)) array))
+
+(defn reverse
+  (array)
+  (reverse! (clone array)))
+
+(defn ->array
+  (object)
+  (.from js/Array object))
+
+(defn index-of
+  (array value)
+  (.call (.-indexOf (.-prototype js/Array)) array))
+
+(defn length
+  (array) (.-length array))
+
+(defn partition (n a)
+  (let (pairs (array))
+    (dotimes (i (.floor js/Math (/ (alength a) n)))
+      (let (p (array))
+        (dotimes (j n)
+          (aset p j (aget a (+ (* n i) j))))
+        (aset pairs i p)))
+    pairs))
+
+;; Maps & Sets
+
+;; TODO: Add merge and merge!
+
+;; These are polymorphic on Maps ans Sets and any other
+;; object that implements the method.
+(defn keys
+  (map) (->array (.keys map)))
+
+(defn values
+  (map) (->array (.values map)))
+
+(defn entries
+  (map) (->array (.entries map)))
+
+(defn (defn size
+  (map) (.-size map))
+
+;; These are map specific
+(defn add-key!
+  (map key value)
+  (.set map key value))
+
+(defn key?
+  (map key)
+  (.call (.-has (.-prototype js/Map)) map key))
+
+;; These are set specific
+(defn add-member!
+  (set member)
+  (.call (.-add (.-prototype js/Set)) set member))
+
+(defn member?
+  (set member)
+  (.call (.-has (.-prototype js/Set)) set member))
+
+;; Seq & Seqable
+
+(defn seq?
+  (obj)
+  (or (nil? obj) (array? obj) (map? obj) (set? obj)
+      (and (satisfies? obj 'first) (satisfies? 'next))))
+
+(defn seqable?
+  (obj)
+  (or (seq? obj) (satisfies? obj 'seq)))
+
+(defn seq
+  (obj)
+  (cond
+    (nil? obj) $empty-array
+    (seq? obj) obj
+    (seqable? obj) (.seq obj)
+    else
+      (throw "value is not a seq or seqable")))
+
+(defn second
+  (xs) (first (rest xs)))
+
+(defn third
+  (xs) (first (rest (rest xs))))
+
+(defn fourth
+  (xs) (first (rest (rest (rest xs)))))
+
+; TODO: add support for seqs
+(defn at
+  (col n) (.at col n))
+
+(defn add!
+  (col value)
+  (cond
+    (array-like? col) (do (push! col value) col)
+    (map? col) (add-key! col (at value 0) (at value 1))
+    (set? col) (add-member! col value)
+    (satisfies? col 'add) (.add col value)
+    else
+      (throw "don't know how to add a value to this collection")))
+
+(defn add
+  (col value)
+  (add! (clone col) value))
+
+(defn remove!
+  (col ref)
+  (cond
+    (array-like? col) (do (.splice col ref 1) col)
+    (satisfies? col 'delete) (do (.delete col ref) col)
+    else
+      (throw "don't know how to add a value to this collection")))
+
+(defn remove
+  (col ref)
+  (remove! (clone col) ref))
+
+(defn empty!
+  (col) (.clear col) col)
+
+(defn empty
+  (col)
+  (if (array-like? col)
+    $empty-array
+    (empty! (clone col))))
+
+(defn count
+  (col)
+  (cond
+    (array-like? col) (length col)
+    (or (map? col) (set? col)) (size col)
+    (satisfies? col 'count) (.count col)
+    else
+     (reduce (fn (n _) (inc n)) col 0)))
+
+(defn includes?
+  (col value)
+  (cond
+    (array-like? col) (not (identical? -1 (index-of col value)))
+    (map? col) (key? col value)
+    (set? col) (member? col value)
+    (satisfies? col 'includes) (.includes col value)
+    else
+      (throw "can't test inclusion")))
+
+;; TODO: need to revise "def" to create a nil definition in the env before creating evaluating the def so we can have recursive functions
+;; (defn all?
+;;   (&args)
+;;   (cond (identical? (alength args) 1) (all? (aget args 0) truthy?)
+;;         (identical? (alength args) 2)
+;;         (let (f   (aget args 0)
+;;               col (aget args 1))
+;;           (reduce (fn (bool x) (and bool (f x)))))
+;;         else
+;;           (throw "wrong number of arguments expected 1 or 2")))
+
+;; (defn js-arrays-equal
+;;   (a b)
+;;   (cond
+;;     (not (and (array? a) (array? b))) false
+;;     (not (identical? (alength a) (alength b))) false
+;;     else
+;;       (do
+;;         (dotimes (i (alength a))
+;;           (js* (quote "if (!wonderscriopt.core._EQ_(a[i],b[i])) return false;")))
+;;         (js* (quote "return true;")))))
+
+(defn =
+  (a b)
+  (cond
+    (and (nil? a) (nil? b)) (equiv? a b)
+    (and (js-primitive-type? a) (js-primitive-type? b)) (identical? a b)
+    (and (satisfies? a 'equal) (satisfies? b 'equal)) (.equal a b)
+    else
+      (throw "both values must implement equality protocol")))
+
+(def $white-space-regex (js/RegExp. "\\s+"))
+(def $empty-string "")
+
+(defn blank?
+  (object)
+  (or (nil? object) (empty? object)
+      (and (string? object)
+           (identical? 0 (.-length (.replace object $white-space-regex $empty-string))))))
+
+(defn present?
+  (object)
+  (not (blank? object)))
+
+(defn presence
+  (object)
+  (if (blank? object)
+    nil
+    object))
+
+;; HTML Rendering
 
 (defn tag?
   (x) (array? x) (string? (aget x 0)))
@@ -192,52 +515,17 @@
     (html (apply f args))))
 
 (defn html (form)
-  (cond (nil? form) ""
-        (true? form) "Yes"
-        (false? form) "No"
-        (string? form) form
-        (tag? form)
-          (if (has-attr? form)
-            (render-attr-tag form)
-            (render-tag form))
-        (component? form) (render-component form)
-        (tag-list? form) (render-tag-list form)
-        :else
-          (throw (js/Error. "Unknown form"))))
+  (cond
+    (nil? form) $empty-string
+    (true? form) "Yes"
+    (false? form) "No"
+    (string? form) form
+    (tag? form)
+      (if (has-attr? form)
+        (render-attr-tag form)
+        (render-tag form))
+    (component? form) (render-component form)
+    (tag-list? form) (render-tag-list form)
+    else
+     (throw (js/Error. "Unknown form"))))
 
-(defn pr
-  (x) (print (pr-str x)))
-
-(defn ns-map
-  (ns) (.-module ns))
-
-(defmacro ns
-  (nm) (array 'set! '(. NS -value) (array 'create-ns (array 'quote nm))))
-
-(def failure-tag "FAILURE: ")
-(def assertion-msg " is false")
-
-(defmacro is
-  (&args)
-  (cond (identical? 1 (alength args))
-        (array 'is (aget args 0) (array 'str 'wonderscript.core/failure-tag (array 'quote (pr-str (aget args 0))) 'wonderscript.core/assertion-msg))
-        (identical? 2 (alength args))
-        (array 'cond
-               (array 'not (aget args 0)) (array 'print (aget args 1)))))
-
-(defmacro is-not (body &args)
-  (cons 'is (cons (array 'not body) args)))
-
-(defmacro deftest
-  (nm &body)
-  (array 'do
-    (array 'def nm (cons 'fn (cons '() body)))
-    (array 'set-meta nm ':test true)))
-
-(defn class
-  (object)
-  (.-constructor object))
-
-(defn class-name
-  (object)
-  (.-name (class object)))
