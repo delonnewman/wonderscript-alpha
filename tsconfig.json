@@ -1,5 +1,9 @@
 {
   "compilerOptions": {
     "target": "ES6",
-  }
+    "sourceMap": true,
+    "removeComments": true,
+    "preserveConstEnums": true
+  },
+  "include": ["src/**/*"]
 }

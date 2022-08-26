@@ -4,8 +4,8 @@ JSGLOBAL = typeof module !== 'undefined' ? global : window;
     this.wonderscript = this.wonderscript || {};
     this.wonderscript.core = this.wonderscript.core || {};
 
-    var EMPTY_ARRAY  = Object.freeze([]);
-    var EMPTY_STRING = '';
+    const EMPTY_ARRAY  = Object.freeze([]);
+    const EMPTY_STRING = '';
 
     function str() {
         if (arguments.length === 0) return EMPTY_STRING;
@@ -124,12 +124,11 @@ JSGLOBAL = typeof module !== 'undefined' ? global : window;
         }
 
         if (isArrayLike(col)) {
-            if (col.length <= 1) {
+            if (col.length === 0) {
                 return null;
             }
-            else {
-                return Array.prototype.slice.call(col, 1);
-            }
+
+            return Array.prototype.slice.call(col, 1);
         }
 
         if (isFunction(col.forEach)) {
