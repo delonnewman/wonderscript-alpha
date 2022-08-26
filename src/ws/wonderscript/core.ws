@@ -189,7 +189,7 @@
 
 (defn js-prototype
   (object)
-  (.-prototype object))
+  (.getPrototypeOf js/Object object))
 
 (defn js-constructor-name
   (object)
@@ -233,7 +233,7 @@
 
 (defn js-object-tag
   (object)
-  (.call (.-toString (.-prototype js/Object))) object)
+  (.call (.-toString (.-prototype js/Object)) object))
 
 (defn arity
   (f)
@@ -245,21 +245,31 @@
   (obj property-name)
   (aget obj property-name))
 
+;; Return the bound method or thow an exception
 (defn method
   (obj method-name)
   (let (val (js-property-value obj method-name))
     (if (function? val)
-      val
+      (.bind val obj)
       (throw (js/Error. "undefined method")))))
 
 (defn method?
   (obj method)
   (function? (aget obj method)))
 
+(defn bind
+  (f object)
+  (.call (.-bind (.-prototype js/Function)) f object))
+
+(defn partial
+  (f &args)
+  (.apply (.-bind (.-prototype js/Function)) f (.concat [nil] args)))
+
 ;; Array, Strings & ArrayLike
 
-
 (def $empty-array (freeze! []))
+
+(defn array (&args) args)
 
 (defn array?
   (object)
