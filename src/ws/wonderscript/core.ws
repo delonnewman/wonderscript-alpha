@@ -470,16 +470,16 @@
     else
       (throw "can't test inclusion")))
 
-;; TODO: need to revise "def" to create a nil definition in the env before creating evaluating the def so we can have recursive functions
-;; (defn all?
-;;   (&args)
-;;   (cond (identical? (alength args) 1) (all? (aget args 0) truthy?)
-;;         (identical? (alength args) 2)
-;;         (let (f   (aget args 0)
-;;               col (aget args 1))
-;;           (reduce (fn (bool x) (and bool (f x)))))
-;;         else
-;;           (throw "wrong number of arguments expected 1 or 2")))
+;; TODO: Implement for seqables
+(defn all?
+  (&args)
+  (cond (identical? (alength args) 1) (all? (aget args 0) truthy?)
+        (identical? (alength args) 2)
+        (let (f   (aget args 0)
+              col (aget args 1))
+          (reduce (fn (bool x) (and bool (f x))) col true))
+        else
+          (throw "wrong number of arguments expected 1 or 2")))
 
 ;; (defn js-arrays-equal
 ;;   (a b)

@@ -576,43 +576,46 @@ JSGLOBAL.wonderscript.compilerBuilder = function(global, platform) {
     }
 
     function emitSymbol(s, env) {
-        var scope;
         if (s === '&env') {
             return 'this.env';
         }
-        else if (s === '&form') {
+
+        if (s === '&form') {
             return 'this.form';
         }
-        else if (s !== DIV_SYM && s.indexOf('/') !== -1) {
-            var parts = s.split('/');
+
+        if (s.indexOf('/') !== -1) {
+            let parts = s.split('/');
             if (parts.length !== 2) throw new Error('A symbol should only have 2 parts');
-            scope = lookup(env, parts[0]);
+
+            let scope = lookup(env, parts[0]);
             if (scope === null) throw new Error('Unknown namespace: ' + parts[0]);
-            else {
-                var ns = scope.vars[parts[0]];
-                if (isUndefined(ns.module[escapeChars(parts[1])])) {
-                    throw new Error('Undefined variable: ' + parts[1] + ' in namespace: ' + parts[0]);
-                }
-                return str(ns.name, '.', escapeChars(parts[1]));
+
+            let ns = scope.vars[parts[0]];
+            if (isUndefined(ns.module[escapeChars(parts[1])])) {
+                throw new Error('Undefined variable: ' + parts[1] + ' in namespace: ' + parts[0]);
             }
+
+            return str(ns.name, '.', escapeChars(parts[1]));
         }
-        else {
-            var s_ = escapeChars(s);
-            scope = lookup(env, s_);
-            if (scope !== null) {
-                return s_;
-            }
-            else if (!isUndefined(CURRENT_NS.value.module[s_])) {
-                return str(CURRENT_NS.value.name, '.', s_);
-            }
-            else if (!isUndefined(CORE_NS.module[s_])) {
-                return str(CORE_NS.name, '.', s_);
-            }
-            else {
-                console.error("env", env)
-                throw new Error(str('Undefined variable: "', s, '"'));
-            }
+
+        let s_ = escapeChars(s);
+        let scope = lookup(env, s_);
+        if (scope !== null) {
+            return s_;
         }
+
+        if (!isUndefined(CURRENT_NS.value.module[s_])) {
+            return str(CURRENT_NS.value.name, '.', s_);
+        }
+
+        if (!isUndefined(CORE_NS.module[s_])) {
+            return str(CORE_NS.name, '.', s_);
+        }
+
+        console.error("env", env)
+        console.error(CURRENT_NS.value.name, Object.keys(CURRENT_NS.value.module))
+        throw new Error(str('Undefined variable: "', s, '"'));
     }
 
     function emitRecursionPoint(form, env) {
@@ -760,17 +763,21 @@ JSGLOBAL.wonderscript.compilerBuilder = function(global, platform) {
         return buff.join('');
     }
 
-    function emitDef(form, env, opts) {
-        var name = escapeChars(form[1]), code, value, def;
+    function emitDef(form, env) {
+        let name = escapeChars(form[1]);
+        let code = 'null';
+        let val  = null;
+
+        // set the value so it can be found in the eval below
+        CURRENT_NS.value.module[name] = val;
+
         if (form[2]) {
-            code = emit(form[2], env); value = eval(code);
-            def = str(CURRENT_NS.value.name, ".", name, " = ", code, ";");
+            code = emit(form[2], env);
+            val  = eval(code);
         }
-        else {
-            code = 'null'; value = null;
-            def = str(CURRENT_NS.value.name, ".", name, " = null;");
-        }
-        CURRENT_NS.value.module[name] = value;
+
+        const def = str(CURRENT_NS.value.name, ".", name, " = ", code, ";");
+        CURRENT_NS.value.module[name] = val;
         return def;
     }
   
