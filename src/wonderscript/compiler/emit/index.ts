@@ -70,7 +70,7 @@ import {emitBinOperator} from "./emitBinOperator";
 import {emitFuncApplication} from "./emitFuncApplication";
 
 export function emit(form_: Form, env_ = TOP_LEVEL_ENV) {
-    var form = macroexpand(form_, env_);
+    const form = macroexpand(form_, env_);
     if (isKeyword(form)) {
         return emitKeyword(form);
     }
