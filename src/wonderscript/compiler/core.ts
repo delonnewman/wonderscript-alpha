@@ -1,6 +1,6 @@
 import {getMeta, isArray, isFunction, isString, str} from "../lang/runtime";
 import {KEYWORD_SYM, RECUR_SYM, THROW_SYM} from "./constants";
-import {emit} from "./emit/index";
+import {emit} from "./emit";
 
 export function isMacro(x): boolean {
     return isFunction(x) && getMeta(x, "macro") === true;

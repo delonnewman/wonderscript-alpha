@@ -1,5 +1,5 @@
 import {map, str} from "../../lang/runtime";
-import {emit} from "./index";
+import {emit} from "../emit";
 import {Env} from "../Env";
 
 export function emitClassInit(form, env: Env): string {

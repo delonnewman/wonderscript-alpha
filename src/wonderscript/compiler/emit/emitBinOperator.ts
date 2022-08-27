@@ -1,4 +1,4 @@
-import {emit} from "./index";
+import {emit} from "../emit";
 import {str} from "../../lang/runtime";
 import {Env} from "../Env";
 

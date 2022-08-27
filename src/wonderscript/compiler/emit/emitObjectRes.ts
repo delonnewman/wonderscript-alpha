@@ -1,5 +1,5 @@
 import {isArray, isString, map, str} from "../../lang/runtime";
-import {emit} from "./index";
+import {emit} from "../emit";
 import {escapeChars} from "../utils";
 import {Env} from "../Env";
 

@@ -1,6 +1,6 @@
 import {partition, rest, str} from "../../lang/runtime";
 import {emitTailPosition} from "./emitTailPosition";
-import {emit} from "./index";
+import {emit} from "../emit";
 import {Env} from "../Env";
 
 export function emitCond(form, env: Env): string {

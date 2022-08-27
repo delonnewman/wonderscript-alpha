@@ -2,7 +2,7 @@ import {PushBackReader} from "../reader/PushBackReader";
 import {TOP_LEVEL_ENV} from "./vars";
 import {EOF, isEOF, isTaggedValue, stacktrace} from "./core";
 import {read} from "../reader/read";
-import {emit} from "./emit/index";
+import {emit} from "./emit";
 
 export function evalString(s: string, src = 'inline') {
     const r = new PushBackReader(s);

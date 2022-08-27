@@ -1,8 +1,8 @@
-import {TOP_LEVEL_ENV} from "../vars";
-import {macroexpand} from "../macroexpand";
-import {Form, isKeyword, isSymbol} from "../core";
-import {emitKeyword} from "./emitKeyword";
-import {isArray, isBoolean, isMap, isNull, isNumber, isUndefined, str} from "../../lang/runtime";
+import {TOP_LEVEL_ENV} from "./vars";
+import {macroexpand} from "./macroexpand";
+import {Form, isKeyword, isSymbol} from "./core";
+import {emitKeyword} from "./emit/emitKeyword";
+import {isArray, isBoolean, isMap, isNull, isNumber, isUndefined, str} from "../lang/runtime";
 import {
     AGET_SYM, ALENGTH_SYM,
     AND_SYM,
@@ -48,26 +48,26 @@ import {
     TRY_SYM,
     TYPE_SYM,
     UNDEFINED_SYM
-} from "../constants";
-import {emitMap} from "./emitMap";
-import {RECUR_ERROR_MSG} from "../errorMessages";
-import {emitSymbol} from "./emitSymbol";
-import {emitDef} from "./emitDef";
-import {emitQuote} from "./emitQuote";
-import {emitCond} from "./emitCond";
-import {emitLoop} from "./emitLoop";
-import {emitThrownException} from "./emitThrownException";
-import {emitArrayLength} from "./emitArrayLength";
-import {emitArrayMutation} from "./emitArrayMutation";
-import {emitArrayAccess} from "./emitArrayAccess";
-import {emitFunc} from "./emitFunc";
-import {emitDo} from "./emitDo";
-import {emitLet} from "./emitLet";
-import {emitObjectRes} from "./emitObjectRes";
-import {emitClassInit} from "./emitClassInit";
-import {emitAssignment} from "./emitAssignment";
-import {emitBinOperator} from "./emitBinOperator";
-import {emitFuncApplication} from "./emitFuncApplication";
+} from "./constants";
+import {emitMap} from "./emit/emitMap";
+import {RECUR_ERROR_MSG} from "./errorMessages";
+import {emitSymbol} from "./emit/emitSymbol";
+import {emitDef} from "./emit/emitDef";
+import {emitQuote} from "./emit/emitQuote";
+import {emitCond} from "./emit/emitCond";
+import {emitLoop} from "./emit/emitLoop";
+import {emitThrownException} from "./emit/emitThrownException";
+import {emitArrayLength} from "./emit/emitArrayLength";
+import {emitArrayMutation} from "./emit/emitArrayMutation";
+import {emitArrayAccess} from "./emit/emitArrayAccess";
+import {emitFunc} from "./emit/emitFunc";
+import {emitDo} from "./emit/emitDo";
+import {emitLet} from "./emit/emitLet";
+import {emitObjectRes} from "./emit/emitObjectRes";
+import {emitClassInit} from "./emit/emitClassInit";
+import {emitAssignment} from "./emit/emitAssignment";
+import {emitBinOperator} from "./emit/emitBinOperator";
+import {emitFuncApplication} from "./emit/emitFuncApplication";
 
 export function emit(form_: Form, env_ = TOP_LEVEL_ENV) {
     const form = macroexpand(form_, env_);

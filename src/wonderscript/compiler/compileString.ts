@@ -1,5 +1,5 @@
 import {readString} from "./readString";
-import {emit} from "./emit/index";
+import {emit} from "./emit";
 import {evaluate, Form, isTaggedValue} from "./core";
 import {macroexpand} from "./macroexpand";
 import {cons, isArray, map} from "../lang/runtime";

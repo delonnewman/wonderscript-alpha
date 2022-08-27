@@ -2,7 +2,7 @@ import {define, Env, env} from "../Env";
 import {isString} from "../../lang/runtime";
 import {escapeChars} from "../utils";
 import {compileBody} from "./compileBody";
-import {emit} from "./index";
+import {emit} from "../emit";
 
 export function emitLet(form, scope: Env): string {
     var env_ = env(scope);

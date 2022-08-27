@@ -1,7 +1,7 @@
 import {isString, str} from "../../lang/runtime";
 import {isMacro} from "../core";
 import {findNamespaceVar} from "../findNamespaceVar";
-import {emit} from "./index";
+import {emit} from "../emit";
 import {Env} from "../Env";
 
 export function emitFuncApplication(form, env: Env): string {

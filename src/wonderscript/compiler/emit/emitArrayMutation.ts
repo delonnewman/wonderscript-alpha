@@ -1,5 +1,5 @@
 import {str} from "../../lang/runtime";
-import {emit} from "./index";
+import {emit} from "../emit";
 
 export function emitArrayMutation(form, env) {
     if (form.length !== 4)

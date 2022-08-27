@@ -2,7 +2,7 @@ import {define, Env, env} from "../Env";
 import {isString} from "../../lang/runtime";
 import {escapeChars} from "../utils";
 import {compileRecursiveBody} from "./compileBody";
-import {emit} from "./index";
+import {emit} from "../emit";
 
 export function emitLoop(form, scope: Env): string {
     var env_ = env(scope);

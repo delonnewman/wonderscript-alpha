@@ -3,7 +3,7 @@ import {RECUR_ERROR_MSG} from "../errorMessages";
 import {emitRecursionPoint} from "./emitRecursionPoint";
 import {emitThrownException} from "./emitThrownException";
 import {str} from "../../lang/runtime";
-import {emit} from "./index";
+import {emit} from "../emit";
 
 export function emitTailPosition(x, env, def = 'return'): string {
     if (isRecur(x)) {

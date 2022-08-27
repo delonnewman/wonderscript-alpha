@@ -1,5 +1,5 @@
 import {map, str} from "../../lang/runtime";
-import {emit} from "./index";
+import {emit} from "../emit";
 
 function emitMapEntry(env) {
     return function(entry) {

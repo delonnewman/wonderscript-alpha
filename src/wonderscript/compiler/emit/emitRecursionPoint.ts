@@ -1,5 +1,5 @@
 import {str} from "../../lang/runtime";
-import {emit} from "./index";
+import {emit} from "../emit";
 import {RECURSION_POINT_CLASS} from "../constants";
 import {Env} from "../Env";
 
