@@ -7,7 +7,7 @@ export function isMacro(x): boolean {
 }
 
 export type TaggedValue<Tag = string> = [Tag, ...any]
-export type Form = string | number | null | undefined | Map<any, any> | Set<any> | TaggedValue
+export type Form = string | number | null | undefined | Map<any, any> | Set<any> | TaggedValue | any[]
 
 export function isTaggedValue<Tag = string>(x): x is TaggedValue<Tag> {
     return isArray(x) && isString(x[0]);

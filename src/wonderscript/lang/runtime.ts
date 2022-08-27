@@ -1,5 +1,8 @@
 import {First} from "./Seq";
 import {Nil} from "./Nil";
+import {CORE_NAMES} from "../compiler/constants";
+import {dasherize, escapeChars} from "../compiler/utils";
+import {CORE_MOD} from "../compiler/vars";
 
 const EMPTY_ARRAY  = Object.freeze([]);
 const EMPTY_STRING = "";
@@ -221,6 +224,11 @@ export function setMeta(obj, key, value) {
     return obj;
 }
 
+
+export function setMacro(obj) {
+    return setMeta(obj, 'macro', true);
+}
+
 export function resetMeta(obj, meta) {
     obj[META_SYMBOL] = meta;
     return obj;
@@ -232,4 +240,27 @@ export function meta(obj) {
 
 export function getMeta(obj, key) {
     return meta(obj)[key];
+}
+
+function importSymbol(name: string, obj) {
+    let wsName = CORE_NAMES[name];
+
+    if (wsName) {
+        wsName = escapeChars(dasherize(wsName));
+    }
+    else if (name.startsWith('is')) {
+        wsName = str(name.slice(2).toLowerCase(), '?');
+        wsName = escapeChars(dasherize(wsName));
+    }
+    else {
+        wsName = escapeChars(dasherize(name));
+    }
+
+    CORE_MOD[wsName] = obj;
+}
+
+export function importModule(module) {
+    Object.keys(module).forEach(function(name) {
+        importSymbol(name, module[name]);
+    });
 }

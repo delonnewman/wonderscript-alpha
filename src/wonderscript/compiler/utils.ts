@@ -16,6 +16,29 @@ export function capitalize(x: string): string {
     return `${x[0].toUpperCase()}${x.slice(1)}`;
 }
 
+const DASH = '-';
+const UNDERSCORE = '_';
+
+export function dasherize(string: string): string {
+    var i, ch, buffer = [];
+
+    for (i = 0; i < string.length; i++) {
+        ch = string[i];
+        if (ch.match(/[A-Z]/)) { // TODO: replace this with a numerical method
+            buffer.push(DASH);
+            buffer.push(ch.toLowerCase());
+        }
+        else if (ch === UNDERSCORE) {
+            buffer.push(DASH);
+        }
+        else {
+            buffer.push(ch);
+        }
+    }
+
+    return buffer.join('');
+}
+
 export function wsNameToJS(x: string): string {
     if (names[x]) {
         return names[x];
