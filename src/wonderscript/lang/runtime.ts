@@ -1,10 +1,10 @@
-import {First, Next, Seq} from "./Seq";
+import {First} from "./Seq";
 import {Nil} from "./Nil";
 
-const EMPTY_ARRAY = Object.freeze([]);
-const EMPTY_STRING = Object.freeze("");
+const EMPTY_ARRAY  = Object.freeze([]);
+const EMPTY_STRING = "";
 
-export function isString(x): x is string | String {
+export function isString(x): x is string {
     return typeof x === 'string' || Object.prototype.toString.call(x) === '[object String]';
 }
 
@@ -68,7 +68,7 @@ type Consable = ArrayLike | Nil | ConsMethod
 
 const hasConsMethod = (col): col is ConsMethod => isFunction(col.cons)
 
-export function cons(x, col: Consable): Readonly<any[] | string> {
+export function cons(x, col: Consable): Readonly<any[]> | string {
     if (col == null) return [x];
 
     if (hasConsMethod(col)) {
@@ -88,7 +88,7 @@ export function cons(x, col: Consable): Readonly<any[] | string> {
 }
 
 type FirstMethod = { first: () => any | Nil }
-type Firstable = FirstMethod | ArrayLike | Iterator<any>
+type Firstable = FirstMethod | ArrayLike | Map<any, any> | Set<any>
 
 const hasFirstMethod = (col): col is FirstMethod => isFunction(col.first)
 
@@ -163,7 +163,7 @@ export function isEmpty(x): boolean {
 }
 
 type Mapper<In, Out> = (x: In) => Out
-type Mappable = ArrayLike | (FirstMethod & NextMethod)
+type Mappable = ArrayLike | (FirstMethod & NextMethod) | Map<any, any> | Set<any>
 
 export function map<In = any, Out = unknown>(f: Mapper<In, Out>, xs: Mappable): Readonly<Out[]> {
     if (arguments.length !== 2) {
