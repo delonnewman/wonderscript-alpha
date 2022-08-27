@@ -206,3 +206,30 @@ export function partition(n: number, xs: ArrayLike): Readonly<any[]> {
         return a;
     }
 }
+
+const META_SYMBOL = Symbol('wonderscriptMetaData');
+
+export function setMeta(obj, key, value) {
+    if (typeof obj === 'string') {
+        obj = new String(obj);
+    }
+    else {
+        const meta = obj[META_SYMBOL];
+        if (!meta) obj[META_SYMBOL] = {};
+        obj[META_SYMBOL][key] = value;
+    }
+    return obj;
+}
+
+export function resetMeta(obj, meta) {
+    obj[META_SYMBOL] = meta;
+    return obj;
+}
+
+export function meta(obj) {
+    return obj[META_SYMBOL] || {};
+}
+
+export function getMeta(obj, key) {
+    return meta(obj)[key];
+}
