@@ -1,10 +1,13 @@
 #!/usr/bin/env node
-// jshint esversion: 6
 const fs = require("fs"),
     readline = require("readline");
 
 // load runtime and core library
-const { print, str, evalString, NS, loadFile, prStr, createNs, importSymbol } = require(`${__dirname}/../index.js`);
+const {Compiler} = require("../dist/wonderscript");
+const wsc = new Compiler('node', global);
+const {str, pr_DASH_str, _STAR_ns_STAR_} = wonderscript.core;
+const NS = _STAR_ns_STAR_;
+const prStr = pr_DASH_str;
 
 function interactive() {
     const rl = readline.createInterface({
@@ -16,19 +19,19 @@ function interactive() {
 
     // NS.value = createNs('user');
     // wonderscript.core.import('user', NS.value);
-    rl.setPrompt(str(NS.value.name, "> "));
+    rl.setPrompt(str(NS.name, "> "));
     rl.prompt();
 
     rl.on("line", function(line) {
         try {
-            var input = line.trim();
+            const input = line.trim();
             if (input === "exit") {
                 console.log("Bye for now!");
                 process.exit(0);
             } else {
-                var res = evalString(input);
+                const res = wsc.evalString(input);
                 console.log(str("=> ", prStr(res)));
-                rl.setPrompt(str(NS.value.name, "> "));
+                rl.setPrompt(str(NS.name, "> "));
             }
         } catch (e) {
             console.error(e);
@@ -43,21 +46,21 @@ function interactive() {
 
 if (process.argv.length >= 3) {
     try {
-        loadFile([process.cwd(), process.argv[2]].join("/"));
+        wsc.loadFile([process.cwd(), process.argv[2]].join("/"));
         process.exitCode = 0;
     } catch (e) {
         console.error(e);
         process.exitCode = 1;
     }
 } else {
-    var INTERATIVE = false;
+    let INTERATIVE = false;
     setTimeout(() => {
         interactive();
         INTERACTIVE = true;
     }, 1);
     process.stdin.on("data", chunk => {
         if (!INTERACTIVE) {
-            zera.evalString(chunk.toString("utf8"));
+            wsc.evalString(chunk.toString("utf8"));
         }
     });
 }

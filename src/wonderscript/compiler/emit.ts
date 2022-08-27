@@ -1,4 +1,3 @@
-import {TOP_LEVEL_ENV} from "./vars";
 import {macroexpand} from "./macroexpand";
 import {Form, isKeyword, isSymbol} from "./core";
 import {emitKeyword} from "./emit/emitKeyword";
@@ -68,8 +67,10 @@ import {emitClassInit} from "./emit/emitClassInit";
 import {emitAssignment} from "./emit/emitAssignment";
 import {emitBinOperator} from "./emit/emitBinOperator";
 import {emitFuncApplication} from "./emit/emitFuncApplication";
+import {Env} from "./Env";
+import {emitJS} from "./emit/emitJS";
 
-export function emit(form_: Form, env_ = TOP_LEVEL_ENV) {
+export function emit(form_: Form, env_: Env) {
     const form = macroexpand(form_, env_);
     if (isKeyword(form)) {
         return emitKeyword(form);
@@ -105,7 +106,7 @@ export function emit(form_: Form, env_ = TOP_LEVEL_ENV) {
                 case COND_SYM:
                     return emitCond(form, env_);
                 case JS_SYM:
-                    return form[1][1];
+                    return emitJS(form);
                 case FN_SYM:
                     return emitFunc(form, env_);
                 case LOOP_SYM:

@@ -1,12 +1,13 @@
 import {PushBackReader} from "../reader/PushBackReader";
-import {TOP_LEVEL_ENV} from "./vars";
 import {EOF, isEOF, isTaggedValue, stacktrace} from "./core";
 import {read} from "../reader/read";
 import {emit} from "./emit";
+import {Env} from "./Env";
 
-export function evalString(s: string, src = 'inline') {
+export function evalString(s: string, scope: Env, src = 'inline') {
     const r = new PushBackReader(s);
-    var ret, scope = TOP_LEVEL_ENV, stack = [], evalingTaggedValue = false;
+    let ret, evalingTaggedValue = false;
+    const stack = [];
     while (true) {
         //console.log('line before: ', r.line());
         const res = read(r, { eofIsError: false, eofValue: EOF });

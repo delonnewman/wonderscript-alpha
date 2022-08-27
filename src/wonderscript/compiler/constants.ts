@@ -1,4 +1,3 @@
-import {str} from "../lang/runtime";
 import {CORE_NS} from "./vars";
 
 export const QUOTE_SYM   = 'quote';
@@ -55,7 +54,7 @@ export const NULL_SYM        = 'null';
 export const UNDEFINED_SYM   = 'undefined';
 export const EMPTY_ARRAY     = '[]';
 
-export const RECURSION_POINT_CLASS = str(CORE_NS.name, '.RecursionPoint');
+export const RECURSION_POINT_CLASS = `${CORE_NS.name}.RecursionPoint`;
 
 // TODO: make into a Set
 export const SPECIAL_FORMS = {

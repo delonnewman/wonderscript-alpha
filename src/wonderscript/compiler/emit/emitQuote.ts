@@ -1,5 +1,11 @@
 import {isArray, isMap, isNumber, isString, isUndefined, map, str} from "../../lang/runtime";
-import {EMPTY_ARRAY, FALSE_SYM, NULL_SYM, TRUE_SYM, UNDEFINED_SYM} from "../constants";
+import {EMPTY_ARRAY, FALSE_SYM, NULL_SYM, QUOTE_SYM, TRUE_SYM, UNDEFINED_SYM} from "../constants";
+import {isTaggedValue, TaggedValue} from "../core";
+
+export type QuoteForm = TaggedValue<typeof QUOTE_SYM>;
+
+export const isQuoteForm = (form: any): form is QuoteForm =>
+    isTaggedValue(form) && form[0] === QUOTE_SYM;
 
 export function emitQuote(form) {
     if (form.length !== 2) throw new Error('One value should be quoted');

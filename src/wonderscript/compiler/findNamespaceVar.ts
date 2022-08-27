@@ -1,9 +1,9 @@
 import {Env, lookup} from "./Env";
 import {escapeChars} from "./utils";
 import {isUndefined} from "../lang/runtime";
-import {CORE_NS, CURRENT_NS, TOP_LEVEL_ENV} from "./vars";
+import {CORE_NS, CURRENT_NS} from "./vars";
 
-export function findNamespaceVar(s: string, env: Env = TOP_LEVEL_ENV) {
+export function findNamespaceVar(s: string, env: Env) {
     if (s.indexOf('/') !== -1) {
         const parts = s.split('/');
         if (parts.length !== 2) throw new Error('A symbol should only have 2 parts');

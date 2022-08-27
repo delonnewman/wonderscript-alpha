@@ -3,9 +3,8 @@ import {DOT_SYM, NEW_SYM, SPECIAL_FORMS} from "./constants";
 import {env, Env} from "./Env";
 import {findNamespaceVar} from "./findNamespaceVar";
 import {isString} from "../lang/runtime";
-import {TOP_LEVEL_ENV} from "./vars";
 
-export function macroexpand(form: Form, scope: Env = TOP_LEVEL_ENV): Form {
+export function macroexpand(form: Form, scope: Env): Form {
     if (!isTaggedValue(form)) {
         return form;
     }

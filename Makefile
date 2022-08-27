@@ -1,27 +1,16 @@
 UGLIFY=npx uglifyjs
+ROLLUP=npx rollup
 
-all: dist/wonderscript dist/wonderscript.js
+all: dist/wonderscript.js
 
 dist/wonderscript:
 	mkdir -p dist/wonderscript
 
-dist/wonderscript/core.ws.js:
-	./bin/wsc browser ./src/ws/wonderscript/core.ws > dist/wonderscript/core.ws.js
+dist/wonderscript/core.ws.js: dist/wonderscript
+	./bin/wsc browser ./src/wonderscript/core.ws > dist/wonderscript/core.ws.js
 
-dist/wonderscript/core.js:
-	$(UGLIFY) src/js/wonderscript/core.js > dist/wonderscript/core.js
-
-dist/wonderscript/edn.js:
-	$(UGLIFY) src/js/wonderscript/edn.js > dist/wonderscript/edn.js
-
-dist/wonderscript/compiler.js:
-	$(UGLIFY) src/js/wonderscript/compiler.js > dist/wonderscript/compiler.js
-
-dist/wonderscript.js: dist/wonderscript/core.js dist/wonderscript/edn.js dist/wonderscript/compiler.js dist/wonderscript/core.ws.js
-	cat dist/wonderscript/core.js dist/wonderscript/edn.js dist/wonderscript/compiler.js dist/wonderscript/core.ws.js > dist/wonderscript.js
-
-#dist/wonderscript.min.js:
-
+dist/wonderscript.js:
+	npx rollup -c
 
 clean:
 	rm -rf dist

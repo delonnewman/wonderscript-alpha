@@ -5,7 +5,7 @@ import {emit} from "../emit";
 import {Env} from "../Env";
 
 export function emitFuncApplication(form, env: Env): string {
-    if (isString(form[0]) && isMacro(findNamespaceVar(form[0])))
+    if (isString(form[0]) && isMacro(findNamespaceVar(form[0], env)))
         throw new Error('Macros cannot be evaluated in this context');
 
     var fn = emit(form[0], env),

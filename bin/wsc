@@ -1,6 +1,9 @@
 #!/usr/bin/env node
-// jshint esversion: 6
-const fs = require('fs'), { print, compileString } = require('../index.js');
+
+const fs = require('fs');
+const {Compiler} = require('dist/wonderscript');
+
 const platform = process.argv[2];
 const src = fs.readFileSync(process.argv[3], 'utf8');
-print(compileString(src));
+
+console.log(new Compiler('node', global).compileString(src));

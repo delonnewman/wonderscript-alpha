@@ -4,3 +4,5 @@ dist/
 tags
 .DS_Store
 /.idea/
+src/**/*.js
+src/**/*.js.map
