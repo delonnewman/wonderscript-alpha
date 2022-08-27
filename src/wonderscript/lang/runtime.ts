@@ -242,7 +242,7 @@ export function getMeta(obj, key) {
     return meta(obj)[key];
 }
 
-function importSymbol(name: string, obj) {
+export function importSymbol(name: string, obj) {
     let wsName = CORE_NAMES[name];
 
     if (wsName) {
