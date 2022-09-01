@@ -56,15 +56,17 @@ export class Compiler {
         return this.platform === 'browser';
     }
 
-    loadFile(path: string) {
+    loadFile(path: string): Compiler {
         if (this.isNode()) {
-            return this.evalString(this.slurp(path), path);
+            this.evalString(this.slurp(path), path);
         }
 
         if (this.isBrowser()) {
-            return this.fetchFile(path)
+            this.fetchFile(path)
                 .then((text) => this.evalString(text, path))
         }
+
+        return this;
     }
 
     readFile(path: string) {

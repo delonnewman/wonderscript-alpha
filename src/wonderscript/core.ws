@@ -28,6 +28,14 @@
 (defmacro defn (name args &body)
   (array 'def name (cons 'fn (cons args body))))
 
+(defn browser?
+  ()
+  (identical? $platform "browser"))
+
+(defn node?
+  ()
+  (identical? $platform "node"))
+
 (defn ==
   (a b)
   (identical? a b))
@@ -571,7 +579,8 @@
         args (slice form 1))
     (html (apply f args))))
 
-(defn html (form)
+(defn html
+  (form)
   (cond
     (nil? form) $empty-string
     (true? form) "Yes"
@@ -584,5 +593,13 @@
     (component? form) (render-component form)
     (tag-list? form) (render-tag-list form)
     else
-     (throw (js/Error. "Unknown form"))))
+      (throw (js/Error. "Unknown form"))))
 
+(defn dom-write
+  (html) (.write js/document html))
+
+(when (browser?)
+  (dom-write
+   (html (array
+          [a {href https://delonnewman.name} This is Delon]
+          (array :strong "Hey")))))
