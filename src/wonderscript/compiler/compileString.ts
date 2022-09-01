@@ -1,15 +1,17 @@
 import {readString} from "./readString";
 import {emit} from "./emit";
-import {evaluate, Form, isTaggedValue} from "./core";
+import {Form, isTaggedValue} from "./core";
 import {macroexpand} from "./macroexpand";
 import {cons, isArray, map} from "../lang/runtime";
+import {Env} from "./Env";
+import {evaluate} from "../compiler";
 
-function evalAll(seq: Form[]): Form[] {
+function evalAll(seq: Form[], scope: Env): Form[] {
     const evaled = [];
 
     for (let i = 0; i < seq.length; i++) {
         const form = seq[i];
-        evaluate(form);
+        evaluate(form, scope);
         evaled.push(form);
     }
 
@@ -17,34 +19,34 @@ function evalAll(seq: Form[]): Form[] {
 }
 
 
-function expandMacros(form: Form) {
+function expandMacros(form: Form, scope: Env) {
     if (!isArray(form)) {
         return form;
     }
     else if (isTaggedValue(form)) {
         const args = form.slice(1);
-        return macroexpand(cons(form[0], args.map(expandMacros)) as Form);
+        return macroexpand(cons(form[0], args.map((arg) => expandMacros(arg, scope))) as Form, scope);
     }
     else {
-        return map(expandMacros, form);
+        return map((x) => expandMacros(x, scope), form);
     }
 }
 
-function expandAllMacros(seq: Form[]) {
+function expandAllMacros(seq: Form[], scope: Env) {
     const expanded = [];
     for (let i = 0; i < seq.length; i++) {
-        const form_= expandMacros(expandMacros(seq[i]));
+        const form_= expandMacros(expandMacros(seq[i], scope), scope);
         expanded.push(form_);
     }
     return expanded;
 }
 
-export function compileString(s) {
-    const seq = expandAllMacros(evalAll(readString(s)));
+export function compileString(s: string, scope: Env): string {
+    const seq = expandAllMacros(evalAll(readString(s), scope), scope);
     const buffer = [];
 
     for (let i = 0; i < seq.length; i++) {
-        buffer.push(emit(seq[i]));
+        buffer.push(emit(seq[i], scope));
     }
 
     return buffer.join(';\n');

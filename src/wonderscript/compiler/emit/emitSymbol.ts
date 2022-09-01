@@ -42,6 +42,6 @@ export function emitSymbol(s: string, env: Env): string {
     }
 
     console.error("env", env)
-    console.error(CURRENT_NS.value.name, Object.keys(CURRENT_NS.value.module))
+    console.error(s_, CURRENT_NS.value.name, Object.keys(CURRENT_NS.value.module))
     throw new Error(str('Undefined variable: "', s, '"'));
 }

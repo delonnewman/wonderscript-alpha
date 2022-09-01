@@ -1,7 +1,7 @@
 import {isUndefined} from "../lang/runtime";
 
 export class Env {
-    readonly vars: object;
+    readonly vars: object | null;
     readonly parent: Env | null;
     private _isRecursive: boolean
 

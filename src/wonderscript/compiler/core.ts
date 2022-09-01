@@ -1,6 +1,5 @@
 import {getMeta, isArray, isFunction, isString, str} from "../lang/runtime";
 import {KEYWORD_SYM, RECUR_SYM, THROW_SYM} from "./constants";
-import {emit} from "./emit";
 
 export function isMacro(x): boolean {
     return isFunction(x) && getMeta(x, "macro") === true;
@@ -25,10 +24,6 @@ export function isRecur(x): x is TaggedValue<typeof RECUR_SYM> {
 
 export function isThrow(x): x is TaggedValue<typeof THROW_SYM> {
     return isArray(x) && x[0] === THROW_SYM;
-}
-
-export function evaluate(form) {
-    return eval(emit(form));
 }
 
 export const EOF = { eof: true } as const;

@@ -1,10 +1,12 @@
 {
   "name": "wonderscript-alpha",
   "version": "0.0.1",
-  "description": "A simple lisp for webdevelopment",
+  "description": "A simple lisp for web development",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "npx rollup -c",
+    "watch": "npx rollup -c -w",
+    "dev": "npx httpster -c"
   },
   "repository": {
     "type": "git",
@@ -17,6 +19,11 @@
   },
   "homepage": "https://github.com/delonnewman/wonderscript-alpha#readme",
   "devDependencies": {
+    "@rollup/plugin-typescript": "^8.4.0",
+    "httpster": "^1.2.0",
+    "rollup": "^2.78.1",
+    "tslib": "^2.4.0",
+    "typescript": "^4.8.2",
     "uglify-js": "^3.17.0"
   }
 }

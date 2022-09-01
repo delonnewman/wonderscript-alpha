@@ -166,11 +166,16 @@
 
 (defmacro is
   (&args)
-  (cond (identical? 1 (alength args))
-        (array 'is (aget args 0) (array 'str '$failure-tag (array 'quote (pr-str (aget args 0))) '$assertion-msg))
-        (identical? 2 (alength args))
-        (array 'cond
-               (array 'not (aget args 0)) (array 'print (aget args 1)))))
+  (cond
+    (identical? 1 (alength args))
+      (array 'is (aget args 0)
+             (array 'str
+                    '$failure-tag
+                    (array 'quote (pr-str (aget args 0)))
+                    '$assertion-msg))
+    (identical? 2 (alength args))
+      (array 'cond
+             (array 'not (aget args 0)) (array 'print (aget args 1)))))
 
 (defmacro is-not (body &args)
   (cons 'is (cons (array 'not body) args)))
