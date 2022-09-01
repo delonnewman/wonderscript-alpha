@@ -1,6 +1,7 @@
 UGLIFY=npx uglifyjs
 ROLLUP=npx rollup
 WSC=./bin/wsc
+WSI=./bin/wsi
 
 all: dist/wonderscript.js dist/wonderscript/core.ws.js dist/wonderscript.min.js dist/wonderscript/core.ws.min.js
 
@@ -24,4 +25,9 @@ clean:
 deps:
 	npm install .
 
-.PHONY: all clean deps
+test:
+	@for file in $(shell find test -name '*.ws'); do \
+		$(WSI) $$file; \
+	done;
+
+.PHONY: all clean deps test
