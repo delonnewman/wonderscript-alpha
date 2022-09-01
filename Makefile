@@ -1,7 +1,7 @@
 UGLIFY=npx uglifyjs
 ROLLUP=npx rollup
 
-all: dist/wonderscript.js
+all: dist/wonderscript.js dist/wonderscript/core.ws.js
 
 dist/wonderscript:
 	mkdir -p dist/wonderscript

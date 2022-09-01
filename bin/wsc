@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const fs = require('fs');
-const {Compiler} = require('dist/wonderscript');
+const {Compiler} = require('../dist/wonderscript.js');
 
 const platform = process.argv[2];
 const src = fs.readFileSync(process.argv[3], 'utf8');
