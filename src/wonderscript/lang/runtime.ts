@@ -190,6 +190,31 @@ export function map<In = any, Out = unknown>(f: Mapper<In, Out>, xs: Mappable): 
     return Object.freeze(a);
 }
 
+type Reducing = (a: any, b: any) => any
+
+export function reduce(f: Reducing, xs, init?: any) {
+    if (arguments.length >= 2) {
+        if (init == null) {
+            init = first(xs);
+            xs   = next(xs);
+        }
+        if (isEmpty(xs)) {
+            return init;
+        }
+        else {
+            let x = init;
+            while (xs != null) {
+                x = f.call(xs, x, first(xs));
+                xs = next(xs);
+            }
+            return x;
+        }
+    }
+    else {
+        throw new Error('Wrong number of arguments expected at least 2, got: ' + arguments.length);
+    }
+}
+
 export function partition(n: number, xs: ArrayLike): Readonly<any[]> {
     if (isEmpty(xs)) {
         return EMPTY_ARRAY;

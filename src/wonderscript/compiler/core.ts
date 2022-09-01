@@ -33,13 +33,3 @@ export function isEOF(x): x is EOF {
     return x && x.eof === true;
 }
 
-export function stacktrace(stack): string {
-    const buffer = [];
-
-    for (let i = 0; i < stack.length; i++) {
-        const frame = stack[i];
-        buffer.push(str(frame[0], ' - ', frame[1], ':', frame[2]));
-    }
-
-    return buffer.join('\n');
-}

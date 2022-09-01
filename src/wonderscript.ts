@@ -108,4 +108,8 @@ export class Compiler {
     macroexpand(form: Form): Form {
         return compiler.macroexpand(form, this.env);
     }
+
+    prStr(form: Form): string {
+        return compiler.prStr(form);
+    }
 }

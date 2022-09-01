@@ -1,8 +1,21 @@
 import {PushBackReader} from "../reader/PushBackReader";
-import {EOF, isEOF, isTaggedValue, stacktrace} from "./core";
+import {EOF, isEOF, isTaggedValue} from "./core";
 import {read} from "../reader/read";
 import {emit} from "./emit";
 import {Env} from "./Env";
+import {str} from "../lang/runtime";
+import {prStr} from "./prStr";
+
+function stacktrace(stack): string {
+    const buffer = [];
+
+    for (let i = 0; i < stack.length; i++) {
+        const frame = stack[i];
+        buffer.push(str(frame[0], ' - ', frame[1], ':', frame[2]));
+    }
+
+    return buffer.join('\n');
+}
 
 export function evalString(s: string, scope: Env, src = 'inline') {
     const r = new PushBackReader(s);
@@ -16,7 +29,7 @@ export function evalString(s: string, scope: Env, src = 'inline') {
         if (isEOF(res)) return ret;
         if (isTaggedValue(res)) {
             evalingTaggedValue = true;
-            stack.unshift([res[0], src, r.line()]);
+            stack.unshift([prStr(res), src, r.line()]);
         }
         if (res != null) {
             try {

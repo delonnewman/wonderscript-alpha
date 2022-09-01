@@ -9,6 +9,8 @@
 
 ; TODO: add optional doc string and meta data map
 
+(def array (fn (&args) args))
+
 (def defmacro
   (fn* (name args &body)
     (array 'do
@@ -94,119 +96,11 @@
 (defn odd? (x)
   (identical? (bit-and x 1) 1))
 
-(defn assoc-array? (a)
-  (cond (not (array? a))
-          false
-        :else
-          (array? (aget a 0))))
+;; Basic functions and OOP
 
-(defn mapcat
-  (f coll)
-  (apply concat (map f coll)))
-
-; (fn^
-;   ((x) x)
-;   ((x y) [x y])
-;   ((x y &zs) (cons x (cons y zs))))
-(defmacro fn- (&xs)
-  (let (x (aget xs 0))
-    (cond
-      (assoc-array? x)
-        ; compile multi-body fn
-        ; TODO: collect arguments
-      (array 'fn (array '&args)
-             (cons 'cond
-                   (mapcat (fn (x)
-                             (array (array 'identical? (.-length (aget x 0)) 'args) (aget x 1))) xs)))
-          else
-            ; single body fn
-            (cons 'fn xs))))
-
-;; Imperative Programming
-
-(defmacro when (pred &acts)
-  (array 'cond pred (cons 'do acts)))
-
-(defmacro unless (pred &acts)
-  (array 'cond (array 'not pred) (cons 'do acts)))
-
-(defmacro dotimes
-  (bindings &body)
-  (let (nm (aget bindings 0)
-        init (aget bindings 1))
-    (array 'loop (array nm 0)
-          (cons 'when
-                (cons (array '< nm init)
-                      (concat body (array (array 'recur (array '+ nm 1))))))
-          init)))
-
-(defmacro doeach
-  (bindings &body)
-  (let (nm (aget bindings 0)
-        col (aget bindings 1))
-    (array 'loop (array nm (array 'aget col 0) 'i 0)
-           (cons 'when
-                 (cons (array 'not (array 'nil? nm))
-                       (concat body (array (array 'recur (array 'aget col (array 'inc 'i)) (array 'inc 'i))))))
-           col)))
-
-(defmacro while
-  (pred &body)
-  (array 'loop ()
-         (cons 'when (cons pred (concat body (array (array 'recur)))))))
-
-(defn pr
-  (x)
-  (print (pr-str x)))
-
-;; Assertions and Testing
-
-(def $failure-tag "FAILURE: ")
-(def $assertion-msg " is false")
-
-(defmacro is
-  (&args)
-  (cond
-    (identical? 1 (alength args))
-      (array 'is (aget args 0)
-             (array 'str
-                    '$failure-tag
-                    (array 'quote (pr-str (aget args 0)))
-                    '$assertion-msg))
-    (identical? 2 (alength args))
-      (array 'cond
-             (array 'not (aget args 0)) (array 'print (aget args 1)))))
-
-(defmacro is-not (body &args)
-  (cons 'is (cons (array 'not body) args)))
-
-(defmacro deftest
-  (nm &body)
-  (array 'do
-    (array 'def nm (cons 'fn (cons '() body)))
-    (array 'set-meta nm ':test true)))
-
-;; OOP & JS reflection
-
-(defn js-constructor
-  (object)
-  (.-constructor object))
-
-(defn js-prototype
-  (object)
-  (.getPrototypeOf js/Object object))
-
-(defn js-constructor-name
-  (object)
-  (.-name (js-constructor object)))
-
-(defn js-define-singleton-method
-  (obj method-name f)
-  (aset obj method-name f))
-
-(defn js-define-prototype-method
-  (object method-name f)
-  (aset (js-prototype object) method-name f))
+(def apply
+  (fn (f args)
+    (.apply f args)))
 
 (defn freeze!
   (object) (.freeze js/Object object))
@@ -220,61 +114,14 @@
     (.slice object 0)
     (.assign js/Object (.create js/Object nil) object)))
 
-(defn seal!
-  (object) (.seal js/Object object))
 
-(defn sealed?
-  (object) (.isSealed js/Object object))
-
-(defn extensible?
-  (object) (.isExtensible js/Object object))
-
-(defn prevent-extensions!
-  (object) (.preventExtensions js/Object object))
-
-(defn js-primitive-type?
-  (obj)
-  (not (identical? "object" (type obj))))
-
-(defn js-object-tag
-  (object)
-  (.call (.-toString (.-prototype js/Object)) object))
-
-(defn arity
-  (f)
-  (if (function? f)
-    (.-length f)
-    (throw (js/Error. "arity cannot be found"))))
-
-(defn js-property-value
-  (obj property-name)
-  (aget obj property-name))
-
-;; Return the bound method or thow an exception
-(defn method
-  (obj method-name)
-  (let (val (js-property-value obj method-name))
-    (if (function? val)
-      (.bind val obj)
-      (throw (js/Error. "undefined method")))))
-
-(defn method?
-  (obj method)
-  (function? (aget obj method)))
-
-(defn bind
-  (f object)
-  (.call (.-bind (.-prototype js/Function)) f object))
-
-(defn partial
-  (f &args)
-  (.apply (.-bind (.-prototype js/Function)) f (.concat [nil] args)))
-
-;; Array, Strings & ArrayLike
+;; Basic Array, Strings & ArrayLike
 
 (def $empty-array (freeze! []))
 
-(defn array (&args) args)
+(defn concat
+  (&arrays)
+  (.apply (.-concat (.-prototype js/Array)) $empty-array arrays))
 
 (defn array?
   (object)
@@ -336,15 +183,6 @@
 (defn length
   (array) (.-length array))
 
-(defn partition (n a)
-  (let (pairs (array))
-    (dotimes (i (.floor js/Math (/ (alength a) n)))
-      (let (p (array))
-        (dotimes (j n)
-          (aset p j (aget a (+ (* n i) j))))
-        (aset pairs i p)))
-    pairs))
-
 ;; Strings
 
 (def $white-space-regex (js/RegExp. "\\s+"))
@@ -365,6 +203,185 @@
   (if (blank? object)
     nil
     object))
+
+(defn assoc-array? (a)
+  (cond (not (array? a))
+          false
+        :else
+          (array? (aget a 0))))
+
+(defn mapcat
+  (f coll)
+  (apply concat (map f coll)))
+
+; (fn^
+;   ((x) x)
+;   ((x y) [x y])
+;   ((x y &zs) (cons x (cons y zs))))
+(defmacro fn- (&xs)
+  (let (x (aget xs 0))
+    (cond
+      (assoc-array? x)
+        ; compile multi-body fn
+        ; TODO: collect arguments
+      (array 'fn (array '&args)
+             (cons 'cond
+                   (mapcat (fn (x)
+                             (array (array 'identical? (.-length (aget x 0)) 'args) (aget x 1))) xs)))
+          else
+            ; single body fn
+            (cons 'fn xs))))
+
+;; Imperative Programming
+
+(defmacro when (pred &acts)
+  (array 'cond pred (cons 'do acts)))
+
+(defmacro unless (pred &acts)
+  (array 'cond (array 'not pred) (cons 'do acts)))
+
+;; TODO: include let binding for macro output for better performance, will need gensym
+(defmacro dotimes
+  (bindings &body)
+  (let (nm (aget bindings 0)
+        init (aget bindings 1))
+    (array 'loop (array nm 0)
+          (cons 'when
+                (cons (array '< nm init)
+                      (concat body (array (array 'recur (array '+ nm 1))))))
+          init)))
+
+(defmacro doeach
+  (bindings &body)
+  (let (nm (aget bindings 0)
+        col (aget bindings 1))
+    (array 'loop (array nm (array 'aget col 0) 'i 0)
+           (cons 'when
+                 (cons (array 'not (array 'nil? nm))
+                       (concat body (array (array 'recur (array 'aget col (array 'inc 'i)) (array 'inc 'i))))))
+           col)))
+
+(defmacro while
+  (pred &body)
+  (array 'loop ()
+         (cons 'when (cons pred (concat body (array (array 'recur)))))))
+
+(defn print
+  (x) (.log js/console x))
+
+(defn pr
+  (x)
+  (print (pr-str x)))
+
+;; Assertions and Testing
+
+(def $failure-tag "FAILURE: ")
+(def $assertion-msg " is false")
+
+(defmacro is
+  (&args)
+  (cond
+    (identical? 1 (alength args))
+      (array 'is (aget args 0)
+             (array 'str
+                    '$failure-tag
+                    (array 'quote (pr-str (aget args 0)))
+                    '$assertion-msg))
+    (identical? 2 (alength args))
+      (array 'cond
+             (array 'not (aget args 0)) (array 'print (aget args 1)))))
+
+(defmacro is-not (body &args)
+  (cons 'is (cons (array 'not body) args)))
+
+(defmacro deftest
+  (nm &body)
+  (array 'do
+    (array 'def nm (cons 'fn (cons '() body)))
+    (array 'set-meta nm ':test true)))
+
+;; OOP & JS reflection
+
+(defn js-constructor
+  (object)
+  (.-constructor object))
+
+(defn js-prototype
+  (object)
+  (.getPrototypeOf js/Object object))
+
+(defn js-constructor-name
+  (object)
+  (.-name (js-constructor object)))
+
+(defn js-define-singleton-method
+  (obj method-name f)
+  (aset obj method-name f))
+
+(defn js-define-prototype-method
+  (object method-name f)
+  (aset (js-prototype object) method-name f))
+
+(defn seal!
+  (object) (.seal js/Object object))
+
+(defn sealed?
+  (object) (.isSealed js/Object object))
+
+(defn extensible?
+  (object) (.isExtensible js/Object object))
+
+(defn prevent-extensions!
+  (object) (.preventExtensions js/Object object))
+
+(defn js-primitive-type?
+  (obj)
+  (not (identical? "object" (type obj))))
+
+(defn js-object-tag
+  (object)
+  (.call (.-toString (.-prototype js/Object)) object))
+
+(defn arity
+  (f)
+  (if (function? f)
+    (.-length f)
+    (throw (js/Error. "arity cannot be found"))))
+
+(defn js-property-value
+  (obj property-name)
+  (aget obj property-name))
+
+;; Return the bound method or thow an exception
+(defn method
+  (obj method-name)
+  (let (val (js-property-value obj method-name))
+    (if (function? val)
+      (.bind val obj)
+      (throw (js/Error. "undefined method")))))
+
+(defn method?
+  (obj method)
+  (function? (aget obj method)))
+
+(defn bind
+  (f object)
+  (.call (.-bind (.-prototype js/Function)) f object))
+
+(defn partial
+  (f &args)
+  (.apply (.-bind (.-prototype js/Function)) f (.concat [nil] args)))
+
+;; More advanced array functions
+
+(defn partition (n a)
+  (let (pairs (array))
+    (dotimes (i (.floor js/Math (/ (alength a) n)))
+      (let (p (array))
+        (dotimes (j n)
+          (aset p j (aget a (+ (* n i) j))))
+        (aset pairs i p)))
+    pairs))
 
 ;; Maps & Sets
 

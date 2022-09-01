@@ -2,7 +2,7 @@ import {escapeChars} from "../utils";
 import {isSymbol} from "../core";
 import {isArray, map, str} from "../../lang/runtime";
 import {COND_SYM, FN_SYM, RECUR_SYM} from "../constants";
-import {define, env, Env} from "../Env";
+import {Env} from "../Env";
 import {compileBody, compileRecursiveBody} from "./compileBody";
 
 function parseArgs(args) {
@@ -58,37 +58,34 @@ function hasTailCall(form) {
 }
 
 export function emitFunc(form, scope: Env): string {
-    var env_ = env(env_),
-        args = form[1],
-        argsDef, argsAssign, argsBuf, expr, i, value;
+    const env = new Env(scope);
+    const args = form[1];
 
-    if (form.length < 2)
+    if (form.length < 2) {
         throw new Error("a function requires at least an arguments list and a body");
-    else {
-        if (!isArray(args)) throw new Error("an arguments list is required");
-
-        argsBuf = parseArgs(args);
-        argsAssign = genArgAssigns(argsBuf);
-        argsDef = genArgsDef(argsBuf);
-
-        for (i = 0; i < argsBuf.length; i++) {
-            define(env_, argsBuf[i].name, true);
-        }
-
-        var buf = [argsAssign],
-            body = form.slice(2),
-            names = map(function(x) { return x.name; }, argsBuf);
-
-        if (hasTailCall(body)) {
-            buf.push(compileRecursiveBody(body, names, env_));
-        }
-        else if (body.length === 0) {
-            buf = [];
-        }
-        else {
-            buf.push(compileBody(body, env_));
-        }
-
-        return str("(function(", argsDef, ") { ", buf.join('; '), "; })");
     }
+
+    if (!isArray(args)) throw new Error("an arguments list is required");
+
+    const argsBuf = parseArgs(args);
+    const argsAssign = genArgAssigns(argsBuf);
+    const argsDef = genArgsDef(argsBuf);
+
+    for (let i = 0; i < argsBuf.length; i++) {
+        env.define(argsBuf[i].name, true);
+    }
+
+    let buffer = [argsAssign];
+    const body = form.slice(2);
+    const names = map((x) => x.name, argsBuf);
+
+    if (hasTailCall(body)) {
+        buffer.push(compileRecursiveBody(body, names, env));
+    } else if (body.length === 0) {
+        buffer = [];
+    } else {
+        buffer.push(compileBody(body, env));
+    }
+
+    return str("(function(", argsDef, ") { ", buffer.join('; '), "; })");
 }

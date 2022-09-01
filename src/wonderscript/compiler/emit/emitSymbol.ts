@@ -1,4 +1,4 @@
-import {Env, lookup} from "../Env";
+import {Env} from "../Env";
 import {escapeChars} from "../utils";
 import {isUndefined, str} from "../../lang/runtime";
 import {CORE_NS, CURRENT_NS} from "../vars";
@@ -16,8 +16,11 @@ export function emitSymbol(s: string, env: Env): string {
         let parts = s.split('/');
         if (parts.length !== 2) throw new Error('A symbol should only have 2 parts');
 
-        let scope = lookup(env, parts[0]);
-        if (scope === null) throw new Error('Unknown namespace: ' + parts[0]);
+        let scope = env.lookup(parts[0]);
+        if (scope === null) {
+            console.error(env);
+            throw new Error('Unknown namespace: ' + parts[0]);
+        }
 
         let ns = scope.vars[parts[0]];
         if (isUndefined(ns.module[escapeChars(parts[1])])) {
@@ -28,7 +31,7 @@ export function emitSymbol(s: string, env: Env): string {
     }
 
     let s_ = escapeChars(s);
-    let scope = lookup(env, s_);
+    let scope = env.lookup(s_);
     if (scope !== null) {
         return s_;
     }

@@ -1,3 +1,5 @@
+import {isString} from "../lang/runtime";
+
 const names = {
     '=': 'eq',
     'not=': 'noteq',
@@ -96,6 +98,8 @@ const SPECIAL_CHARS = {
 } as const;
 
 export function escapeChars(str: string): string {
+    if (!isString(str)) throw new Error("only strings can be escaped not " + JSON.stringify(str))
+
     for (let ch in SPECIAL_CHARS) {
         str = str.replace(new RegExp(ch, 'g'), SPECIAL_CHARS[ch]);
     }

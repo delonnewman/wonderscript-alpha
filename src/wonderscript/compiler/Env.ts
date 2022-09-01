@@ -5,9 +5,9 @@ export class Env {
     readonly parent: Env | null;
     private _isRecursive: boolean
 
-    constructor(vars, parent) {
-        this.vars = vars || {};
-        this.parent = parent || null;
+    constructor(parent = null, vars = {}) {
+        this.vars = vars;
+        this.parent = parent;
         this._isRecursive = false;
     }
 
@@ -18,6 +18,34 @@ export class Env {
 
     isRecursive(): boolean {
         return this._isRecursive;
+    }
+
+    lookup(name: string) {
+        if (this.vars != null && this.vars[name] != null) {
+            return this;
+        }
+
+        if (this.parent == null) return null;
+
+        let scope = this.parent;
+        while (scope != null) {
+            if (scope.vars != null && scope.vars[name] != null) {
+                return scope;
+            }
+            scope = scope.parent;
+        }
+        return null;
+    }
+
+    define(name: string, value?: any) {
+        if (!isUndefined(value)) {
+            this.vars[name] = value;
+            return null;
+        }
+        else {
+            this.vars[name] = null;
+            return null;
+        }
     }
 
     toString() {
@@ -35,7 +63,7 @@ export function isEnv(x): x is Env {
 }
 
 export function env(parent?: Env): Env {
-    return new Env(null, parent);
+    return new Env(parent);
 }
 
 export function lookup(env: Env, name: string) {
@@ -63,7 +91,7 @@ export function lookup(env: Env, name: string) {
 }
 
 export function define(env: Env, name: string, value?: any) {
-    if (isUndefined(value)) {
+    if (!isUndefined(value)) {
         env.vars[name] = value;
         return null;
     }
