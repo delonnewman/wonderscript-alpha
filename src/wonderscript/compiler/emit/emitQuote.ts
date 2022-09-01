@@ -1,18 +1,20 @@
 import {isArray, isMap, isNumber, isString, isUndefined, map, str} from "../../lang/runtime";
 import {EMPTY_ARRAY, FALSE_SYM, NULL_SYM, QUOTE_SYM, TRUE_SYM, UNDEFINED_SYM} from "../constants";
-import {isTaggedValue, TaggedValue} from "../core";
+import {Form, isTaggedValue} from "../core";
+import {prStr} from "../prStr";
 
-export type QuoteForm = TaggedValue<typeof QUOTE_SYM>;
+export type QuoteForm = [typeof QUOTE_SYM, any];
 
 export const isQuoteForm = (form: any): form is QuoteForm =>
-    isTaggedValue(form) && form[0] === QUOTE_SYM;
+    isTaggedValue(form) && form[0] === QUOTE_SYM && form.length === 2;
 
-export function emitQuote(form) {
-    if (form.length !== 2) throw new Error('One value should be quoted');
+export function emitQuote(form: Form): string {
+    if (!isQuoteForm(form)) throw new Error(`invalid ${QUOTE_SYM} form: ${prStr(form)}`)
+
     return emitQuotedValue(form[1]);
 }
 
-function emitQuotedValue(val) {
+function emitQuotedValue(val): string {
     if (isString(val)) {
         return JSON.stringify(val);
     }

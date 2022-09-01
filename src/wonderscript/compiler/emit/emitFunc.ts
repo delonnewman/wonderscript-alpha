@@ -1,13 +1,15 @@
 import {escapeChars} from "../utils";
-import {isSymbol} from "../core";
+import {Form, isSymbol, isTaggedValue} from "../core";
 import {isArray, map, str} from "../../lang/runtime";
 import {COND_SYM, FN_SYM, RECUR_SYM} from "../constants";
 import {Env} from "../Env";
 import {compileBody, compileRecursiveBody} from "./compileBody";
+import {prStr} from "../prStr";
 
 function parseArgs(args) {
-    var splat = false, name, argsBuf = [];
-    for (var i = 0; i < args.length; ++i) {
+    let splat = false, name;
+    const argsBuf = [];
+    for (let i = 0; i < args.length; ++i) {
         if ( !isSymbol(args[i]) ) continue;
         if ( args[i].startsWith('&') ) {
             name = args[i].replace(/^&/, '');
@@ -22,8 +24,8 @@ function parseArgs(args) {
 }
 
 function genArgAssigns(argsBuf) {
-    var argsAssign = [], i;
-    for (i = 0; i < argsBuf.length; ++i) {
+    const argsAssign = [];
+    for (let i = 0; i < argsBuf.length; ++i) {
         if (argsBuf[i].splat) {
             argsAssign.push(str('var ', argsBuf[i].name, " = Array.prototype.slice.call(arguments, ", i, ")"));
         }
@@ -32,8 +34,8 @@ function genArgAssigns(argsBuf) {
 }
 
 function genArgsDef(argsBuf) {
-    var i, argsDef = [];
-    for (i = 0; i < argsBuf.length; ++i) {
+    const argsDef = [];
+    for (let i = 0; i < argsBuf.length; ++i) {
         argsDef.push(argsBuf[i].name);
     }
     return argsDef.join(',');
@@ -57,15 +59,16 @@ function hasTailCall(form) {
     }
 }
 
-export function emitFunc(form, scope: Env): string {
+export type FnForm = [typeof FN_SYM, any[], ...any[]];
+
+export const isFnForm = (form: Form): form is FnForm =>
+    isTaggedValue(form) && form[0] === FN_SYM && isArray(form[1]);
+
+export function emitFunc(form: Form, scope: Env): string {
+    if (!isFnForm(form)) throw new Error(`invalid ${FN_SYM} form: ${prStr(form)}`)
+
     const env = new Env(scope);
     const args = form[1];
-
-    if (form.length < 2) {
-        throw new Error("a function requires at least an arguments list and a body");
-    }
-
-    if (!isArray(args)) throw new Error("an arguments list is required");
 
     const argsBuf = parseArgs(args);
     const argsAssign = genArgAssigns(argsBuf);
