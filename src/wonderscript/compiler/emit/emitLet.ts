@@ -3,16 +3,24 @@ import {isString} from "../../lang/runtime";
 import {escapeChars} from "../utils";
 import {compileBody} from "./compileBody";
 import {emit} from "../emit";
+import {BodyForm, Form, isBodyForm} from "../core";
+import {LET_SYM} from "../constants";
+import {prStr} from "../prStr";
 
-export function emitLet(form, scope: Env): string {
+export type LetForm = BodyForm<typeof LET_SYM>;
+
+export const isLetForm = isBodyForm<typeof LET_SYM>(LET_SYM);
+
+export function emitLet(form: Form, scope: Env): string {
+    if (!isLetForm(form)) throw new Error(`invalid ${LET_SYM} form: ${prStr(form)}`);
+
     const env = new Env(scope);
 
     if (form.length < 2) throw new Error('A let expression should have at least 2 elements');
 
     const buffer = ['(function('];
-    const rest = form.slice(1);
-    const binds = rest[0];
-    const body = rest.slice(1);
+    const binds = form[1];
+    const body = form.slice(2);
 
     // add names to function scope
     const names = [];

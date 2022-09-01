@@ -6,7 +6,7 @@ import {Form, isTaggedValue, TaggedValue} from "../core";
 import {DO_SYM} from "../constants";
 import {prStr} from "../prStr";
 
-export type DoForm = TaggedValue<typeof DO_SYM>;
+export type DoForm = [typeof DO_SYM, ...Form[]];
 
 export const isDoForm = (form: Form): form is DoForm =>
     isTaggedValue(form) && form[0] === DO_SYM;

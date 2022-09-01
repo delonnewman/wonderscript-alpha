@@ -3,9 +3,9 @@ import {EMPTY_ARRAY, FALSE_SYM, NULL_SYM, QUOTE_SYM, TRUE_SYM, UNDEFINED_SYM} fr
 import {Form, isTaggedValue} from "../core";
 import {prStr} from "../prStr";
 
-export type QuoteForm = [typeof QUOTE_SYM, any];
+export type QuoteForm = [typeof QUOTE_SYM, Form];
 
-export const isQuoteForm = (form: any): form is QuoteForm =>
+export const isQuoteForm = (form: Form): form is QuoteForm =>
     isTaggedValue(form) && form[0] === QUOTE_SYM && form.length === 2;
 
 export function emitQuote(form: Form): string {

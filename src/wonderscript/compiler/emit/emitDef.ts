@@ -7,7 +7,7 @@ import {DEF_SYM} from "../constants";
 import {Form} from "../core";
 import {prStr} from "../prStr";
 
-export type DefForm = [typeof DEF_SYM, string, any?];
+export type DefForm = [typeof DEF_SYM, string, Form?];
 
 export const isDefForm = (value: any): value is DefForm =>
     isArray(value) && (value.length === 2 || value.length === 3) && value[0] === DEF_SYM && isString(value[1]);

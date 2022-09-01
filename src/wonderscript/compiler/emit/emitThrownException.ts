@@ -1,8 +1,16 @@
-import {str} from "../../lang/runtime";
+import {isArray, str} from "../../lang/runtime";
 import {emit} from "../emit";
+import {THROW_SYM} from "../constants";
+import {Form} from "../core";
+import {prStr} from "../prStr";
+
+export type ThrowForm = [typeof THROW_SYM, Form];
+
+export const isThrowForm = (form: Form): form is ThrowForm =>
+    isArray(form) && form[0] === THROW_SYM && form.length === 2;
 
 export function emitThrownException(form, env) {
-    if (form.length !== 2)
-        throw new Error(str('Wrong number of arguments should have 2, got', form.length));
-    return str("throw ", emit(form[1], env));
+    if (!isThrowForm(form)) throw new Error(`invalid ${THROW_SYM} form: ${prStr(form)}`);
+
+    return `throw ${emit(form[1], env)}`;
 }

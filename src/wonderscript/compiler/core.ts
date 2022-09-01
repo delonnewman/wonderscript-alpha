@@ -8,6 +8,12 @@ export function isMacro(x): boolean {
 export type TaggedValue<Tag = string> = [Tag, ...any]
 export type Form = string | number | null | undefined | Map<any, any> | Set<any> | TaggedValue | any[]
 
+export type BodyForm<Tag> = [Tag, string[], ...Form[]];
+
+export function isBodyForm<Tag>(tag: string) {
+    return (form: Form): form is BodyForm<Tag> => isTaggedValue(form) && form[0] === tag && isArray(form[1]);
+}
+
 export function isTaggedValue<Tag = string>(x): x is TaggedValue<Tag> {
     return isArray(x) && isString(x[0]);
 }

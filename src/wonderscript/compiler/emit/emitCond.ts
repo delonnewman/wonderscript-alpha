@@ -6,7 +6,7 @@ import {Form, isTaggedValue, TaggedValue} from "../core";
 import {COND_SYM} from "../constants";
 import {prStr} from "../prStr";
 
-export type CondForm = TaggedValue<typeof COND_SYM>;
+export type CondForm = [typeof COND_SYM, ...Form[]];
 
 export const isCondForm = (form: any): form is CondForm =>
     isTaggedValue(form) && form[0] === COND_SYM && form.length >= 3;

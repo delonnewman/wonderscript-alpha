@@ -1,5 +1,5 @@
 import {escapeChars} from "../utils";
-import {Form, isSymbol, isTaggedValue} from "../core";
+import {BodyForm, Form, isBodyForm, isSymbol, isTaggedValue} from "../core";
 import {isArray, map, str} from "../../lang/runtime";
 import {COND_SYM, FN_SYM, RECUR_SYM} from "../constants";
 import {Env} from "../Env";
@@ -59,10 +59,9 @@ function hasTailCall(form) {
     }
 }
 
-export type FnForm = [typeof FN_SYM, any[], ...any[]];
+export type FnForm = BodyForm<typeof FN_SYM>;
 
-export const isFnForm = (form: Form): form is FnForm =>
-    isTaggedValue(form) && form[0] === FN_SYM && isArray(form[1]);
+export const isFnForm = isBodyForm<typeof FN_SYM>(FN_SYM);
 
 export function emitFunc(form: Form, scope: Env): string {
     if (!isFnForm(form)) throw new Error(`invalid ${FN_SYM} form: ${prStr(form)}`)

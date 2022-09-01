@@ -1,19 +1,23 @@
 import {Env} from "../Env";
-import {isString} from "../../lang/runtime";
+import {isArray, isString} from "../../lang/runtime";
 import {escapeChars} from "../utils";
 import {compileRecursiveBody} from "./compileBody";
 import {emit} from "../emit";
+import {LOOP_SYM} from "../constants";
+import {BodyForm, isBodyForm} from "../core";
+import {prStr} from "../prStr";
+
+export type LoopForm = BodyForm<typeof LOOP_SYM>;
+
+export const isLoopForm = isBodyForm<typeof LOOP_SYM>(LOOP_SYM);
 
 export function emitLoop(form, scope: Env): string {
+    if (!isLoopForm(form)) throw new Error(`invalid ${LOOP_SYM} form: ${prStr(form)}`);
     const env = new Env(scope);
 
-    if (form.length < 3)
-        throw new Error('A loop expression should have at least 3 elements');
-
     const buffer = ['(function('];
-    const rest = form.slice(1);
-    const binds = rest[0];
-    const body = rest.slice(1);
+    const binds = form[1];
+    const body = form.slice(2);
 
     const names = [];
     for (let i = 0; i < binds.length; i += 2) {
