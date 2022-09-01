@@ -3,8 +3,7 @@ const fs = require("fs"),
     readline = require("readline");
 
 // load runtime and core library
-const {Compiler} = require("../dist/wonderscript");
-const wsc = new Compiler('node', global);
+const wsc = require("../index.js");
 const {str, pr_DASH_str, _STAR_ns_STAR_} = wonderscript.core;
 const NS = _STAR_ns_STAR_;
 const prStr = pr_DASH_str;

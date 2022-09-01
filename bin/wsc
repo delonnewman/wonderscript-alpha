@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
 const fs = require('fs');
-const {Compiler} = require('../dist/wonderscript.js');
+const wsc = require('../index.js');
 
 const platform = process.argv[2];
 const src = fs.readFileSync(process.argv[3], 'utf8');
 
-console.log(new Compiler('node', global).compileString(src));
+console.log(wsc.compileString(src));
