@@ -12,12 +12,13 @@ dist/wonderscript/core.ws.js: dist/wonderscript
 	$(WSC) browser ./src/wonderscript/core.ws > dist/wonderscript/core.ws.js
 
 dist/wonderscript/core.ws.min.js: dist/wonderscript/core.ws.js
+	$(UGLIFY) dist/wonderscript/core.ws.js > dist/wonderscript/core.ws.min.js
 
 dist/wonderscript.js:
 	$(ROLLUP) -c
 
 dist/wonderscript.min.js: dist/wonderscript.js
-	$(UGLIFY) dist/wonderscript.js
+	$(UGLIFY) dist/wonderscript.js > dist/wonderscript.min.js
 
 clean:
 	rm -rf dist
