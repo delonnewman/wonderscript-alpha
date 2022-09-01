@@ -1,6 +1,5 @@
 import {FALSE_SYM, NIL_SYM, TRUE_SYM} from "./constants";
 import {
-    first,
     isArray,
     isArrayLike,
     isBoolean,
@@ -9,60 +8,52 @@ import {
     isNumber,
     isString,
     map,
-    next,
     str
 } from "../lang/runtime";
 import {Form, isKeyword, isSymbol} from "./core";
-import {Nil} from "../lang/Nil";
 
-export function prStr(x: Form): string {
-    if (x == null) return NIL_SYM;
-    else if (isNumber(x)) return str(x);
-    else if (isBoolean(x)) {
-        return x ? TRUE_SYM : FALSE_SYM;
+export function prStr(form: Form): string {
+    if (form == null) return NIL_SYM;
+    if (isNumber(form)) return `${form}`;
+
+    if (isBoolean(form)) {
+        return form ? TRUE_SYM : FALSE_SYM;
     }
-    else if (isSymbol(x)) {
-        return str(x);
+
+    if (isSymbol(form) || isKeyword(form)) {
+        return `${form}`;
     }
-    else if (isString(x)) {
-        return JSON.stringify(x);
+
+    if (isString(form)) {
+        return JSON.stringify(form);
     }
-    else if (isKeyword(x)) {
-        return str(":", x[1]);
-    }
-    else if (isArray(x)) {
-        if (x.length === 0) {
+
+    if (isArray(form)) {
+        if (form.length === 0) {
             return '()';
         }
-        else {
-            let y;
-            let ys: Readonly<any[]> | Nil = x;
-            const buffer = [];
-            while (ys !== null) {
-                y = first(ys);
-                ys = next(ys);
-                buffer.push(prStr(y));
-            }
-            return str('(', buffer.join(' '), ')');
-        }
+
+        const parts = form.map(prStr);
+        return str('(', parts.join(' '), ')');
     }
-    else if (isFunction(x)) {
-        return str('#js/function "', x.toString(), '"');
+
+    if (isFunction(form)) {
+        return `#js/function "${form}"`;
     }
-    else if (isMap(x)) {
-        var s = map(function(entry) { return str(prStr(entry[0]), ' ', prStr(entry[1])); }, x).join(' ');
-        return str('{', s, '}');
+
+    if (isMap(form)) {
+        const parts = map((entry) => `${prStr(entry[0])} ${prStr(entry[1])}`, form);
+        return str('{', parts.join(' '), '}');
     }
-    else if (x.toString) {
-        return x.toString();
+
+    if (isFunction(form.toString)) {
+        return form.toString();
     }
-    else if (isArrayLike(x)) {
-        return str('#js/object {',
-            Array.prototype.slice.call(x)
-                .map(function(x, i) { return str(i, ' ', prStr(x)); })
-                .join(', '), '}');
+
+    if (isArrayLike(form)) {
+        const parts = Array.prototype.map.call(form, (x, i) => `${i} ${prStr(x)}`);
+        return `#js/object {${parts.join(', ')}}`;
     }
-    else {
-        return "" + x;
-    }
+
+    return `${form}`;
 }

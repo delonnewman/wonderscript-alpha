@@ -1,43 +1,42 @@
-import {define, Env, env} from "../Env";
+import {Env} from "../Env";
 import {isString} from "../../lang/runtime";
 import {escapeChars} from "../utils";
 import {compileRecursiveBody} from "./compileBody";
 import {emit} from "../emit";
 
 export function emitLoop(form, scope: Env): string {
-    var env_ = env(scope);
+    const env = new Env(scope);
 
     if (form.length < 3)
         throw new Error('A loop expression should have at least 3 elements');
 
-    var i, bind,
-        buff = ['(function('],
-        rest = form.slice(1),
-        binds = rest[0],
-        body = rest.slice(1);
+    const buffer = ['(function('];
+    const rest = form.slice(1);
+    const binds = rest[0];
+    const body = rest.slice(1);
 
-    var names = [];
-    for (i = 0; i < binds.length; i += 2) {
-        if (!isString(binds[i]))
-            throw new Error('Invalid binding name');
-        bind = escapeChars(binds[i]);
-        define(env_, bind, true);
+    const names = [];
+    for (let i = 0; i < binds.length; i += 2) {
+        if (!isString(binds[i])) throw new Error('Invalid binding name');
+
+        const bind = escapeChars(binds[i]);
+        env.define(bind, true);
         names.push(bind);
     }
-    buff.push(names.join(', '));
-    buff.push('){');
+    buffer.push(names.join(', '));
+    buffer.push('){');
 
     // body
-    buff.push(compileRecursiveBody(body, names, env_));
-    buff.push('}(');
+    buffer.push(compileRecursiveBody(body, names, env));
+    buffer.push('}(');
 
     // add values to function scope
-    var values = [];
-    for (i = 0; i < binds.length; i += 2) {
-        values.push(emit(binds[i + 1], env_));
+    const values = [];
+    for (let i = 0; i < binds.length; i += 2) {
+        values.push(emit(binds[i + 1], env));
     }
-    buff.push(values.join(', '));
-    buff.push('))');
+    buffer.push(values.join(', '));
+    buffer.push('))');
 
-    return buff.join('');
+    return buffer.join('');
 }

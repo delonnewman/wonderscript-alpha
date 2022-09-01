@@ -1,4 +1,4 @@
-import {Env, lookup} from "./Env";
+import {Env} from "./Env";
 import {escapeChars} from "./utils";
 import {isUndefined} from "../lang/runtime";
 import {CORE_NS, CURRENT_NS} from "./vars";
@@ -8,7 +8,7 @@ export function findNamespaceVar(s: string, env: Env) {
         const parts = s.split('/');
         if (parts.length !== 2) throw new Error('A symbol should only have 2 parts');
 
-        const scope = lookup(env, parts[0]);
+        const scope = env.lookup(parts[0]);
         if (scope === null) return null;
 
         const ns  = scope.vars[parts[0]],

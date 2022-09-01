@@ -1,5 +1,5 @@
 import {getMeta, isArray, isFunction, isString, str} from "../lang/runtime";
-import {KEYWORD_SYM, RECUR_SYM, THROW_SYM} from "./constants";
+import {KEYWORD_SYM, RECUR_SYM, SPECIAL_FORMS, THROW_SYM} from "./constants";
 
 export function isMacro(x): boolean {
     return isFunction(x) && getMeta(x, "macro") === true;
@@ -33,3 +33,8 @@ export function isEOF(x): x is EOF {
     return x && x.eof === true;
 }
 
+export type SpecialFormSymbol = keyof typeof SPECIAL_FORMS;
+export type SpecialForm = TaggedValue<SpecialFormSymbol>;
+
+export const isSpecialForm = (value: any): value is SpecialForm =>
+    isTaggedValue(value) && SPECIAL_FORMS[value[0]] === true;

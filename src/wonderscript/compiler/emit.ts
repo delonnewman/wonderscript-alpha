@@ -79,7 +79,7 @@ export function emit(form_: Form, env_: Env) {
         return emitSymbol(form, env_);
     }
     else if (isNumber(form)) {
-        return str(form);
+        return JSON.stringify(form);
     }
     else if (isBoolean(form)) {
         return form === true ? TRUE_SYM : FALSE_SYM;
@@ -90,6 +90,7 @@ export function emit(form_: Form, env_: Env) {
     else if (isUndefined(form)) {
         return UNDEFINED_SYM;
     }
+    // TODO: add support for Set
     else if (isMap(form)) {
         return emitMap(form, env_);
     }

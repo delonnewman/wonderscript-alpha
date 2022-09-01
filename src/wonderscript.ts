@@ -1,4 +1,4 @@
-import {define, Env, env} from "./wonderscript/compiler/Env";
+import {Env} from "./wonderscript/compiler/Env";
 import {CORE_NS, CURRENT_NS} from "./wonderscript/compiler/vars";
 import {createNs} from "./wonderscript/lang/Namespace";
 import * as core from "./wonderscript/lang";
@@ -14,19 +14,20 @@ export class Compiler {
     readonly platform: Platform
 
     constructor(platform: Platform, global: object) {
-        this.env = env();
+        this.env = new Env();
         this.global = global
         this.platform = platform
         this.init()
     }
 
     private init() {
-        define(this.env, CORE_NS.name, CORE_NS);
+        this.env.define(CORE_NS.name, CORE_NS);
+
         if (this.isNode()) {
-            define(this.env, 'js', createNs('global', this.global));
+            this.env.define('js', createNs('global', this.global));
         } else {
             // @ts-ignore
-            define(this.env, 'js', createNs('window', this.global.window));
+            this.env.define('js', createNs('window', this.global.window));
         }
 
         importModule(core);
