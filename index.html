@@ -6,5 +6,13 @@
   <body>
     <main id="main"></main>
     <script type="module" src="dist/wonderscript.js"></script>
+    <script>
+      const wsInter = setInterval(() => {
+        if (window.wonderscript) {
+          clearInterval(wsInter);
+          new wonderscript.Compiler('browser', this).loadFile("src/wonderscript/core.ws");
+        }
+      }, 500);
+    </script>
   </body>
 </html>
