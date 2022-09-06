@@ -66,7 +66,7 @@
   (x) (identical? false x))
 
 (defn falsy?
-  (obj) (and (identical? false) (nil? obj)))
+  (obj) (and (identical? obj false) (nil? obj)))
 
 (defn truthy?
   (obj) (not (falsy? obj)))
@@ -597,9 +597,3 @@
 
 (defn dom-write
   (html) (.write js/document html))
-
-(when (browser?)
-  (dom-write
-   (html (array
-          [a {href https://delonnewman.name} This is Delon]
-          (array :strong "Hey")))))

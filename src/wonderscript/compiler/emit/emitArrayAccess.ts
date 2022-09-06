@@ -1,9 +1,16 @@
-import {str} from "../../lang/runtime";
 import {emit} from "../emit";
+import {Form, isTaggedValue, TaggedValue} from "../core";
+import {AGET_SYM} from "../constants";
+import {prStr} from "../prStr";
+import {isArray} from "../../lang/runtime";
 
-export function emitArrayAccess(form, env) {
-    if (form.length !== 3)
-        throw new Error(str('Wrong number of arguments expected 2, got ', form.length - 1));
+export type ArrayAccessForm = [typeof AGET_SYM, any[], Form];
 
-    return str(emit(form[1], env), '[', emit(form[2], env), ']');
+export const isArrayAccessForm = (form: Form): form is ArrayAccessForm =>
+    isTaggedValue(form) && form[0] === AGET_SYM && form.length === 3;
+
+export function emitArrayAccess(form: Form, env) {
+    if (!isArrayAccessForm(form)) throw new Error(`invalid ${AGET_SYM} form: ${prStr(form)}`);
+
+    return `${emit(form[1], env)}[${emit(form[2], env)}]`;
 }

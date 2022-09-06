@@ -1,4 +1,4 @@
-import {isArray, isString, map, str} from "../../lang/runtime";
+import {isArray, isString, map} from "../../lang/runtime";
 import {emit} from "../emit";
 import {Env} from "../Env";
 import {NEW_SYM} from "../constants";
@@ -13,7 +13,7 @@ export const isClassInitForm = (form: Form): form is ClassInitForm =>
 export function emitClassInit(form, env: Env): string {
     if (!isClassInitForm(form)) throw new Error(`invalid ${NEW_SYM} form: ${prStr(form)}`);
 
-    const args = map((arg) => emit(arg, env), form.slice(2)).join(', ');
+    const args = map((arg) => emit(arg, env), form.slice(2));
 
-    return str('new ', emit(form[1], env), '(', args, ')');
+    return `new ${emit(form[1], env)}(${args.join(', ')})`;
 }

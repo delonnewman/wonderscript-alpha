@@ -5,9 +5,10 @@ import {RECURSION_POINT_CLASS} from "../constants";
 import {Env} from "../Env";
 
 export function compileBody(body, env: Env, tailDef?: string) {
-    const last = body[body.length - 1],
-           head = body.slice(0, body.length - 1);
-    return map(function(x) { return emit(x, env); }, head)
+    const last = body[body.length - 1];
+    const head = body.slice(0, body.length - 1);
+
+    return map((x) => emit(x, env), head)
         .concat(emitTailPosition(last, env, tailDef)).join('; ');
 }
 

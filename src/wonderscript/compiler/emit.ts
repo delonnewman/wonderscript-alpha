@@ -1,9 +1,10 @@
 import {macroexpand} from "./macroexpand";
 import {Form, isKeyword, isSymbol} from "./core";
 import {emitKeyword} from "./emit/emitKeyword";
-import {isArray, isBoolean, isMap, isNull, isNumber, isUndefined, str} from "../lang/runtime";
+import {isArray, isBoolean, isMap, isNull, isNumber, isUndefined} from "../lang/runtime";
 import {
-    AGET_SYM, ALENGTH_SYM,
+    AGET_SYM,
+    ALENGTH_SYM,
     AND_SYM,
     ASET_SYM,
     BIT_AND_SYM,
@@ -26,7 +27,19 @@ import {
     GTQ_SYM,
     IDENTICAL_SYM,
     INSTANCE_SYM,
-    JS_SYM,
+    JS_AND,
+    JS_BIT_AND,
+    JS_BIT_LSHIFT, JS_BIT_NOT,
+    JS_BIT_OR,
+    JS_BIT_RSHIFT,
+    JS_BIT_URSHIFT,
+    JS_BIT_XOR,
+    JS_EQUIV,
+    JS_IDENTICAL,
+    JS_INSTANCE,
+    JS_NOT,
+    JS_OR,
+    JS_SYM, JS_TYPEOF,
     LET_SYM,
     LOOP_SYM,
     LT_SYM,
@@ -65,10 +78,12 @@ import {emitLet} from "./emit/emitLet";
 import {emitObjectRes} from "./emit/emitObjectRes";
 import {emitClassInit} from "./emit/emitClassInit";
 import {emitAssignment} from "./emit/emitAssignment";
-import {emitBinOperator} from "./emit/emitBinOperator";
+import {emitVariableOp} from "./emit/emitVariableOp";
 import {emitFuncApplication} from "./emit/emitFuncApplication";
 import {Env} from "./Env";
 import {emitJS} from "./emit/emitJS";
+import {emitUnaryOp} from "./emit/emitUnaryOp";
+import {emitBinOp} from "./emit/emitBinOp";
 
 export function emit(form_: Form, env_: Env) {
     const form = macroexpand(form_, env_);
@@ -130,48 +145,48 @@ export function emit(form_: Form, env_: Env) {
                     return emitAssignment(form, env_);
                 // operators
                 case MOD_SYM:
-                    return str('(', emit(form[1], env_), '%', emit(form[2], env_), ')');
+                    return emitBinOp(form, env_)
                 case LT_SYM:
-                    return str('(', emit(form[1], env_), '<', emit(form[2], env_), ')');
+                    return emitBinOp(form, env_)
                 case GT_SYM:
-                    return str('(', emit(form[1], env_), '>', emit(form[2], env_), ')');
+                    return emitBinOp(form, env_)
                 case LTQ_SYM:
-                    return str('(', emit(form[1], env_), '<=', emit(form[2], env_), ')');
+                    return emitBinOp(form, env_)
                 case GTQ_SYM:
-                    return str('(', emit(form[1], env_), '>=', emit(form[2], env_), ')');
+                    return emitBinOp(form, env_)
                 case NOT_SYM:
-                    return str('!(', emit(form[1], env_), ')');
+                    return emitUnaryOp(form, env_, JS_NOT)
                 case OR_SYM:
-                    return emitBinOperator(['||'].concat(form.slice(1)), env_);
+                    return emitVariableOp(form, env_, JS_OR);
                 case AND_SYM:
-                    return emitBinOperator(['&&'].concat(form.slice(1)), env_);
+                    return emitVariableOp(form, env_, JS_AND);
                 case BIT_NOT_SYM:
-                    return str('~(', emit(form[1], env_), ')');
+                    return emitBinOp(form, env_, JS_BIT_NOT)
                 case BIT_OR_SYM:
-                    return emitBinOperator(['|'].concat(form.slice(1)), env_);
+                    return emitBinOp(form, env_, JS_BIT_OR);
                 case BIT_XOR_SYM:
-                    return emitBinOperator(['^'].concat(form.slice(1)), env_);
+                    return emitBinOp(form, env_, JS_BIT_XOR);
                 case BIT_AND_SYM:
-                    return emitBinOperator(['&'].concat(form.slice(1)), env_);
+                    return emitBinOp(form, env_, JS_BIT_AND);
                 case BIT_LSHIFT_SYM:
-                    return emitBinOperator(['<<'].concat(form.slice(1)), env_);
+                    return emitBinOp(form, env_, JS_BIT_LSHIFT);
                 case BIT_RSHIFT_SYM:
-                    return emitBinOperator(['>>'].concat(form.slice(1)), env_);
+                    return emitBinOp(form, env_, JS_BIT_RSHIFT);
                 case BIT_URSHIFT_SYM:
-                    return emitBinOperator(['>>>'].concat(form.slice(1)), env_);
+                    return emitBinOp(form, env_, JS_BIT_URSHIFT);
                 case IDENTICAL_SYM:
-                    return emitBinOperator(['==='].concat(form.slice(1)), env_);
+                    return emitBinOp(form, env_, JS_IDENTICAL);
                 case EQUIV_SYM:
-                    return emitBinOperator(['=='].concat(form.slice(1)), env_);
+                    return emitBinOp(form, env_, JS_EQUIV);
                 case INSTANCE_SYM:
-                    return emitBinOperator([' instanceof '].concat(form.slice(1)), env_);
+                    return emitBinOp(form, env_, JS_INSTANCE);
                 case TYPE_SYM:
-                    return str('typeof(', emit(form[1], env_), ')');
+                    return emitUnaryOp(form, env_, JS_TYPEOF)
                 case PLUS_SYM:
                 case MINUS_SYM:
                 case DIV_SYM:
                 case MULT_SYM:
-                    return emitBinOperator(form, env_);
+                    return emitVariableOp(form, env_);
                 case AGET_SYM:
                     return emitArrayAccess(form, env_);
                 case ASET_SYM:

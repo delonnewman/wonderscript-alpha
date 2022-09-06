@@ -55,6 +55,28 @@ export const NULL_SYM        = 'null';
 export const UNDEFINED_SYM   = 'undefined';
 export const EMPTY_ARRAY     = '[]';
 
+export const JS_OR          = '||';
+export const JS_AND         = '&&';
+export const JS_NOT         = '!';
+export const JS_BIT_OR      = '|';
+export const JS_BIT_AND     = '&';
+export const JS_BIT_NOT     = '~';
+export const JS_BIT_XOR     = '^';
+export const JS_BIT_RSHIFT  = '>>';
+export const JS_BIT_URSHIFT = '>>>';
+export const JS_BIT_LSHIFT  = '<<';
+export const JS_IDENTICAL   = '===';
+export const JS_EQUIV       = '==';
+export const JS_INSTANCE    = ' instance ';
+export const JS_TYPEOF      = 'typeof'
+export const JS_MOD         = '%';
+export const JS_LT          = '<';
+export const JS_GT          = '>';
+export const JS_LTQ         = '<=';
+export const JS_GTQ         = '>=';
+export const OPEN_PEREN     = '(';
+export const CLOSE_PEREN    = ')';
+
 export const RECURSION_POINT_CLASS = `${CORE_NS.name}.RecursionPoint`;
 
 export const SPECIAL_FORMS = {

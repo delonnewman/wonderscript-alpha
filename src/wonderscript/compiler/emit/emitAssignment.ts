@@ -12,5 +12,5 @@ export const isAssignmentForm = (form: Form): form is AssignmentForm =>
 export function emitAssignment(form, env) {
     if (!isAssignmentForm(form)) throw new Error(`invalid ${SET_SYM} form: ${prStr(form)}`);
 
-    return str(emit(form[1], env), " = ", emit(form[2], env));
+    return `${emit(form[1], env)}=${emit(form[2], env)}`;
 }

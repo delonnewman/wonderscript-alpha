@@ -1,4 +1,4 @@
-import {getMeta, isArray, isFunction, isString, str} from "../lang/runtime";
+import {getMeta, isArray, isFunction, isString} from "../lang/runtime";
 import {KEYWORD_SYM, RECUR_SYM, SPECIAL_FORMS, THROW_SYM} from "./constants";
 
 export function isMacro(x): boolean {
