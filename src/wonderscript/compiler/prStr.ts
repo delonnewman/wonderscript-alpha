@@ -23,7 +23,7 @@ export function prStr(form: Form): string {
     }
 
     if (isSymbol(form) || isKeyword(form)) {
-        return `${form}`;
+        return form.toString();
     }
 
     if (isString(form)) {

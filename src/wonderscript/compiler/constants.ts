@@ -3,20 +3,21 @@ import {CORE_NS} from "./vars";
 export const QUOTE_SYM    = 'quote';
 export const DEF_SYM      = 'def';
 export const COND_SYM     = 'cond';
-export const JS_SYM       = 'js*';
 export const FN_SYM       = 'fn*';
+export const LET_SYM      = 'let';
 export const LOOP_SYM     = 'loop';
 export const RECUR_SYM    = 'recur';
 export const THROW_SYM    = 'throw';
 export const BEGIN_SYM    = 'begin';
 export const RESCUE_SYM   = 'rescue';
 export const ENSURE_SYM   = 'ensure';
-export const DO_SYM       = 'do';
-export const LET_SYM      = 'let';
 export const DOT_SYM      = '.';
 export const DOT_DASH_SYM = '.-';
 export const NEW_SYM      = 'new';
+export const SLOT_SYM     = 'slot';
 export const SET_SYM      = 'set!';
+export const JS_SYM       = 'js*';
+
 export const NIL_SYM      = 'nil';
 export const TRUE_SYM     = 'true';
 export const FALSE_SYM    = 'false';
@@ -92,14 +93,14 @@ export const SPECIAL_FORMS = {
     loop: true,
     recur: true,
     throw: true,
-    try: true,
     catch: true,
     finally: true,
-    do: true,
+    begin: true,
     let: true,
     '.': true,
     new: true,
-    'set!': true
+    'set!': true,
+    slot: true,
 } as const;
 
 export const CORE_NAMES = {

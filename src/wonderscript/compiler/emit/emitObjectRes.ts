@@ -3,13 +3,13 @@ import {emit} from "../emit";
 import {escapeChars} from "../utils";
 import {Env} from "../Env";
 import {DOT_SYM as DOT_STR} from "../constants";
-import {Form, isTaggedValue} from "../core";
+import {Form, isTaggedValue, TaggedValue} from "../core";
 import {prStr} from "../prStr";
-import {Symbol} from "../../lang/Symbol";
+import {isSymbol, Symbol} from "../../lang/Symbol";
 
 export const DOT_SYM = Symbol.intern(DOT_STR)
 
-export type ObjectResForm = [typeof DOT_SYM, Form, Form];
+export type ObjectResForm = [typeof DOT_SYM, Form, TaggedValue | Symbol];
 
 export const isObjectResForm = (form: Form): form is ObjectResForm =>
     isTaggedValue(form) && form[0].equals(DOT_SYM) && form.length === 3;
@@ -19,21 +19,22 @@ export function emitObjectRes(form, env: Env): string {
 
     const [_, obj, prop] = form;
 
-    if (isArray(prop)) {
+    if (isTaggedValue(prop)) {
         const [method, ...args] = prop;
 
-        return str('(', emit(obj, env), ').', escapeChars(method), '(',
+        return str('(', emit(obj, env), ').', escapeChars(method.name()), '(',
             map((x) => emit(x, env), args).join(', '), ')');
     }
 
-    if (isString(prop)) {
-        if (prop.startsWith('-')) {
-            return str('(', emit(obj, env), ').', escapeChars(prop.slice(1)));
+    if (isSymbol(prop)) {
+        const name = prop.name()
+        if (name.startsWith('-')) {
+            return str('(', emit(obj, env), ').', escapeChars(name.slice(1)));
         }
         else {
-            return str('(', emit(obj, env), ').', escapeChars(prop), '()');
+            return str('(', emit(obj, env), ').', escapeChars(name), '()');
         }
     }
 
-    throw new Error("'.' form requires at least 3 elements");
+    throw new Error(`invalid ${DOT_SYM} form: ${prStr(form)}`);
 }

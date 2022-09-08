@@ -34,9 +34,9 @@
 (defn ^:macro if (&args)
   (cond
     (identical? 2 (array-length args))
-      (array 'cond (array-get args 0) (array-get args 1))
+      (array 'cond (args 0) (args 1))
     (identical? 3 (array-length args))
-      (array 'cond (array-get args 0) (array-get args 1) 'else (array-get args 2))
+      (array 'cond (args 0) (args 1) 'else (args 2))
     else
       (throw (new js/Error "Wrong number of arguments expected 2 or 3"))))
 
@@ -54,16 +54,17 @@
 
 ;; Numerical
 
-(defn inc (x) (+ x 1))
-(defn dec (x) (- x 1))
+(defn add1 (x) (+ x 1))
+(defn sub1 (x) (- 1 x))
 
 (defn + (&xs)
-  (cond (identical? 0 (array-length xs))
-          0
-        (identical? 1 (array-length xs))
-          (array-get xs 0)
-        :else
-          (eval (cons '+ xs))))
+  (cond
+    (identical? 0 (array-length xs))
+      0
+    (identical? 1 (array-length xs))
+      (xs 0)
+    else
+      (eval (cons '+ xs))))
 
 ; TODO: improve these definitions
 (defn - (a b) (- a b))
@@ -197,7 +198,7 @@
   (cond (not (array? a))
           false
         :else
-          (array? (array-get a 0))))
+          (array? (a 0))))
 
 (defn mapcat
   (f coll)
@@ -208,7 +209,7 @@
 ;   ((x y) [x y])
 ;   ((x y &zs) (cons x (cons y zs))))
 (defn ^:macro fn- (&xs)
-  (let (x (array-get xs 0))
+  (let (x (xs 0))
     (cond
       (assoc-array? x)
         ; compile multi-body fn
@@ -216,7 +217,7 @@
       (array 'fn (array '&args)
              (cons 'cond
                    (mapcat (fn (x)
-                             (array (array 'identical? (.-length (array-get x 0)) 'args) (array-get x 1))) xs)))
+                             (array (array 'identical? (array-length (x 0)) 'args) (x 1))) xs)))
           else
             ; single body fn
             (cons 'fn xs))))
@@ -230,10 +231,10 @@
   (array 'cond (array 'not pred) (cons 'begin acts)))
 
 ;; TODO: include let binding for macro output for better performance, will need gensym
-(defn ^:macro dotimes
+(defn ^:macro for-times
   (bindings &body)
-  (let (nm (array-get bindings 0)
-        init (array-get bindings 1))
+  (let (nm   (bindings 0)
+        init (bindings 1))
     (array 'loop (array nm 0)
           (cons 'when
                 (cons (array '< nm init)
@@ -242,12 +243,12 @@
 
 (defn ^:macro for-each
   (bindings &body)
-  (let (nm (array-get bindings 0)
-        col (array-get bindings 1))
-    (array 'loop (array nm (array 'array-get col 0) 'i 0)
+  (let (nm  (bindings 0)
+        col (bindings 1))
+    (array 'loop (array nm (array 'col 0) 'i 0)
            (cons 'when
                  (cons (array 'not (array 'nil? nm))
-                       (concat body (array (array 'recur (array 'array-get col (array 'inc 'i)) (array 'inc 'i))))))
+                       (concat body (array (array 'recur (array 'col (array 'add1 'i)) (array 'add1 'i))))))
            col)))
 
 (defn ^:macro while
@@ -271,14 +272,14 @@
   (&args)
   (cond
     (identical? 1 (array-length args))
-      (array 'is (array-get args 0)
+      (array 'is (args 0)
              (array 'str
                     '$failure-tag
-                    (array 'quote (pr-str (array-get args 0)))
+                    (array 'quote (pr-str (args 0)))
                     '$assertion-msg))
     (identical? 2 (array-length args))
       (array 'cond
-             (array 'not (array-get args 0)) (array 'print (array-get args 1)))))
+             (array 'not (args 0)) (array 'print (args 1)))))
 
 (defn ^:macro is-not (body &args)
   (cons 'is (cons (array 'not body) args)))
@@ -369,9 +370,9 @@
 
 (defn partition (n a)
   (let (pairs (array))
-    (dotimes (i (.floor js/Math (/ (array-length a) n)))
+    (for-times (i (.floor js/Math (/ (array-length a) n)))
       (let (p (array))
-        (dotimes (j n)
+        (for-times (j n)
           (array-set! p j (array-get a (+ (* n i) j))))
         (array-set! pairs i p)))
     pairs))
@@ -494,7 +495,7 @@
     (or (map? col) (set? col)) (size col)
     (method? col 'count) (.count col)
     else
-     (reduce (fn (n _) (inc n)) col 0)))
+     (reduce (fn (n _) (add1 n)) col 0)))
 
 (defn includes?
   (col value)

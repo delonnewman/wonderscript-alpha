@@ -14,11 +14,11 @@ export function macroexpand(form: Form, scope: Env): Form {
     const sym = form[0];
     const name = sym.name();
     if (!sym.equals(DOT_DASH_SYM) && name.startsWith(DOT_DASH_STR)) {
-        return [DOT_SYM, form.slice(1)[0], name.slice(1)];
+        return [DOT_SYM, form.slice(1)[0], Symbol.intern(name.slice(1))];
     }
 
     if (!sym.equals(DOT_SYM) && name.startsWith(DOT_STR)) {
-        return [DOT_SYM, form.slice(1)[0], [name.slice(1)].concat(form.slice(2))];
+        return [DOT_SYM, form.slice(1)[0], [Symbol.intern(name.slice(1))].concat(form.slice(2))];
     }
 
     if (name.endsWith(DOT_STR)) {

@@ -28,7 +28,8 @@ import {
     INSTANCE_SYM,
     JS_AND,
     JS_BIT_AND,
-    JS_BIT_LSHIFT, JS_BIT_NOT,
+    JS_BIT_LSHIFT,
+    JS_BIT_NOT,
     JS_BIT_OR,
     JS_BIT_RSHIFT,
     JS_BIT_URSHIFT,
@@ -36,9 +37,12 @@ import {
     JS_EQUIV,
     JS_IDENTICAL,
     JS_INSTANCE,
-    JS_NOT, JS_NOT_EQUIV, JS_NOT_IDENTICAL,
+    JS_NOT,
+    JS_NOT_EQUIV,
+    JS_NOT_IDENTICAL,
     JS_OR,
-    JS_SYM, JS_TYPEOF,
+    JS_SYM,
+    JS_TYPEOF,
     LET_SYM,
     LOOP_SYM,
     LT_SYM,
@@ -46,7 +50,9 @@ import {
     MINUS_SYM,
     MOD_SYM,
     MULT_SYM,
-    NEW_SYM, NOT_EQUIV_SYM, NOT_IDENTICAL_SYM,
+    NEW_SYM,
+    NOT_EQUIV_SYM,
+    NOT_IDENTICAL_SYM,
     NOT_SYM,
     NULL_SYM,
     OR_SYM,
@@ -58,7 +64,8 @@ import {
     TRUE_SYM,
     BEGIN_SYM,
     TYPE_SYM,
-    UNDEFINED_SYM
+    UNDEFINED_SYM,
+    SLOT_SYM
 } from "./constants";
 import {emitMap} from "./emit/emitMap";
 import {RECUR_ERROR_MSG} from "./errorMessages";
@@ -86,6 +93,7 @@ import {emitBinOp} from "./emit/emitBinOp";
 import {isKeyword} from "../lang/Keyword";
 import {isSymbol} from "../lang/Symbol";
 import {prStr} from "./prStr";
+import {emitSlotAccess} from "./emit/emitSlotAccess";
 
 export function emit(form_: Form, env_: Env) {
     const form = macroexpand(form_, env_);
@@ -144,6 +152,8 @@ export function emit(form_: Form, env_: Env) {
                     return emitClassInit(form, env_);
                 case SET_SYM:
                     return emitAssignment(form, env_);
+                case SLOT_SYM:
+                    return emitSlotAccess(form, env_);
                 // operators
                 case MOD_SYM:
                     return emitBinOp(form, env_)
