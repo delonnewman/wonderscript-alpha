@@ -44,11 +44,11 @@ export function prStr(form: Form): string {
 
     if (isArray(form)) {
         if (form.length === 0) {
-            return EMPTY_ARRAY;
+            return EMPTY_LIST;
         }
 
         const parts = form.map(prStr);
-        return `[${parts.join(' ')}]`;
+        return `(${parts.join(' ')})`;
     }
 
     if (isFunction(form)) {

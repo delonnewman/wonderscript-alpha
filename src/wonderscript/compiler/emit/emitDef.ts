@@ -26,7 +26,7 @@ export function emitDef(form: Form, env: Env): string {
     // set the value so it can be found in the eval below
     CURRENT_NS.value.module[name] = val;
 
-    if (form[2]) {
+    if (form[2] != null) {
         code = emit(form[2], env);
         val  = eval(code);
     }

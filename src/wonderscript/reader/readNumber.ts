@@ -4,7 +4,7 @@ import {PushBackReader} from "./PushBackReader";
 export function readNumber(r: PushBackReader, initch: string): number {
     const buff = [initch];
 
-    while(true) {
+    while (true) {
         const ch = r.read();
         if (ch === null || isWhitespace(ch) || isMacro(ch)) {
             r.unread(ch);
@@ -22,9 +22,11 @@ export function readNumber(r: PushBackReader, initch: string): number {
 // TODO: add decimals, _'s, scientific notation, rationals?
 function matchNumber(s: string): number | null {
     const m = s.match(/(\-|\+)?\d+/);
-    if (m !== null) {
+    if (m == null) return null;
+
+    if (s.indexOf('.') === -1) {
         return parseInt(s, 10);
     }
 
-    return null;
+    return parseFloat(s);
 }

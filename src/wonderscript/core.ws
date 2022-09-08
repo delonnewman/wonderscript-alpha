@@ -60,6 +60,22 @@
 
 ;; Numerical
 
+;; numerical constants
+(def ^:constant $pi      (.-PI js/Math))
+(def ^:constant $e       (.-E js/Math))
+(def ^:constant $log10e  (.-LOG10e js/Math))
+(def ^:constant $log2e   (.-LOG2e js/Math))
+(def ^:constant $ln10    (.-LN10 js/Math))
+(def ^:constant $ln2     (.-LN2 js/Math))
+(def ^:constant $sqrt1-2 (.-SQRT1_2 js/Math))
+(def ^:constant $sqrt2   (.-SQRT2 js/Math))
+
+(defn ->integer
+  (s) (js/parseInt s 10))
+
+(defn ->float
+  (s) (js/parseFloat s 10))
+
 (defn add1 (x) (+ x 1))
 (defn sub1 (x) (- 1 x))
 
@@ -95,6 +111,12 @@
 (defn odd? (x)
   (identical? (bit-and x 1) 1))
 
+(defn rand
+  (n)
+  (if n
+    (.floor js/Math (* n (.random js/Math)))
+    (.random js/Math)))
+
 ;; Basic functions and OOP
 
 (def apply
@@ -129,15 +151,15 @@
   (object)
   (.-name (js-constructor object)))
 
-(defn type-name
+(defn type
   (value)
   (if (identical? "object" (typeof value))
-    (js-constructor-name value)
-    (typeof value)))
+    (symbol (js-constructor-name value))
+    (symbol (typeof value))))
 
 ;; Basic Array, Strings & ArrayLike
 
-(def $empty-array (freeze! []))
+(def ^:constant $empty-array (freeze! []))
 
 (defn concat
   (&arrays)
@@ -146,6 +168,9 @@
 (defn array?
   (object)
   (.isArray js/Array object))
+
+(defn new-array
+  (n?) (js/Array. n?))
 
 ;; TODO: will need to extend for seqs
 (defn ->array
@@ -158,8 +183,8 @@
        (number? (.-length object))))
 
 (defn slice
-  (col start end)
-  (.slice col start end))
+  (col start end?)
+  (.slice col start end?))
 
 ; TODO: add support for seqs
 (defn at
@@ -198,10 +223,14 @@
   (array)
   (sort! (clone array)))
 
+(defn fill!
+  (array value start? end?)
+  (.fill array value start? end?))
+
 (defn reverse!
   (array)
   (unless (array? array)
-    (throw (js/Error. (str "no automatic conversion of " (type-name array) " to array"))))
+    (throw (js/Error. (str "no automatic conversion of " (type array) " to array"))))
   (.call (.-reverse (.-prototype js/Array)) array))
 
 (defn reverse
@@ -219,12 +248,12 @@
 
 ;; Strings
 
-(def $white-space-regex (js/RegExp. "\\s+"))
-(def $empty-string "")
+(def ^:constant $white-space-regex (js/RegExp. "\\s+"))
+(def ^:constant $empty-string "")
 
 (defn blank?
   (object)
-  (or (nil? object) (empty? object)
+  (or (nil? object) (zero? (array-length object))
       (and (string? object)
            (identical? 0 (.-length (.replace object $white-space-regex $empty-string))))))
 
@@ -238,11 +267,63 @@
     nil
     object))
 
-(defn assoc-array? (a)
-  (cond (not (array? a))
-          false
-        :else
-          (array? (a 0))))
+(defn trim
+  (s) (.trim s))
+
+(defn trim-leading
+  (s) (.trimStart s))
+
+(defn trim-trailing
+  (s) (.trimEnd s))
+
+(defn starts-with?
+  (s ch) (.startsWith s ch))
+
+(defn ends-with?
+  (s ch) (.endsWith s ch))
+
+(def ^:constant $ending-new-line-pattern (js/RegExp. "(\\n|\\r\\n)$"))
+(def ^:constant $new-line-pattern (js/RegExp. "\\r\\n|\\n"))
+
+(defn chomp
+  (s) (.replace s $ending-new-line-pattern $empty-string))
+
+(defn lines
+  (s) (.split s $new-line-pattern))
+
+(defn chop
+  (s) (.slice s 0 (- (array-length s) 1)))
+
+(defn chr
+  (ch)
+  (if (number? ch)
+    (.fromCodePoint js/String ch)
+    (.fromCodePoint js/String (->integer ch))))
+
+(defn chrs
+  (array)
+  (.join (.map array chr) $empty-string))
+
+(defn upcase
+  (s) (.toUpperCase s))
+
+(defn downcase
+  (s) (.toLowerCase s))
+
+(defn capitalize
+  (s) (str (.toUpperCase (.at s 0)) (.slice s 1 (.-length s))))
+
+(defn words
+  (s) (.split s $white-space-regex))
+
+(defn titlecase
+  (s) (.join (.map (words s) capitalize) " "))
+
+(defn assoc-array?
+  (a)
+  (if (not (array? a))
+    false
+  (array? (a 0))))
 
 (defn mapcat
   (f coll)
@@ -294,8 +375,24 @@
   (array 'loop ()
          (cons 'when (cons pred (concat body (array (array 'recur)))))))
 
+(defn times
+  (n f)
+  (let (a [])
+    (for-times (i n)
+      (push! a (f i)))
+    a))
+
+(defn each
+  (a f) (.forEach a f) a)
+
+(defn tap
+  (val f) (f val) val)
+
 (defn print
   (x) (.log js/console x))
+
+(defn say
+  (&args) (.apply (.-log js/console) js/console (.map args pr-str)))
 
 (defn pr
   (x)
@@ -303,21 +400,17 @@
 
 ;; Assertions and Testing
 
-(def $failure-tag "FAILURE: ")
-(def $assertion-msg " is false")
-
 (defn ^:macro is
   (&args)
   (cond
     (identical? 1 (array-length args))
-      (array 'is (args 0)
-             (array 'str
-                    '$failure-tag
-                    (array 'quote (pr-str (args 0)))
-                    '$assertion-msg))
+      (array 'is (args 0) (array 'str "Failed assertion: " (pr-str (args 0) " is false")))
     (identical? 2 (array-length args))
-      (array 'cond
-             (array 'not (args 0)) (array 'print (args 1)))))
+      (array 'begin
+             (array 'cond (array 'not (args 0)) (array 'throw (args 1)))
+             (args 0))
+    else
+      (throw (js/Error. (str "wrong number of arguments expected 1 or 2, got " (array-length args))))))
 
 (defn ^:macro is-not (body &args)
   (cons 'is (cons (array 'not body) args)))
@@ -415,6 +508,13 @@
   (numbers)
   (array-get (sort numbers) (- (array-length numbers) 1)))
 
+(defn indices
+  (indexed)
+  (let (a [])
+    (for-times (i (.-length indexed))
+      (push! a i))
+    a))
+
 ;; Maps & Sets
 
 (defn hash-map
@@ -511,14 +611,26 @@
     (array-like? col) (begin (.splice col ref 1) col)
     (slot? col "delete") (begin (.delete col ref) col)
     else
-      (throw "don't know how to add a value to this collection")))
+      (throw "don't know how to remove a value from this collection")))
 
 (defn remove
   (col ref)
   (remove! (clone col) ref))
 
-(defn empty!
-  (col) (.clear col) col)
+(defn clear!
+  (col)
+  (cond
+    (array? col) (.splice col 0 (- (array-length col) 1))
+    (slot? col "clear") (begin (.clear col) col)
+    else
+      (throw (js/Error. (str "cannot clear" (pr-str col))))))
+
+;; TODO: add alias key as meta data
+(defn ^:macro alias
+  (name old)
+  (array 'def name (array 'clone old)))
+
+(def empty! clear!)
 
 (defn empty
   (col)
@@ -541,7 +653,7 @@
     (array-like? col) (not (identical? -1 (index-of col value)))
     (map? col) (key? col value)
     (set? col) (member? col value)
-    (slot? col "includes") (.includes col value)
+    (method? col "includes") (.includes col value)
     else
       (throw "can't test inclusion")))
 
