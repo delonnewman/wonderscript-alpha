@@ -65,7 +65,7 @@ import {
     BEGIN_SYM,
     TYPE_SYM,
     UNDEFINED_SYM,
-    SLOT_SYM
+    SLOT_SYM, HAS_SLOT_SYM
 } from "./constants";
 import {emitMap} from "./emit/emitMap";
 import {RECUR_ERROR_MSG} from "./errorMessages";
@@ -94,6 +94,7 @@ import {isKeyword} from "../lang/Keyword";
 import {isSymbol} from "../lang/Symbol";
 import {prStr} from "./prStr";
 import {emitSlotAccess} from "./emit/emitSlotAccess";
+import {emitSlotInspection} from "./emit/emitSlotInspection";
 
 export function emit(form_: Form, env_: Env) {
     const form = macroexpand(form_, env_);
@@ -152,9 +153,11 @@ export function emit(form_: Form, env_: Env) {
                     return emitClassInit(form, env_);
                 case SET_SYM:
                     return emitAssignment(form, env_);
+                // operators
                 case SLOT_SYM:
                     return emitSlotAccess(form, env_);
-                // operators
+                case HAS_SLOT_SYM:
+                    return emitSlotInspection(form, env_);
                 case MOD_SYM:
                     return emitBinOp(form, env_)
                 case LT_SYM:

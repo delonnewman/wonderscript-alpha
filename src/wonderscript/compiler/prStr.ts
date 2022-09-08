@@ -5,14 +5,17 @@ import {
     isBoolean,
     isFunction,
     isMap,
-    isNumber,
-    isString,
-    map,
+    isNumber, isObject,
+    isString, map,
     str
 } from "../lang/runtime";
 import {Form} from "./core";
 import {isSymbol} from "../lang/Symbol";
 import {isKeyword} from "../lang/Keyword";
+import {isList} from "../lang/List";
+
+const EMPTY_LIST  = '()';
+const EMPTY_ARRAY = '[]';
 
 export function prStr(form: Form): string {
     if (form == null) return NIL_SYM;
@@ -30,13 +33,22 @@ export function prStr(form: Form): string {
         return JSON.stringify(form);
     }
 
+    if (isList(form)) {
+        if (form.count() === 0) {
+            return EMPTY_LIST;
+        }
+
+        const parts = map(prStr, form);
+        return `(${parts.join(' ')})`;
+    }
+
     if (isArray(form)) {
         if (form.length === 0) {
-            return '()';
+            return EMPTY_ARRAY;
         }
 
         const parts = form.map(prStr);
-        return str('(', parts.join(' '), ')');
+        return `[${parts.join(' ')}]`;
     }
 
     if (isFunction(form)) {
@@ -44,17 +56,27 @@ export function prStr(form: Form): string {
     }
 
     if (isMap(form)) {
-        const parts = map((entry) => `${prStr(entry[0])} ${prStr(entry[1])}`, form);
-        return str('{', parts.join(' '), '}');
+        const parts = [];
+        for (let entry of form) {
+            const key = prStr(entry[0]);
+            const val = prStr(entry[1]);
+            parts.push(`${key} ${val}`);
+        }
+        return `{${parts.join(' ')}}`;
+    }
+
+    if (isArrayLike(form)) {
+        const parts = Array.prototype.map.call(form, (x, i) => `${i} ${prStr(x)}`);
+        return `#js/object {${parts.join(', ')}}`;
     }
 
     if (isFunction(form.toString)) {
         return form.toString();
     }
 
-    if (isArrayLike(form)) {
-        const parts = Array.prototype.map.call(form, (x, i) => `${i} ${prStr(x)}`);
-        return `#js/object {${parts.join(', ')}}`;
+    if (isObject(form)) {
+        const keys = Object.keys(form);
+        return `#js/object {${keys.map((k) => `${k} ${prStr(form[k])}`).join(', ')}}`
     }
 
     return `${form}`;

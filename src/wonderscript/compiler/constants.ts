@@ -11,12 +11,14 @@ export const THROW_SYM    = 'throw';
 export const BEGIN_SYM    = 'begin';
 export const RESCUE_SYM   = 'rescue';
 export const ENSURE_SYM   = 'ensure';
-export const DOT_SYM      = '.';
-export const DOT_DASH_SYM = '.-';
 export const NEW_SYM      = 'new';
-export const SLOT_SYM     = 'slot';
 export const SET_SYM      = 'set!';
 export const JS_SYM       = 'js*';
+
+export const DOT_SYM      = '.';
+export const DOT_DASH_SYM = '.-';
+export const SLOT_SYM     = 'slot';
+export const HAS_SLOT_SYM = 'slot?';
 
 export const NIL_SYM      = 'nil';
 export const TRUE_SYM     = 'true';

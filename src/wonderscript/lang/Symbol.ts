@@ -6,9 +6,9 @@ import {Invokable} from "./Invokable";
 
 const SLASH = '/';
 
-export class Symbol<Name = string, Namespace = string> implements Named<Name, Namespace>, Meta, Invokable {
-    private readonly _name: Name;
-    private readonly _namespace?: Namespace;
+export class Symbol implements Named, Meta, Invokable, Comparable, Equality {
+    private readonly _name: string;
+    private readonly _namespace?: string;
     private _meta?: MetaData;
 
     static CACHE = new Map<String, Symbol>();
@@ -25,10 +25,10 @@ export class Symbol<Name = string, Namespace = string> implements Named<Name, Na
     }
 
     static intern(name: string, namespace?: string, meta?: MetaData): Symbol {
-        return new this(name, namespace);
+        return new this(name, namespace, meta);
     }
 
-    constructor(name: Name, namespace?: Namespace, meta?: MetaData) {
+    constructor(name: string, namespace?: string, meta?: MetaData) {
         this._name = name;
         this._namespace = namespace;
         this._meta = meta
@@ -42,7 +42,7 @@ export class Symbol<Name = string, Namespace = string> implements Named<Name, Na
         return new Symbol(this._name, this._namespace, data);
     }
 
-    setMeta(key: Keyword, value: any): Symbol<Name, Namespace> {
+    setMeta(key: Keyword, value: any): Symbol {
         if (this._meta == null) {
             this._meta = new Map();
         }
@@ -52,7 +52,7 @@ export class Symbol<Name = string, Namespace = string> implements Named<Name, Na
         return this;
     }
 
-    resetMeta(data: Map<Keyword, any>): Symbol<Name, Namespace> {
+    resetMeta(data: Map<Keyword, any>): Symbol {
         this._meta = data;
 
         return this;
@@ -62,16 +62,27 @@ export class Symbol<Name = string, Namespace = string> implements Named<Name, Na
         return this._meta != null;
     }
 
-    name(): Name {
+    name(): string {
         return this._name;
     }
 
-    namespace(): Namespace | Nil {
+    namespace(): string | Nil {
         return this._namespace;
     }
 
     hasNamespace(): boolean {
         return this._namespace != null;
+    }
+
+    cmp(other: Symbol): -1 | 1 | 0 {
+        if (!isSymbol(other)) throw new Error("cannot compare symbols to other values");
+
+        const a = this.toString();
+        const b = other.toString();
+
+        if (a < b) return -1;
+        if (a > b) return 1;
+        return 0;
     }
 
     equals(other: Symbol): boolean {
@@ -80,7 +91,7 @@ export class Symbol<Name = string, Namespace = string> implements Named<Name, Na
         return this._name === other.name() && this._namespace === other.namespace()
     }
 
-    invoke(map: Map<Symbol<Name, Namespace>, any>): any {
+    invoke(map: Map<Symbol, any>): any {
         return map.get(this);
     }
 

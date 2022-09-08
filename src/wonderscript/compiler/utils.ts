@@ -22,10 +22,10 @@ const DASH = '-';
 const UNDERSCORE = '_';
 
 export function dasherize(string: string): string {
-    var i, ch, buffer = [];
+    const buffer = [];
 
-    for (i = 0; i < string.length; i++) {
-        ch = string[i];
+    for (let i = 0; i < string.length; i++) {
+        let ch = string[i];
         if (ch.match(/[A-Z]/)) { // TODO: replace this with a numerical method
             buffer.push(DASH);
             buffer.push(ch.toLowerCase());

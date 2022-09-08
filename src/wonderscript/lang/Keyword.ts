@@ -3,7 +3,7 @@ import {Symbol} from "./Symbol";
 import {Nil} from "./Nil";
 import {Invokable} from "./Invokable";
 
-export class Keyword implements Named, Invokable {
+export class Keyword implements Named, Invokable, Comparable, Equality {
     private readonly _symbol: Symbol;
 
     static CACHE = new Map<string, Keyword>();
@@ -31,6 +31,10 @@ export class Keyword implements Named, Invokable {
         this._symbol = symbol;
     }
 
+    symbol(): Symbol {
+        return this._symbol;
+    }
+
     name(): string {
         return this._symbol.name();
     }
@@ -45,6 +49,18 @@ export class Keyword implements Named, Invokable {
 
     invoke(map: Map<Keyword, any>): any {
         return map.get(this);
+    }
+
+    cmp(other: Keyword): -1 | 1 | 0 {
+        if (!isKeyword(other)) throw new Error("cannot compare keywords to other values");
+
+        return this._symbol.cmp(other.symbol());
+    }
+
+    equals(other: Keyword): boolean {
+        if (!isKeyword(other)) return false
+
+        return this._symbol.equals(other.symbol());
     }
 
     toString() {

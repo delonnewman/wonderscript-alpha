@@ -6,6 +6,7 @@ import {CORE_MOD} from "../compiler/vars";
 import {isMeta, Meta, MetaData} from "./Meta";
 import {Keyword} from "./Keyword";
 import {Symbol as WSSymbol} from "./Symbol";
+import {List} from "./List";
 
 const EMPTY_ARRAY  = Object.freeze([]);
 const EMPTY_STRING = "";
@@ -252,6 +253,16 @@ export function symbol(arg1: string, arg2?: string, meta?: MetaData): WSSymbol {
     }
 
     return WSSymbol.intern(arg2, arg1, meta)
+}
+
+export function list(...args): List {
+    let xs = List.EMPTY;
+
+    for (let i = args.length - 1; i >= 0; i--) {
+        xs = xs.cons(args[i]);
+    }
+
+    return xs;
 }
 
 const META_SYMBOL = Symbol('wonderscriptMetaData');

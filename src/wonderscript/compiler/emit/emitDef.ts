@@ -1,20 +1,20 @@
 import {escapeChars} from "../utils";
 import {CURRENT_NS} from "../vars";
 import {emit} from "../emit";
-import {isArray, str} from "../../lang/runtime";
+import {isArray} from "../../lang/runtime";
 import {Env} from "../Env";
-import {DEF_SYM} from "../constants";
+import {DEF_SYM as DEF_STR} from "../constants";
 import {Form} from "../core";
 import {prStr} from "../prStr";
 import {isSymbol, Symbol} from "../../lang/Symbol";
 import {emitQuotedMetaData} from "./emitQuote";
 
-export type DefForm = [Symbol<typeof DEF_SYM>, Symbol, Form?];
+const DEF_SYM = Symbol.intern(DEF_STR)
 
-const DEF = Symbol.intern(DEF_SYM)
+export type DefForm = [typeof DEF_SYM, Symbol, Form?];
 
 export const isDefForm = (value: any): value is DefForm =>
-    isArray(value) && (value.length === 2 || value.length === 3) && DEF.equals(value[0]) && isSymbol(value[1]);
+    isArray(value) && (value.length === 2 || value.length === 3) && DEF_SYM.equals(value[0]) && isSymbol(value[1]);
 
 export function emitDef(form: Form, env: Env): string {
     if (!isDefForm(form)) throw new Error(`invalid ${DEF_SYM} form: ${prStr(form)}`);

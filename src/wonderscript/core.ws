@@ -40,6 +40,12 @@
     else
       (throw (new js/Error "Wrong number of arguments expected 2 or 3"))))
 
+(defn ^:macro when (pred &acts)
+  (array 'cond pred (cons 'begin acts)))
+
+(defn ^:macro unless (pred &acts)
+  (array 'cond (array 'not pred) (cons 'begin acts)))
+
 (defn true?
   (x) (identical? true x))
 
@@ -74,10 +80,13 @@
 (defn zero?
   (x) (identical? 0 x))
 
-(defn pos?
+(defn nonzero?
+  (x) (not-identical? 0 x))
+
+(defn positive?
   (x) (< 0 x))
 
-(defn neg?
+(defn negative?
   (x) (> 0 x))
 
 (defn even? (x)
@@ -104,6 +113,27 @@
     (.slice object 0)
     (.assign js/Object (.create js/Object nil) object)))
 
+(defn js-object-tag
+  (object)
+  (.call (.-toString (.-prototype js/Object)) object))
+
+(defn js-prototype
+  (object)
+  (.getPrototypeOf js/Object object))
+
+(defn js-constructor
+  (object)
+  (.-constructor (js-prototype object)))
+
+(defn js-constructor-name
+  (object)
+  (.-name (js-constructor object)))
+
+(defn type-name
+  (value)
+  (if (identical? "object" (typeof value))
+    (js-constructor-name value)
+    (typeof value)))
 
 ;; Basic Array, Strings & ArrayLike
 
@@ -116,6 +146,11 @@
 (defn array?
   (object)
   (.isArray js/Array object))
+
+;; TODO: will need to extend for seqs
+(defn ->array
+  (object)
+  (.from js/Array object))
 
 (defn array-like?
   (object)
@@ -146,9 +181,18 @@
   (array)
   (.call (.-shift (.-prototype js/Array)) array))
 
+(defn <=>
+  (a b)
+  (cond
+    (< a b) -1
+    (> a b) 1
+    (slot? a "cmp") (.cmp a b)
+    (slot? b "cmp") (.cmp b a)
+    else 0))
+
 (defn sort!
   (array)
-  (.call (.-shift (.-prototype js/Array)) array))
+  (.call (.-sort (.-prototype js/Array)) array <=>))
 
 (defn sort
   (array)
@@ -156,19 +200,19 @@
 
 (defn reverse!
   (array)
+  (unless (array? array)
+    (throw (js/Error. (str "no automatic conversion of " (type-name array) " to array"))))
   (.call (.-reverse (.-prototype js/Array)) array))
 
 (defn reverse
-  (array)
-  (reverse! (clone array)))
-
-(defn ->array
-  (object)
-  (.from js/Array object))
+  (col)
+  (if (array? col)
+    (reverse! (clone col))
+    (reverse! (->array col))))
 
 (defn index-of
   (array value)
-  (.call (.-indexOf (.-prototype js/Array)) array))
+  (.call (.-indexOf (.-prototype js/Array)) array value))
 
 (defn array-length
   (array) (.-length array))
@@ -223,12 +267,6 @@
             (cons 'fn xs))))
 
 ;; Imperative Programming
-
-(defn ^:macro when (pred &acts)
-  (array 'cond pred (cons 'begin acts)))
-
-(defn ^:macro unless (pred &acts)
-  (array 'cond (array 'not pred) (cons 'begin acts)))
 
 ;; TODO: include let binding for macro output for better performance, will need gensym
 (defn ^:macro for-times
@@ -292,18 +330,6 @@
 
 ;; OOP & JS reflection
 
-(defn js-constructor
-  (object)
-  (.-constructor object))
-
-(defn js-prototype
-  (object)
-  (.getPrototypeOf js/Object object))
-
-(defn js-constructor-name
-  (object)
-  (.-name (js-constructor object)))
-
 (defn js-define-slot-value
   (obj slot-name value)
   (array-set! obj slot-name value))
@@ -330,10 +356,6 @@
 
 (defn js-primitive-number?
   (val) (identical? "number" (typeof val)))
-
-(defn js-object-tag
-  (object)
-  (.call (.-toString (.-prototype js/Object)) object))
 
 (defn arity
   (f)
@@ -376,6 +398,22 @@
           (array-set! p j (array-get a (+ (* n i) j))))
         (array-set! pairs i p)))
     pairs))
+
+(defn sum
+  (numbers)
+  (reduce + numbers))
+
+(defn product
+  (numbers)
+  (reduce * numbers))
+
+(defn min
+  (numbers)
+  (array-get (sort numbers) 0))
+
+(defn max
+  (numbers)
+  (array-get (sort numbers) (- (array-length numbers) 1)))
 
 ;; Maps & Sets
 
@@ -429,11 +467,11 @@
 (defn seq?
   (obj)
   (or (nil? obj) (array? obj) (map? obj) (set? obj)
-      (and (method? obj 'first) (method? obj 'next))))
+      (and (slot? obj "first") (slot? obj "next"))))
 
 (defn seqable?
   (obj)
-  (or (seq? obj) (method? obj 'seq)))
+  (or (seq? obj) (slot? obj "seq")))
 
 (defn seq
   (obj)
@@ -459,7 +497,7 @@
     (array-like? col) (begin (push! col value) col)
     (map? col) (add-key! col (at value 0) (at value 1))
     (set? col) (add-member! col value)
-    (method? col 'add) (.add col value)
+    (slot? col "add") (.add col value)
     else
       (throw "don't know how to add a value to this collection")))
 
@@ -471,7 +509,7 @@
   (col ref)
   (cond
     (array-like? col) (begin (.splice col ref 1) col)
-    (method? col 'delete) (begin (.delete col ref) col)
+    (slot? col "delete") (begin (.delete col ref) col)
     else
       (throw "don't know how to add a value to this collection")))
 
@@ -493,7 +531,7 @@
   (cond
     (array-like? col) (array-length col)
     (or (map? col) (set? col)) (size col)
-    (method? col 'count) (.count col)
+    (slot? col "count") (.count col)
     else
      (reduce (fn (n _) (add1 n)) col 0)))
 
@@ -503,7 +541,7 @@
     (array-like? col) (not (identical? -1 (index-of col value)))
     (map? col) (key? col value)
     (set? col) (member? col value)
-    (method? col 'includes) (.includes col value)
+    (slot? col "includes") (.includes col value)
     else
       (throw "can't test inclusion")))
 
@@ -531,8 +569,8 @@
     (and (js-primitive-number? a) (js-primitive-number? b))
        (or (identical? a b) (and (not-identical? a a) (not-identical? b b)))
     (and (array? a) (array? b)) (js-arrays-equal a b)
-    (method? a 'equals) (.equals a b)
-    (method? b 'equals) (.equals b a)
+    (slot? a "equals") (.equals a b)
+    (slot? b "equals") (.equals b a)
     else
      (identical? a b)))
 
@@ -596,6 +634,3 @@
     (tag-list? form) (render-tag-list form)
     else
       (throw (js/Error. "Unknown form"))))
-
-(defn dom-write
-  (html) (.write js/document html))

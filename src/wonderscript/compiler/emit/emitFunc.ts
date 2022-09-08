@@ -1,7 +1,7 @@
 import {escapeChars} from "../utils";
 import {BodyForm, Form, isBodyForm} from "../core";
 import {isArray, map, str} from "../../lang/runtime";
-import {COND_SYM, FN_SYM, RECUR_SYM} from "../constants";
+import {COND_SYM as COND_STR, FN_SYM as FN_STR, RECUR_SYM as RECUR_STR} from "../constants";
 import {Env} from "../Env";
 import {compileBody, compileRecursiveBody} from "./compileBody";
 import {prStr} from "../prStr";
@@ -53,18 +53,18 @@ function genArgsDef(argsBuf: ParsedArgs): string {
     return argsDef.join(',');
 }
 
-const RECUR = Symbol.intern(RECUR_SYM)
-const COND  = Symbol.intern(COND_SYM)
-const FN    = Symbol.intern(FN_SYM)
+const RECUR_SYM = Symbol.intern(RECUR_STR);
+const COND_SYM  = Symbol.intern(COND_STR);
+const FN_SYM    = Symbol.intern(FN_STR);
 
 function hasTailCall(form: Form): boolean {
-    if (isArray(form) && RECUR.equals(form[0])) {
+    if (isArray(form) && RECUR_SYM.equals(form[0])) {
         return true;
     }
-    else if (isArray(form) && COND.equals(form[0])) {
+    else if (isArray(form) && COND_SYM.equals(form[0])) {
         return form.slice(1).some(hasTailCall);
     }
-    else if (isArray(form) && FN.equals(form[0])) {
+    else if (isArray(form) && FN_SYM.equals(form[0])) {
         return form.slice(2).some(hasTailCall);
     }
     else if (isArray(form)) {
@@ -75,9 +75,9 @@ function hasTailCall(form: Form): boolean {
     }
 }
 
-export type FnForm = BodyForm<Symbol<typeof FN_SYM>>;
+export type FnForm = BodyForm<typeof FN_SYM>;
 
-export const isFnForm = isBodyForm<Symbol<typeof FN_SYM>>(Symbol.intern(FN_SYM));
+export const isFnForm = isBodyForm<typeof FN_SYM>(FN_SYM);
 
 export function emitFunc(form: Form, scope: Env): string {
     if (!isFnForm(form)) throw new Error(`invalid ${FN_SYM} form: ${prStr(form)}`)

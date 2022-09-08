@@ -1,10 +1,10 @@
 import {Meta, MetaData} from "./Meta";
 import {Nil} from "./Nil";
-import {First, Next, Seq} from "./Seq";
+import {First, isSeq, Next, Seq} from "./Seq";
 import {Seqable} from "./Seqable";
 import {Keyword} from "./Keyword";
 
-export class List implements Meta, Seq, Seqable {
+export class List implements Meta, Seq, Seqable, Equality {
     static EMPTY = new this(null, null);
 
     private readonly _first: First;
@@ -70,4 +70,30 @@ export class List implements Meta, Seq, Seqable {
     count(): number {
         return this._count;
     }
+
+    equals(other: Seq): boolean {
+        if (!isSeq(other)) return false;
+        // TODO: generalize to isCounted add counted interface
+        if (isList(other) && this.count() !== other.count())  {
+            return false;
+        }
+
+        let x = this.first();
+        let xs: Seq = this;
+        let y = other.first();
+        let ys = other;
+
+        while (xs != null && ys != null) {
+            if (x !== y) return false; // TODO: toplevel equals needs to be accessible here
+            xs = xs.next();
+            ys = ys.next();
+            x  = xs.first();
+            y  = ys.first();
+        }
+
+        return xs == null && ys == null;
+    }
 }
+
+export const isList = (value: any): value is List =>
+    value instanceof List;
