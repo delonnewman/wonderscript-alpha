@@ -18,14 +18,6 @@
   (fn (name args &body)
     (array 'def name (cons 'fn (cons args body)))))
 
-(defn browser?
-  ()
-  (identical? $platform "browser"))
-
-(defn node?
-  ()
-  (identical? $platform "node"))
-
 (defn ==
   (a b)
   (identical? a b))
@@ -126,7 +118,7 @@
 
 (defn array-like?
   (object)
-  (and (identical? "object" (type object))
+  (and (identical? "object" (typeof object))
        (number? (.-length object))))
 
 (defn slice
@@ -311,13 +303,13 @@
   (object)
   (.-name (js-constructor object)))
 
-(defn js-define-singleton-method
-  (obj method-name f)
-  (aset obj method-name f))
+(defn js-define-slot-value
+  (obj slot-name value)
+  (aset obj slot-name value))
 
-(defn js-define-prototype-method
-  (object method-name f)
-  (aset (js-prototype object) method-name f))
+(defn js-define-prototype-value
+  (object slot-name value)
+  (aset (js-prototype object) slot-name value))
 
 (defn seal!
   (object) (.seal js/Object object))
@@ -333,7 +325,10 @@
 
 (defn js-primitive-type?
   (obj)
-  (not (identical? "object" (type obj))))
+  (not (identical? "object" (typeof obj))))
+
+(defn js-primitive-number?
+  (val) (identical? "number" (typeof val)))
 
 (defn js-object-tag
   (object)
@@ -359,6 +354,7 @@
 
 (defn method?
   (obj method)
+  (.log js/console (aget obj method) obj method)
   (function? (aget obj method)))
 
 (defn bind
@@ -502,33 +498,37 @@
 ;; TODO: Implement for seqables
 (defn all?
   (&args)
-  (cond (identical? (alength args) 1) (all? (aget args 0) truthy?)
-        (identical? (alength args) 2)
-        (let (f   (aget args 0)
-              col (aget args 1))
-          (reduce (fn (bool x) (and bool (f x))) col true))
-        else
-          (throw "wrong number of arguments expected 1 or 2")))
+  (cond
+    (identical? (alength args) 1) (all? (aget args 0) truthy?)
+    (identical? (alength args) 2)
+      (let (f   (aget args 0)
+                col (aget args 1))
+        (reduce (fn (bool x) (and bool (f x))) col true))
+    else
+      (throw "wrong number of arguments expected 1 or 2")))
 
-;; (defn js-arrays-equal
-;;   (a b)
-;;   (cond
-;;     (not (and (array? a) (array? b))) false
-;;     (not (identical? (alength a) (alength b))) false
-;;     else
-;;       (do
-;;         (dotimes (i (alength a))
-;;           (js* (quote "if (!wonderscriopt.core._EQ_(a[i],b[i])) return false;")))
-;;         (js* (quote "return true;")))))
+(def ^:private js-arrays-equal)
 
 (defn =
   (a b)
   (cond
+    ;; null and undefined are equal
     (and (nil? a) (nil? b)) (equiv? a b)
-    (and (js-primitive-type? a) (js-primitive-type? b)) (identical? a b)
-    (and (method? a 'equals) (method? b 'equals)) (.equal a b)
+    ;; (see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Equality_comparisons_and_sameness#same-value-zero_equality)
+    (and (js-primitive-number? a) (js-primitive-number? b))
+       (or (identical? a b) (and (not-identical? a a) (not-identical? b b)))
+    (and (array? a) (array? b)) (js-arrays-equal a b)
+    (method? a 'equals) (.equals a b)
+    (method? b 'equals) (.equals b a)
     else
-      (throw "both values must implement equality protocol")))
+     (identical? a b)))
+
+(defn ^:private js-arrays-equal
+  (a b)
+  (cond
+    (not-identical? (alength a) (alength b)) false
+    else
+      (.every a (fn (x i) (= x (aget b i))))))
 
 ;; HTML Rendering
 

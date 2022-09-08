@@ -3,7 +3,7 @@ import {CORE_NS, CURRENT_NS} from "./wonderscript/compiler/vars";
 import {createNs} from "./wonderscript/lang/Namespace";
 import * as core from "./wonderscript/lang";
 import * as compiler from "./wonderscript/compiler";
-import {importModule, importSymbol} from "./wonderscript/lang";
+import {importModule, importSymbol, Keyword} from "./wonderscript/lang";
 import {Form} from "./wonderscript/compiler/core";
 import {findDefinitionMetaData} from "./wonderscript/compiler/findDefinitionMetaData";
 import {Symbol} from "./wonderscript/lang";
@@ -46,9 +46,17 @@ export class Compiler {
             theMeta: (sym: Symbol) => findDefinitionMetaData(sym, this.env)
         });
 
-        importSymbol('*ns*', CURRENT_NS.value);
-        importSymbol('$platform', this.platform);
         importSymbol(CORE_NS.name, CORE_NS);
+        importSymbol('*ns*', CURRENT_NS.value);
+        importSymbol('$is-browser', this.isBrowser());
+        importSymbol('$is-node', this.isNode());
+        importSymbol('$platform-info', this.platformInfo());
+    }
+
+    platformInfo(): Map<Keyword, any> {
+        const info = new Map();
+
+        return info;
     }
 
     private isNode(): boolean {

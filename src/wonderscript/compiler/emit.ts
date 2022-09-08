@@ -37,7 +37,7 @@ import {
     JS_EQUIV,
     JS_IDENTICAL,
     JS_INSTANCE,
-    JS_NOT,
+    JS_NOT, JS_NOT_EQUIV, JS_NOT_IDENTICAL,
     JS_OR,
     JS_SYM, JS_TYPEOF,
     LET_SYM,
@@ -47,7 +47,7 @@ import {
     MINUS_SYM,
     MOD_SYM,
     MULT_SYM,
-    NEW_SYM,
+    NEW_SYM, NOT_EQUIV_SYM, NOT_IDENTICAL_SYM,
     NOT_SYM,
     NULL_SYM,
     OR_SYM,
@@ -179,8 +179,12 @@ export function emit(form_: Form, env_: Env) {
                     return emitBinOp(form, env_, JS_BIT_URSHIFT);
                 case IDENTICAL_SYM:
                     return emitBinOp(form, env_, JS_IDENTICAL);
+                case NOT_IDENTICAL_SYM:
+                    return emitBinOp(form, env_, JS_NOT_IDENTICAL);
                 case EQUIV_SYM:
                     return emitBinOp(form, env_, JS_EQUIV);
+                case NOT_EQUIV_SYM:
+                    return emitBinOp(form, env_, JS_NOT_EQUIV);
                 case INSTANCE_SYM:
                     return emitBinOp(form, env_, JS_INSTANCE);
                 case TYPE_SYM:
