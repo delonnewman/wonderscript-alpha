@@ -30,8 +30,7 @@
   (a b)
   (identical? a b))
 
-; TODO: Is there a preferable name less mathy perhaps what about "reflect"?
-(def identity (fn (x) x))
+(def itself (fn (x) x))
 
 ; TODO: Should be named "always"?
 (def always
@@ -527,7 +526,7 @@
   (cond
     (and (nil? a) (nil? b)) (equiv? a b)
     (and (js-primitive-type? a) (js-primitive-type? b)) (identical? a b)
-    (and (method? a 'equal) (method? b 'equal)) (.equal a b)
+    (and (method? a 'equals) (method? b 'equals)) (.equal a b)
     else
       (throw "both values must implement equality protocol")))
 

@@ -19,6 +19,10 @@ export class List implements Meta, Seq, Seqable {
         this._meta  = meta;
     }
 
+    empty(): List {
+        return List.EMPTY;
+    }
+
     cons(x): List {
         return new List(x, this, this._count + 1);
     }
@@ -29,6 +33,10 @@ export class List implements Meta, Seq, Seqable {
 
     meta(): MetaData | Nil {
         return this._meta;
+    }
+
+    withMeta(data: MetaData): List {
+        return new List(this._first, this._next, this._count, data);
     }
 
     setMeta(key: Keyword, value: any): List {

@@ -11,9 +11,7 @@ export {prStr} from "./compiler/prStr"
 
 export function evaluate(form, scope: Env) {
     const code = emit(form, scope);
-    console.log(prStr(form), " => ",  code);
     const result = eval(code);
-    console.log("=> ", result);
     return result;
 }
 
