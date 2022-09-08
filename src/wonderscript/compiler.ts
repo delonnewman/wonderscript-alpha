@@ -1,5 +1,6 @@
 import {emit} from "./compiler/emit";
 import {Env} from "./compiler/Env";
+import { prStr } from "./compiler/prStr";
 export const compile = emit;
 
 export {evalString} from "./compiler/evalString"
@@ -9,6 +10,10 @@ export {macroexpand} from "./compiler/macroexpand"
 export {prStr} from "./compiler/prStr"
 
 export function evaluate(form, scope: Env) {
-    return eval(emit(form, scope));
+    const code = emit(form, scope);
+    console.log(prStr(form), " => ",  code);
+    const result = eval(code);
+    console.log("=> ", result);
+    return result;
 }
 

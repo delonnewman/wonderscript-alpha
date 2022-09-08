@@ -3,7 +3,7 @@ import {Env} from "../Env";
 import {Form, isTaggedValue} from "../core";
 import {prStr} from "../prStr";
 
-export type BinOpForm = [string, Form, Form];
+export type BinOpForm = [Symbol, Form, Form];
 
 export const isBinOpForm = (form: Form): form is BinOpForm =>
     isTaggedValue(form) && form.length === 3;

@@ -1,12 +1,17 @@
 import {isArray, isMap, isNumber, isString, isUndefined, map, str} from "../../lang/runtime";
-import {EMPTY_ARRAY, FALSE_SYM, NULL_SYM, QUOTE_SYM, TRUE_SYM, UNDEFINED_SYM} from "../constants";
+import {EMPTY_ARRAY, FALSE_SYM, NULL_SYM, QUOTE_SYM as QUOTE_STR, TRUE_SYM, UNDEFINED_SYM} from "../constants";
 import {Form, isTaggedValue} from "../core";
 import {prStr} from "../prStr";
+import {isSymbol, Symbol} from "../../lang/Symbol";
+import {MetaData} from "../../lang/Meta";
+import {isKeyword} from "../../lang/Keyword";
+import {emitKeyword} from "./emitKeyword";
 
+export const QUOTE_SYM = Symbol.intern(QUOTE_STR);
 export type QuoteForm = [typeof QUOTE_SYM, Form];
 
 export const isQuoteForm = (form: Form): form is QuoteForm =>
-    isTaggedValue(form) && form[0] === QUOTE_SYM && form.length === 2;
+    isTaggedValue(form) && form[0].equals(QUOTE_SYM) && form.length === 2;
 
 export function emitQuote(form: Form): string {
     if (!isQuoteForm(form)) throw new Error(`invalid ${QUOTE_SYM} form: ${prStr(form)}`)
@@ -14,9 +19,40 @@ export function emitQuote(form: Form): string {
     return emitQuotedValue(form[1]);
 }
 
-function emitQuotedValue(val): string {
+export function emitQuotedMetaData(meta: MetaData): string {
+    const buffer = [];
+    for (let entry of meta) {
+        const valStr = entry[1].toJS ? entry[1].toJS() : JSON.stringify(entry[1])
+        buffer.push(`[${entry[0].toJS()}, ${valStr}]`)
+    }
+
+    return `new Map([${buffer.join(', ')}])`
+}
+
+const SYM_FUNC = 'wonderscript.core.symbol';
+
+function emitQuotedSymbol(sym: Symbol): string {
+    if (sym.hasMeta() && sym.hasNamespace()) {
+        const m = emitQuotedMetaData(sym.meta());
+        return `${SYM_FUNC}(${JSON.stringify(sym.name())},${JSON.stringify(sym.namespace())},${m})`
+    }
+
+    if (sym.hasNamespace()) {
+        return `${SYM_FUNC}(${JSON.stringify(sym.name())},${JSON.stringify(sym.namespace())})`
+    }
+
+    return `${SYM_FUNC}(${JSON.stringify(sym.name())})`
+}
+
+function emitQuotedValue(val: any): string {
     if (isString(val)) {
         return JSON.stringify(val);
+    }
+    if (isSymbol(val)) {
+        return emitQuotedSymbol(val);
+    }
+    if (isKeyword(val)) {
+        return emitKeyword(val);
     }
     if (isNumber(val)) {
         return str(val);
@@ -41,6 +77,7 @@ function emitQuotedValue(val): string {
         const parts = map((xs) => str('[', emitQuotedValue(xs[0]), ',', emitQuotedValue(xs[1]) ,']'), val);
         return str('(new Map([', parts.join(', '), ']))');
     }
-    throw new Error('Invalid form: ' + val);
+
+    throw new Error(`Invalid quoted form: ${prStr(val)}`);
 }
 

@@ -1,29 +1,41 @@
 import {escapeChars} from "../utils";
-import {BodyForm, Form, isBodyForm, isSymbol, isTaggedValue} from "../core";
+import {BodyForm, Form, isBodyForm} from "../core";
 import {isArray, map, str} from "../../lang/runtime";
 import {COND_SYM, FN_SYM, RECUR_SYM} from "../constants";
 import {Env} from "../Env";
 import {compileBody, compileRecursiveBody} from "./compileBody";
 import {prStr} from "../prStr";
+import {isSymbol, Symbol} from "../../lang/Symbol";
 
-function parseArgs(args) {
+const SPLAT = '&';
+
+type ParsedArgs = Array<{
+    name: string,
+    order: number,
+    splat: boolean
+}>
+
+function parseArgs(args: Symbol[]): ParsedArgs {
     let splat = false, name;
-    const argsBuf = [];
+    const parsed: ParsedArgs = [];
+
     for (let i = 0; i < args.length; ++i) {
-        if ( !isSymbol(args[i]) ) continue;
-        if ( args[i].startsWith('&') ) {
-            name = args[i].replace(/^&/, '');
+        if ( !isSymbol(args[i]) ) continue; // TODO: probably should throw and error instead
+
+        if ( args[i].name().startsWith(SPLAT) ) {
+            name = args[i].name().slice(1);
             splat = true;
+        } else {
+            name = args[i].name();
         }
-        else {
-            name = args[i];
-        }
-        argsBuf.push({name: escapeChars(name), order: i, splat: splat});
+
+        parsed.push({name: escapeChars(name), order: i, splat: splat});
     }
-    return argsBuf;
+
+    return parsed;
 }
 
-function genArgAssigns(argsBuf) {
+function genArgAssigns(argsBuf: ParsedArgs): string {
     const argsAssign = [];
     for (let i = 0; i < argsBuf.length; ++i) {
         if (argsBuf[i].splat) {
@@ -33,7 +45,7 @@ function genArgAssigns(argsBuf) {
     return argsAssign.join('');
 }
 
-function genArgsDef(argsBuf) {
+function genArgsDef(argsBuf: ParsedArgs): string {
     const argsDef = [];
     for (let i = 0; i < argsBuf.length; ++i) {
         argsDef.push(argsBuf[i].name);
@@ -41,14 +53,18 @@ function genArgsDef(argsBuf) {
     return argsDef.join(',');
 }
 
-function hasTailCall(form) {
-    if (isArray(form) && form[0] === RECUR_SYM) {
+const RECUR = Symbol.intern(RECUR_SYM)
+const COND  = Symbol.intern(COND_SYM)
+const FN    = Symbol.intern(FN_SYM)
+
+function hasTailCall(form: Form): boolean {
+    if (isArray(form) && RECUR.equals(form[0])) {
         return true;
     }
-    else if (isArray(form) && form[0] === COND_SYM) {
+    else if (isArray(form) && COND.equals(form[0])) {
         return form.slice(1).some(hasTailCall);
     }
-    else if (isArray(form) && form[0] === FN_SYM) {
+    else if (isArray(form) && FN.equals(form[0])) {
         return form.slice(2).some(hasTailCall);
     }
     else if (isArray(form)) {
@@ -59,9 +75,9 @@ function hasTailCall(form) {
     }
 }
 
-export type FnForm = BodyForm<typeof FN_SYM>;
+export type FnForm = BodyForm<Symbol<typeof FN_SYM>>;
 
-export const isFnForm = isBodyForm<typeof FN_SYM>(FN_SYM);
+export const isFnForm = isBodyForm<Symbol<typeof FN_SYM>>(Symbol.intern(FN_SYM));
 
 export function emitFunc(form: Form, scope: Env): string {
     if (!isFnForm(form)) throw new Error(`invalid ${FN_SYM} form: ${prStr(form)}`)
@@ -69,9 +85,9 @@ export function emitFunc(form: Form, scope: Env): string {
     const env = new Env(scope);
     const args = form[1];
 
-    const argsBuf = parseArgs(args);
+    const argsBuf    = parseArgs(args);
     const argsAssign = genArgAssigns(argsBuf);
-    const argsDef = genArgsDef(argsBuf);
+    const argsDef    = genArgsDef(argsBuf);
 
     for (let i = 0; i < argsBuf.length; i++) {
         env.define(argsBuf[i].name, true);

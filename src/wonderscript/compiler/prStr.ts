@@ -10,7 +10,9 @@ import {
     map,
     str
 } from "../lang/runtime";
-import {Form, isKeyword, isSymbol} from "./core";
+import {Form} from "./core";
+import {isSymbol} from "../lang/Symbol";
+import {isKeyword} from "../lang/Keyword";
 
 export function prStr(form: Form): string {
     if (form == null) return NIL_SYM;

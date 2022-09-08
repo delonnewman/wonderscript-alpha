@@ -2,14 +2,17 @@ import {isArray, isString, map, str} from "../../lang/runtime";
 import {emit} from "../emit";
 import {escapeChars} from "../utils";
 import {Env} from "../Env";
-import {DOT_SYM} from "../constants";
-import {Form} from "../core";
+import {DOT_SYM as DOT_STR} from "../constants";
+import {Form, isTaggedValue} from "../core";
 import {prStr} from "../prStr";
+import {Symbol} from "../../lang/Symbol";
+
+export const DOT_SYM = Symbol.intern(DOT_STR)
 
 export type ObjectResForm = [typeof DOT_SYM, Form, Form];
 
 export const isObjectResForm = (form: Form): form is ObjectResForm =>
-    isArray(form) && form[0] === DOT_SYM && form.length === 3;
+    isTaggedValue(form) && form[0].equals(DOT_SYM) && form.length === 3;
 
 export function emitObjectRes(form, env: Env): string {
     if (!isObjectResForm(form)) throw new Error(`invalid ${DOT_SYM} form: ${prStr(form)}`);

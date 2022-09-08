@@ -2,35 +2,40 @@ import {Env} from "../Env";
 import {escapeChars} from "../utils";
 import {isUndefined, str} from "../../lang/runtime";
 import {CORE_NS, CURRENT_NS} from "../vars";
+import {Symbol} from "../../lang/Symbol";
+import {prStr} from "../prStr";
 
-export function emitSymbol(s: string, env: Env): string {
-    if (s === '&env') {
-        return 'this.env';
+const CTX_ENV  = Symbol.intern('&env');
+const CTX_FORM = Symbol.intern('&form');
+
+const JS_CTX_ENV = 'this.env';
+const JS_CTX_FORM = 'this.form';
+
+export function emitSymbol(s: Symbol, env: Env): string {
+    if (s.equals(CTX_ENV)) {
+        return JS_CTX_ENV;
     }
 
-    if (s === '&form') {
-        return 'this.form';
+    if (s.equals(CTX_FORM)) {
+        return JS_CTX_FORM;
     }
 
-    if (s.indexOf('/') !== -1) {
-        let parts = s.split('/');
-        if (parts.length !== 2) throw new Error('A symbol should only have 2 parts');
-
-        let scope = env.lookup(parts[0]);
+    if (s.hasNamespace()) {
+        let scope = env.lookup(s.namespace());
         if (scope === null) {
             console.error(env);
-            throw new Error('Unknown namespace: ' + parts[0]);
+            throw new Error(`Unknown namespace: ${prStr(s.namespace())}`);
         }
 
-        let ns = scope.vars[parts[0]];
-        if (isUndefined(ns.module[escapeChars(parts[1])])) {
-            throw new Error('Undefined variable: ' + parts[1] + ' in namespace: ' + parts[0]);
+        let ns = scope.vars[s.namespace()];
+        if (isUndefined(ns.module[escapeChars(s.name())])) {
+            throw new Error(`Undefined variable: ${prStr(s.name())} in namespace: ${prStr(s.namespace())}`);
         }
 
-        return str(ns.name, '.', escapeChars(parts[1]));
+        return `${ns.name}.${escapeChars(s.name())}`;
     }
 
-    let s_ = escapeChars(s);
+    let s_ = escapeChars(s.name());
     let scope = env.lookup(s_);
     if (scope !== null) {
         return s_;

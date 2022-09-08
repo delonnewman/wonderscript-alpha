@@ -2,15 +2,72 @@
 <html lang="en">
   <head>
     <title>WonderScript</title>
+    <style>
+      .frame {
+        display: flex;
+      }
+
+      .frame > button {
+        margin-left: 5px;
+      }
+
+      #input {
+        font-size: 14pt;
+        font-family: monospace;
+        padding: 3px;
+        width: 100%;
+        border-radius: 4px;
+        border: 1px gray solid;
+      }
+
+      #output {
+        font-size: 14pt;
+        margin-top: 5px;
+        margin-bottom: 15px;
+      }
+    </style>
   </head>
   <body>
-    <main id="main"></main>
+    <main id="main">
+      <div class="frame">
+        <input id="input" type="text" name="input">
+        <button id="evalButton" type="button">Eval</button>
+        <button id="clearButton" type="button">Clear</button>
+      </div>
+      <div id="output"></div>
+      <div id="error"></div>
+      <div id="history"></div>
+    </main>
     <script type="module" src="dist/wonderscript.js"></script>
     <script>
+      let compiler;
+      const history = [];
+
+      function initListener() {
+        evalButton.addEventListener("click", () => {
+          try {
+            history.push(input.value);
+            const result = compiler.evalString(input.value);
+            output.innerText = compiler.prStr(result);
+            renderHistory();
+          } catch (e) {
+            console.error(e);
+            error.innerText = e;
+          }
+        });
+      }
+
+      function renderHistory() {
+        const entries = history.map((h => `<div class="history-entry">${h}</div>`))
+        history.innerHTML = entries.join();
+      }
+
       const wsInter = setInterval(() => {
         if (window.wonderscript) {
           clearInterval(wsInter);
-          new wonderscript.Compiler('browser', this).loadFile("src/wonderscript/core.ws");
+          compiler = new wonderscript.Compiler('browser', this)
+          compiler.loadFile("src/wonderscript/core.ws");
+          initListener();
         }
       }, 500);
     </script>

@@ -3,6 +3,9 @@ import {Nil} from "./Nil";
 import {CORE_NAMES} from "../compiler/constants";
 import {dasherize, escapeChars} from "../compiler/utils";
 import {CORE_MOD} from "../compiler/vars";
+import {isMeta, Meta, MetaData} from "./Meta";
+import {Keyword} from "./Keyword";
+import {Symbol as WSSymbol} from "./Symbol";
 
 const EMPTY_ARRAY  = Object.freeze([]);
 const EMPTY_STRING = "";
@@ -235,36 +238,54 @@ export function partition(n: number, xs: ArrayLike): Readonly<any[]> {
     }
 }
 
+export function keyword(arg1: string, arg2?: string): Keyword {
+    if (arg2 == null) {
+        return Keyword.intern(arg1);
+    }
+
+    return Keyword.intern(arg2, arg1);
+}
+
+export function symbol(arg1: string, arg2?: string, meta?: MetaData): WSSymbol {
+    if (arg2 == null) {
+        return WSSymbol.intern(arg1, undefined, meta);
+    }
+
+    return WSSymbol.intern(arg2, arg1, meta)
+}
+
 const META_SYMBOL = Symbol('wonderscriptMetaData');
 
-export function setMeta(obj, key, value) {
-    if (typeof obj === 'string') {
-        obj = new String(obj);
+export function setMeta(obj: Meta, key: Keyword, value: any): Meta {
+    if (!isMeta(obj)) {
+        console.error("not meta", obj);
     }
-    else {
-        const meta = obj[META_SYMBOL];
-        if (!meta) obj[META_SYMBOL] = {};
-        obj[META_SYMBOL][key] = value;
-    }
+
+    obj.setMeta(key, value);
+
     return obj;
 }
 
-
-export function setMacro(obj) {
-    return setMeta(obj, 'macro', true);
+export function setMacro(obj: Meta): Meta {
+    return setMeta(obj, Keyword.intern('macro'), true);
 }
 
-export function resetMeta(obj, meta) {
-    obj[META_SYMBOL] = meta;
+export function resetMeta(obj: Meta, data: Map<Keyword, any>): Meta {
+    obj.resetMeta(data);
+
     return obj;
 }
 
-export function meta(obj) {
-    return obj[META_SYMBOL] || {};
+export function meta(obj: Meta): Map<Keyword, any> {
+    if (!isMeta(obj)) {
+        console.error("not meta", obj);
+    }
+
+    return obj.meta();
 }
 
-export function getMeta(obj, key) {
-    return meta(obj)[key];
+export function getMeta(obj: Meta, key: Keyword): any {
+    return meta(obj)?.get(key);
 }
 
 export function importSymbol(name: string, obj) {

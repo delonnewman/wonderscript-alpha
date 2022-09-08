@@ -1,7 +1,7 @@
 import {macroexpand} from "./macroexpand";
-import {Form, isKeyword, isSymbol} from "./core";
+import {Form} from "./core";
 import {emitKeyword} from "./emit/emitKeyword";
-import {isArray, isBoolean, isMap, isNull, isNumber, isUndefined} from "../lang/runtime";
+import {isArray, isBoolean, isMap, isNull, isNumber, isString, isUndefined} from "../lang/runtime";
 import {
     AGET_SYM,
     ALENGTH_SYM,
@@ -84,6 +84,9 @@ import {Env} from "./Env";
 import {emitJS} from "./emit/emitJS";
 import {emitUnaryOp} from "./emit/emitUnaryOp";
 import {emitBinOp} from "./emit/emitBinOp";
+import {isKeyword} from "../lang/Keyword";
+import {isSymbol} from "../lang/Symbol";
+import {prStr} from "./prStr";
 
 export function emit(form_: Form, env_: Env) {
     const form = macroexpand(form_, env_);
@@ -93,7 +96,7 @@ export function emit(form_: Form, env_: Env) {
     else if (isSymbol(form)) {
         return emitSymbol(form, env_);
     }
-    else if (isNumber(form)) {
+    else if (isNumber(form) || isString(form)) {
         return JSON.stringify(form);
     }
     else if (isBoolean(form)) {
@@ -114,7 +117,7 @@ export function emit(form_: Form, env_: Env) {
             return EMPTY_ARRAY;
         }
         else if (isSymbol(form[0])) {
-            switch(form[0]) {
+            switch(form[0].name()) {
                 case DEF_SYM:
                     return emitDef(form, env_);
                 case QUOTE_SYM:
@@ -202,6 +205,6 @@ export function emit(form_: Form, env_: Env) {
         }
     }
     else {
-        throw new Error("Invalid form: " + form);
+        throw new Error(`Invalid form: ${prStr(form)}`);
     }
 }

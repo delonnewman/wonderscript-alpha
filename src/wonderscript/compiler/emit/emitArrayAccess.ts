@@ -1,13 +1,15 @@
 import {emit} from "../emit";
-import {Form, isTaggedValue, TaggedValue} from "../core";
-import {AGET_SYM} from "../constants";
+import {Form, isTaggedValue} from "../core";
+import {AGET_SYM as AGET_STR} from "../constants";
 import {prStr} from "../prStr";
-import {isArray} from "../../lang/runtime";
+import {Symbol} from "../../lang/Symbol";
+
+export const AGET_SYM = Symbol.intern(AGET_STR);
 
 export type ArrayAccessForm = [typeof AGET_SYM, any[], Form];
 
 export const isArrayAccessForm = (form: Form): form is ArrayAccessForm =>
-    isTaggedValue(form) && form[0] === AGET_SYM && form.length === 3;
+    isTaggedValue(form) && form[0].equals(AGET_SYM) && form.length === 3;
 
 export function emitArrayAccess(form: Form, env) {
     if (!isArrayAccessForm(form)) throw new Error(`invalid ${AGET_SYM} form: ${prStr(form)}`);

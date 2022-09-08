@@ -2,31 +2,21 @@
 
 ; Initial fn definition, will redefine below
 ; TODO: add arity checks here
-(def fn
+(def ^:macro fn
   (fn* (args &body)
     (cons 'fn* (cons args body))))
-(set-macro fn)
 
 ; TODO: add optional doc string and meta data map
 
 (def array (fn (&args) args))
 
-(def defmacro
-  (fn* (name args &body)
-    (array 'do
-           (array 'def name (cons 'fn (cons args body)))
-           (array 'set-macro name)
-           name)))
-(set-macro defmacro)
-(set-meta defmacro :doc "define a macro")
-(set-meta defmacro :arglists '(name args &body))
-
-(defmacro comment (&xs) nil)
+(def ^:macro comment (fn (&xs) nil))
 
 ; TODO: redefine fn with multi arity bodies
 
-(defmacro defn (name args &body)
-  (array 'def name (cons 'fn (cons args body))))
+(def ^:macro defn
+  (fn (name args &body)
+    (array 'def name (cons 'fn (cons args body)))))
 
 (defn browser?
   ()
@@ -51,7 +41,7 @@
 
 ;; Boolean & Logic
 
-(defmacro if (&args)
+(defn ^:macro if (&args)
   (cond (identical? 2 (alength args))
           (array 'cond (aget args 0) (aget args 1))
         (identical? 3 (alength args))
@@ -226,7 +216,7 @@
 ;   ((x) x)
 ;   ((x y) [x y])
 ;   ((x y &zs) (cons x (cons y zs))))
-(defmacro fn- (&xs)
+(defn ^:macro fn- (&xs)
   (let (x (aget xs 0))
     (cond
       (assoc-array? x)
@@ -242,14 +232,14 @@
 
 ;; Imperative Programming
 
-(defmacro when (pred &acts)
+(defn ^:macro when (pred &acts)
   (array 'cond pred (cons 'do acts)))
 
-(defmacro unless (pred &acts)
+(defn ^:macro unless (pred &acts)
   (array 'cond (array 'not pred) (cons 'do acts)))
 
 ;; TODO: include let binding for macro output for better performance, will need gensym
-(defmacro dotimes
+(defn ^:macro dotimes
   (bindings &body)
   (let (nm (aget bindings 0)
         init (aget bindings 1))
@@ -259,7 +249,7 @@
                       (concat body (array (array 'recur (array '+ nm 1))))))
           init)))
 
-(defmacro doeach
+(defn ^:macro doeach
   (bindings &body)
   (let (nm (aget bindings 0)
         col (aget bindings 1))
@@ -269,7 +259,7 @@
                        (concat body (array (array 'recur (array 'aget col (array 'inc 'i)) (array 'inc 'i))))))
            col)))
 
-(defmacro while
+(defn ^:macro while
   (pred &body)
   (array 'loop ()
          (cons 'when (cons pred (concat body (array (array 'recur)))))))
@@ -286,7 +276,7 @@
 (def $failure-tag "FAILURE: ")
 (def $assertion-msg " is false")
 
-(defmacro is
+(defn ^:macro is
   (&args)
   (cond
     (identical? 1 (alength args))
@@ -299,10 +289,10 @@
       (array 'cond
              (array 'not (aget args 0)) (array 'print (aget args 1)))))
 
-(defmacro is-not (body &args)
+(defn ^:macro is-not (body &args)
   (cons 'is (cons (array 'not body) args)))
 
-(defmacro deftest
+(defn ^:macro deftest
   (nm &body)
   (array 'do
     (array 'def nm (cons 'fn (cons '() body)))

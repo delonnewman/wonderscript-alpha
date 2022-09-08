@@ -10,9 +10,16 @@ import {wrappingReader} from "./wrappingReader";
 import {dispatchReader} from "./dispatchReader";
 import {varReader} from "./varReader";
 import {setReader} from "./setReader";
+import {Symbol} from "../lang/Symbol";
+import {Keyword} from "../lang/Keyword";
+
+export const LINE_KEY   = Keyword.intern("line");
+export const COLUMN_KEY = Keyword.intern("column");
+export const TAG_KEY    = Keyword.intern("tag");
 
 export function isWhitespace(ch): boolean {
     if (ch == null) return false;
+
     return ch === ',' || ch.match(/^\s$/);
 }
 
@@ -23,8 +30,8 @@ export function isDigit(ch): boolean {
 export const MACROS = {
     '"': stringReader,
     ';': commentReader,
-    "'": wrappingReader('quote'),
-    '@': wrappingReader('deref'),
+    "'": wrappingReader(Symbol.intern('quote')),
+    '@': wrappingReader(Symbol.intern('deref')),
     '^': metaReader,
     '(': listReader,
     ')': unmatchedDelimiterReader,
@@ -56,21 +63,20 @@ export function nonConstituent(ch): ch is '@' | '`' | '~' {
 }
 
 export function getMacro(ch: string): Function | null {
-    var m = MACROS[ch];
+    const m = MACROS[ch];
     if (m != null) return m;
+
     return null;
 }
 
-export function matchSymbol(s: string): string | ['keyword', string] {
+export function matchSymbol(s: string): Symbol | Keyword {
     if (s.charAt(0) === ':') {
-        //return Keyword.intern(Sym.intern(s.substring(1)));
-        return ['keyword', s.slice(1)];
+        return Keyword.parse(s);
     }
-    //return Sym.intern(s);
-    return s;
+    return Symbol.parse(s);
 }
 
-export function interpretToken(s: string) {
+export function interpretToken(s: string): null | boolean | Symbol | Keyword {
     if (s === 'nil') {
         return null;
     }

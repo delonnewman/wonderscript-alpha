@@ -1,9 +1,9 @@
 import {readDelimitedList} from "./readDelimitedList";
 import {PushBackReader} from "./PushBackReader";
+import {QUOTE_SYM, QuoteForm} from "../compiler/emit/emitQuote";
 
-export function vectorReader(r: PushBackReader, openbracket, opts): ['quote', any[]] {
+export function vectorReader(r: PushBackReader, openbracket, opts): QuoteForm {
     const a = readDelimitedList(']', r, true, opts);
-    // return new Vector(null, a);
-    // return ['array'].concat(a);
-    return ['quote', a]
+
+    return [QUOTE_SYM, a]
 }

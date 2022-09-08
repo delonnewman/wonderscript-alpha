@@ -3,14 +3,15 @@ import {escapeChars} from "./utils";
 import {isUndefined} from "../lang/runtime";
 import {CORE_NS, CURRENT_NS} from "./vars";
 import {Symbol} from "../lang/Symbol";
+import {MetaData} from "../lang/Meta";
 
-export function findNamespaceVar(s: Symbol, env?: Env) {
+export function findDefinitionMetaData(s: Symbol, env?: Env): MetaData {
     if (s.hasNamespace() && env) {
         const scope = env.lookup(s.namespace());
         if (scope === null) return null;
 
         const ns  = scope.vars[s.namespace()];
-        const val = ns.module[s.name()];
+        const val = ns.module[`${s.name()}_META_`];
 
         if (isUndefined(val)) return null;
 
@@ -18,13 +19,13 @@ export function findNamespaceVar(s: Symbol, env?: Env) {
     }
 
     const s_ = escapeChars(s.name());
-    let val = CURRENT_NS.value.module[s_];
+    let val = CURRENT_NS.value.module[`${s_}_META_`];
 
     if (!isUndefined(val)) {
         return val;
     }
 
-    if (!isUndefined(val = CORE_NS.module[s_])) {
+    if (!isUndefined(val = CORE_NS.module[`${s_}_META_`])) {
         return val;
     }
 

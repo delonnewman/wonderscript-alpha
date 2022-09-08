@@ -5,6 +5,8 @@ import * as core from "./wonderscript/lang";
 import * as compiler from "./wonderscript/compiler";
 import {importModule, importSymbol} from "./wonderscript/lang";
 import {Form} from "./wonderscript/compiler/core";
+import {findDefinitionMetaData} from "./wonderscript/compiler/findDefinitionMetaData";
+import {Symbol} from "./wonderscript/lang";
 
 type Platform = "node" | "browser"
 
@@ -41,6 +43,7 @@ export class Compiler {
             macroexpand: this.macroexpand.bind(this),
             readString: compiler.readString,
             prStr: compiler.prStr,
+            theMeta: (sym: Symbol) => findDefinitionMetaData(sym, this.env)
         });
 
         importSymbol('*ns*', CURRENT_NS.value);

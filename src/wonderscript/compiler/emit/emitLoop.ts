@@ -3,14 +3,18 @@ import {isArray, isString} from "../../lang/runtime";
 import {escapeChars} from "../utils";
 import {compileRecursiveBody} from "./compileBody";
 import {emit} from "../emit";
-import {LOOP_SYM} from "../constants";
+import {LOOP_SYM as LOOP_STR} from "../constants";
 import {BodyForm, isBodyForm} from "../core";
 import {prStr} from "../prStr";
+import {isSymbol, Symbol} from "../../lang/Symbol";
+
+export const LOOP_SYM = Symbol.intern(LOOP_STR);
 
 export type LoopForm = BodyForm<typeof LOOP_SYM>;
 
 export const isLoopForm = isBodyForm<typeof LOOP_SYM>(LOOP_SYM);
 
+// TODO: generalize body form emitters
 export function emitLoop(form, scope: Env): string {
     if (!isLoopForm(form)) throw new Error(`invalid ${LOOP_SYM} form: ${prStr(form)}`);
     const env = new Env(scope);
@@ -21,9 +25,9 @@ export function emitLoop(form, scope: Env): string {
 
     const names = [];
     for (let i = 0; i < binds.length; i += 2) {
-        if (!isString(binds[i])) throw new Error('Invalid binding name');
+        if (!isSymbol(binds[i])) throw new Error('Invalid binding name');
 
-        const bind = escapeChars(binds[i]);
+        const bind = escapeChars(binds[i].name());
         env.define(bind, true);
         names.push(bind);
     }

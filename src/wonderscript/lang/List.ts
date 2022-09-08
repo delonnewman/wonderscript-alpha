@@ -1,7 +1,8 @@
-import {Meta, MetaMap} from "./Meta";
+import {Meta, MetaData} from "./Meta";
 import {Nil} from "./Nil";
 import {First, Next, Seq} from "./Seq";
 import {Seqable} from "./Seqable";
+import {Keyword} from "./Keyword";
 
 export class List implements Meta, Seq, Seqable {
     static EMPTY = new this(null, null);
@@ -9,9 +10,9 @@ export class List implements Meta, Seq, Seqable {
     private readonly _first: First;
     private readonly _next: Next;
     private readonly _count: number;
-    private readonly _meta: MetaMap | Nil;
+    private _meta: MetaData | Nil;
 
-    constructor(first: First, next: Next, count = 0, meta?: MetaMap) {
+    constructor(first: First, next: Next, count = 0, meta?: MetaData) {
         this._first = first;
         this._next  = next;
         this._count = count;
@@ -26,8 +27,28 @@ export class List implements Meta, Seq, Seqable {
         return this;
     }
 
-    meta(): MetaMap | Nil {
+    meta(): MetaData | Nil {
         return this._meta;
+    }
+
+    setMeta(key: Keyword, value: any): List {
+        if (this._meta == null) {
+            this._meta = new Map();
+        }
+
+        this._meta.set(key, value)
+
+        return this;
+    }
+
+    resetMeta(data: Map<Keyword, any>): List {
+        this._meta = data;
+
+        return this;
+    }
+
+    hasMeta(): boolean {
+        return this._meta != null;
     }
 
     first(): First {

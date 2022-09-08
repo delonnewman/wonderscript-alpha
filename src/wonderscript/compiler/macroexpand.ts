@@ -1,31 +1,36 @@
 import {Form, isMacro, isSpecialForm, isTaggedValue} from "./core";
-import {DOT_DASH_SYM, DOT_SYM, NEW_SYM} from "./constants";
+import {DOT_DASH_SYM as DOT_DASH_STR, DOT_SYM as DOT_STR, NEW_SYM as NEW_STR} from "./constants";
 import {Env} from "./Env";
 import {findNamespaceVar} from "./findNamespaceVar";
-import {isString} from "../lang/runtime";
+import {isSymbol, Symbol} from "../lang/Symbol";
+
+const DOT_DASH_SYM = Symbol.intern(DOT_DASH_STR)
+const DOT_SYM      = Symbol.intern(DOT_STR)
+const NEW_SYM      = Symbol.intern(NEW_STR)
 
 export function macroexpand(form: Form, scope: Env): Form {
     if (!isTaggedValue(form) || isSpecialForm(form)) return form;
 
-    const name = form[0];
-    if (name !== DOT_DASH_SYM && name.startsWith(DOT_DASH_SYM)) {
+    const sym = form[0];
+    const name = sym.name();
+    if (!sym.equals(DOT_DASH_SYM) && name.startsWith(DOT_DASH_STR)) {
         return [DOT_SYM, form.slice(1)[0], name.slice(1)];
     }
 
-    if (name !== DOT_SYM && name.startsWith(DOT_SYM)) {
+    if (!sym.equals(DOT_SYM) && name.startsWith(DOT_STR)) {
         return [DOT_SYM, form.slice(1)[0], [name.slice(1)].concat(form.slice(2))];
     }
 
-    if (name.endsWith(DOT_SYM)) {
+    if (name.endsWith(DOT_STR)) {
         // @ts-ignore
-        return [NEW_SYM, name.replace(/\.$/, '')].concat(form.slice(1));
+        return [NEW_SYM, Symbol.intern(name.slice(0, name.length - 1), sym.namespace())].concat(form.slice(1));
     }
 
-    if (isString(form[0])) {
+    if (isSymbol(form[0])) {
         const val = findNamespaceVar(form[0], scope);
-        if (val === null) return form;
+        if (val == null) return form;
 
-        if (isMacro(val)) {
+        if (isMacro(form[0])) {
             const args = form.slice(1);
             const ctx = {env: new Env(scope), form: form};
 

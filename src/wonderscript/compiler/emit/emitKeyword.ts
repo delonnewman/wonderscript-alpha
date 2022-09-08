@@ -1,10 +1,11 @@
-import {str} from "../../lang/runtime";
-import {CURRENT_NS} from "../vars";
+import {Keyword} from "../../lang/Keyword";
 
-export function emitKeyword(kw) {
-    let name = '' + kw[1];
-    if (name.startsWith(':')) {
-        name = str(CURRENT_NS.value.name, '/', name.slice(1));
+const KW_FUNC = 'wonderscript.core.keyword';
+
+export function emitKeyword(kw: Keyword): string {
+    if (kw.hasNamespace()) {
+        return `${KW_FUNC}(${JSON.stringify(kw.namespace())},${JSON.stringify(kw.name())})`;
     }
-    return JSON.stringify(name);
+
+    return `${KW_FUNC}(${JSON.stringify(kw.name())})`;
 }

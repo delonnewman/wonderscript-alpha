@@ -1,6 +1,6 @@
 import {PushBackReader} from "./PushBackReader";
 
-export function stringReader(r: PushBackReader, doublequote, opts): ['quote', string] {
+export function stringReader(r: PushBackReader, doublequote, opts): string {
     const buff = [];
 
     for (let ch = r.read(); ch !== '"'; ch = r.read()) {
@@ -39,5 +39,5 @@ export function stringReader(r: PushBackReader, doublequote, opts): ['quote', st
         buff.push(ch);
     }
 
-    return ['quote', buff.join('')];
+    return buff.join('');
 }

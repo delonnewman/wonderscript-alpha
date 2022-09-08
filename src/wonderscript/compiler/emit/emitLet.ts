@@ -1,11 +1,13 @@
 import {Env} from "../Env";
-import {isString} from "../../lang/runtime";
 import {escapeChars} from "../utils";
 import {compileBody} from "./compileBody";
 import {emit} from "../emit";
 import {BodyForm, Form, isBodyForm} from "../core";
-import {LET_SYM} from "../constants";
+import {LET_SYM as LET_STR} from "../constants";
 import {prStr} from "../prStr";
+import {isSymbol, Symbol} from "../../lang/Symbol";
+
+export const LET_SYM = Symbol.intern(LET_STR);
 
 export type LetForm = BodyForm<typeof LET_SYM>;
 
@@ -25,8 +27,8 @@ export function emitLet(form: Form, scope: Env): string {
     // add names to function scope
     const names = [];
     for (let i = 0; i < binds.length; i += 2) {
-        if (!isString(binds[i])) throw new Error('Invalid binding name');
-        const bind = escapeChars(binds[i]);
+        if (!isSymbol(binds[i])) throw new Error('Invalid binding name');
+        const bind = escapeChars(binds[i].name()); // TODO: should throw error for namespaced symbols
         env.define(bind, true);
         names.push(bind);
     }

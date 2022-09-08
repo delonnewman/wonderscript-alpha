@@ -1,14 +1,17 @@
 import {isArray, isString, map} from "../../lang/runtime";
 import {emit} from "../emit";
 import {Env} from "../Env";
-import {NEW_SYM} from "../constants";
+import {NEW_SYM as NEW_STR} from "../constants";
 import {Form} from "../core";
 import {prStr} from "../prStr";
+import {isSymbol, Symbol} from "../../lang/Symbol";
 
-export type ClassInitForm = [typeof NEW_SYM, string, ...Form[]];
+export const NEW_SYM = Symbol.intern(NEW_STR);
+
+export type ClassInitForm = [typeof NEW_SYM, Symbol, ...Form[]];
 
 export const isClassInitForm = (form: Form): form is ClassInitForm =>
-    isArray(form) && form[0] === NEW_SYM && isString(form[1]);
+    isArray(form) && form[0].equals(NEW_SYM) && isSymbol(form[1]);
 
 export function emitClassInit(form, env: Env): string {
     if (!isClassInitForm(form)) throw new Error(`invalid ${NEW_SYM} form: ${prStr(form)}`);

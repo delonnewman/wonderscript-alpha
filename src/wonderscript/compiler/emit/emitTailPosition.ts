@@ -10,6 +10,7 @@ export function emitTailPosition(x, env, def = 'return'): string {
         if (!env.isRecursive()) throw new Error(RECUR_ERROR_MSG);
         return emitRecursionPoint(x, env);
     }
+
     if (isThrow(x)) {
         return emitThrownException(x, env);
     }
