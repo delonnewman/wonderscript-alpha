@@ -7,6 +7,7 @@ import {importModule, importSymbol, Keyword} from "./wonderscript/lang";
 import {Form} from "./wonderscript/compiler/core";
 import {findDefinitionMetaData} from "./wonderscript/compiler/findDefinitionMetaData";
 import {Symbol} from "./wonderscript/lang";
+import {RecursionPoint} from "./wonderscript/compiler/RecursionPoint";
 
 type Platform = "node" | "browser"
 
@@ -43,7 +44,8 @@ export class Compiler {
             macroexpand: this.macroexpand.bind(this),
             readString: compiler.readString,
             prStr: compiler.prStr,
-            theMeta: (sym: Symbol) => findDefinitionMetaData(sym, this.env)
+            theMeta: (sym: Symbol) => findDefinitionMetaData(sym, this.env),
+            RecursionPoint: RecursionPoint
         });
 
         importSymbol(CORE_NS.name, CORE_NS);

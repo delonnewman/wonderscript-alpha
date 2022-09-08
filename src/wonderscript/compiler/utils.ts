@@ -103,6 +103,7 @@ export function escapeChars(str: string): string {
     for (let ch in SPECIAL_CHARS) {
         str = str.replace(new RegExp(ch, 'g'), SPECIAL_CHARS[ch]);
     }
+
     return str;
 }
 

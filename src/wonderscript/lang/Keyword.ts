@@ -1,12 +1,10 @@
 import {Named, namedHash} from "./Named";
 import {Symbol} from "./Symbol";
 import {Nil} from "./Nil";
+import {Invokable} from "./Invokable";
 
-let currID = 0;
-
-export class Keyword implements Named {
+export class Keyword implements Named, Invokable {
     private readonly _symbol: Symbol;
-    readonly id: number;
 
     static CACHE = new Map<string, Keyword>();
 
@@ -31,7 +29,6 @@ export class Keyword implements Named {
 
     constructor(symbol: Symbol) {
         this._symbol = symbol;
-        this.id = currID++;
     }
 
     name(): string {
@@ -44,6 +41,10 @@ export class Keyword implements Named {
 
     hasNamespace(): boolean {
         return this._symbol.hasNamespace();
+    }
+
+    invoke(map: Map<Keyword, any>): any {
+        return map.get(this);
     }
 
     toString() {

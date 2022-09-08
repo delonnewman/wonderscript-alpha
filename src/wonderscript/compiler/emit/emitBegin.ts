@@ -3,19 +3,19 @@ import {emitTailPosition} from "./emitTailPosition";
 import {str} from "../../lang/runtime";
 import {Env} from "../Env";
 import {Form, isTaggedValue} from "../core";
-import {DO_SYM as DO_STR} from "../constants";
+import {BEGIN_SYM as BEGIN_STR} from "../constants";
 import {prStr} from "../prStr";
 import {Symbol} from "../../lang/Symbol";
 
-export const DO_SYM = Symbol.intern(DO_STR);
+export const BEGIN_SYM = Symbol.intern(BEGIN_STR);
 
-export type DoForm = [typeof DO_SYM, ...Form[]];
+export type BeginForm = [typeof BEGIN_SYM, ...Form[]];
 
-export const isDoForm = (form: Form): form is DoForm =>
-    isTaggedValue(form) && form[0].equals(DO_SYM);
+export const isBeginForm = (form: Form): form is BeginForm =>
+    isTaggedValue(form) && form[0].equals(BEGIN_SYM);
 
-export function emitDo(form: Form, env: Env): string {
-    if (!isDoForm(form)) throw new Error(`invalid ${DO_SYM} form: ${prStr(form)}`);
+export function emitBegin(form: Form, env: Env): string {
+    if (!isBeginForm(form)) throw new Error(`invalid ${BEGIN_SYM} form: ${prStr(form)}`);
 
     const exprs = form.slice(0, form.length - 1).slice(1);
     const buffer = [];

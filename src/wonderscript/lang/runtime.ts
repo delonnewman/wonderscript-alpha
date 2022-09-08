@@ -291,7 +291,10 @@ export function getMeta(obj: Meta, key: Keyword): any {
 export function importSymbol(name: string, obj) {
     let wsName = CORE_NAMES[name];
 
-    if (wsName) {
+    if (name[0] === name[0].toUpperCase()) { // Don't escape names that start with uppercase
+        wsName = name
+    }
+    else if (wsName) {
         wsName = escapeChars(dasherize(wsName));
     }
     else if (name.startsWith('is')) {

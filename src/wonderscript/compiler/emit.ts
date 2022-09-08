@@ -17,7 +17,6 @@ import {
     COND_SYM,
     DEF_SYM,
     DIV_SYM,
-    DO_SYM,
     DOT_SYM,
     EMPTY_ARRAY,
     EQUIV_SYM,
@@ -57,7 +56,7 @@ import {
     SET_SYM,
     THROW_SYM,
     TRUE_SYM,
-    TRY_SYM,
+    BEGIN_SYM,
     TYPE_SYM,
     UNDEFINED_SYM
 } from "./constants";
@@ -73,7 +72,7 @@ import {emitArrayLength} from "./emit/emitArrayLength";
 import {emitArrayMutation} from "./emit/emitArrayMutation";
 import {emitArrayAccess} from "./emit/emitArrayAccess";
 import {emitFunc} from "./emit/emitFunc";
-import {emitDo} from "./emit/emitDo";
+import {emitBegin} from "./emit/emitBegin";
 import {emitLet} from "./emit/emitLet";
 import {emitObjectRes} from "./emit/emitObjectRes";
 import {emitClassInit} from "./emit/emitClassInit";
@@ -118,6 +117,7 @@ export function emit(form_: Form, env_: Env) {
         }
         else if (isSymbol(form[0])) {
             switch(form[0].name()) {
+                // special forms
                 case DEF_SYM:
                     return emitDef(form, env_);
                 case QUOTE_SYM:
@@ -134,10 +134,8 @@ export function emit(form_: Form, env_: Env) {
                     throw new Error(RECUR_ERROR_MSG);
                 case THROW_SYM:
                     return emitThrownException(form, env_);
-                case TRY_SYM:
-                    throw new Error("not implemented");
-                case DO_SYM:
-                    return emitDo(form, env_);
+                case BEGIN_SYM:
+                    return emitBegin(form, env_);
                 case LET_SYM:
                     return emitLet(form, env_);
                 case DOT_SYM:

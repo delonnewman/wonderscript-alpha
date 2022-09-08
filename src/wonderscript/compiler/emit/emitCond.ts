@@ -2,7 +2,7 @@ import {partition, rest, str} from "../../lang/runtime";
 import {emitTailPosition} from "./emitTailPosition";
 import {emit} from "../emit";
 import {Env} from "../Env";
-import {Form, isTaggedValue, TaggedValue} from "../core";
+import {Form, isTaggedValue} from "../core";
 import {COND_SYM as COND_STR} from "../constants";
 import {prStr} from "../prStr";
 import {Symbol} from "../../lang/Symbol";

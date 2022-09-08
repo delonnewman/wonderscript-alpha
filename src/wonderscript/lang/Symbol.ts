@@ -2,10 +2,11 @@ import {Named} from "./Named";
 import {Meta, MetaData} from "./Meta";
 import {Nil} from "./Nil";
 import {Keyword} from "./Keyword";
+import {Invokable} from "./Invokable";
 
 const SLASH = '/';
 
-export class Symbol<Name = string, Namespace = string> implements Named<Name, Namespace>, Meta {
+export class Symbol<Name = string, Namespace = string> implements Named<Name, Namespace>, Meta, Invokable {
     private readonly _name: Name;
     private readonly _namespace?: Namespace;
     private _meta?: MetaData;
@@ -77,6 +78,10 @@ export class Symbol<Name = string, Namespace = string> implements Named<Name, Na
         if (!isSymbol(other)) return false
 
         return this._name === other.name() && this._namespace === other.namespace()
+    }
+
+    invoke(map: Map<Symbol<Name, Namespace>, any>): any {
+        return map.get(this);
     }
 
     toString() {
