@@ -1,22 +1,23 @@
 import {Meta, MetaData} from "./Meta";
 import {Nil} from "./Nil";
-import {First, isSeq, Next, Seq} from "./Seq";
-import {Seqable} from "./Seqable";
-import {Keyword} from "./Keyword";
+import {First, isSequence, Next, Sequence} from "./Sequence";
+import {Sequenceable} from "./Sequenceable";
+import {merge} from "./runtime";
 
-export class List implements Meta, Seq, Seqable, Equality {
+export class List implements Meta, Sequence, Sequenceable, Equality {
     static EMPTY = new this(null, null);
 
     private readonly _first: First;
     private readonly _next: Next;
     private readonly _count: number;
-    private _meta: MetaData | Nil;
+    private readonly _meta: MetaData | Nil;
 
     constructor(first: First, next: Next, count = 0, meta?: MetaData) {
         this._first = first;
         this._next  = next;
         this._count = count;
         this._meta  = meta;
+        Object.freeze(this);
     }
 
     empty(): List {
@@ -36,23 +37,7 @@ export class List implements Meta, Seq, Seqable, Equality {
     }
 
     withMeta(data: MetaData): List {
-        return new List(this._first, this._next, this._count, data);
-    }
-
-    setMeta(key: Keyword, value: any): List {
-        if (this._meta == null) {
-            this._meta = new Map();
-        }
-
-        this._meta.set(key, value)
-
-        return this;
-    }
-
-    resetMeta(data: Map<Keyword, any>): List {
-        this._meta = data;
-
-        return this;
+        return new List(this._first, this._next, this._count, merge(this._meta, data));
     }
 
     hasMeta(): boolean {
@@ -71,24 +56,22 @@ export class List implements Meta, Seq, Seqable, Equality {
         return this._count;
     }
 
-    equals(other: Seq): boolean {
-        if (!isSeq(other)) return false;
+    equals(other: Sequence): boolean {
+        if (!isSequence(other)) return false;
         // TODO: generalize to isCounted add counted interface
         if (isList(other) && this.count() !== other.count())  {
             return false;
         }
 
         let x = this.first();
-        let xs: Seq = this;
+        let xs: Sequence = this;
         let y = other.first();
         let ys = other;
 
         while (xs != null && ys != null) {
             if (x !== y) return false; // TODO: toplevel equals needs to be accessible here
-            xs = xs.next();
-            ys = ys.next();
-            x  = xs.first();
-            y  = ys.first();
+            xs = xs.next();  ys = ys.next();
+            x  = xs.first(); y  = ys.first();
         }
 
         return xs == null && ys == null;

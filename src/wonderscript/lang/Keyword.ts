@@ -29,6 +29,7 @@ export class Keyword implements Named, Invokable, Comparable, Equality {
 
     constructor(symbol: Symbol) {
         this._symbol = symbol;
+        Object.freeze(this);
     }
 
     symbol(): Symbol {

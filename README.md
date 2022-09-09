@@ -194,9 +194,9 @@ A collection of properties/shapes and doc strings
 - Seq < Collection
   - first()
   - next()
-- Seqable < Collection
+- Sequenceable < Collection
   - seq()
-- Associative < Seqable
+- Associative < Sequenceable
   - get(key, alt = nil)
   - remove(key)
 - Indexed < Associative

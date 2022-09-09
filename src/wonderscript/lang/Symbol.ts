@@ -1,15 +1,15 @@
 import {Named} from "./Named";
 import {Meta, MetaData} from "./Meta";
 import {Nil} from "./Nil";
-import {Keyword} from "./Keyword";
 import {Invokable} from "./Invokable";
+import {merge} from "./runtime";
 
 const SLASH = '/';
 
 export class Symbol implements Named, Meta, Invokable, Comparable, Equality {
     private readonly _name: string;
     private readonly _namespace?: string;
-    private _meta?: MetaData;
+    private readonly _meta?: MetaData;
 
     static CACHE = new Map<String, Symbol>();
 
@@ -31,7 +31,8 @@ export class Symbol implements Named, Meta, Invokable, Comparable, Equality {
     constructor(name: string, namespace?: string, meta?: MetaData) {
         this._name = name;
         this._namespace = namespace;
-        this._meta = meta
+        this._meta = meta;
+        Object.freeze(this);
     }
 
     meta(): MetaData {
@@ -39,23 +40,7 @@ export class Symbol implements Named, Meta, Invokable, Comparable, Equality {
     }
 
     withMeta(data: MetaData): Meta {
-        return new Symbol(this._name, this._namespace, data);
-    }
-
-    setMeta(key: Keyword, value: any): Symbol {
-        if (this._meta == null) {
-            this._meta = new Map();
-        }
-
-        this._meta.set(key, value)
-
-        return this;
-    }
-
-    resetMeta(data: Map<Keyword, any>): Symbol {
-        this._meta = data;
-
-        return this;
+        return new Symbol(this._name, this._namespace, merge(this._meta, data));
     }
 
     hasMeta(): boolean {

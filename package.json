@@ -6,7 +6,8 @@
   "scripts": {
     "build": "npx rollup -c",
     "watch": "npx rollup -c -w",
-    "dev": "npx httpster -c"
+    "dev": "npx httpster -c",
+    "type-check": "tsc -p tsconfig.json"
   },
   "repository": {
     "type": "git",

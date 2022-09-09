@@ -16,6 +16,7 @@ export type DefForm = [typeof DEF_SYM, Symbol, Form?];
 export const isDefForm = (value: any): value is DefForm =>
     isArray(value) && (value.length === 2 || value.length === 3) && DEF_SYM.equals(value[0]) && isSymbol(value[1]);
 
+// TODO: need to escape JS keywords
 export function emitDef(form: Form, env: Env): string {
     if (!isDefForm(form)) throw new Error(`invalid ${DEF_SYM} form: ${prStr(form)}`);
 
@@ -28,7 +29,6 @@ export function emitDef(form: Form, env: Env): string {
 
     if (form[2] != null) {
         code = emit(form[2], env);
-        // console.log("emitDef code", code);
         val  = eval(code);
     }
 

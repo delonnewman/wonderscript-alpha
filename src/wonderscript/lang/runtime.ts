@@ -1,4 +1,4 @@
-import {First} from "./Seq";
+import {First} from "./Sequence";
 import {Nil} from "./Nil";
 import {CORE_NAMES} from "../compiler/constants";
 import {dasherize, escapeChars} from "../compiler/utils";
@@ -7,6 +7,7 @@ import {isMeta, Meta, MetaData} from "./Meta";
 import {Keyword} from "./Keyword";
 import {Symbol as WSSymbol} from "./Symbol";
 import {List} from "./List";
+import {Reference} from "./Reference";
 
 const EMPTY_ARRAY  = Object.freeze([]);
 const EMPTY_STRING = "";
@@ -141,7 +142,8 @@ export function next(col: Nextable): Readonly<any[]> | Nil {
     }
 
     if (hasForEachMethod(col)) {
-        var a = [], i = 0;
+        const a = [];
+        let i = 0;
         col.forEach(function (val) {
             if (i > 0) {
                 a.push(val);
@@ -197,46 +199,46 @@ export function map<In = any, Out = unknown>(f: Mapper<In, Out>, xs: Mappable): 
 type Reducing = (a: any, b: any) => any
 
 export function reduce(f: Reducing, xs, init?: any) {
-    if (arguments.length >= 2) {
-        if (init == null) {
-            init = first(xs);
-            xs   = next(xs);
-        }
-        if (isEmpty(xs)) {
-            return init;
-        }
-        else {
-            let x = init;
-            while (xs != null) {
-                x = f.call(xs, x, first(xs));
-                xs = next(xs);
-            }
-            return x;
-        }
+    if (arguments.length !== 2 && arguments.length !== 3) {
+        throw new Error('wrong number of arguments expected at least 2 or 3, got: ' + arguments.length);
     }
-    else {
-        throw new Error('Wrong number of arguments expected at least 2, got: ' + arguments.length);
+
+    if (init == null) {
+        init = first(xs);
+        xs = next(xs);
     }
+
+    if (isEmpty(xs)) {
+        return init;
+    }
+
+    let memo = init;
+
+    while (!isEmpty(xs)) {
+        memo = f.call(xs, memo, first(xs));
+        xs = next(xs);
+    }
+
+    return memo;
 }
 
 export function partition(n: number, xs: ArrayLike): Readonly<any[]> {
     if (isEmpty(xs)) {
         return EMPTY_ARRAY;
     }
-    else if (xs.length === n) {
+    if (xs.length === n) {
         return [xs];
     }
-    else {
-        var a = [], i, j, x;
-        for (i = 0; i < xs.length; i = i + n) {
-            x = [];
-            for (j = 0; j < n; j++) {
-                x.push(xs[i + j]);
-            }
-            a.push(x);
+
+    const a = [];
+    for (let i = 0; i < xs.length; i = i + n) {
+        const x = [];
+        for (let j = 0; j < n; j++) {
+            x.push(xs[i + j]);
         }
-        return a;
+        a.push(x);
     }
+    return a;
 }
 
 export function keyword(arg1: string, arg2?: string): Keyword {
@@ -265,9 +267,7 @@ export function list(...args): List {
     return xs;
 }
 
-const META_SYMBOL = Symbol('wonderscriptMetaData');
-
-export function setMeta(obj: Meta, key: Keyword, value: any): Meta {
+export function setMeta(obj: Reference, key: Keyword, value: any): Reference {
     if (!isMeta(obj)) {
         console.error("not meta", obj);
     }
@@ -277,11 +277,11 @@ export function setMeta(obj: Meta, key: Keyword, value: any): Meta {
     return obj;
 }
 
-export function setMacro(obj: Meta): Meta {
+export function setMacro(obj: Reference): Reference {
     return setMeta(obj, Keyword.intern('macro'), true);
 }
 
-export function resetMeta(obj: Meta, data: Map<Keyword, any>): Meta {
+export function resetMeta(obj: Reference, data: Map<Keyword, any>): Reference {
     obj.resetMeta(data);
 
     return obj;
@@ -297,6 +297,21 @@ export function meta(obj: Meta): Map<Keyword, any> {
 
 export function getMeta(obj: Meta, key: Keyword): any {
     return meta(obj)?.get(key);
+}
+
+export function merge(...maps: Map<any, any>[]): Map<any, any> {
+    const merged = new Map();
+
+    for (let i = 0; i < maps.length; i++) {
+        const m = maps[i];
+        if (m == null) continue; // ignore nullish values
+
+        for (let entry of m) {
+            merged.set(entry[0], entry[1]);
+        }
+    }
+
+    return merged;
 }
 
 export function importSymbol(name: string, obj) {

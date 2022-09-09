@@ -15,6 +15,8 @@
 
 ;; TODO: collect arities to improve error message
 ;; TODO: add arity checking for single body forms
+;; TODO: add support for multi-line bodies
+;; TODO: add support for splat arguments
 (def ^:macro fn
   (fn*
    (&xs)
@@ -29,8 +31,7 @@
                                  (fn* (x)
                                       (array (array 'identical? (array-length (x 0)) (array 'array-length 'args))
                                              (array 'let (.flatMap (x 0) (fn* (x i) (array x (array 'args i))))
-                                                    (x 1))
-                                             )))
+                                                    (x 1)))))
                        (array 'else
                               (array 'throw
                                      (array 'js/Error.
@@ -61,6 +62,12 @@
 
 (defn type?
   (sym) (:type (the-meta sym)))
+
+(defn js-primitive-type?
+  (obj) (not-identical? "object" (typeof obj)))
+
+(defn js-primitive-number?
+  (val) (identical? "number" (typeof val)))
 
 ;; primitive types
 
@@ -113,6 +120,8 @@
 ;; Numerical
 
 ;; numerical constants
+;; NOTE: For constants not only can the definition not change the value will also be checked for mutablility
+;; TODO: add "constant" macro
 (def ^:constant $pi      (.-PI js/Math))
 (def ^:constant $e       (.-E js/Math))
 (def ^:constant $log10e  (.-LOG10e js/Math))
@@ -131,19 +140,20 @@
 (defn add1 (x) (+ x 1))
 (defn sub1 (x) (- 1 x))
 
-(defn + (&xs)
-  (cond
-    (identical? 0 (array-length xs))
-      0
-    (identical? 1 (array-length xs))
-      (xs 0)
-    else
-      (eval (cons '+ xs))))
+(defmacro <op>
+  (operator)
+  (array 'fn (array 'a 'b) (array operator 'a 'b)))
 
-; TODO: improve these definitions
-(defn - (a b) (- a b))
-(defn * (a b) (* a b))
-(defn / (a b) (/ a b))
+(def <+> (<op> +))
+(def <-> (<op> -))
+(def <*> (<op> *))
+(def </> (<op> /))
+
+(defn sum
+  (xs) (reduce <+> xs 0))
+
+(defn product
+  (xs) (reduce <*> xs 1))
 
 (defn zero?
   (x) (identical? 0 x))
@@ -180,6 +190,9 @@
 
 (defn frozen?
   (object) (.isFrozen js/Object object))
+
+(defn mutable?
+  (value) (or (js-primitive-type? value) (frozen? value)))
 
 (defn clone
   (object)
@@ -338,11 +351,25 @@
 (defn trim-trailing
   (s) (.trimEnd s))
 
+(defn name
+  (named)
+  (.name named))
+
+(defn namespace
+  (named)
+  (.namespace named))
+
 (defn starts-with?
-  (s ch) (.startsWith s ch))
+  (s ch)
+  (if (or (keyword? s) (symbol? s))
+    (.startsWith (name s))
+    (.startsWith s ch)))
 
 (defn ends-with?
-  (s ch) (.endsWith s ch))
+  (s ch)
+  (if (or (keyword? s) (symbol? s))
+    (.startsWith (name s))
+    (.endsWith s ch)))
 
 (def ^:constant $ending-new-line-pattern (js/RegExp. "(\\n|\\r\\n)$"))
 (def ^:constant $new-line-pattern (js/RegExp. "\\r\\n|\\n"))
@@ -475,13 +502,6 @@
 (defn prevent-extensions!
   (object) (.preventExtensions js/Object object))
 
-(defn js-primitive-type?
-  (obj)
-  (not (identical? "object" (typeof obj))))
-
-(defn js-primitive-number?
-  (val) (identical? "number" (typeof val)))
-
 (defn arity
   (f)
   (if (function? f)
@@ -523,14 +543,6 @@
           (array-set! p j (array-get a (+ (* n i) j))))
         (array-set! pairs i p)))
     pairs))
-
-(defn sum
-  (numbers)
-  (reduce + numbers))
-
-(defn product
-  (numbers)
-  (reduce * numbers))
 
 (defn min
   (numbers)
@@ -623,6 +635,8 @@
 (defn fourth
   (xs) (first (rest (rest (rest xs)))))
 
+
+;; TODO: perhaps rename these to include! and include, which might pair nicely with includes?
 (defn add!
   (col value)
   (cond
@@ -666,9 +680,11 @@
 
 (defn empty
   (col)
-  (if (array-like? col)
-    $empty-array
-    (empty! (clone col))))
+  (cond
+    (array-like? col) $empty-array
+    (method? 'empty) (.empty col)
+    else
+      (empty! (clone col))))
 
 (defn count
   (col)
@@ -682,25 +698,19 @@
 (defn includes?
   (col value)
   (cond
-    (array-like? col) (not (identical? -1 (index-of col value)))
+    (array-like? col) (not-identical? -1 (index-of col value))
     (map? col) (key? col value)
     (set? col) (member? col value)
     (method? col "includes") (.includes col value)
     else
       (throw "can't test inclusion")))
 
-;; TODO: Implement for seqables
 (defn all?
-  (&args)
-  (cond
-    (identical? (array-length args) 1)
-      (all? (array-get args 0) truthy?)
-    (identical? (array-length args) 2)
-      (let (f   (array-get args 0)
-                col (array-get args 1))
-        (reduce (fn (bool x) (and bool (f x))) col true))
-    else
-      (throw "wrong number of arguments expected 1 or 2")))
+  ((col)
+   (all? col truthy?))
+  ((col f)
+   (reduce
+    (fn (bool x) (and bool (f x))) col true)))
 
 (def ^:private js-arrays-equal)
 

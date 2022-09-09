@@ -1,5 +1,5 @@
 import {_read} from "./read";
-import {isMap, resetMeta} from "../lang/runtime";
+import {isMap} from "../lang/runtime";
 import {isSymbol} from "../lang/Symbol";
 import {TAG_KEY} from "./core";
 import {isKeyword} from "../lang/Keyword";
@@ -17,9 +17,9 @@ export function metaReader(r, hat, opts) {
         throw new Error('Metadata must be a Symbol, Keyword, String or Map');
     }
 
-    const value = _read(r, true, null, true, opts);
+    let value = _read(r, true, null, true, opts);
     if (isMeta(value)) {
-        resetMeta(value, meta);
+        value = value.withMeta(meta);
     }
 
     return value;
