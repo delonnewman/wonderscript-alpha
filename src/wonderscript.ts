@@ -1,4 +1,4 @@
-import {Env} from "./wonderscript/compiler/Env";
+import {Context} from "./wonderscript/lang/Context";
 import {CORE_NS, CURRENT_NS} from "./wonderscript/compiler/vars";
 import {createNs} from "./wonderscript/lang/Namespace";
 import * as core from "./wonderscript/lang";
@@ -13,12 +13,12 @@ import {escapeChars} from "./wonderscript/compiler/utils";
 type Platform = "node" | "browser"
 
 export class Compiler {
-    private readonly env: Env;
+    private readonly env: Context;
     private readonly global: object;
     readonly platform: Platform
 
     constructor(platform: Platform, global: object) {
-        this.env = new Env();
+        this.env = new Context();
         this.global = global
         this.platform = platform
         this.init()

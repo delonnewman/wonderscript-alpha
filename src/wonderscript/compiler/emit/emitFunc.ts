@@ -2,7 +2,7 @@ import {escapeChars} from "../utils";
 import {BodyForm, Form, isBodyForm} from "../core";
 import {isArray, map, str} from "../../lang/runtime";
 import {COND_SYM as COND_STR, FN_SYM as FN_STR, RECUR_SYM as RECUR_STR} from "../constants";
-import {Env} from "../Env";
+import {Context} from "../../lang/Context";
 import {compileBody, compileRecursiveBody} from "./compileBody";
 import {prStr} from "../prStr";
 import {isSymbol, Symbol} from "../../lang/Symbol";
@@ -79,10 +79,10 @@ export type FnForm = BodyForm<typeof FN_SYM>;
 
 export const isFnForm = isBodyForm<typeof FN_SYM>(FN_SYM);
 
-export function emitFunc(form: Form, scope: Env): string {
+export function emitFunc(form: Form, scope: Context): string {
     if (!isFnForm(form)) throw new Error(`invalid ${FN_SYM} form: ${prStr(form)}`)
 
-    const env = new Env(scope);
+    const env = new Context(scope);
     const args = form[1];
 
     const argsBuf    = parseArgs(args);

@@ -2,7 +2,7 @@ import {PushBackReader} from "../reader/PushBackReader";
 import {EOF, isEOF, isTaggedValue} from "./core";
 import {read} from "../reader/read";
 import {emit} from "./emit";
-import {Env} from "./Env";
+import {Context} from "../lang/Context";
 import {str} from "../lang/runtime";
 import {prStr} from "./prStr";
 
@@ -17,7 +17,7 @@ function stacktrace(stack): string {
     return buffer.join('\n');
 }
 
-export function evalString(s: string, scope: Env, src = 'inline') {
+export function evalString(s: string, scope: Context, src = 'inline') {
     const r = new PushBackReader(s);
     let ret, evalingTaggedValue = false;
     const stack = [];

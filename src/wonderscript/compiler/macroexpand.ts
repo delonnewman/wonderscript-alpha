@@ -1,6 +1,6 @@
 import {Form, isMacro, isSpecialForm, isTaggedValue} from "./core";
 import {DOT_DASH_SYM as DOT_DASH_STR, DOT_SYM as DOT_STR, NEW_SYM as NEW_STR} from "./constants";
-import {Env} from "./Env";
+import {Context} from "../lang/Context";
 import {findNamespaceVar} from "./findNamespaceVar";
 import {isSymbol, Symbol} from "../lang/Symbol";
 
@@ -8,7 +8,7 @@ const DOT_DASH_SYM = Symbol.intern(DOT_DASH_STR)
 const DOT_SYM      = Symbol.intern(DOT_STR)
 const NEW_SYM      = Symbol.intern(NEW_STR)
 
-export function macroexpand(form: Form, scope: Env): Form {
+export function macroexpand(form: Form, scope: Context): Form {
     if (!isTaggedValue(form) || isSpecialForm(form)) return form;
 
     const sym = form[0];
@@ -32,7 +32,7 @@ export function macroexpand(form: Form, scope: Env): Form {
 
         if (isMacro(form[0])) {
             const args = form.slice(1);
-            const ctx = {env: new Env(scope), form: form};
+            const ctx = {env: new Context(scope), form: form};
 
             return macroexpand(val.apply(ctx, args), scope);
         }

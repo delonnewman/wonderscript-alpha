@@ -135,6 +135,7 @@
 (defn mutable?
   (value) (not (immutable? value)))
 
+;; defconst?
 (defmacro constant
   ((name value)
    (array 'constant name nil value))
@@ -145,6 +146,7 @@
                    value
                    (array 'throw (array 'js/Error. "only immutable values can be constants")))))))
 
+;; defvar?
 (defmacro var
   ((name value)
    (array 'var name nil value))
@@ -193,8 +195,6 @@
 ;; Numerical
 
 ;; numerical constants
-;; NOTE: For constants not only can the definition not change the value will also be checked for mutablility
-;; TODO: add "constant" macro
 (constant $pi      (.-PI js/Math))
 (constant $e       (.-E js/Math))
 (constant $log10e  (.-LOG10e js/Math))

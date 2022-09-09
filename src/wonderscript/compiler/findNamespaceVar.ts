@@ -1,15 +1,15 @@
-import {Env} from "./Env";
+import {Context} from "../lang/Context";
 import {escapeChars} from "./utils";
 import {isUndefined} from "../lang/runtime";
 import {CORE_NS, CURRENT_NS} from "./vars";
 import {Symbol} from "../lang/Symbol";
 
-export function findNamespaceVar(s: Symbol, env?: Env) {
+export function findNamespaceVar(s: Symbol, env?: Context) {
     if (s.hasNamespace() && env) {
         const scope = env.lookup(s.namespace());
         if (scope === null) return null;
 
-        const ns  = scope.vars[s.namespace()];
+        const ns  = scope.get(s.namespace());
         const val = ns.module[s.name()];
 
         if (isUndefined(val)) return null;

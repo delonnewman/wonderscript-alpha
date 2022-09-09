@@ -5,6 +5,7 @@ import {Nil} from "./Nil";
 import {Keyword} from "./Keyword";
 import {merge} from "./runtime";
 import {Reference, Watcher} from "./Reference";
+import {Object} from "./Object";
 
 export const MACRO_KW     = Keyword.intern("macro");
 // the value will be a symbol, class, protocol, or function that is part of the type system
@@ -23,7 +24,7 @@ export const ALIAS_KW     = Keyword.intern("alias");
 // the type signature of a value
 export const SIGNATURE_KW = Keyword.intern("signature");
 
-export class Definition implements Meta, Named, Reference {
+export class Definition implements Meta, Named, Reference, Object {
     private readonly _symbol: Symbol;
     private _meta: MetaData;
     private _value: any;
@@ -74,8 +75,16 @@ export class Definition implements Meta, Named, Reference {
         return this;
     }
 
-    deref() {
+    get() {
         return this._value;
+    }
+
+    set(value: any) {
+        return this.reset(value);
+    }
+
+    deref() {
+        return this.get();
     }
 
     reset(value: any): Definition {

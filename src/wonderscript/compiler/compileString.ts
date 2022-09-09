@@ -3,10 +3,10 @@ import {emit} from "./emit";
 import {Form, isTaggedValue} from "./core";
 import {macroexpand} from "./macroexpand";
 import {cons, isArray, map} from "../lang/runtime";
-import {Env} from "./Env";
+import {Context} from "../lang/Context";
 import {evaluate} from "../compiler";
 
-function evalAll(seq: Form[], scope: Env): Form[] {
+function evalAll(seq: Form[], scope: Context): Form[] {
     const evaled = [];
 
     for (let i = 0; i < seq.length; i++) {
@@ -19,7 +19,7 @@ function evalAll(seq: Form[], scope: Env): Form[] {
 }
 
 
-function expandMacros(form: Form, scope: Env) {
+function expandMacros(form: Form, scope: Context) {
     if (!isArray(form)) {
         return form;
     }
@@ -32,7 +32,7 @@ function expandMacros(form: Form, scope: Env) {
     }
 }
 
-function expandAllMacros(seq: Form[], scope: Env) {
+function expandAllMacros(seq: Form[], scope: Context) {
     const expanded = [];
     for (let i = 0; i < seq.length; i++) {
         const form_= expandMacros(expandMacros(seq[i], scope), scope);
@@ -41,7 +41,7 @@ function expandAllMacros(seq: Form[], scope: Env) {
     return expanded;
 }
 
-export function compileString(s: string, scope: Env): string {
+export function compileString(s: string, scope: Context): string {
     const seq = expandAllMacros(evalAll(readString(s), scope), scope);
     const buffer = [];
 

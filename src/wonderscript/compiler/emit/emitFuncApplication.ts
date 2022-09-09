@@ -1,5 +1,5 @@
 import {emit} from "../emit";
-import {Env} from "../Env";
+import {Context} from "../../lang/Context";
 import {isSymbol} from "../../lang/Symbol";
 import {isMacro} from "../core";
 
@@ -23,7 +23,7 @@ Function.prototype.invoke = function(...args) {
     return this.call(this, ...args);
 };
 
-export function emitFuncApplication(form, env: Env): string {
+export function emitFuncApplication(form, env: Context): string {
     if (isSymbol(form[0]) && isMacro(form[0])) {
         throw new Error('Macros cannot be evaluated in this context');
     }

@@ -1,9 +1,9 @@
 import {emit} from "../emit";
-import {Env} from "../Env";
+import {Context} from "../../lang/Context";
 import {Form, isTaggedValue} from "../core";
 import {prStr} from "../prStr";
 
-export function emitVariableOp(form: Form, env: Env, op = form[0]): string {
+export function emitVariableOp(form: Form, env: Context, op = form[0]): string {
     if (!isTaggedValue(form)) throw new Error(`invalid variable operator form: ${prStr(form)}`);
     // TODO: For now we'll throw and error, but eventually we may want to provide
     //  an alternate dispatch for these cases.

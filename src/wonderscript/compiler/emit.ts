@@ -65,7 +65,8 @@ import {
     BEGIN_SYM,
     TYPE_SYM,
     UNDEFINED_SYM,
-    SLOT_SYM, HAS_SLOT_SYM
+    SLOT_SYM,
+    HAS_SLOT_SYM
 } from "./constants";
 import {emitMap} from "./emit/emitMap";
 import {RECUR_ERROR_MSG} from "./errorMessages";
@@ -86,7 +87,7 @@ import {emitClassInit} from "./emit/emitClassInit";
 import {emitAssignment} from "./emit/emitAssignment";
 import {emitVariableOp} from "./emit/emitVariableOp";
 import {emitFuncApplication} from "./emit/emitFuncApplication";
-import {Env} from "./Env";
+import {Context} from "../lang/Context";
 import {emitJS} from "./emit/emitJS";
 import {emitUnaryOp} from "./emit/emitUnaryOp";
 import {emitBinOp} from "./emit/emitBinOp";
@@ -96,13 +97,13 @@ import {prStr} from "./prStr";
 import {emitSlotAccess} from "./emit/emitSlotAccess";
 import {emitSlotInspection} from "./emit/emitSlotInspection";
 
-export function emit(form_: Form, env_: Env) {
-    const form = macroexpand(form_, env_);
+export function emit(form_: Form, ctx: Context) {
+    const form = macroexpand(form_, ctx);
     if (isKeyword(form)) {
         return emitKeyword(form);
     }
     else if (isSymbol(form)) {
-        return emitSymbol(form, env_);
+        return emitSymbol(form, ctx);
     }
     else if (isNumber(form) || isString(form)) {
         return JSON.stringify(form);
@@ -118,7 +119,7 @@ export function emit(form_: Form, env_: Env) {
     }
     // TODO: add support for Set
     else if (isMap(form)) {
-        return emitMap(form, env_);
+        return emitMap(form, ctx);
     }
     else if (isArray(form)) {
         if (form.length === 0) {
@@ -128,95 +129,95 @@ export function emit(form_: Form, env_: Env) {
             switch(form[0].name()) {
                 // special forms
                 case DEF_SYM:
-                    return emitDef(form, env_);
+                    return emitDef(form, ctx);
                 case QUOTE_SYM:
                     return emitQuote(form);
                 case COND_SYM:
-                    return emitCond(form, env_);
+                    return emitCond(form, ctx);
                 case JS_SYM:
                     return emitJS(form);
                 case FN_SYM:
-                    return emitFunc(form, env_);
+                    return emitFunc(form, ctx);
                 case LOOP_SYM:
-                    return emitLoop(form, env_);
+                    return emitLoop(form, ctx);
                 case RECUR_SYM:
                     throw new Error(RECUR_ERROR_MSG);
                 case THROW_SYM:
-                    return emitThrownException(form, env_);
+                    return emitThrownException(form, ctx);
                 case BEGIN_SYM:
-                    return emitBegin(form, env_);
+                    return emitBegin(form, ctx);
                 case LET_SYM:
-                    return emitLet(form, env_);
+                    return emitLet(form, ctx);
                 case DOT_SYM:
-                    return emitObjectRes(form, env_);
+                    return emitObjectRes(form, ctx);
                 case NEW_SYM:
-                    return emitClassInit(form, env_);
+                    return emitClassInit(form, ctx);
                 case SET_SYM:
-                    return emitAssignment(form, env_);
+                    return emitAssignment(form, ctx);
                 // operators
                 case SLOT_SYM:
-                    return emitSlotAccess(form, env_);
+                    return emitSlotAccess(form, ctx);
                 case HAS_SLOT_SYM:
-                    return emitSlotInspection(form, env_);
+                    return emitSlotInspection(form, ctx);
                 case MOD_SYM:
-                    return emitBinOp(form, env_)
+                    return emitBinOp(form, ctx)
                 case LT_SYM:
-                    return emitBinOp(form, env_)
+                    return emitBinOp(form, ctx)
                 case GT_SYM:
-                    return emitBinOp(form, env_)
+                    return emitBinOp(form, ctx)
                 case LTQ_SYM:
-                    return emitBinOp(form, env_)
+                    return emitBinOp(form, ctx)
                 case GTQ_SYM:
-                    return emitBinOp(form, env_)
+                    return emitBinOp(form, ctx)
                 case NOT_SYM:
-                    return emitUnaryOp(form, env_, JS_NOT)
+                    return emitUnaryOp(form, ctx, JS_NOT)
                 case OR_SYM:
-                    return emitVariableOp(form, env_, JS_OR);
+                    return emitVariableOp(form, ctx, JS_OR);
                 case AND_SYM:
-                    return emitVariableOp(form, env_, JS_AND);
+                    return emitVariableOp(form, ctx, JS_AND);
                 case BIT_NOT_SYM:
-                    return emitBinOp(form, env_, JS_BIT_NOT)
+                    return emitBinOp(form, ctx, JS_BIT_NOT)
                 case BIT_OR_SYM:
-                    return emitBinOp(form, env_, JS_BIT_OR);
+                    return emitBinOp(form, ctx, JS_BIT_OR);
                 case BIT_XOR_SYM:
-                    return emitBinOp(form, env_, JS_BIT_XOR);
+                    return emitBinOp(form, ctx, JS_BIT_XOR);
                 case BIT_AND_SYM:
-                    return emitBinOp(form, env_, JS_BIT_AND);
+                    return emitBinOp(form, ctx, JS_BIT_AND);
                 case BIT_LSHIFT_SYM:
-                    return emitBinOp(form, env_, JS_BIT_LSHIFT);
+                    return emitBinOp(form, ctx, JS_BIT_LSHIFT);
                 case BIT_RSHIFT_SYM:
-                    return emitBinOp(form, env_, JS_BIT_RSHIFT);
+                    return emitBinOp(form, ctx, JS_BIT_RSHIFT);
                 case BIT_URSHIFT_SYM:
-                    return emitBinOp(form, env_, JS_BIT_URSHIFT);
+                    return emitBinOp(form, ctx, JS_BIT_URSHIFT);
                 case IDENTICAL_SYM:
-                    return emitBinOp(form, env_, JS_IDENTICAL);
+                    return emitBinOp(form, ctx, JS_IDENTICAL);
                 case NOT_IDENTICAL_SYM:
-                    return emitBinOp(form, env_, JS_NOT_IDENTICAL);
+                    return emitBinOp(form, ctx, JS_NOT_IDENTICAL);
                 case EQUIV_SYM:
-                    return emitBinOp(form, env_, JS_EQUIV);
+                    return emitBinOp(form, ctx, JS_EQUIV);
                 case NOT_EQUIV_SYM:
-                    return emitBinOp(form, env_, JS_NOT_EQUIV);
+                    return emitBinOp(form, ctx, JS_NOT_EQUIV);
                 case INSTANCE_SYM:
-                    return emitBinOp(form, env_, JS_INSTANCE);
+                    return emitBinOp(form, ctx, JS_INSTANCE);
                 case TYPE_SYM:
-                    return emitUnaryOp(form, env_, JS_TYPEOF)
+                    return emitUnaryOp(form, ctx, JS_TYPEOF)
                 case PLUS_SYM:
                 case MINUS_SYM:
                 case DIV_SYM:
                 case MULT_SYM:
-                    return emitVariableOp(form, env_);
+                    return emitVariableOp(form, ctx);
                 case AGET_SYM:
-                    return emitArrayAccess(form, env_);
+                    return emitArrayAccess(form, ctx);
                 case ASET_SYM:
-                    return emitArrayMutation(form, env_);
+                    return emitArrayMutation(form, ctx);
                 case ALENGTH_SYM:
-                    return emitArrayLength(form, env_);
+                    return emitArrayLength(form, ctx);
                 default:
-                    return emitFuncApplication(form, env_);
+                    return emitFuncApplication(form, ctx);
             }
         }
         else {
-            return emitFuncApplication(form, env_);
+            return emitFuncApplication(form, ctx);
         }
     }
     else {

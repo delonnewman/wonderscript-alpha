@@ -2,9 +2,9 @@ import {emitTailPosition} from "./emitTailPosition";
 import {map, str} from "../../lang/runtime";
 import {emit} from "../emit";
 import {RECURSION_POINT_CLASS} from "../constants";
-import {Env} from "../Env";
+import {Context} from "../../lang/Context";
 
-export function compileBody(body, env: Env, tailDef?: string) {
+export function compileBody(body, env: Context, tailDef?: string) {
     const last = body[body.length - 1];
     const head = body.slice(0, body.length - 1);
 
@@ -12,7 +12,7 @@ export function compileBody(body, env: Env, tailDef?: string) {
         .concat(emitTailPosition(last, env, tailDef)).join('; ');
 }
 
-export function compileRecursiveBody(body, names, env: Env): string {
+export function compileRecursiveBody(body, names, env: Context): string {
     const buff = [];
     for (let i = 0; i < names.length; i++) {
         buff.push(str(names[i], ' = e.args[', i, ']'));

@@ -1,4 +1,4 @@
-import {Env} from "../Env";
+import {Context} from "../../lang/Context";
 import {prStr} from "../prStr";
 import {SLOT_SYM as SLOT_STR} from "../constants";
 import {Symbol} from "../../lang/Symbol";
@@ -12,7 +12,7 @@ export type SlotAccessForm = [typeof SLOT_SYM, Form, Form];
 export const isSlotAccessForm = (form: Form): form is SlotAccessForm =>
     isTaggedValue(form) && form[0].equals(SLOT_SYM) && form.length === 3;
 
-export function emitSlotAccess(form, env: Env): string {
+export function emitSlotAccess(form, env: Context): string {
     if (!isSlotAccessForm(form)) throw new Error(`invalid ${SLOT_SYM} form: ${prStr(form)}`);
 
     const [_, obj, slot] = form;

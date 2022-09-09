@@ -7,7 +7,7 @@ import {isMeta, Meta, MetaData} from "./Meta";
 import {Keyword} from "./Keyword";
 import {Symbol as WSSymbol} from "./Symbol";
 import {List} from "./List";
-import {Reference} from "./Reference";
+import {Object} from "./Object";
 
 const EMPTY_ARRAY  = Object.freeze([]);
 const EMPTY_STRING = "";
@@ -267,7 +267,7 @@ export function list(...args): List {
     return xs;
 }
 
-export function setMeta(obj: Reference, key: Keyword, value: any): Reference {
+export function setMeta(obj: Object, key: Keyword, value: any): Object {
     if (!isMeta(obj)) {
         console.error("not meta", obj);
     }
@@ -277,11 +277,11 @@ export function setMeta(obj: Reference, key: Keyword, value: any): Reference {
     return obj;
 }
 
-export function setMacro(obj: Reference): Reference {
+export function setMacro(obj: Object): Object {
     return setMeta(obj, Keyword.intern('macro'), true);
 }
 
-export function resetMeta(obj: Reference, data: Map<Keyword, any>): Reference {
+export function resetMeta(obj: Object, data: Map<Keyword, any>): Object {
     obj.resetMeta(data);
 
     return obj;

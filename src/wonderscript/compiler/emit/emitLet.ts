@@ -1,4 +1,4 @@
-import {Env} from "../Env";
+import {Context} from "../../lang/Context";
 import {escapeChars} from "../utils";
 import {compileBody} from "./compileBody";
 import {emit} from "../emit";
@@ -13,10 +13,10 @@ export type LetForm = BodyForm<typeof LET_SYM>;
 
 export const isLetForm = isBodyForm<typeof LET_SYM>(LET_SYM);
 
-export function emitLet(form: Form, scope: Env): string {
+export function emitLet(form: Form, scope: Context): string {
     if (!isLetForm(form)) throw new Error(`invalid ${LET_SYM} form: ${prStr(form)}`);
 
-    const env = new Env(scope);
+    const env = new Context(scope);
 
     if (form.length < 2) throw new Error('A let expression should have at least 2 elements');
 

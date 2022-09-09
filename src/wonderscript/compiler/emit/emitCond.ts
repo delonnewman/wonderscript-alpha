@@ -1,7 +1,7 @@
 import {partition, rest, str} from "../../lang/runtime";
 import {emitTailPosition} from "./emitTailPosition";
 import {emit} from "../emit";
-import {Env} from "../Env";
+import {Context} from "../../lang/Context";
 import {Form, isTaggedValue} from "../core";
 import {COND_SYM as COND_STR} from "../constants";
 import {prStr} from "../prStr";
@@ -15,7 +15,7 @@ export type CondForm = [typeof COND_SYM, ...Form[]];
 export const isCondForm = (form: any): form is CondForm =>
     isTaggedValue(form) && form[0].equals(COND_SYM) && form.length >= 3;
 
-export function emitCond(form: Form, env: Env): string {
+export function emitCond(form: Form, env: Context): string {
     if (!isCondForm(form)) throw new Error(`invalid ${COND_SYM} form: ${prStr(form)}`);
 
     const others = rest(form);

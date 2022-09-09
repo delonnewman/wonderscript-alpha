@@ -1,9 +1,9 @@
 import {emit} from "../emit";
-import {Env} from "../Env";
+import {Context} from "../../lang/Context";
 
 const EMPTY_MAP = '(new Map())';
 
-export function emitMap(m: Map<any, any>, env: Env): string {
+export function emitMap(m: Map<any, any>, env: Context): string {
     if (m.size === 0) return EMPTY_MAP;
 
     const buffer = [];

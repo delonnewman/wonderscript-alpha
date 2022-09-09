@@ -1,4 +1,4 @@
-import {Env} from "../Env";
+import {Context} from "../../lang/Context";
 import {escapeChars} from "../utils";
 import {isUndefined, str} from "../../lang/runtime";
 import {CORE_NS, CURRENT_NS} from "../vars";
@@ -11,7 +11,7 @@ const CTX_FORM = Symbol.intern('&form');
 const JS_CTX_ENV = 'this.env';
 const JS_CTX_FORM = 'this.form';
 
-export function emitSymbol(s: Symbol, env: Env): string {
+export function emitSymbol(s: Symbol, env: Context): string {
     if (s.equals(CTX_ENV)) {
         return JS_CTX_ENV;
     }
@@ -27,7 +27,7 @@ export function emitSymbol(s: Symbol, env: Env): string {
             throw new Error(`Unknown namespace: ${prStr(s.namespace())}`);
         }
 
-        let ns = scope.vars[s.namespace()];
+        let ns = scope.get(s.namespace());
         if (isUndefined(ns.module[escapeChars(s.name())])) {
             throw new Error(`Undefined variable: ${prStr(s.name())} in namespace: ${prStr(s.namespace())}`);
         }

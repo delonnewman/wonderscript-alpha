@@ -1,7 +1,7 @@
 import {emit} from "../emit";
 import {emitTailPosition} from "./emitTailPosition";
 import {str} from "../../lang/runtime";
-import {Env} from "../Env";
+import {Context} from "../../lang/Context";
 import {Form, isTaggedValue} from "../core";
 import {BEGIN_SYM as BEGIN_STR} from "../constants";
 import {prStr} from "../prStr";
@@ -14,7 +14,7 @@ export type BeginForm = [typeof BEGIN_SYM, ...Form[]];
 export const isBeginForm = (form: Form): form is BeginForm =>
     isTaggedValue(form) && form[0].equals(BEGIN_SYM);
 
-export function emitBegin(form: Form, env: Env): string {
+export function emitBegin(form: Form, env: Context): string {
     if (!isBeginForm(form)) throw new Error(`invalid ${BEGIN_SYM} form: ${prStr(form)}`);
 
     const exprs = form.slice(0, form.length - 1).slice(1);
