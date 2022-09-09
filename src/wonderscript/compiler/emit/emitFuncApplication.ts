@@ -25,6 +25,7 @@ Function.prototype.invoke = function(...args) {
 
 export function emitFuncApplication(form, env: Env): string {
     if (isSymbol(form[0]) && isMacro(form[0])) {
+        console.log("funcApplication", form);
         throw new Error('Macros cannot be evaluated in this context');
     }
 

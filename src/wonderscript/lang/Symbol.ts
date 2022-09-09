@@ -92,6 +92,8 @@ export class Symbol implements Named, Meta, Invokable, Comparable, Equality {
     }
 
     invoke(map: Map<Symbol, any>): any {
+        if (map == null) return null;
+
         return map.get(this);
     }
 

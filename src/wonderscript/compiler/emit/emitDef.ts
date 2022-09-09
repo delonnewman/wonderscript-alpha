@@ -28,6 +28,7 @@ export function emitDef(form: Form, env: Env): string {
 
     if (form[2] != null) {
         code = emit(form[2], env);
+        // console.log("emitDef code", code);
         val  = eval(code);
     }
 

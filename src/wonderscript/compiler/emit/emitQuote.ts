@@ -34,11 +34,11 @@ const SYM_FUNC = 'wonderscript.core.symbol';
 function emitQuotedSymbol(sym: Symbol): string {
     if (sym.hasMeta() && sym.hasNamespace()) {
         const m = emitQuotedMetaData(sym.meta());
-        return `${SYM_FUNC}(${JSON.stringify(sym.name())},${JSON.stringify(sym.namespace())},${m})`
+        return `${SYM_FUNC}(${JSON.stringify(sym.namespace())},${JSON.stringify(sym.name())},${m})`
     }
 
     if (sym.hasNamespace()) {
-        return `${SYM_FUNC}(${JSON.stringify(sym.name())},${JSON.stringify(sym.namespace())})`
+        return `${SYM_FUNC}(${JSON.stringify(sym.namespace())},${JSON.stringify(sym.name())})`
     }
 
     return `${SYM_FUNC}(${JSON.stringify(sym.name())})`

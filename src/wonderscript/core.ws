@@ -1,22 +1,77 @@
 ; -*- mode: clojure -*-
 
-; Initial fn definition, will redefine below
-; TODO: add arity checks here
+(def array (fn* (&args) args))
+
+(def ^:macro comment (fn* (&xs) nil))
+
+(def assoc-array?
+  (fn*
+   (a)
+   (cond
+     (not (.isArray js/Array a))
+       false
+     else
+       (.isArray js/Array (a 0)))))
+
+;; TODO: collect arities to improve error message
+;; TODO: add arity checking for single body forms
 (def ^:macro fn
-  (fn* (args &body)
-    (cons 'fn* (cons args body))))
+  (fn*
+   (&xs)
+   (let (x (xs 0))
+     (cond
+       (assoc-array? x)
+         (array 'fn*
+                (array '&args)
+                (cons 'cond
+                      (.concat
+                       (.flatMap xs
+                                 (fn* (x)
+                                      (array (array 'identical? (array-length (x 0)) (array 'array-length 'args))
+                                             (array 'let (.flatMap (x 0) (fn* (x i) (array x (array 'args i))))
+                                                    (x 1))
+                                             )))
+                       (array 'else
+                              (array 'throw
+                                     (array 'js/Error.
+                                            (array 'str "wrong number of arguments, got "
+                                                   (array 'array-length 'args))))))))
+       else
+         (cons 'fn* xs)))))
+
 
 ; TODO: add optional doc string and meta data map
-
-(def array (fn (&args) args))
-
-(def ^:macro comment (fn (&xs) nil))
-
-; TODO: redefine fn with multi arity bodies
-
 (def ^:macro defn
   (fn (name args &body)
     (array 'def name (cons 'fn (cons args body)))))
+
+(defn ^:macro defmacro
+  (name args &body)
+  (let (nm (.withMeta name {:macro true}))
+    (array 'def nm (cons 'fn (cons args body)))))
+
+
+(defn macro?
+  (sym) (:macro (the-meta sym)))
+
+(defmacro deftype
+  (name type-val)
+  (let (nm (.withMeta name {:type true}))
+    (array 'def nm type-val)))
+
+(defn type?
+  (sym) (:type (the-meta sym)))
+
+;; primitive types
+
+(deftype Any       'any)
+(deftype Undefined 'undefined)
+(deftype Null      'null)
+; (deftype Nil       (union Undefined Null))
+(deftype Number    'number)
+(deftype String    'string)
+(deftype Boolean   'boolean)
+(deftype Object    'object)
 
 (defn ==
   (a b)
@@ -31,19 +86,16 @@
 
 ;; Boolean & Logic
 
-(defn ^:macro if (&args)
-  (cond
-    (identical? 2 (array-length args))
-      (array 'cond (args 0) (args 1))
-    (identical? 3 (array-length args))
-      (array 'cond (args 0) (args 1) 'else (args 2))
-    else
-      (throw (new js/Error "Wrong number of arguments expected 2 or 3"))))
+(defmacro if
+  ((pred then)
+   (array 'cond pred then))
+  ((pred then other)
+   (array 'cond pred then 'else other)))
 
-(defn ^:macro when (pred &acts)
+(defmacro when (pred &acts)
   (array 'cond pred (cons 'begin acts)))
 
-(defn ^:macro unless (pred &acts)
+(defmacro unless (pred &acts)
   (array 'cond (array 'not pred) (cons 'begin acts)))
 
 (defn true?
@@ -156,6 +208,16 @@
   (if (identical? "object" (typeof value))
     (symbol (js-constructor-name value))
     (symbol (typeof value))))
+
+(defn same-type?
+  (a b)
+  (.equals (type a) (type b)))
+
+(defn isa?
+  (t value)
+  (if (function? t)
+    (instance? value t)
+    (.equals (type value) t)))
 
 ;; Basic Array, Strings & ArrayLike
 
@@ -319,38 +381,14 @@
 (defn titlecase
   (s) (.join (.map (words s) capitalize) " "))
 
-(defn assoc-array?
-  (a)
-  (if (not (array? a))
-    false
-  (array? (a 0))))
-
 (defn mapcat
   (f coll)
   (apply concat (map f coll)))
 
-; (fn^
-;   ((x) x)
-;   ((x y) [x y])
-;   ((x y &zs) (cons x (cons y zs))))
-(defn ^:macro fn- (&xs)
-  (let (x (xs 0))
-    (cond
-      (assoc-array? x)
-        ; compile multi-body fn
-        ; TODO: collect arguments
-      (array 'fn (array '&args)
-             (cons 'cond
-                   (mapcat (fn (x)
-                             (array (array 'identical? (array-length (x 0)) 'args) (x 1))) xs)))
-          else
-            ; single body fn
-            (cons 'fn xs))))
-
 ;; Imperative Programming
 
 ;; TODO: include let binding for macro output for better performance, will need gensym
-(defn ^:macro for-times
+(defmacro for-times
   (bindings &body)
   (let (nm   (bindings 0)
         init (bindings 1))
@@ -360,7 +398,7 @@
                       (concat body (array (array 'recur (array '+ nm 1))))))
           init)))
 
-(defn ^:macro for-each
+(defmacro for-each
   (bindings &body)
   (let (nm  (bindings 0)
         col (bindings 1))
@@ -370,7 +408,7 @@
                        (concat body (array (array 'recur (array 'col (array 'add1 'i)) (array 'add1 'i))))))
            col)))
 
-(defn ^:macro while
+(defmacro while
   (pred &body)
   (array 'loop ()
          (cons 'when (cons pred (concat body (array (array 'recur)))))))
@@ -400,22 +438,16 @@
 
 ;; Assertions and Testing
 
-(defn ^:macro is
-  (&args)
-  (cond
-    (identical? 1 (array-length args))
-      (array 'is (args 0) (array 'str "Failed assertion: " (pr-str (args 0) " is false")))
-    (identical? 2 (array-length args))
-      (array 'begin
-             (array 'cond (array 'not (args 0)) (array 'throw (args 1)))
-             (args 0))
-    else
-      (throw (js/Error. (str "wrong number of arguments expected 1 or 2, got " (array-length args))))))
+(defmacro is
+  ((exp)
+   (array 'is (args 0) (array 'str "Failed assertion: " (pr-str (args 0) " is false"))))
+  ((exp msg)
+   (array 'begin (array 'cond (array 'not exp) (array 'throw msg)) exp)))
 
-(defn ^:macro is-not (body &args)
+(defmacro is-not (body &args)
   (cons 'is (cons (array 'not body) args)))
 
-(defn ^:macro deftest
+(defmacro deftest
   (nm &body)
   (array 'begin
     (array 'def nm (cons 'fn (cons '() body)))
@@ -626,7 +658,7 @@
       (throw (js/Error. (str "cannot clear" (pr-str col))))))
 
 ;; TODO: add alias key as meta data
-(defn ^:macro alias
+(defmacro alias
   (name old)
   (array 'def name (array 'clone old)))
 
@@ -692,6 +724,22 @@
     (not-identical? (array-length a) (array-length b)) false
     else
       (.every a (fn (x i) (= x (array-get b i))))))
+
+
+(def === isa?)
+
+(defmacro case-with
+  (pred value &conditions)
+  (cons 'cond
+         (.flatMap (partition 2 conditions)
+               (fn (x)
+                 (if (.equals 'else (x 0))
+                   x
+                   (array (array pred (x 0) value) (x 1)))))))
+
+(defmacro case
+  (value &conditions)
+  (cons 'case-with (cons '=== (cons value conditions))))
 
 ;; HTML Rendering
 

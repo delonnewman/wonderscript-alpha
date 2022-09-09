@@ -48,6 +48,8 @@ export class Keyword implements Named, Invokable, Comparable, Equality {
     }
 
     invoke(map: Map<Keyword, any>): any {
+        if (map == null) return null;
+
         return map.get(this);
     }
 
