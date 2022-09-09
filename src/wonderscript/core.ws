@@ -117,19 +117,92 @@
 (defn truthy?
   (obj) (not (falsy? obj)))
 
+;; Basic functions and OOP
+
+(def apply
+  (fn (f args)
+    (.apply f args)))
+
+(defn freeze!
+  (object) (.freeze js/Object object))
+
+(defn frozen?
+  (object) (.isFrozen js/Object object))
+
+(defn immutable?
+  (value) (or (js-primitive-type? value) (frozen? value)))
+
+(defn mutable?
+  (value) (not (immutable? value)))
+
+(defmacro constant
+  ((name value)
+   (array 'constant name nil value))
+  ((name doc value)
+   (let (nm (.withMeta name {:doc doc :constant true}))
+     (array 'def nm
+            (array 'if (array 'immutable? value)
+                   value
+                   (array 'throw (array 'js/Error. "only immutable values can be constants")))))))
+
+(defmacro var
+  ((name value)
+   (array 'var name nil value))
+  ((name doc value)
+   (let (nm (.withMeta name {:doc doc :variable true}))
+     (array 'def nm value))))
+
+(defn clone
+  (object)
+  (if (.isArray js/Array object)
+    (.slice object 0)
+    (.assign js/Object (.create js/Object nil) object)))
+
+(defn js-object-tag
+  (object)
+  (.call (.-toString (.-prototype js/Object)) object))
+
+(defn js-prototype
+  (object)
+  (.getPrototypeOf js/Object object))
+
+(defn js-constructor
+  (object)
+  (.-constructor (js-prototype object)))
+
+(defn js-constructor-name
+  (object)
+  (.-name (js-constructor object)))
+
+(defn type
+  (value)
+  (if (identical? "object" (typeof value))
+    (symbol (js-constructor-name value))
+    (symbol (typeof value))))
+
+(defn same-type?
+  (a b)
+  (.equals (type a) (type b)))
+
+(defn isa?
+  (t value)
+  (if (function? t)
+    (instance? value t)
+    (.equals (type value) t)))
+
 ;; Numerical
 
 ;; numerical constants
 ;; NOTE: For constants not only can the definition not change the value will also be checked for mutablility
 ;; TODO: add "constant" macro
-(def ^:constant $pi      (.-PI js/Math))
-(def ^:constant $e       (.-E js/Math))
-(def ^:constant $log10e  (.-LOG10e js/Math))
-(def ^:constant $log2e   (.-LOG2e js/Math))
-(def ^:constant $ln10    (.-LN10 js/Math))
-(def ^:constant $ln2     (.-LN2 js/Math))
-(def ^:constant $sqrt1-2 (.-SQRT1_2 js/Math))
-(def ^:constant $sqrt2   (.-SQRT2 js/Math))
+(constant $pi      (.-PI js/Math))
+(constant $e       (.-E js/Math))
+(constant $log10e  (.-LOG10e js/Math))
+(constant $log2e   (.-LOG2e js/Math))
+(constant $ln10    (.-LN10 js/Math))
+(constant $ln2     (.-LN2 js/Math))
+(constant $sqrt1-2 (.-SQRT1_2 js/Math))
+(constant $sqrt2   (.-SQRT2 js/Math))
 
 (defn ->integer
   (s) (js/parseInt s 10))
@@ -179,62 +252,9 @@
     (.floor js/Math (* n (.random js/Math)))
     (.random js/Math)))
 
-;; Basic functions and OOP
-
-(def apply
-  (fn (f args)
-    (.apply f args)))
-
-(defn freeze!
-  (object) (.freeze js/Object object))
-
-(defn frozen?
-  (object) (.isFrozen js/Object object))
-
-(defn mutable?
-  (value) (or (js-primitive-type? value) (frozen? value)))
-
-(defn clone
-  (object)
-  (if (.isArray js/Array object)
-    (.slice object 0)
-    (.assign js/Object (.create js/Object nil) object)))
-
-(defn js-object-tag
-  (object)
-  (.call (.-toString (.-prototype js/Object)) object))
-
-(defn js-prototype
-  (object)
-  (.getPrototypeOf js/Object object))
-
-(defn js-constructor
-  (object)
-  (.-constructor (js-prototype object)))
-
-(defn js-constructor-name
-  (object)
-  (.-name (js-constructor object)))
-
-(defn type
-  (value)
-  (if (identical? "object" (typeof value))
-    (symbol (js-constructor-name value))
-    (symbol (typeof value))))
-
-(defn same-type?
-  (a b)
-  (.equals (type a) (type b)))
-
-(defn isa?
-  (t value)
-  (if (function? t)
-    (instance? value t)
-    (.equals (type value) t)))
-
 ;; Basic Array, Strings & ArrayLike
 
-(def ^:constant $empty-array (freeze! []))
+(constant $empty-array (freeze! []))
 
 (defn concat
   (&arrays)
@@ -323,8 +343,8 @@
 
 ;; Strings
 
-(def ^:constant $white-space-regex (js/RegExp. "\\s+"))
-(def ^:constant $empty-string "")
+(constant $white-space-regex (freeze! (js/RegExp. "\\s+")))
+(constant $empty-string "")
 
 (defn blank?
   (object)
@@ -371,8 +391,8 @@
     (.startsWith (name s))
     (.endsWith s ch)))
 
-(def ^:constant $ending-new-line-pattern (js/RegExp. "(\\n|\\r\\n)$"))
-(def ^:constant $new-line-pattern (js/RegExp. "\\r\\n|\\n"))
+(constant $ending-new-line-pattern (freeze! (js/RegExp. "(\\n|\\r\\n)$")))
+(constant $new-line-pattern (freeze! (js/RegExp. "\\r\\n|\\n")))
 
 (defn chomp
   (s) (.replace s $ending-new-line-pattern $empty-string))

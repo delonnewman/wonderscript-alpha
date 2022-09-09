@@ -22,7 +22,7 @@ export function emitQuote(form: Form): string {
 export function emitQuotedMetaData(meta: MetaData): string {
     const buffer = [];
     for (let entry of meta) {
-        const valStr = entry[1].toJS ? entry[1].toJS() : JSON.stringify(entry[1])
+        const valStr = entry[1]?.toJS ? entry[1].toJS() : JSON.stringify(entry[1])
         buffer.push(`[${entry[0].toJS()}, ${valStr}]`)
     }
 
