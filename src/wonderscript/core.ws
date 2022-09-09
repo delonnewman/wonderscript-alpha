@@ -240,6 +240,15 @@
 (defn negative?
   (x) (> 0 x))
 
+(defn finite?
+  (x) (js/isFinite x))
+
+(defn infinite?
+  (x) (not (finite? x)))
+
+(defn NaN?
+  (x) (js/isNaN x))
+
 (defn even? (x)
   (identical? (bit-and x 1) 0))
 
@@ -495,10 +504,9 @@
   (cons 'is (cons (array 'not body) args)))
 
 (defmacro deftest
-  (nm &body)
-  (array 'begin
-    (array 'def nm (cons 'fn (cons '() body)))
-    (array 'set-meta nm ':test true)))
+  (name &body)
+  (let (nm (.withMeta {:test true}))
+    (array 'def nm (cons 'fn (cons '() body)))))
 
 ;; OOP & JS reflection
 
@@ -527,6 +535,12 @@
   (if (function? f)
     (.-length f)
     (throw (js/Error. "arity cannot be found"))))
+
+(defn js-object
+  (&kvs)
+  (when (odd? (array-length kvs))
+    (throw (js/Error. "key/value pairs should be even")))
+  (.fromEntries js/Object (partition 2 kvs)))
 
 (defn js-property-value
   (obj property-name)
@@ -583,7 +597,6 @@
 
 (defn hash-map
   (&kvs)
-  (.log js/console kvs)
   (when (odd? (array-length kvs))
     (throw (js/Error. "key/value pairs should be even")))
   (js/Map. (partition 2 kvs)))
