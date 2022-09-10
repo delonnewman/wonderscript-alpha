@@ -27,9 +27,11 @@ export function emitLet(form: Form, scope: Context): string {
     // add names to function scope
     const names = [];
     for (let i = 0; i < binds.length; i += 2) {
-        if (!isSymbol(binds[i])) throw new Error('Invalid binding name');
-        const bind = escapeChars(binds[i].name()); // TODO: should throw error for namespaced symbols
-        env.define(bind, true);
+        if (!isSymbol(binds[i])) throw new Error('binding names should be symbols');
+        // TODO: should throw error for namespaced symbols
+        env.define(binds[i], true);
+
+        const bind = escapeChars(binds[i].name());
         names.push(bind);
     }
 

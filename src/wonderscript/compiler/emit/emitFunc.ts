@@ -10,7 +10,7 @@ import {isSymbol, Symbol} from "../../lang/Symbol";
 const SPLAT = '&';
 
 type ParsedArgs = Array<{
-    name: string,
+    name: Symbol,
     order: number,
     splat: boolean
 }>
@@ -20,16 +20,18 @@ function parseArgs(args: Symbol[]): ParsedArgs {
     const parsed: ParsedArgs = [];
 
     for (let i = 0; i < args.length; ++i) {
-        if ( !isSymbol(args[i]) ) continue; // TODO: probably should throw and error instead
+        // TODO: probably should throw and error instead
+        // TODO: check if there's a namespace that should be an error also
+        if ( !isSymbol(args[i]) ) continue;
 
         if ( args[i].name().startsWith(SPLAT) ) {
-            name = args[i].name().slice(1);
+            name = Symbol.intern(args[i].name().slice(1));
             splat = true;
         } else {
-            name = args[i].name();
+            name = args[i];
         }
 
-        parsed.push({name: escapeChars(name), order: i, splat: splat});
+        parsed.push({name, order: i, splat});
     }
 
     return parsed;
@@ -37,18 +39,21 @@ function parseArgs(args: Symbol[]): ParsedArgs {
 
 function genArgAssigns(argsBuf: ParsedArgs): string {
     const argsAssign = [];
+
     for (let i = 0; i < argsBuf.length; ++i) {
         if (argsBuf[i].splat) {
-            argsAssign.push(str('var ', argsBuf[i].name, " = Array.prototype.slice.call(arguments, ", i, ")"));
+            const splat = `var ${escapeChars(argsBuf[i].name.name())}=Array.prototype.slice.call(arguments, ${i})`;
+            argsAssign.push(splat);
         }
     }
+
     return argsAssign.join('');
 }
 
 function genArgsDef(argsBuf: ParsedArgs): string {
     const argsDef = [];
     for (let i = 0; i < argsBuf.length; ++i) {
-        argsDef.push(argsBuf[i].name);
+        argsDef.push(escapeChars(argsBuf[i].name.name()));
     }
     return argsDef.join(',');
 }

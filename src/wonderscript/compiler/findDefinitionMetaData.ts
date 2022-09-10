@@ -7,10 +7,10 @@ import {MetaData} from "../lang/Meta";
 
 export function findDefinitionMetaData(s: Symbol, env?: Context): MetaData {
     if (s.hasNamespace() && env) {
-        const scope = env.lookup(s.namespace());
+        const scope = env.lookup(Symbol.intern(s.namespace()));
         if (scope === null) return null;
 
-        const ns  = scope.get(s.namespace());
+        const ns  = scope.get(Symbol.intern(s.namespace()));
         const val = ns.module[`${s.name()}_META_`];
 
         if (isUndefined(val)) return null;

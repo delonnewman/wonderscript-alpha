@@ -1,15 +1,21 @@
 import {isUndefined} from "./runtime";
-import {Object} from "./Object";
 import {Nil} from "./Nil";
+import {Symbol} from "./Symbol";
+import {MetaData} from "./Meta";
+import {Keyword} from "./Keyword";
+
+const MUTABLE_KW = Keyword.intern("mutable");
 
 export class Context {
     private readonly vars: Map<string, any>;
+    private readonly varMeta: Map<string, MetaData>;
     private readonly parent: Context | null;
     private _isRecursive: boolean
 
     constructor(parent?: Context) {
         this.parent = parent;
         this.vars = new Map<string, any>();
+        this.varMeta = new Map<string, MetaData>();
         this._isRecursive = false;
     }
 
@@ -23,15 +29,27 @@ export class Context {
         return this._isRecursive;
     }
 
-    get(name: string): any | Nil {
-        return this.vars.get(name);
+    get(sym: Symbol): any | Nil {
+        return this.vars.get(sym.name());
     }
 
-    has(name: string): boolean {
-        return this.vars.has(name);
+    has(sym: Symbol): boolean {
+        return this.vars.has(sym.name());
     }
 
-    lookup(name: string): Context | Nil {
+    isMutable(sym: Symbol): boolean {
+        if (!this.varHasMeta(sym)) {
+            return false;
+        }
+
+        return this.varMeta.get(sym.name())?.get(MUTABLE_KW) === true;
+    }
+
+    varHasMeta(sym: Symbol): boolean {
+        return this.varMeta.has(sym.name());
+    }
+
+    lookup(name: Symbol): Context | Nil {
         if (this.has(name)) {
             return this;
         }
@@ -48,29 +66,49 @@ export class Context {
         return null;
     }
 
-    set(name: string, value: unknown): Context {
-        this.vars.set(name, value);
+    set(sym: Symbol, value: unknown): Context {
+        if (!this.has(sym)) {
+            throw new Error(`undefined variable: ${sym}`);
+        }
+
+        if (!this.isMutable(sym)) {
+            throw new Error(`cannot mutate an immutable value: ${sym}`);
+        }
+
+        this.vars.set(sym.name(), value);
 
         return this;
     }
 
-    define(name: string, value?: unknown): Context {
+    // TODO: deal with meta data options here
+    define(sym: Symbol, value?: unknown): Context {
         if (!isUndefined(value)) {
-            this.set(name, value);
+            this.vars.set(sym.name(), value);
         }
         else {
-            this.set(name, null);
+            this.vars.set(sym.name(), null);
+        }
+
+        if (sym.hasMeta()) {
+            this.varMeta.set(sym.name(), sym.meta());
         }
 
         return this;
     }
 
     toString() {
-        const buffer = ['#<Context variables: ', Object.keys(this.vars).join(', ')];
-        if (this.parent) {
-            buffer.push('parent: ', this.parent.toString());
+        const buffer = ['#<Context'];
+
+        if (this.vars.size !== 0) {
+            buffer.push(' variables: ', Array.from(this.vars.keys()).join(', '));
         }
+
+        if (this.parent) {
+            buffer.push(' parent: ', this.parent.toString());
+        }
+
         buffer.push('>');
+
         return buffer.join('');
     };
 }

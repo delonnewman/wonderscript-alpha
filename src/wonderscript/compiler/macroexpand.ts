@@ -32,7 +32,7 @@ export function macroexpand(form: Form, scope: Context): Form {
 
         if (isMacro(form[0])) {
             const args = form.slice(1);
-            const ctx = {env: new Context(scope), form: form};
+            const ctx = {context: new Context(scope), form: form};
 
             return macroexpand(val.apply(ctx, args), scope);
         }

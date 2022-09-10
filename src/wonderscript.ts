@@ -12,6 +12,8 @@ import {escapeChars} from "./wonderscript/compiler/utils";
 
 type Platform = "node" | "browser"
 
+export const JS_SYM = Symbol.intern("js");
+
 export class Compiler {
     private readonly env: Context;
     private readonly global: object;
@@ -25,13 +27,13 @@ export class Compiler {
     }
 
     private init() {
-        this.env.define(CORE_NS.name, CORE_NS);
+        this.env.define(Symbol.intern(CORE_NS.name), CORE_NS);
 
         if (this.isNode()) {
-            this.env.define('js', createNs('global', this.global));
+            this.env.define(JS_SYM, createNs('global', this.global));
         } else {
             // @ts-ignore
-            this.env.define('js', createNs('window', this.global.window));
+            this.env.define(JS_SYM, createNs('window', this.global.window));
         }
 
         importModule(core);

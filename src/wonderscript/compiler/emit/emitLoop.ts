@@ -26,9 +26,9 @@ export function emitLoop(form, scope: Context): string {
     const names = [];
     for (let i = 0; i < binds.length; i += 2) {
         if (!isSymbol(binds[i])) throw new Error('Invalid binding name');
+        env.define(binds[i], true);
 
         const bind = escapeChars(binds[i].name());
-        env.define(bind, true);
         names.push(bind);
     }
     buffer.push(names.join(', '));

@@ -6,10 +6,10 @@ import {Symbol} from "../lang/Symbol";
 
 export function findNamespaceVar(s: Symbol, env?: Context) {
     if (s.hasNamespace() && env) {
-        const scope = env.lookup(s.namespace());
+        const scope = env.lookup(Symbol.intern(s.namespace()));
         if (scope === null) return null;
 
-        const ns  = scope.get(s.namespace());
+        const ns  = scope.get(Symbol.intern(s.namespace()));
         const val = ns.module[s.name()];
 
         if (isUndefined(val)) return null;
