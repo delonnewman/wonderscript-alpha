@@ -37,6 +37,10 @@ export class Definition implements Meta, Named, Reference, Object {
         this._watchers = {};
     }
 
+    symbol(): Symbol {
+        return this._symbol;
+    }
+
     name(): string {
         return this._symbol.name();
     }

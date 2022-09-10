@@ -39,8 +39,12 @@ export class Symbol implements Named, Meta, Invokable, Comparable, Equality {
         return this._meta;
     }
 
-    withMeta(data: MetaData): Meta {
+    withMeta(data: MetaData): Symbol {
         return new Symbol(this._name, this._namespace, merge(this._meta, data));
+    }
+
+    withoutMeta(): Symbol {
+        return this.withMeta(null);
     }
 
     hasMeta(): boolean {

@@ -4,7 +4,7 @@ import {Symbol} from "./Symbol";
 import {MetaData} from "./Meta";
 import {Keyword} from "./Keyword";
 
-const MUTABLE_KW = Keyword.intern("mutable");
+export const MUTABLE_KW = Keyword.intern("mutable");
 
 export class Context {
     private readonly vars: Map<string, any>;

@@ -1,4 +1,4 @@
-import {Context} from "./wonderscript/lang/Context";
+import {Context, MUTABLE_KW} from "./wonderscript/lang/Context";
 import {CORE_NS, CURRENT_NS} from "./wonderscript/compiler/vars";
 import {createNs} from "./wonderscript/lang/Namespace";
 import * as core from "./wonderscript/lang";
@@ -9,10 +9,13 @@ import {findDefinitionMetaData} from "./wonderscript/compiler/findDefinitionMeta
 import {Symbol} from "./wonderscript/lang";
 import {RecursionPoint} from "./wonderscript/compiler/RecursionPoint";
 import {escapeChars} from "./wonderscript/compiler/utils";
+import {Definition, VAR_KW} from "./wonderscript/lang/Definition";
+import {Module} from "./wonderscript/lang/Module";
 
 type Platform = "node" | "browser"
 
 export const JS_SYM = Symbol.intern("js");
+export const CURRENT_MOD_SYM = Symbol.intern("*module*", null, new Map([[MUTABLE_KW, true], [VAR_KW, true]]));
 
 export class Compiler {
     private readonly env: Context;

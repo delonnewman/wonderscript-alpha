@@ -16,7 +16,6 @@
 ;; TODO: collect arities to improve error message
 ;; TODO: add arity checking for single body forms
 ;; TODO: add support for multi-line bodies
-;; TODO: add support for splat arguments
 (def ^:macro fn
   (fn*
    (&xs)
@@ -30,7 +29,15 @@
                        (.flatMap xs
                                  (fn* (x)
                                       (array (array 'identical? (array-length (x 0)) (array 'array-length 'args))
-                                             (array 'let (.flatMap (x 0) (fn* (x i) (array x (array 'args i))))
+                                             (array 'let
+                                                    (.flatMap (x 0)
+                                                              (fn* (x i)
+                                                                   (cond
+                                                                     (.startsWith (.name x) "&")
+                                                                       (array (symbol (.slice (.name x) 1))
+                                                                              (array '.slice 'args i))
+                                                                     else
+                                                                       (array x (array 'args i)))))
                                                     (x 1)))))
                        (array 'else
                               (array 'throw
@@ -40,11 +47,17 @@
        else
          (cons 'fn* xs)))))
 
-
-; TODO: add optional doc string and meta data map
+;; TODO: need to test for types on doc (should be string?) and meta (should be map?)
 (def ^:macro defn
-  (fn (name args &body)
-    (array 'def name (cons 'fn (cons args body)))))
+  (fn
+    ((name args &body)
+     (array 'def name (cons 'fn (cons args body))))
+    ((name doc args &body)
+     (let (nm (.withMeta name {:doc doc}))
+       (array 'def nm (cons 'fn (cons args body)))))
+    ((name doc meta args &body)
+     (let (nm (.withMeta name (merge {:doc doc} meta)))
+       (array 'def nm (cons 'fn (cons args body)))))))
 
 (defn ^:macro defmacro
   (name args &body)
