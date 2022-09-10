@@ -47,28 +47,34 @@
        else
          (cons 'fn* xs)))))
 
-;; TODO: need to test for types on doc (should be string?) and meta (should be map?)
 (def ^:macro defn
   (fn
-    ((name args &body)
-     (array 'def name (cons 'fn (cons args body))))
-    ((name doc args &body)
-     (let (nm (.withMeta name {:doc doc}))
-       (array 'def nm (cons 'fn (cons args body)))))
-    ((name doc meta args &body)
-     (let (nm (.withMeta name (merge {:doc doc} meta)))
-       (array 'def nm (cons 'fn (cons args body)))))))
+    (name &rest)
+    (let (doc  (cond (string? (rest 0)) (rest 0) else nil)
+          meta (cond (map? (rest 0)) (rest 0) (map? (rest 1)) (rest 1) else nil)
+          args (cond
+                 (array? (rest 0)) (rest 0)
+                 (array? (rest 1)) (rest 1)
+                 (array? (rest 2)) (rest 2)
+                 else (throw (js/Error. "an arglist is required")))
+          body (cond
+                 (and doc meta) (.slice rest 3)
+                 (or doc meta) (.slice rest 2)
+                 else (.slice rest 1))
+          nm (.withMeta name (merge meta {:doc doc})))
+     (array 'def nm (cons 'fn (cons args body))))))
 
 (defn ^:macro defmacro
-  (name args &body)
+  (name &rest)
   (let (nm (.withMeta name {:macro true}))
-    (array 'def nm (cons 'fn (cons args body)))))
-
+    (cons 'defn (cons nm rest))))
 
 (defn macro?
   (sym) (:macro (the-meta sym)))
 
 (defmacro deftype
+  "Define a type alias"
+  {:added 1.0}
   (name type-val)
   (let (nm (.withMeta name {:type true}))
     (array 'def nm type-val)))
@@ -150,6 +156,8 @@
 
 ;; defconst?
 (defmacro constant
+  "Define a constant value this means the definition
+  cannot change and the value must be immutable"
   ((name value)
    (array 'constant name nil value))
   ((name doc value)
@@ -236,10 +244,12 @@
 (def </> (<op> /))
 
 (defn sum
-  (xs) (reduce <+> xs 0))
+  "Take the sum of the values in the collection"
+  (col) (reduce <+> col 0))
 
 (defn product
-  (xs) (reduce <*> xs 1))
+  "Take the product of the values in the collection"
+  (col) (reduce <*> col 1))
 
 (defn zero?
   (x) (identical? 0 x))

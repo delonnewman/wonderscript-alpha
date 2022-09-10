@@ -1,11 +1,12 @@
-import {partition, rest, str} from "../../lang/runtime";
+import {isBoolean, partition, rest, str} from "../../lang/runtime";
 import {emitTailPosition} from "./emitTailPosition";
 import {emit} from "../emit";
 import {Context} from "../../lang/Context";
-import {Form, isTaggedValue} from "../core";
+import {Form, isTaggedValue, isThrow} from "../core";
 import {COND_SYM as COND_STR} from "../constants";
 import {prStr} from "../prStr";
 import {Symbol} from "../../lang/Symbol";
+import {isNil} from "../../lang/Nil";
 
 export const COND_SYM = Symbol.intern(COND_STR);
 export const ELSE_SYM = Symbol.intern('else');
@@ -23,6 +24,11 @@ export function emitCond(form: Form, env: Context): string {
         throw new Error(`the number of body expressions should be even, found ${others.length}`);
     }
 
+    if (others.length === 2 || others.length === 4 && ELSE_SYM.equals(others[2]) && !isThrow(others[3])) {
+        const [pred, consequent, _, alternate] = others;
+        return `${emit(pred, env)}?(${emit(consequent, env)}):(${emit(alternate ?? null, env)})`;
+    }
+
     const exprs = partition(2, others);
     const buffer = [];
 
@@ -33,7 +39,8 @@ export function emitCond(form: Form, env: Context): string {
         }
         else {
             const x = emit(exprs[i][0], env);
-            buffer.push(str(cond, '(', x, ' != null && ', x, ' !== false){ ', emitTailPosition(exprs[i][1], env), ' }'));
+            const test = isBoolean(exprs[i][0]) || isNil(exprs[i][0]) ? `(${x})` : `(${x}!=null&&${x}!==false)`;
+            buffer.push(str(cond, test, '{ ', emitTailPosition(exprs[i][1], env), ' }'));
         }
     }
 

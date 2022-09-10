@@ -13,6 +13,7 @@ export type LetForm = BodyForm<typeof LET_SYM>;
 
 export const isLetForm = isBodyForm<typeof LET_SYM>(LET_SYM);
 
+// TODO: move the changes from here to loop
 export function emitLet(form: Form, scope: Context): string {
     if (!isLetForm(form)) throw new Error(`invalid ${LET_SYM} form: ${prStr(form)}`);
 
@@ -20,7 +21,7 @@ export function emitLet(form: Form, scope: Context): string {
 
     if (form.length < 2) throw new Error('A let expression should have at least 2 elements');
 
-    const buffer = ['(function('];
+    const buffer = ['(function(){'];
     const binds = form[1];
     const body = form.slice(2);
 
@@ -32,24 +33,16 @@ export function emitLet(form: Form, scope: Context): string {
         env.define(binds[i], true);
 
         const bind = escapeChars(binds[i].name());
-        names.push(bind);
+        const val  = emit(binds[i + 1], env);
+        names.push([bind, val, env.isMutable(binds[i])]);
     }
 
-    buffer.push(names.join(', '));
-    buffer.push('){');
+    const bindings = names.map(([name, val, mut]) => `${mut ? 'let' : 'const'} ${name}=${val}`);
+    buffer.push(`${bindings.join(';')};`);
 
     // body
     buffer.push(compileBody(body, env));
-    buffer.push('}(');
-
-    // add values to function scope
-    const values = [];
-    for (let i = 0; i < binds.length; i += 2) {
-        values.push(emit(binds[i + 1], env));
-    }
-
-    buffer.push(values.join(', '));
-    buffer.push('))');
+    buffer.push('}())');
 
     return buffer.join('');
 }
