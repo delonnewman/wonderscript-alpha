@@ -26,9 +26,9 @@ function collectArgs(body): Symbol[] {
         if (isSymbol(form) && form.name().startsWith('%')) {
             args.push(form);
         }
-        if (isArray(form)) {
-            args.push.apply(args, collectArgs(form));
-        }
+        // if (isArray(form)) {
+        //     args.push.apply(args, collectArgs(form));
+        // }
     }
 
     const names = args.sort((a, b) => a.cmp(b));
