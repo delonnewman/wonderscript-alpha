@@ -60,7 +60,7 @@ function genArgsDef(argsBuf: ParsedArgs): string {
 
 const RECUR_SYM = Symbol.intern(RECUR_STR);
 const COND_SYM  = Symbol.intern(COND_STR);
-const FN_SYM    = Symbol.intern(FN_STR);
+export const FN_SYM    = Symbol.intern(FN_STR);
 
 function hasTailCall(form: Form): boolean {
     if (isArray(form) && RECUR_SYM.equals(form[0])) {

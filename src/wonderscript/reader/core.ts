@@ -8,10 +8,11 @@ import {characterReader} from "./characterReader";
 import {metaReader} from "./metaReader";
 import {wrappingReader} from "./wrappingReader";
 import {dispatchReader} from "./dispatchReader";
-import {varReader} from "./varReader";
+import {defReader} from "./defReader";
 import {setReader} from "./setReader";
 import {Symbol} from "../lang/Symbol";
 import {Keyword} from "../lang/Keyword";
+import {fnReader} from "./fnReader";
 
 export const LINE_KEY   = Keyword.intern("line");
 export const COLUMN_KEY = Keyword.intern("column");
@@ -46,8 +47,9 @@ export const MACROS = {
 // TODO: implement dispatch macros
 export const DISPATCH_MACROS = {
     '^': metaReader,
-    "'": varReader,
-    '{': setReader
+    "'": defReader,
+    '{': setReader,
+    '(': fnReader,
 } as const;
 
 export function isMacro(ch): boolean {

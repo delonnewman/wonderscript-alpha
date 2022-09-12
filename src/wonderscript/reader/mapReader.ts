@@ -1,7 +1,7 @@
 import {readDelimitedList} from "./readDelimitedList";
 import {PushBackReader} from "./PushBackReader";
 
-export function mapReader(r: PushBackReader, openbracket, opts): Map<any, any> {
+export function mapReader(r: PushBackReader, openbracket, opts): ReadonlyMap<any, any> {
     const a = readDelimitedList('}', r, true, opts);
     const map = new Map();
 
@@ -11,5 +11,5 @@ export function mapReader(r: PushBackReader, openbracket, opts): Map<any, any> {
         map.set(key, val);
     }
 
-    return map;
+    return Object.freeze(map);
 }

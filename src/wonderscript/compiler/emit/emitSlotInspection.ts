@@ -16,6 +16,7 @@ export function emitSlotInspection(form: Form, env: Context): string {
     if (!isSlotInspectionForm(form)) throw new Error(`invalid ${HAS_SLOT_SYM} form: ${prStr(form)}`);
 
     const [_, obj, slot] = form;
+    const objStr = emit(obj, env);
 
-    return `(${emit(slot, env)} in ${emit(obj, env)})`;
+    return `(typeof ${objStr} === "object" && ${emit(slot, env)} in ${objStr})`;
 }

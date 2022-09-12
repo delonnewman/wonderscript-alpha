@@ -5,9 +5,11 @@ import {
     isBoolean,
     isFunction,
     isMap,
-    isNumber, isObject,
-    isString, map,
-    str
+    isNumber,
+    isObject,
+    isSet,
+    isString,
+    map,
 } from "../lang/runtime";
 import {Form} from "./core";
 import {isSymbol} from "../lang/Symbol";
@@ -65,13 +67,18 @@ export function prStr(form: Form): string {
         return `{${parts.join(' ')}}`;
     }
 
+    if (isSet(form)) {
+        const parts = [];
+        for (let entry of form) {
+            const val = prStr(entry);
+            parts.push(val);
+        }
+        return `#{${parts.join(' ')}}`;
+    }
+
     if (isArrayLike(form)) {
         const parts = Array.prototype.map.call(form, (x, i) => `${i} ${prStr(x)}`);
         return `#js/object {${parts.join(', ')}}`;
-    }
-
-    if (isFunction(form.toString)) {
-        return form.toString();
     }
 
     if (isObject(form)) {

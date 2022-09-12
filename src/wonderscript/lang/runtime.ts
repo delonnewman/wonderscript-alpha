@@ -36,6 +36,10 @@ export function isNumber(x): x is number {
     return Object.prototype.toString.call(x) === '[object Number]';
 }
 
+export function isInteger(x): x is number {
+    return isNumber(x) && Math.round(x) === x;
+}
+
 export function isArray(x): x is any[] {
     return Object.prototype.toString.call(x) === '[object Array]';
 }

@@ -1,7 +1,7 @@
 import {macroexpand} from "./macroexpand";
 import {Form} from "./core";
 import {emitKeyword} from "./emit/emitKeyword";
-import {isArray, isBoolean, isMap, isNull, isNumber, isString, isUndefined} from "../lang/runtime";
+import {isArray, isBoolean, isMap, isNull, isNumber, isSet, isString, isUndefined} from "../lang/runtime";
 import {
     AGET_SYM,
     ALENGTH_SYM,
@@ -96,6 +96,7 @@ import {isSymbol} from "../lang/Symbol";
 import {prStr} from "./prStr";
 import {emitSlotAccess} from "./emit/emitSlotAccess";
 import {emitSlotInspection} from "./emit/emitSlotInspection";
+import {emitSet} from "./emit/emitSet";
 
 export function emit(form_: Form, ctx: Context) {
     const form = macroexpand(form_, ctx);
@@ -117,9 +118,11 @@ export function emit(form_: Form, ctx: Context) {
     else if (isUndefined(form)) {
         return UNDEFINED_SYM;
     }
-    // TODO: add support for Set
     else if (isMap(form)) {
         return emitMap(form, ctx);
+    }
+    else if (isSet(form)) {
+        return emitSet(form, ctx);
     }
     else if (isArray(form)) {
         if (form.length === 0) {

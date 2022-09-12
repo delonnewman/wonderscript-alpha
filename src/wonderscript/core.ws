@@ -45,7 +45,7 @@
               (.flatMap (pair 0)
                         (fn* (x i)
                              (cond
-                               (.startsWith (.name x) "&")
+                               (splat? x)
                                (array (symbol (.slice (.name x) 1))
                                       (array '.slice 'args i))
                                else
@@ -527,7 +527,7 @@
   ((obj key value)
    (array 'cond
      (array 'array? obj) (array 'array-set! obj key value)
-     (array 'method? obj 'set) (array '.set obj key value)
+     (array 'has-method? obj 'set) (array '.set obj key value)
      'else (array 'throw (array 'js/Error. "can only set keys for associative values")))))
 
 ;; TODO: include let binding for macro output for better performance, will need gensym
@@ -641,10 +641,9 @@
       (.bind val obj)
       (throw (js/Error. "undefined method")))))
 
-(defn method?
+(defn has-method?
   (obj method)
-  (.log js/console (array-get obj method) obj method)
-  (function? (array-get obj method)))
+  (function? (slot obj method)))
 
 (defn bind
   (f object)
@@ -802,7 +801,7 @@
   (col)
   (cond
     (array-like? col) $empty-array
-    (method? 'empty) (.empty col)
+    (has-method? col 'empty) (.empty col)
     else
       (empty! (clone col))))
 
@@ -821,7 +820,7 @@
     (array-like? col) (not-identical? -1 (index-of col value))
     (map? col) (key? col value)
     (set? col) (member? col value)
-    (method? col "includes") (.includes col value)
+    (has-method? col 'includes) (.includes col value)
     else
       (throw "can't test inclusion")))
 
