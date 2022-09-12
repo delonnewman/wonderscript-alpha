@@ -32,12 +32,12 @@ export function emitDef(form: Form, env: Context): string {
         val  = eval(code);
     }
 
-    let def = `${CURRENT_NS.value.name}.${name}=${code};`;
+    let def = `${CURRENT_NS.value.name}.${name}=${code}`;
     CURRENT_NS.value.module[name] = val;
 
     if (form[1].hasMeta()) {
-        const meta = `${CURRENT_NS.value.name}.${name}_META_=${emitQuotedMetaData(form[1].meta())};`
-        def += meta;
+        const meta = `${CURRENT_NS.value.name}.${name}_META_=${emitQuotedMetaData(form[1].meta())}`
+        def = `${def};${meta}`;
     }
 
     return def;

@@ -11,41 +11,84 @@
      (not (.isArray js/Array a))
        false
      else
-       (.isArray js/Array (a 0)))))
+     (.isArray js/Array (a 0)))))
 
-;; TODO: collect arities to improve error message
-;; TODO: add arity checking for single body forms
-;; TODO: add support for multi-line bodies
+(def splat?
+  (fn* (sym)
+       (cond (symbol? sym)
+             (.startsWith (.name sym) "&")
+             else false)))
+
+(def parsed-args
+  (fn* (arglist)
+       (.map arglist
+             (fn* (sym i)
+                  (cond
+                    (splat? sym)
+                    {:name (symbol (.slice (.name sym) 1)) :order i :splat true}
+                    else
+                    {:name sym :order i :splat false})))))
+
+(def arity-validation-forms
+  (fn* (parsed)
+       (let (nargs (array-length parsed))
+         (cond
+           (.some parsed (fn* (arg) (:splat arg)))
+             (array '> (array 'array-length 'args) (- nargs 1))
+           else
+             (array 'identical? nargs (array 'array-length 'args))))))
+
+(def let-bindings-form
+  (fn* (pair)
+       (cons 'let
+             (cons
+              (.flatMap (pair 0)
+                        (fn* (x i)
+                             (cond
+                               (.startsWith (.name x) "&")
+                               (array (symbol (.slice (.name x) 1))
+                                      (array '.slice 'args i))
+                               else
+                               (array x (array 'args i)))))
+              (.slice pair 1)))))
+
 (def ^:macro fn
   (fn*
    (&xs)
    (let (x (xs 0))
      (cond
        (assoc-array? x)
+       (let (arglists (map first xs)
+             parsed (map parsed-args arglists)
+             arities (.sort (map (fn* (args) (array-length args)) arglists) (fn* (a b) (cond (< a b) -1 (> a b) 1 else 0)))
+             splat (.some parsed (fn* (list) (.some list (fn* (arg) (:splat arg)))))
+             arity-str (cond splat (str (arities 0) " or more") else (.join arities " or ")))
          (array 'fn*
                 (array '&args)
                 (cons 'cond
                       (.concat
                        (.flatMap xs
-                                 (fn* (x)
-                                      (array (array 'identical? (array-length (x 0)) (array 'array-length 'args))
-                                             (array 'let
-                                                    (.flatMap (x 0)
-                                                              (fn* (x i)
-                                                                   (cond
-                                                                     (.startsWith (.name x) "&")
-                                                                       (array (symbol (.slice (.name x) 1))
-                                                                              (array '.slice 'args i))
-                                                                     else
-                                                                       (array x (array 'args i)))))
-                                                    (x 1)))))
+                                 (fn* (x i)
+                                      (array (arity-validation-forms (parsed i))
+                                             (let-bindings-form x))))
                        (array 'else
                               (array 'throw
                                      (array 'js/Error.
-                                            (array 'str "wrong number of arguments, got "
-                                                   (array 'array-length 'args))))))))
+                                            (array 'str "wrong number of arguments, expected " arity-str " got "
+                                                   (array 'array-length 'args)))))))))
        else
-         (cons 'fn* xs)))))
+         (let (parsed (parsed-args x)
+               arity (array-length x)
+               splat (.some parsed (fn* (arg) (:splat arg)))
+               arity-str (cond splat (str arity " or more") else (str arity)))
+           (array 'fn* (array '&args)
+                  (array 'cond (arity-validation-forms (parsed-args x))
+                         (let-bindings-form xs)
+                         'else
+                         (array 'throw
+                                (array 'js/Error.
+                                       (array 'str "wrong number of arguments, expected " arity-str " got "
+                                              (array 'array-length 'args)))))))))))
 
 (def ^:macro defn
   (fn
@@ -88,16 +131,16 @@
 (defn js-primitive-number?
   (val) (identical? "number" (typeof val)))
 
-;; primitive types
-
 (deftype Any       'any)
 (deftype Undefined 'undefined)
 (deftype Null      'null)
-; (deftype Nil       (union Undefined Null))
 (deftype Number    'number)
 (deftype String    'string)
 (deftype Boolean   'boolean)
 (deftype Object    'object)
+
+(deftype Array     array?)
+(deftype Nil       nil?)
 
 (defn ==
   (a b)
@@ -117,6 +160,12 @@
    (array 'cond pred then))
   ((pred then other)
    (array 'cond pred then 'else other)))
+
+(defmacro if-not
+  ((pred then)
+   (array 'if-not pred then nil))
+  ((pred then other)
+   (array 'cond (array 'not pred) then 'else other)))
 
 (defmacro when (pred &acts)
   (array 'cond pred (cons 'begin acts)))
@@ -154,12 +203,11 @@
 (defn mutable?
   (value) (not (immutable? value)))
 
-;; defconst?
-(defmacro constant
+(defmacro defconst
   "Define a constant value this means the definition
   cannot change and the value must be immutable"
   ((name value)
-   (array 'constant name nil value))
+   (array 'defconst name nil value))
   ((name doc value)
    (let (nm (.withMeta name {:doc doc :constant true}))
      (array 'def nm
@@ -167,13 +215,17 @@
                    value
                    (array 'throw (array 'js/Error. "only immutable values can be constants")))))))
 
-;; defvar?
-(defmacro var
+(defmacro defvar
   ((name value)
-   (array 'var name nil value))
+   (array 'defvar name nil value))
   ((name doc value)
    (let (nm (.withMeta name {:doc doc :variable true}))
      (array 'def nm value))))
+
+(defmacro defonce
+  ((name value)
+   (if-not (defined? name)
+     (array 'def name value))))
 
 (defn clone
   (object)
@@ -207,6 +259,9 @@
   (a b)
   (.equals (type a) (type b)))
 
+(defn constructor?
+  (obj) (and (function? obj) (.hasOwn obj "prototype")))
+
 (defn isa?
   (t value)
   (if (function? t)
@@ -216,14 +271,14 @@
 ;; Numerical
 
 ;; numerical constants
-(constant $pi      (.-PI js/Math))
-(constant $e       (.-E js/Math))
-(constant $log10e  (.-LOG10e js/Math))
-(constant $log2e   (.-LOG2e js/Math))
-(constant $ln10    (.-LN10 js/Math))
-(constant $ln2     (.-LN2 js/Math))
-(constant $sqrt1-2 (.-SQRT1_2 js/Math))
-(constant $sqrt2   (.-SQRT2 js/Math))
+(defconst $pi      (.-PI js/Math))
+(defconst $e       (.-E js/Math))
+(defconst $log10e  (.-LOG10e js/Math))
+(defconst $log2e   (.-LOG2e js/Math))
+(defconst $ln10    (.-LN10 js/Math))
+(defconst $ln2     (.-LN2 js/Math))
+(defconst $sqrt1-2 (.-SQRT1_2 js/Math))
+(defconst $sqrt2   (.-SQRT2 js/Math))
 
 (defn ->integer
   (s) (js/parseInt s 10))
@@ -286,7 +341,7 @@
 
 ;; Basic Array, Strings & ArrayLike
 
-(constant $empty-array (freeze! []))
+(defconst $empty-array (freeze! []))
 
 (defn concat
   (&arrays)
@@ -375,8 +430,8 @@
 
 ;; Strings
 
-(constant $white-space-regex (freeze! (js/RegExp. "\\s+")))
-(constant $empty-string "")
+(defconst $white-space-regex (freeze! (js/RegExp. "\\s+")))
+(defconst $empty-string "")
 
 (defn blank?
   (object)
@@ -423,8 +478,8 @@
     (.startsWith (name s))
     (.endsWith s ch)))
 
-(constant $ending-new-line-pattern (freeze! (js/RegExp. "(\\n|\\r\\n)$")))
-(constant $new-line-pattern (freeze! (js/RegExp. "\\r\\n|\\n")))
+(defconst $ending-new-line-pattern (freeze! (js/RegExp. "(\\n|\\r\\n)$")))
+(defconst $new-line-pattern (freeze! (js/RegExp. "\\r\\n|\\n")))
 
 (defn chomp
   (s) (.replace s $ending-new-line-pattern $empty-string))
@@ -465,6 +520,15 @@
   (apply concat (map f coll)))
 
 ;; Imperative Programming
+
+(defmacro set!
+  ((sym value)
+   (array 'set* sym value))
+  ((obj key value)
+   (array 'cond
+     (array 'array? obj) (array 'array-set! obj key value)
+     (array 'method? obj 'set) (array '.set obj key value)
+     'else (array 'throw (array 'js/Error. "can only set keys for associative values")))))
 
 ;; TODO: include let binding for macro output for better performance, will need gensym
 (defmacro for-times

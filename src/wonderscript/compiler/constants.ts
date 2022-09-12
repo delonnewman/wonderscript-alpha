@@ -12,7 +12,7 @@ export const BEGIN_SYM    = 'begin';
 export const RESCUE_SYM   = 'rescue';
 export const ENSURE_SYM   = 'ensure';
 export const NEW_SYM      = 'new';
-export const SET_SYM      = 'set!';
+export const SET_SYM      = 'set*';
 export const JS_SYM       = 'js*';
 
 export const DOT_SYM      = '.';
@@ -101,7 +101,7 @@ export const SPECIAL_FORMS = {
     let: true,
     '.': true,
     new: true,
-    'set!': true,
+    'set*': true,
     slot: true,
 } as const;
 

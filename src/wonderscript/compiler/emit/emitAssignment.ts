@@ -17,7 +17,7 @@ export function emitAssignment(form, ctx: Context) {
     if (!isAssignmentForm(form)) throw new Error(`invalid ${SET_SYM} form: ${prStr(form)}`);
 
     const [_, obj, value] = form;
-    if (isSymbol(obj) && !ctx.isMutable(obj)) {
+    if (isSymbol(obj) && ctx.has(obj) && !ctx.isMutable(obj)) {
         throw new Error(`cannot mutate an immutable value: ${prStr(obj)}`);
     }
 

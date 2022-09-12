@@ -11,6 +11,7 @@ import {RecursionPoint} from "./wonderscript/compiler/RecursionPoint";
 import {escapeChars} from "./wonderscript/compiler/utils";
 import {Definition, VAR_KW} from "./wonderscript/lang/Definition";
 import {Module} from "./wonderscript/lang/Module";
+import {findNamespaceVar} from "./wonderscript/compiler/findNamespaceVar";
 
 type Platform = "node" | "browser"
 
@@ -51,6 +52,7 @@ export class Compiler {
             readString: compiler.readString,
             prStr: compiler.prStr,
             theMeta: (sym: Symbol) => findDefinitionMetaData(sym, this.env),
+            isDefined: (sym: Symbol) => findNamespaceVar(sym, this.env) != null,
             RecursionPoint,
             escapeChars,
         });
