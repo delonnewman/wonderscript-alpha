@@ -27,7 +27,7 @@ function collectArgs(body): Symbol[] {
         if (isSymbol(form) && form.name().startsWith('%')) {
             args.push(form);
         } else if (isTaggedValue(form)) {
-            for (let x of form.slice(1)) {
+            for (let x of form) {
                 forms.push(x);
             }
         }

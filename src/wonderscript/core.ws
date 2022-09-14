@@ -61,8 +61,8 @@
        (assoc-array? x)
        (let (arglists (map first xs)
              parsed (map parsed-args arglists)
-             arities (.sort (map (fn* (args) (array-length args)) arglists) (fn* (a b) (cond (< a b) -1 (> a b) 1 else 0)))
-             splat (.some parsed (fn* (list) (.some list (fn* (arg) (:splat arg)))))
+             arities (.sort (map #(array-length %) arglists) #(cond (< %1 %2) -1 (> %1 %2) 1 else 0))
+             splat (.some parsed (fn* (list) (.some list #(:splat %))))
              arity-str (cond splat (str (arities 0) " or more") else (.join arities " or "))
              argsym (gensym "args"))
          (array 'fn*
@@ -81,7 +81,7 @@
        else
          (let (parsed (parsed-args x)
                arity (array-length x)
-               splat (.some parsed (fn* (arg) (:splat arg)))
+               splat (.some parsed #(:splat %))
                arity-str (cond splat (str arity " or more") else (str arity))
                argsym (gensym "args"))
            (array 'fn* (array (symbol (str "&" argsym)))
@@ -276,11 +276,33 @@
 (defn constructor?
   (obj) (and (function? obj) (.hasOwn obj "prototype")))
 
+(def class? constructor?)
+
 (defn isa?
   (t value)
   (if (function? t)
     (instance? value t)
     (.equals (type value) t)))
+
+(defn make-class
+  (() (make-class '() nil))
+  ((slots) (make-class slots nil))
+  ((slots superclass)
+   (let (ctr   (eval (array 'fn* (cons slots (map #(array (symbol (str ".-" %)) 'this) slots))))
+         proto (.create js/Object superclass))
+     (slot-set! ctr 'prototype proto)
+     ctr)))
+
+(defn define-method
+  (klass name f)
+  (slot-set! (.-prototype klass) name f))
+
+(defmacro defclass
+  ((name) (array 'defclass name '() nil))
+  ((name slots) (array 'defclass name slots nil))
+  ((name slots superclass)
+   (let (nm (.withMeta name {:typedef true}))
+     (array 'def nm (make-class slots superclass)))))
 
 ;; Numerical
 
@@ -365,8 +387,9 @@
   (object)
   (.isArray js/Array object))
 
-(defn new-array
-  (n?) (js/Array. n?))
+(defn make-array
+  (() (js/Array.))
+  ((n) (js/Array. n)))
 
 ;; TODO: will need to extend for seqs
 (defn ->array
@@ -379,8 +402,10 @@
        (number? (.-length object))))
 
 (defn slice
-  (col start end?)
-  (.slice col start end?))
+  ((col start)
+   (.slice col start))
+  ((col start end)
+   (.slice col start end)))
 
 ; TODO: add support for seqs
 (defn at
@@ -420,8 +445,12 @@
   (sort! (clone array)))
 
 (defn fill!
-  (array value start? end?)
-  (.fill array value start? end?))
+  ((array value)
+   (.fill array value))
+  ((array value start)
+   (.fill array value start))
+  ((array value start end)
+   (.fill array value start end)))
 
 (defn reverse!
   (array)
@@ -474,11 +503,13 @@
 
 (defn name
   (named)
-  (.name named))
+  (when (slot? named "name")
+    (.name named)))
 
 (defn namespace
   (named)
-  (.namespace named))
+  (when (slot? named "namespace")
+    (.namespace named)))
 
 (defn starts-with?
   (s ch)
@@ -542,6 +573,7 @@
    (array 'cond
      (array 'array? obj) (array 'array-set! obj key value)
      (array 'has-method? obj 'set) (array '.set obj key value)
+     (array 'object? obj) (array 'slot-set! obj key value)
      'else (array 'throw (array 'js/Error. "can only set keys for associative values")))))
 
 ;; TODO: include let binding for macro output for better performance, will need gensym
@@ -587,11 +619,11 @@
   (x) (.log js/console x))
 
 (defn say
-  (&args) (.apply (.-log js/console) js/console (.map args pr-str)))
+  (&args)
+  (.apply (.-log js/console) js/console (.map args pr-str)))
 
 (defn pr
-  (x)
-  (print (pr-str x)))
+  (x) (print (pr-str x)))
 
 ;; Assertions and Testing
 
@@ -887,38 +919,40 @@
 ;; HTML Rendering
 
 (defn tag?
-  (x) (array? x) (string? (array-get x 0)))
+  (x) (and (array? x) (keyword? (x 0))))
 
 (defn has-attr?
-  (x) (map? (array-get x 1)))
+  (x) (map? (x 1)))
 
 (defn component?
-  (x) (array? x) (function? (array-get x 0)))
+  (x) (and (array? x) (function? (x 0))))
 
 (def tag-list? array?)
 
 (defn render-attr
   (form)
-  (reduce (fn (s x) (str s " " x))
-          (map (fn (x) (str (array-get x 0) "=\"" (array-get x 1) "\""))
+  (reduce #(str %1 " " %2)
+          (map #(str (name (% 0)) "=\"" (% 1) "\"")
                (entries form))))
 
 (def html) ; render-tag-list and html are mutually recursive
 
 (defn render-tag-list
-  (form) (.join (map html form) ""))
+  (form) (.join (map #(html %) form) ""))
 
 (defn render-attr-tag (form)
-  (let (tag  (array-get form 0)
-        attr (render-attr (array-get form 1)))
-    (str "<" tag " " attr ">" (render-tag-list (slice form 2)) "</" tag ">")))
+  (let (tag  (form 0)
+        nm   (name tag)
+        attr (render-attr (form 1)))
+    (str "<" nm " " attr ">" (render-tag-list (slice form 2)) "</" nm ">")))
 
 (defn render-tag (form)
-  (let (t (array-get form 0))
-    (str "<" t ">" (render-tag-list (slice form 1)) "</" t ">")))
+  (let (t  (form 0)
+        nm (name t))
+    (str "<" nm ">" (render-tag-list (slice form 1)) "</" nm ">")))
 
 (defn render-component (form)
-  (let (f (array-get form 0)
+  (let (f    (form 0)
         args (slice form 1))
     (html (apply f args))))
 

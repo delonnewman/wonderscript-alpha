@@ -19,6 +19,7 @@ export const DOT_SYM      = '.';
 export const DOT_DASH_SYM = '.-';
 export const SLOT_SYM     = 'slot';
 export const HAS_SLOT_SYM = 'slot?';
+export const SSET_SYM     = 'slot-set!';
 
 export const NIL_SYM      = 'nil';
 export const TRUE_SYM     = 'true';

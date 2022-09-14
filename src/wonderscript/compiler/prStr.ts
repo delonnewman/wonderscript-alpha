@@ -83,7 +83,7 @@ export function prStr(form: Form): string {
 
     if (isObject(form)) {
         const keys = Object.keys(form);
-        return `#js/object {${keys.map((k) => `${k} ${prStr(form[k])}`).join(', ')}}`
+        return `#js/object {${keys.map((k) => `${prStr(k)} ${prStr(form[k])}`).join(', ')}}`
     }
 
     return `${form}`;
