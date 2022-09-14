@@ -597,7 +597,7 @@
 
 (defmacro is
   ((exp)
-   (array 'is (args 0) (array 'str "Failed assertion: " (pr-str (args 0) " is false"))))
+   (array 'is exp (array 'str "Failed assertion: " (pr-str exp " is false"))))
   ((exp msg)
    (array 'begin (array 'cond (array 'not exp) (array 'throw msg)) exp)))
 
