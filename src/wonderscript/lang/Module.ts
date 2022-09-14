@@ -2,16 +2,21 @@ import {ALIEN_KW, Definition} from "./Definition";
 import {Symbol} from "./Symbol";
 import {MetaData} from "./Meta";
 import {merge} from "./runtime";
+import {Context} from "./Context";
 
-export type DefinitionMap = Map<Symbol, Definition>;
+export type DefinitionMap = Map<string, Definition>;
 
 export class Module {
     readonly name: Symbol
     private readonly _definitions: DefinitionMap;
+    private readonly ctx;
 
-    constructor(name: Symbol) {
+    static CORE = new Module(Symbol.intern("wonderscript.core"));
+
+    constructor(name: Symbol, ctx = Context.withinModule()) {
         this.name = name;
-        this._definitions = new Map<Symbol, Definition>();
+        this.ctx = ctx;
+        this._definitions = new Map<string, Definition>();
     }
 
     definitionMap(): DefinitionMap {
@@ -23,29 +28,33 @@ export class Module {
     }
 
     addDefinition(def: Definition): Module {
-        this._definitions.set(def.symbol().withoutMeta(), def);
+        this._definitions.set(def.symbol().toString(), def);
 
         return this;
     }
 
-    importSymbol(name: Symbol, value, meta?: MetaData): Module {
+    define(name: Symbol, value, meta?: MetaData): Module {
         return this.addDefinition(new Definition(name, value, meta));
     }
 
-    importAlienSymbol(name: string, value, meta?: MetaData): Module {
-        return this.importSymbol(Symbol.intern(name), value, merge(meta, new Map([[ALIEN_KW, true]])));
+    importSymbol(name: string, value, meta?: MetaData): Module {
+        return this.define(Symbol.intern(name), value, meta);
     }
 
-    importAlienModule(module: object): Module {
+    importModule(module: object, meta?: MetaData): Module {
         Object.entries(module).forEach(([name, value]) => {
-            this.importAlienSymbol(name, value)
+            this.importSymbol(name, value, meta)
         });
 
         return this;
     }
 
-    get(name: Symbol): Definition {
-        return this._definitions.get(name);
+    importAlienModule(module: object, meta?: MetaData): Module {
+        return this.importModule(module, merge(meta, new Map([[ALIEN_KW, true]])))
+    }
+
+    get(sym: Symbol): Definition {
+        return this._definitions.get(sym.toString());
     }
 
     exports(): Definition[] {

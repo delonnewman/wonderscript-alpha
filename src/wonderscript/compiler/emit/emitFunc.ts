@@ -87,7 +87,7 @@ export const isFnForm = isBodyForm<typeof FN_SYM>(FN_SYM);
 export function emitFunc(form: Form, scope: Context): string {
     if (!isFnForm(form)) throw new Error(`invalid ${FN_SYM} form: ${prStr(form)}`)
 
-    const env = new Context(scope);
+    const env = Context.withinFn(scope);
     const args = form[1];
 
     const argsBuf    = parseArgs(args);

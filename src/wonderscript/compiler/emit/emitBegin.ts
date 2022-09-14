@@ -14,7 +14,7 @@ export type BeginForm = [typeof BEGIN_SYM, ...Form[]];
 export const isBeginForm = (form: Form): form is BeginForm =>
     isTaggedValue(form) && form[0].equals(BEGIN_SYM);
 
-export function emitBegin(form: Form, env: Context): string {
+export function emitBegin(form: Form, ctx: Context): string {
     if (!isBeginForm(form)) throw new Error(`invalid ${BEGIN_SYM} form: ${prStr(form)}`);
 
     const exprs = form.slice(0, form.length - 1).slice(1);
@@ -22,10 +22,14 @@ export function emitBegin(form: Form, env: Context): string {
     const last = form[form.length - 1];
 
     for (let i = 0; i < exprs.length; ++i) {
-        buffer.push(emit(exprs[i], env));
+        buffer.push(emit(exprs[i], ctx));
     }
 
-    buffer.push(emitTailPosition(last, env));
+    buffer.push(emitTailPosition(last, ctx));
 
-    return str("(function(){ ", buffer.join('; '), "; }())");
+    if (ctx.isWithinFn() || ctx.isWithinCond()) {
+        return `${buffer.join(';')};`;
+    }
+
+    return `(function(){ ${buffer.join(';')}; }())`;
 }

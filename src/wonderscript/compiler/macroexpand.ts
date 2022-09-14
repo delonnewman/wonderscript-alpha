@@ -8,7 +8,7 @@ const DOT_DASH_SYM = Symbol.intern(DOT_DASH_STR)
 const DOT_SYM      = Symbol.intern(DOT_STR)
 const NEW_SYM      = Symbol.intern(NEW_STR)
 
-export function macroexpand(form: Form, scope: Context): Form {
+export function macroexpand(form: Form, context: Context): Form {
     if (!isTaggedValue(form) || isSpecialForm(form)) return form;
 
     const sym = form[0];
@@ -27,14 +27,13 @@ export function macroexpand(form: Form, scope: Context): Form {
     }
 
     if (isSymbol(form[0])) {
-        const val = findNamespaceVar(form[0], scope);
+        const val = findNamespaceVar(form[0], context);
         if (val == null) return form;
 
         if (isMacro(form[0])) {
             const args = form.slice(1);
-            const ctx = {context: new Context(scope), form: form};
 
-            return macroexpand(val.apply(ctx, args), scope);
+            return macroexpand(val.apply({context, form}, args), context);
         }
     }
 

@@ -17,7 +17,7 @@ export const isLoopForm = isBodyForm<typeof LOOP_SYM>(LOOP_SYM);
 // TODO: generalize body form emitters
 export function emitLoop(form, scope: Context): string {
     if (!isLoopForm(form)) throw new Error(`invalid ${LOOP_SYM} form: ${prStr(form)}`);
-    const env = new Context(scope);
+    const env = Context.withinLoop(scope);
 
     const buffer = ['(function('];
     const binds = form[1];

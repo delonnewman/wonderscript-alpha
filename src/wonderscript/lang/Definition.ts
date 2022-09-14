@@ -9,11 +9,12 @@ import {Object} from "./Object";
 
 export const MACRO_KW     = Keyword.intern("macro");
 // the value will be a symbol, class, protocol, or function that is part of the type system
-export const TYPE_KW      = Keyword.intern("type");
+export const TYPEDEF_KW   = Keyword.intern("typedef");
 export const DOC_KW       = Keyword.intern("doc");
 export const ADDED_KW     = Keyword.intern("added");
 export const CONST_KW     = Keyword.intern("constant");
-export const VAR_KW       = Keyword.intern("variable");
+export const DYNAMIC_KW   = Keyword.intern("dynamic");
+export const PRIVATE_KW   = Keyword.intern("private");
 // exported automatically with 'use'
 export const EXPORT_KW    = Keyword.intern("export");
 // made palatable for the outside world
@@ -21,8 +22,7 @@ export const EXTERNAL_KW  = Keyword.intern("external");
 // a value from the outside world
 export const ALIEN_KW     = Keyword.intern("alien");
 export const ALIAS_KW     = Keyword.intern("alias");
-// the type signature of a value
-export const SIGNATURE_KW = Keyword.intern("signature");
+export const TAG_KW       = Keyword.intern("tag");
 
 export class Definition implements Meta, Named, Reference, Object {
     private readonly _symbol: Symbol;
@@ -92,6 +92,10 @@ export class Definition implements Meta, Named, Reference, Object {
     }
 
     reset(value: any): Definition {
+        if (!this.isDynamic()) {
+            throw new Error("cannot change an immutable value");
+        }
+
         Object.entries(this._watchers).forEach(([key, f]) => {
             f.call(this, this._value, value, key, this);
         });
@@ -133,24 +137,24 @@ export class Definition implements Meta, Named, Reference, Object {
         return this._meta?.get(ADDED_KW);
     }
 
-    signature(): any | Nil {
-        return this._meta?.get(SIGNATURE_KW);
+    tag(): Symbol | Nil {
+        return this._meta?.get(TAG_KW);
     }
 
     isMacro(): boolean {
         return this._meta?.get(MACRO_KW) === true;
     }
 
-    isType(): boolean {
-        return this._meta?.get(TYPE_KW) === true;
+    isTypeDef(): boolean {
+        return this._meta?.get(TYPEDEF_KW) === true;
     }
 
     isConstant(): boolean {
         return this._meta?.get(CONST_KW) === true;
     }
 
-    isVariable(): boolean {
-        return this._meta?.get(VAR_KW) === true;
+    isDynamic(): boolean {
+        return this._meta?.get(DYNAMIC_KW) === true;
     }
 
     isExport(): boolean {

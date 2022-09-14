@@ -16,7 +16,7 @@ export type CondForm = [typeof COND_SYM, ...Form[]];
 export const isCondForm = (form: any): form is CondForm =>
     isTaggedValue(form) && form[0].equals(COND_SYM) && form.length >= 3;
 
-export function emitCond(form: Form, env: Context): string {
+export function emitCond(form: Form, ctx: Context): string {
     if (!isCondForm(form)) throw new Error(`invalid ${COND_SYM} form: ${prStr(form)}`);
 
     const others = rest(form);
@@ -26,8 +26,10 @@ export function emitCond(form: Form, env: Context): string {
 
     if (others.length === 2 || others.length === 4 && ELSE_SYM.equals(others[2]) && !isThrow(others[3])) {
         const [pred, consequent, _, alternate] = others;
-        return `${emit(pred, env)}?(${emit(consequent, env)}):(${emit(alternate ?? null, env)})`;
+        return `${emit(pred, ctx)}?(${emit(consequent, ctx)}):(${emit(alternate ?? null, ctx)})`;
     }
+
+    ctx.setWithinCond(); // only set within conds with self-calling functions
 
     const exprs = partition(2, others);
     const buffer = [];
@@ -35,12 +37,12 @@ export function emitCond(form: Form, env: Context): string {
     for (let i = 0; i < exprs.length; ++i) {
         const cond = i === 0 ? 'if' : 'else if';
         if (ELSE_SYM.equals(exprs[i][0])) {
-            buffer.push(str('else { ', emitTailPosition(exprs[i][1], env), ' }'));
+            buffer.push(str('else { ', emitTailPosition(exprs[i][1], ctx), ' }'));
         }
         else {
-            const x = emit(exprs[i][0], env);
+            const x = emit(exprs[i][0], ctx);
             const test = isBoolean(exprs[i][0]) || isNil(exprs[i][0]) ? `(${x})` : `(${x}!=null&&${x}!==false)`;
-            buffer.push(str(cond, test, '{ ', emitTailPosition(exprs[i][1], env), ' }'));
+            buffer.push(str(cond, test, '{ ', emitTailPosition(exprs[i][1], ctx), ' }'));
         }
     }
 

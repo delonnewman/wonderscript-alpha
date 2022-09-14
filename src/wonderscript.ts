@@ -9,39 +9,47 @@ import {findDefinitionMetaData} from "./wonderscript/compiler/findDefinitionMeta
 import {Symbol} from "./wonderscript/lang";
 import {RecursionPoint} from "./wonderscript/compiler/RecursionPoint";
 import {escapeChars} from "./wonderscript/compiler/utils";
-import {Definition, VAR_KW} from "./wonderscript/lang/Definition";
+import {Definition, DYNAMIC_KW} from "./wonderscript/lang/Definition";
 import {Module} from "./wonderscript/lang/Module";
 import {findNamespaceVar} from "./wonderscript/compiler/findNamespaceVar";
+
+export * from "./wonderscript/lang";
 
 type Platform = "node" | "browser"
 
 export const JS_SYM = Symbol.intern("js");
-export const CURRENT_MOD_SYM = Symbol.intern("*module*", null, new Map([[MUTABLE_KW, true], [VAR_KW, true]]));
+export const CURRENT_MOD_SYM = Symbol.intern("*module*", null, new Map([[DYNAMIC_KW, true]]));
 
 export class Compiler {
-    private readonly env: Context;
+    private readonly ctx: Context;
     private readonly global: object;
-    readonly platform: Platform
+    readonly platform: Platform;
+    readonly coreMod: Module;
 
     constructor(platform: Platform, global: object) {
-        this.env = new Context();
-        this.global = global
-        this.platform = platform
+        this.global = global;
+        this.platform = platform;
+        this.ctx = new Context();
+        this.coreMod = new Module(
+            Symbol.intern("wonderscript.core"),
+            Context.withinModule(this.ctx)
+        );
         this.init()
     }
 
     private init() {
-        this.env.define(Symbol.intern(CORE_NS.name), CORE_NS);
+        this.ctx.define(this.coreMod.name, this.coreMod);
+        this.ctx.define(CURRENT_MOD_SYM, this.coreMod);
+        this.coreMod.importModule(core);
 
         if (this.isNode()) {
-            this.env.define(JS_SYM, createNs('global', this.global));
+            this.ctx.define(JS_SYM, new Module(JS_SYM).importAlienModule(this.global));
         } else {
             // @ts-ignore
-            this.env.define(JS_SYM, createNs('window', this.global.window));
+            this.ctx.define(JS_SYM, new Module(JS_SYM).importAlienModule(this.global.window));
         }
 
-        importModule(core);
-        importModule({
+        this.coreMod.importModule({
             loadFile: this.loadFile.bind(this),
             readFile: this.readFile.bind(this),
             eval: this.eval.bind(this),
@@ -51,23 +59,21 @@ export class Compiler {
             macroexpand: this.macroexpand.bind(this),
             readString: compiler.readString,
             prStr: compiler.prStr,
-            theMeta: (sym: Symbol) => findDefinitionMetaData(sym, this.env),
-            isDefined: (sym: Symbol) => findNamespaceVar(sym, this.env) != null,
+            theMeta: (sym: Symbol) => findDefinitionMetaData(sym, this.ctx),
+            isDefined: (sym: Symbol) => findNamespaceVar(sym, this.ctx) != null,
             RecursionPoint,
             escapeChars,
         });
 
-        importSymbol(CORE_NS.name, CORE_NS);
-        importSymbol('*ns*', CURRENT_NS.value);
-        importSymbol('$is-browser', this.isBrowser());
-        importSymbol('$is-node', this.isNode());
-        importSymbol('$platform-info', this.platformInfo());
+        this.coreMod.importSymbol('$is-browser', this.isBrowser());
+        this.coreMod.importSymbol('$is-node', this.isNode());
+        this.coreMod.importSymbol('$platform-info', this.platformInfo());
     }
 
     platformInfo(): Map<Keyword, any> {
         const info = new Map();
 
-        return info;
+        return Object.freeze(info);
     }
 
     private isNode(): boolean {
@@ -115,23 +121,23 @@ export class Compiler {
     }
 
     eval(form: Form) {
-        return compiler.evaluate(form, this.env);
+        return compiler.evaluate(form, this.ctx);
     }
 
     compile(form: Form): string {
-        return compiler.compile(form, this.env);
+        return compiler.compile(form, this.ctx);
     }
 
     evalString(s: string, src = 'inline') {
-        return compiler.evalString(s, this.env, src);
+        return compiler.evalString(s, this.ctx, src);
     }
 
     compileString(s: string): string {
-        return compiler.compileString(s, this.env);
+        return compiler.compileString(s, this.ctx);
     }
 
     macroexpand(form: Form): Form {
-        return compiler.macroexpand(form, this.env);
+        return compiler.macroexpand(form, this.ctx);
     }
 
     prStr(form: Form): string {
