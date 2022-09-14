@@ -29,17 +29,18 @@
                     else
                     {:name sym :order i :splat false})))))
 
+; TODO: need gensym for "args" variable
 (def arity-validation-forms
-  (fn* (parsed)
+  (fn* (parsed argsym)
        (let (nargs (array-length parsed))
          (cond
            (.some parsed (fn* (arg) (:splat arg)))
-             (array '> (array 'array-length 'args) (- nargs 1))
+             (array '> (array 'array-length argsym) (- nargs 1))
            else
-             (array 'identical? nargs (array 'array-length 'args))))))
+             (array 'identical? nargs (array 'array-length argsym))))))
 
 (def let-bindings-form
-  (fn* (pair)
+  (fn* (pair argsym)
        (cons 'let
              (cons
               (.flatMap (pair 0)
@@ -47,9 +48,9 @@
                              (cond
                                (splat? x)
                                (array (symbol (.slice (.name x) 1))
-                                      (array '.slice 'args i))
+                                      (array '.slice argsym i))
                                else
-                               (array x (array 'args i)))))
+                               (array x (array argsym i)))))
               (.slice pair 1)))))
 
 (def ^:macro fn
@@ -62,33 +63,35 @@
              parsed (map parsed-args arglists)
              arities (.sort (map (fn* (args) (array-length args)) arglists) (fn* (a b) (cond (< a b) -1 (> a b) 1 else 0)))
              splat (.some parsed (fn* (list) (.some list (fn* (arg) (:splat arg)))))
-             arity-str (cond splat (str (arities 0) " or more") else (.join arities " or ")))
+             arity-str (cond splat (str (arities 0) " or more") else (.join arities " or "))
+             argsym (gensym "args"))
          (array 'fn*
-                (array '&args)
+                (array (symbol (str "&" argsym)))
                 (cons 'cond
                       (.concat
                        (.flatMap xs
                                  (fn* (x i)
-                                      (array (arity-validation-forms (parsed i))
-                                             (let-bindings-form x))))
+                                      (array (arity-validation-forms (parsed i) argsym)
+                                             (let-bindings-form x argsym))))
                        (array 'else
                               (array 'throw
                                      (array 'js/Error.
-                                            (array 'str "wrong number of arguments, expected " arity-str " got "
-                                                   (array 'array-length 'args)))))))))
+                                            (array 'str "wrong number of arguments (given "
+                                                   (array 'array-length argsym) ", expected " arity-str ")"))))))))
        else
          (let (parsed (parsed-args x)
                arity (array-length x)
                splat (.some parsed (fn* (arg) (:splat arg)))
-               arity-str (cond splat (str arity " or more") else (str arity)))
-           (array 'fn* (array '&args)
-                  (array 'cond (arity-validation-forms (parsed-args x))
-                         (let-bindings-form xs)
+               arity-str (cond splat (str arity " or more") else (str arity))
+               argsym (gensym "args"))
+           (array 'fn* (array (symbol (str "&" argsym)))
+                  (array 'cond (arity-validation-forms (parsed-args x) argsym)
+                         (let-bindings-form xs argsym)
                          'else
                          (array 'throw
                                 (array 'js/Error.
-                                       (array 'str "wrong number of arguments, expected " arity-str " got "
-                                              (array 'array-length 'args)))))))))))
+                                       (array 'str "wrong number of arguments (given "
+                                              (array 'array-length argsym) ", expected " arity-str ")"))))))))))
 
 (def ^:macro defn
   (fn
@@ -215,12 +218,23 @@
                    value
                    (array 'throw (array 'js/Error. "only immutable values can be constants")))))))
 
-(defmacro defvar
+(defmacro defparam
+  ((name) (array 'defparam name nil nil))
   ((name value)
-   (array 'defvar name nil value))
+   (array 'defparam name nil value))
   ((name doc value)
-   (let (nm (.withMeta name {:doc doc :variable true}))
+   (let (nm (.withMeta name {:doc doc :dynamic true}))
      (array 'def nm value))))
+
+(defmacro var
+  ((name) (array 'var name nil))
+  ((name value)
+   (let (nm (.withMeta name {:mutable true}))
+     (.define %context nm value)
+     value)))
+
+(defmacro this-context
+  () %context)
 
 (defmacro defonce
   ((name value)

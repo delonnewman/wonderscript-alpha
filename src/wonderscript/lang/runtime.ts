@@ -318,6 +318,12 @@ export function merge(...maps: Map<any, any>[]): Map<any, any> {
     return merged;
 }
 
+export function gensym(template = "sym"): WSSymbol {
+    const num = Math.floor(Math.random() * 100000);
+
+    return WSSymbol.intern(`${template}${num}`);
+}
+
 export function importSymbol(name: string, obj) {
     let wsName = CORE_NAMES[name];
 
