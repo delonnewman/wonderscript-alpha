@@ -3,8 +3,14 @@
   <head>
     <title>WonderScript</title>
     <style>
+      #main {
+        margin-right: 5px;
+        margin-left: 5px;
+      }
+
       .frame {
         display: flex;
+        align-items: start;
       }
 
       .frame > button {
@@ -18,6 +24,7 @@
         width: 100%;
         border-radius: 4px;
         border: 1px gray solid;
+        min-height: 400px;
       }
 
       #output {
@@ -25,41 +32,60 @@
         margin-top: 5px;
         margin-bottom: 15px;
       }
+
+      #error {
+        color: red;
+      }
     </style>
   </head>
   <body>
     <main id="main">
       <div class="frame">
-        <input id="input" type="text" name="input">
-        <button id="evalButton" type="button">Eval</button>
-        <button id="clearButton" type="button">Clear</button>
+        <div style="width:50%">
+          <div id="output"></div>
+          <div id="error"></div>
+        </div>
+        <div style="width:50%">
+          <label for="input">Listener</label>
+          <textarea id="input" name="input"></textarea>
+          <button id="evalButton" type="button">Eval</button>
+          <button id="clearButton" type="button">Clear</button>
+        </div>
       </div>
-      <div id="output"></div>
-      <div id="error"></div>
-      <div id="history"></div>
+      <div id="historyListing"></div>
     </main>
     <script type="module" src="dist/wonderscript.js"></script>
     <script>
       let compiler;
-      const history = [];
+      const historyItems = [];
+
+      function renderHistory() {
+        const entries = historyItems.map((h => `<pre class="history-entry">${h}</pre>`))
+        historyListing.innerHTML = entries.join('');
+      }
+
+      function clearErrorAndOutput() {
+        error.innerText = "";
+        output.innerText = "";
+      }
 
       function initListener() {
         evalButton.addEventListener("click", () => {
           try {
-            history.push(input.value);
-            const result = compiler.evalString(input.value);
+            historyItems.push(input.value);
+            clearErrorAndOutput();
+            const result = compiler.evalString(input.value, 'listener-input');
             output.innerText = compiler.prStr(result);
             renderHistory();
           } catch (e) {
-            console.error(e);
-            error.innerText = e;
+            error.innerHTML = `
+                <strong>${e.constructor.name}</strong>:${e.message}<br>
+                ${e.stack.replace(/\n/g, '<br>')}
+            `;
           }
         });
-      }
 
-      function renderHistory() {
-        const entries = history.map((h => `<div class="history-entry">${h}</div>`))
-        history.innerHTML = entries.join();
+        clearButton.addEventListener("click", clearErrorAndOutput);
       }
 
       const wsInter = setInterval(() => {

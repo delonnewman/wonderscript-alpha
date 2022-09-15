@@ -25,20 +25,14 @@ export class Compiler {
 
     constructor(platform: Platform, global: object) {
         this.env = new Context();
-        this.global = global
-        this.platform = platform
+        this.global = global;
+        this.platform = platform;
         this.init()
     }
 
     private init() {
         this.env.define(Symbol.intern(CORE_NS.name), CORE_NS);
-
-        if (this.isNode()) {
-            this.env.define(JS_SYM, createNs('global', this.global));
-        } else {
-            // @ts-ignore
-            this.env.define(JS_SYM, createNs('window', this.global.window));
-        }
+        this.env.define(JS_SYM, createNs(this.globalName(), this.global));
 
         importModule(core);
         importModule({
@@ -76,6 +70,10 @@ export class Compiler {
 
     private isBrowser(): boolean {
         return this.platform === 'browser';
+    }
+
+    private globalName(): string {
+        return this.isBrowser() ? 'window' : 'global';
     }
 
     loadFile(path: string): Compiler {

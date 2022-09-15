@@ -24,7 +24,6 @@ export function _read(r, eofIsError, eofValue, isRecursive, opts) {
         let ch = r.read();
 
         while (isWhitespace(ch)) {
-            //if (ch === '\n') r.incrementLine();
             ch = r.read();
         }
         if (ch === null) {
@@ -33,8 +32,7 @@ export function _read(r, eofIsError, eofValue, isRecursive, opts) {
         }
 
         if (isDigit(ch)) {
-            const n = readNumber(r, ch);
-            return n;
+            return readNumber(r, ch);
         }
 
         const macro = getMacro(ch);
@@ -45,7 +43,7 @@ export function _read(r, eofIsError, eofValue, isRecursive, opts) {
         }
 
         if (ch === '+' || ch === '-') {
-            var ch2 = r.read();
+            const ch2 = r.read();
             if (isDigit(ch2)) {
                 r.unread(ch2);
                 return readNumber(r, ch);

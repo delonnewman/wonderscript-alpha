@@ -8,7 +8,10 @@ export function readDelimitedList(delim, r: PushBackReader, isRecursive: boolean
 
     while (true) {
         let ch = r.read();
-        while (isWhitespace(ch)) ch = r.read();
+        while (isWhitespace(ch)) {
+            if (ch === '\n') r.incrementLine();
+            ch = r.read();
+        }
 
         if (ch === null) {
             throw new Error('EOF while reading, starting at line: ' + firstLine);

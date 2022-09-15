@@ -34,7 +34,7 @@
   (fn* (parsed argsym)
        (let (nargs (array-length parsed))
          (cond
-           (.some parsed (fn* (arg) (:splat arg)))
+           (.some parsed #(:splat %))
              (array '> (array 'array-length argsym) (- nargs 1))
            else
              (array 'identical? nargs (array 'array-length argsym))))))
@@ -96,8 +96,8 @@
 (def ^:macro defn
   (fn
     (name &rest)
-    (let (doc  (cond (string? (rest 0)) (rest 0) else nil)
-          meta (cond (map? (rest 0)) (rest 0) (map? (rest 1)) (rest 1) else nil)
+    (let (doc  (cond (string? (rest 0)) (rest 0))
+          meta (cond (map? (rest 0)) (rest 0) (map? (rest 1)) (rest 1))
           args (cond
                  (array? (rest 0)) (rest 0)
                  (array? (rest 1)) (rest 1)
@@ -122,11 +122,11 @@
   "Define a type alias"
   {:added 1.0}
   (name type-val)
-  (let (nm (.withMeta name {:type true}))
+  (let (nm (.withMeta name {:typedef true}))
     (array 'def nm type-val)))
 
 (defn type?
-  (sym) (:type (the-meta sym)))
+  (sym) (:typedef (the-meta sym)))
 
 (defn js-primitive-type?
   (obj) (not-identical? "object" (typeof obj)))
@@ -218,10 +218,10 @@
                    value
                    (array 'throw (array 'js/Error. "only immutable values can be constants")))))))
 
-(defmacro defparam
-  ((name) (array 'defparam name nil nil))
+(defmacro defvar
+  ((name) (array 'defvar name nil nil))
   ((name value)
-   (array 'defparam name nil value))
+   (array 'defvar name nil value))
   ((name doc value)
    (let (nm (.withMeta name {:doc doc :dynamic true}))
      (array 'def nm value))))
@@ -302,7 +302,7 @@
   ((name slots) (array 'defclass name slots nil))
   ((name slots superclass)
    (let (nm (.withMeta name {:typedef true}))
-     (array 'def nm (make-class slots superclass)))))
+     (array 'def nm (array 'make-class (array 'quote slots) superclass)))))
 
 ;; Numerical
 
@@ -320,10 +320,13 @@
   (s) (js/parseInt s 10))
 
 (defn ->float
-  (s) (js/parseFloat s 10))
+  (s) (js/parseFloat s))
 
-(defn add1 (x) (+ x 1))
-(defn sub1 (x) (- 1 x))
+(defn bigint?
+  (n) (identical? "bigint" (typeof n)))
+
+(defn inc (x) (+ x 1))
+(defn dec (x) (- x 1))
 
 (defmacro <op>
   (operator)
@@ -594,7 +597,7 @@
     (array 'loop (array nm (array 'col 0) 'i 0)
            (cons 'when
                  (cons (array 'not (array 'nil? nm))
-                       (concat body (array (array 'recur (array 'col (array 'add1 'i)) (array 'add1 'i))))))
+                       (concat body (array (array 'recur (array 'col (array 'inc 'i)) (array 'inc 'i))))))
            col)))
 
 (defmacro while
@@ -858,7 +861,7 @@
     (or (map? col) (set? col)) (size col)
     (slot? col "count") (.count col)
     else
-     (reduce (fn (n _) (add1 n)) col 0)))
+     (reduce (fn (n _) (inc n)) col 0)))
 
 (defn includes?
   (col value)
@@ -963,6 +966,7 @@
     (true? form) "Yes"
     (false? form) "No"
     (string? form) form
+    (number? form) (str form)
     (tag? form)
       (if (has-attr? form)
         (render-attr-tag form)
@@ -970,4 +974,4 @@
     (component? form) (render-component form)
     (tag-list? form) (render-tag-list form)
     else
-      (throw (js/Error. "Unknown form"))))
+      (throw (js/Error. (str "unknown form: " (pr-str form))))))

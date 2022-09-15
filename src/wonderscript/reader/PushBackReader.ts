@@ -1,6 +1,6 @@
 export class PushBackReader {
     private readonly limit: number;
-    private readonly stream: any;
+    private readonly stream: string[];
     private position: number;
     private _line: number;
     private _column: number;
@@ -21,6 +21,10 @@ export class PushBackReader {
         this._line++;
     }
 
+    decrementLine() {
+        this._line--;
+    }
+
     incrementColumn() {
         this._column++;
     }
@@ -37,9 +41,7 @@ export class PushBackReader {
         if (this.position > this.limit) return null;
         const ch = this.stream[this.position];
         this.position++;
-        //console.log(JSON.stringify(ch));
         if (ch === '\n') {
-            //console.log('line:', this.line());
             this.resetColumn();
             this.incrementLine();
         }
