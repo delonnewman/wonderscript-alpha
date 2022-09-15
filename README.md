@@ -17,39 +17,28 @@ user> (reduce + (range 10))
 
 # Language
 
-## Reader
-
-- `true`, `false`, `nil`
-- Numbers `1`, `100`, `1_000`, `1e10`, `1E10`'
-- Rational? `1/2`
-- Keyword `:keyword`
-- String `"string"`
-- Pair `left => right`? (Cons)
-- List `(1 2 3 4)`
-- Map `{:a => 1 :b => 2}` (immutable, eventually persistent)
-- Vector `[1 2 3 4]` (immutable, eventually persistent)
-- Set `#{1 2 3 4}` (immutable, eventually persistent)
-- Function `#(+ %1 %2)`
-
-## Core Special Forms
+## Special Forms
 
 - `def`
 - `quote`
 - `cond`
 - `fn*` (a direct mapping of JS function semantics)
-- `set!`
+- `set*` (a direct mapping of JS assignment semantics)
 - `js*`
 - `loop`
-- `recur`
+- `recur` - `repeat`?
 - `throw`
 - ~~`try`, `catch`, `finally`~~ (not implemented)
-- ~~`do`~~
-- `begin`, `rescue`, `ensure`, `else`?
+- `do` (a block with it's own environment), `begin` (an immediately executed block with no environment)
+  - `rescue`, `ensure`, `else`
 - `new`
 - `.`
 
 ## Operators
 (treated specially by the compiler)
+
+Consider making is possible to define within WS, they would function as low-level code generating macros
+that can also (optionally) be used as functions.
 
 - `mod` [^1]
 - `<`, `>`, `>=`, `<=` [^1]
@@ -60,9 +49,10 @@ user> (reduce + (range 10))
 - ~~`identical?`~~ `==` (identity, i.e. object equality) [^1]
 - `equiv?` (JS type coercive equality)
 - `instance?` [^1]
-- `type` [^1]
+- `typeof` [^1]
 - `+`, `-`, `*`, `/` [^1]
-- `aget`, `aset`, `alength`
+- ~~`array-get`, `array-set!`, `array-length`~~
+- `slot`, `slot-set!`, `slot?`, `length`
 
 [^1]: Paired with a function equivalent.
 
@@ -82,15 +72,29 @@ user> (reduce + (range 10))
 - Protocol `defprotocol`
 - Record `defrecord`
 
+## Meta Object Protocol
+
+- Invokable
+- Function
+- Method
+- Class
+- Protocol
+- Record
+- GenericFunction
+- Definition
+- Context
+- Module
+- Object
+
 ## Functions
 
-, `(fn (x) (+ 1 x))`, `#(+ 1 %)`, `x => (+ 1 x)`? (if pairs workout)
+`(fn (x) (+ 1 x))`, `#(+ 1 %)`
 
 ## Generic Functions
 
 ## Methods
 
-Can be added to any type and Generic Functions
+Can be dispatched on any type and arbitrary Generic Functions
 
 ## Modules
 
@@ -123,16 +127,16 @@ Exports and shared symbols can also be specified with meta data on the symbol:
 
 (module Dragnet)
 
-(defclass ^:shared View ...)
+(defclass View ...)
 ```
 ## Definition Meta Data
 
 - `:private` (only seen in module defaults to true)
-- `:shared` (can be accessed namespaced by the module)
 - `:export` (definition can be exported)
 - `:macro` (definition is a macro)
 - `:doc` (doc string of the definition)
-- `:type` (boolean, definition is a type alias)
+- `:typedef` (boolean, definition is a type alias)
+- `:tag` (Symbol type tag of the def)
 - `:sig` (the type signature of a function)
 
 ## Data Structures
@@ -171,7 +175,7 @@ Exports and shared symbols can also be specified with meta data on the symbol:
 - Set < Value : Associative
 - MutableSet < Object : Associative
 - String < Value : Indexed
-- CharBuffer < Object : Indexed
+- Buffer < Object : Indexed
 - Vector < Value : Indexed
 - Array < Object : Indexed
 - Function < Value
@@ -201,9 +205,12 @@ A collection of properties/shapes and doc strings
   - remove(key)
 - Indexed < Associative
   - at(index)
-- Stack
+- ImmutableStack
   - pop()
   - peek()
+  - push() 
+- MutableStack
+  - pop()
   - push()
 - Queue
 - Matchable =~
@@ -222,35 +229,41 @@ A collection of properties/shapes and doc strings
 - `fn` (lambda macro with arity checks and arity polymorphism)
 - `defn`
 - `defmacro`
-- `if`
+- `deftype`
+- `defclass`
+- `defprotocol`
+- `defconst`
+- `defvar`
+- `set!`
+- `raise`, (builds on throw, requires a class if no class is provided defaults to RuntimeError)
+- `if`, `if-not`, `when`, `unless`
 - `+`, `-`, `*`, `/`, `mod`
 - `<`, `>`, `>=`, `<=`, `<=>`
-- `inc`, `dec` (+1, -1)?
+- `inc`, `dec`
 - `identity`, ~~`constantly`~~, `always`
 - `comment`
 - `even?`, `odd?`
 - `zero?`, `pos?`, `neg?`
 - `true?`, `false?`
-- `reduce`, `map`, `filter`, `grep`, `mapcat`, `concat`, `reduce-right`, `each`
+- `reduce`, `map`, `filter`, `grep`, `mapcat`, `concat`, `reduce-right`,
 - `first`, `next`, `rest`, `second`, `cons`, `drop`, `take`, `empty?`
+- `each`, `tap`
+- ~~`dotimes`, `doeach`~~, `for`, `while`, `until`
 - ~~`nth`~~, `at`
 - `range`
 - `partition`
-- `when`, `unless`
-- `dotimes`, `doeach`, `while`, `until`
-- `pr`, `pr-str`, `print`
+- ~~`pr`~~ `p`, ~~`pr-str`~~ `inspect`, `print`
 - `str`
-- `number?`, `string?`, `boolean?`, `function?` (rename to `fn?`?)
+- `number?`, `string?`, `boolean?`, `function?`
 - `set?`, `map?`, `iterator?`, `get`
 - `array-like?`, `array?`,  `->array`, `array`, `slice`,
   `push!`, `pop!`, `shift!`, `unshift!`
 - `object?`, `undefined?`, `null?`, `nil?`
 - `memoize`, `compose`, `apply`
-- `maybe`?, `either`?, `raise`?
 - `set-meta`, `meta`, `get-meta`, `reset-meta`
 - `atom`, `reset!`, `swap!`, `deref`, `compare-and-swap!` (TODO)
-- `freeze!`, `unfreeze!`, `clone`
-- `assert`
+- `freeze!`, `frozen?`, `clone`, `immutable?`, `mutable?`
+- `deftest`, `is`
 
 # TODO
 
@@ -269,11 +282,11 @@ A collection of properties/shapes and doc strings
 - [ ] Implement ST or CL-like images called a "world" (a reified notion of static and dynamic state)
     - [ ] Create new compilers based on "world" objects
     - [ ] Create encoders for world objects so they can be persisted and transmitted
-- [ ] Update JS
-    - [ ] Make use of `let` and `const`
-    - [ ] Make use of `class`
-    - [ ] Refactor into modules
-    - [ ] Consider TypeScript?
+- [x] Update JS
+    - [x] Make use of `let` and `const`
+    - [x] Make use of `class`
+    - [x] Refactor into modules
+    - [x] TypeScript
   
 # Author
 
