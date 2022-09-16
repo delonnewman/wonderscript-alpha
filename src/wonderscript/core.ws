@@ -922,15 +922,15 @@
 ;; HTML Rendering
 
 (defn tag?
-  (x) (and (array? x) (keyword? (x 0))))
+  (x) (and (vector? x) (keyword? (x 0))))
 
 (defn has-attr?
   (x) (map? (x 1)))
 
 (defn component?
-  (x) (and (array? x) (function? (x 0))))
+  (x) (and (vector? x) (function? (x 0))))
 
-(def tag-list? array?)
+(def tag-list? vector?)
 
 (defn render-attr
   (form)
@@ -955,18 +955,17 @@
     (str "<" nm ">" (render-tag-list (slice form 1)) "</" nm ">")))
 
 (defn render-component (form)
-  (let (f    (form 0)
-        args (slice form 1))
-    (html (apply f args))))
+  (let (f     (form 0)
+        attrs (form 1))
+    (html (f attrs))))
 
 (defn html
   (form)
   (cond
     (nil? form) $empty-string
-    (true? form) "Yes"
-    (false? form) "No"
+    (or (boolean? form) (number? form))
+      (str form)
     (string? form) form
-    (number? form) (str form)
     (tag? form)
       (if (has-attr? form)
         (render-attr-tag form)
@@ -975,3 +974,10 @@
     (tag-list? form) (render-tag-list form)
     else
       (throw (js/Error. (str "unknown form: " (pr-str form))))))
+
+(defn button
+  (() (button {:label "Button"}))
+  ((attrs)
+   (let (label   (:label attrs)
+         onclick (:onclick attrs))
+     [:button {:onclick onclick} label])))

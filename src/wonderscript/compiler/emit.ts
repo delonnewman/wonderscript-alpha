@@ -99,6 +99,8 @@ import {emitSlotAccess} from "./emit/emitSlotAccess";
 import {emitSlotInspection} from "./emit/emitSlotInspection";
 import {emitSet} from "./emit/emitSet";
 import {emitSlotMutation} from "./emit/emitSlotMutation";
+import {isVector} from "../lang/Vector";
+import {emitVector} from "./emit/emitVector";
 
 export function emit(form_: Form, ctx: Context) {
     const form = macroexpand(form_, ctx);
@@ -226,6 +228,9 @@ export function emit(form_: Form, ctx: Context) {
         else {
             return emitFuncApplication(form, ctx);
         }
+    }
+    else if (isVector(form)) {
+        return emitVector(form, ctx);
     }
     else {
         throw new Error(`Invalid form: ${prStr(form)}`);

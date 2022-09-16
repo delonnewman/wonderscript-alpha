@@ -1,9 +1,9 @@
 import {readDelimitedList} from "./readDelimitedList";
 import {PushBackReader} from "./PushBackReader";
-import {QUOTE_SYM, QuoteForm} from "../compiler/emit/emitQuote";
+import {Vector} from "../lang/Vector";
 
-export function vectorReader(r: PushBackReader, openbracket, opts): QuoteForm {
+export function vectorReader(r: PushBackReader, openbracket, opts): Vector {
     const a = readDelimitedList(']', r, true, opts);
 
-    return [QUOTE_SYM, a]
+    return new Vector(a);
 }

@@ -8,6 +8,7 @@ import {Keyword} from "./Keyword";
 import {Symbol as WSSymbol} from "./Symbol";
 import {List} from "./List";
 import {Object} from "./Object";
+import {Vector} from "./Vector";
 
 const EMPTY_ARRAY  = Object.freeze([]);
 const EMPTY_STRING = "";
@@ -316,6 +317,14 @@ export function merge(...maps: Map<any, any>[]): Map<any, any> {
     }
 
     return merged;
+}
+
+export function vector(...args): Vector {
+    return new Vector(args);
+}
+
+export function escapeHtml(str: string): string {
+    return new Option(str).innerHTML;
 }
 
 export function gensym(template = "sym"): WSSymbol {

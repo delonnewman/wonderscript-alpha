@@ -15,6 +15,7 @@ import {Form} from "./core";
 import {isSymbol} from "../lang/Symbol";
 import {isKeyword} from "../lang/Keyword";
 import {isList} from "../lang/List";
+import {isVector} from "../lang/Vector";
 
 const EMPTY_LIST  = '()';
 const EMPTY_ARRAY = '[]';
@@ -51,6 +52,15 @@ export function prStr(form: Form): string {
 
         const parts = form.map(prStr);
         return `(${parts.join(' ')})`;
+    }
+
+    if (isVector(form)) {
+        if (form.length === 0) {
+            return EMPTY_ARRAY;
+        }
+
+        const parts = Array.prototype.map.call(form, prStr);
+        return `[${parts.join(' ')}]`;
     }
 
     if (isFunction(form)) {

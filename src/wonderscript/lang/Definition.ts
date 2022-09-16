@@ -169,3 +169,7 @@ export class Definition implements Meta, Named, Reference, Object {
         return this._meta?.get(ALIAS_KW) === true;
     }
 }
+
+export function isDefinition(obj): obj is Definition {
+    return obj instanceof Definition;
+}

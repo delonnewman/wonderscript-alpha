@@ -3,7 +3,7 @@ import {CORE_NS, CURRENT_NS} from "./wonderscript/compiler/vars";
 import {createNs} from "./wonderscript/lang/Namespace";
 import * as core from "./wonderscript/lang";
 import * as compiler from "./wonderscript/compiler";
-import {importModule, importSymbol, Keyword} from "./wonderscript/lang";
+import {importModule, importSymbol, isString, Keyword} from "./wonderscript/lang";
 import {Form} from "./wonderscript/compiler/core";
 import {findDefinitionMetaData} from "./wonderscript/compiler/findDefinitionMetaData";
 import {Symbol} from "./wonderscript/lang";
@@ -12,6 +12,8 @@ import {escapeChars} from "./wonderscript/compiler/utils";
 import {Definition, VAR_KW} from "./wonderscript/lang/Definition";
 import {Module} from "./wonderscript/lang/Module";
 import {findNamespaceVar} from "./wonderscript/compiler/findNamespaceVar";
+
+export * from "./wonderscript/lang"
 
 type Platform = "node" | "browser"
 
@@ -45,6 +47,7 @@ export class Compiler {
             macroexpand: this.macroexpand.bind(this),
             readString: compiler.readString,
             prStr: compiler.prStr,
+            prHtml: this.prHTML.bind(this),
             theMeta: (sym: Symbol) => findDefinitionMetaData(sym, this.env),
             isDefined: (sym: Symbol) => findNamespaceVar(sym, this.env) != null,
             RecursionPoint,
@@ -134,5 +137,19 @@ export class Compiler {
 
     prStr(form: Form): string {
         return compiler.prStr(form);
+    }
+
+    isHTML(str: string): str is string {
+        const doc = new DOMParser().parseFromString(str, "text/html");
+
+        return Array.from(doc.body.childNodes).some(node => node.nodeType === 1);
+    }
+
+    prHTML(form: Form): string {
+        if (isString(form) && this.isHTML(form)) {
+            return form;
+        }
+
+        return this.prStr(form);
     }
 }

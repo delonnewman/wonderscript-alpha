@@ -3,6 +3,7 @@ import {RECUR_SYM as RECUR_STR, SPECIAL_FORMS, THROW_SYM as THROW_STR} from "./c
 import {isSymbol, Symbol} from "../lang/Symbol"
 import {Keyword} from "../lang/Keyword";
 import {findDefinitionMetaData} from "./findDefinitionMetaData";
+import {Vector} from "../lang/Vector";
 
 export function isMacro(sym: Symbol): boolean {
     const meta = findDefinitionMetaData(sym)
@@ -12,7 +13,16 @@ export function isMacro(sym: Symbol): boolean {
 }
 
 export type TaggedValue<Tag = Symbol> = [Tag, ...any]
-export type Form = string | number | null | undefined | Map<any, any> | Set<any> | TaggedValue | any[] | Symbol | Keyword
+export type Form = string
+    | number
+    | null
+    | undefined
+    | Map<any, any>
+    | Set<any>
+    | TaggedValue
+    | any[]
+    | Symbol
+    | Keyword
 
 export type BodyForm<Tag> = [Tag, Symbol[], ...Form[]];
 

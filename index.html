@@ -31,6 +31,7 @@
         font-size: 14pt;
         margin-top: 5px;
         margin-bottom: 15px;
+        max-width: 100%;
       }
 
       #error {
@@ -46,7 +47,7 @@
           <div id="error"></div>
         </div>
         <div style="width:50%">
-          <label for="input">Listener</label>
+          <label for="input">WonderScript Listener</label>
           <textarea id="input" name="input"></textarea>
           <button id="evalButton" type="button">Eval</button>
           <button id="clearButton" type="button">Clear</button>
@@ -75,7 +76,7 @@
             historyItems.push(input.value);
             clearErrorAndOutput();
             const result = compiler.evalString(input.value, 'listener-input');
-            output.innerText = compiler.prStr(result);
+            output.innerHTML = compiler.prHTML(result);
             renderHistory();
           } catch (e) {
             error.innerHTML = `
