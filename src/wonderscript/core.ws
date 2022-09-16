@@ -932,35 +932,113 @@
 
 (def tag-list? vector?)
 
-(defn render-attr
-  (form)
-  (reduce #(str %1 " " %2)
-          (map #(str (name (% 0)) "=\"" (% 1) "\"")
-               (entries form))))
+(def event-attrs
+  {:on-abort "onabort"
+   :on-autocomplete "onautocomplete"
+   :on-autocomplete-error "onautocompleteerror"
+   :on-blur "onblur"
+   :on-cancel "oncancel"
+   :on-canplay "oncanplay"
+   :on-canplay-through "canplaythrough"
+   :on-change "change"
+   :on-click "click"
+   :on-close "close"
+   :on-context-menu "contextmenu"
+   :on-cue-change "cuechange"
+   :on-dblclick "dblclick"
+   :on-drag "drag"
+   :on-drag-end "dragend"
+   :on-drag-enter "dragenter"
+   :on-drag-leave "dragleave"
+   :on-drag-over "dragover"
+   :on-drag-start "dragstart"
+   :on-drop "drop"
+   :on-duration-change "durationchange"
+   :on-emptied "emptied"
+   :on-ended "ended"
+   :on-error "error"
+   :on-focus "focus"
+   :on-input "input"
+   :on-invalid "invalid"
+   :on-key-down "keydown"
+   :on-key-press "keypress"
+   :on-key-up "keyup"
+   :on-load "load"
+   :on-loaded-data "loadeddata"
+   :on-loaded-metadata "loadedmetadata"
+   :on-load-start "loadstart"
+   :on-mouse-down "mousedown"
+   :on-mouse-enter "mouseenter"
+   :on-mouse-leave "mouseleave"
+   :on-mouse-move "mousemove"
+   :on-mouse-out "mouseout"
+   :on-mouse-over "mouseover"
+   :on-mouse-up "mouseup"
+   :on-mouse-wheel "mousewheel"
+   :on-pause "pause"
+   :on-play "play"
+   :on-playing "playing"
+   :on-progress "progress"
+   :on-rate-change "ratechange"
+   :on-reset "reset"
+   :on-resize "resize"
+   :on-scroll "scroll"
+   :on-seeked "seeked"
+   :on-seeking "seeking"
+   :on-select "select"
+   :on-show "show"
+   :on-sort "sort"
+   :on-stalled "stalled"
+   :on-submit "submit"
+   :on-suspend "suspend"
+   :on-time-update "timeupdate"
+   :on-toggle "toggle"
+   :on-volume-change "volumechange"
+   :on-waiting "waiting"})
 
-(def html) ; render-tag-list and html are mutually recursive
+(let (^:mutable current-id 0)
+  (defn render-attr
+    (attr value handlers)
+    (let (event (event-attrs attr))
+      (set* current-id (+ 1 current-id))
+      (if (and event value)
+        (begin
+         (push! handlers [(str "element-" current-id) event value])
+         (str "id=\"element-" current-id "\""))
+        (str (name attr) "=\"" value "\"")))))
+
+(defn render-attrs
+  (form handlers)
+  (reduce #(str %1 " " %2)
+          (map #(render-attr (% 0) (% 1) handlers) (entries form))))
+
+(def render-form) ; render-tag-list and html are mutually recursive
 
 (defn render-tag-list
-  (form) (.join (map #(html %) form) ""))
+  (form handlers)
+  (.join (map #(render-form % handlers) form) ""))
 
-(defn render-attr-tag (form)
+(defn render-attr-tag
+  (form handlers)
   (let (tag  (form 0)
         nm   (name tag)
-        attr (render-attr (form 1)))
-    (str "<" nm " " attr ">" (render-tag-list (slice form 2)) "</" nm ">")))
+        attr (render-attrs (form 1) handlers))
+    (str "<" nm " " attr ">" (render-tag-list (slice form 2) handlers) "</" nm ">")))
 
-(defn render-tag (form)
+(defn render-tag
+  (form handlers)
   (let (t  (form 0)
         nm (name t))
-    (str "<" nm ">" (render-tag-list (slice form 1)) "</" nm ">")))
+    (str "<" nm ">" (render-tag-list (slice form 1) handlers) "</" nm ">")))
 
-(defn render-component (form)
-  (let (f     (form 0)
+(defn render-component
+  (form handlers)
+  (let (comp  (form 0)
         attrs (form 1))
-    (html (f attrs))))
+    (render-form (comp attrs) handlers)))
 
-(defn html
-  (form)
+(defn render-form
+  (form handlers)
   (cond
     (nil? form) $empty-string
     (or (boolean? form) (number? form))
@@ -968,16 +1046,38 @@
     (string? form) form
     (tag? form)
       (if (has-attr? form)
-        (render-attr-tag form)
-        (render-tag form))
-    (component? form) (render-component form)
-    (tag-list? form) (render-tag-list form)
+        (render-attr-tag form handlers)
+        (render-tag form handlers))
+    (component? form) (render-component form handlers)
+    (tag-list? form) (render-tag-list form handlers)
     else
       (throw (js/Error. (str "unknown form: " (pr-str form))))))
+
+(defn render-event-handler
+  (handler)
+  (let (id (handler 0)
+        event (handler 1)
+        cb (handler 2))
+    (str "document.getElementById(" (.stringify js/JSON id) ").addEventListener("
+         (.stringify js/JSON event) ", " cb ")")))
+
+(defn render-event-handlers
+  (handlers)
+  (str "<script>"
+       (.join (map #(render-event-handler %) handlers) ";") "</script>"))
+
+(defn html
+  (form)
+  (let (event-handlers (make-array)
+        content (render-form form event-handlers))
+    (print event-handlers)
+    (if-not (empty? event-handlers)
+      (str content (render-event-handlers event-handlers))
+      content)))
 
 (defn button
   (() (button {:label "Button"}))
   ((attrs)
    (let (label   (:label attrs)
-         onclick (:onclick attrs))
-     [:button {:onclick onclick} label])))
+         onclick (:on-click attrs))
+     [:button {:on-click onclick} label])))
