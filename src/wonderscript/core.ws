@@ -149,12 +149,10 @@
   (a b)
   (identical? a b))
 
-(def itself (fn (x) x))
+(defn identity (x) x)
 
-(def always
-  (fn (x)
-    (fn ()
-      x)))
+(defn always
+  (x) (fn () x))
 
 ;; Boolean & Logic
 
@@ -284,25 +282,25 @@
     (instance? value t)
     (.equals (type value) t)))
 
-(defn make-class
-  (() (make-class '() nil))
-  ((slots) (make-class slots nil))
-  ((slots superclass)
-   (let (ctr   (eval (array 'fn* (cons slots (map #(array (symbol (str ".-" %)) 'this) slots))))
-         proto (.create js/Object superclass))
-     (slot-set! ctr 'prototype proto)
-     ctr)))
+(def Object nil)
+
+(defmacro make-class
+  (() (make-class (fn* ()) Object))
+  ((ctr) (make-class ctr Object))
+  ((ctr superclass)
+   (array 'slot-set! ctr 'prototype
+          (array '.create 'js/Object superclass))
+   ctr))
 
 (defn define-method
   (klass name f)
   (slot-set! (.-prototype klass) name f))
 
 (defmacro defclass
-  ((name) (array 'defclass name '() nil))
-  ((name slots) (array 'defclass name slots nil))
-  ((name slots superclass)
+  ((name) (array 'defclass name nil))
+  ((name superclass)
    (let (nm (.withMeta name {:typedef true}))
-     (array 'def nm (array 'make-class (array 'quote slots) superclass)))))
+     (array 'def nm (array 'make-class superclass)))))
 
 ;; Numerical
 

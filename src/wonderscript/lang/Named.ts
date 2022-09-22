@@ -1,7 +1,7 @@
 import {Nil} from "./Nil";
 
-export interface Named {
-    name(): string
+export interface Named<Name = string> {
+    name(): Name
     namespace(): string | Nil
     hasNamespace(): boolean
 }

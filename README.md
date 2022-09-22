@@ -265,6 +265,56 @@ A collection of properties/shapes and doc strings
 - `freeze!`, `frozen?`, `clone`, `immutable?`, `mutable?`
 - `deftest`, `is`
 
+# defclass
+
+```clojure
+(defprotocol Invokable
+  "The interface for all invokable objects"
+  (invoke (*args)))
+  
+(defprotocol Type
+  (satisfies (object)))
+
+(defclass MethodSig
+  (has      Symbol name)
+  (has-many Symbol arglist)
+  (has?     String doc))
+  
+(defclass Protocol :does Type
+  (has-many? Protocol  ^:key protocols)
+  (has-many  MethodSig ^:key signatures)
+  (has?      String    ^:key doc))
+  
+(defclass Method :does Invokable
+  (has      Symbol name)
+  (has?     String doc)
+  (has-many Symbol arglist)
+  (has-many Form   body))
+  
+(defclass Property
+  (has Symbol  name)
+  (has Boolean required :default true))
+  
+(defclass Class :does Type
+  (has?      String   doc)
+  (has-many? Protocol protocols)
+  (has-many  Property properties)
+  (has-many  Method   methods))
+```
+
+Based on https://opendylan.org/documentation/intro-dylan/objects.html
+```clojure
+(defclass Vehicle
+  (has serial-owner)
+  (has owner))
+  
+(defclass Vehicle
+  (has  Integer serial-number :key :sn)
+  (has? String  owner
+    :key :owner ;; true would work just as well here
+    :default "Northern Motors"))
+```
+
 # TODO
 
 - [ ] Add test suite

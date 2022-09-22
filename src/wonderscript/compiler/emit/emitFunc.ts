@@ -1,11 +1,12 @@
 import {escapeChars} from "../utils";
-import {BodyForm, Form, isBodyForm} from "../core";
+import {BodyForm, Form, isBodyForm, isRecurForm, isTaggedValue} from "../core";
 import {isArray, map, str} from "../../lang/runtime";
-import {COND_SYM as COND_STR, FN_SYM as FN_STR, RECUR_SYM as RECUR_STR} from "../constants";
+import {FN_SYM as FN_STR} from "../constants";
 import {Context} from "../../lang/Context";
 import {compileBody, compileRecursiveBody} from "./compileBody";
 import {prStr} from "../prStr";
 import {isSymbol, Symbol} from "../../lang/Symbol";
+import {isCondForm} from "./emitCond";
 
 const SPLAT = '&';
 
@@ -58,18 +59,26 @@ function genArgsDef(argsBuf: ParsedArgs): string {
     return argsDef.join(',');
 }
 
-const RECUR_SYM = Symbol.intern(RECUR_STR);
-const COND_SYM  = Symbol.intern(COND_STR);
-export const FN_SYM    = Symbol.intern(FN_STR);
+export const FN_SYM = Symbol.intern<typeof FN_STR>(FN_STR);
+export type FnForm = [typeof FN_SYM, Symbol, Symbol[], ...Form[]] | [typeof FN_SYM, Symbol[], ...Form[]];
+
+export const isFnForm = (form: Form): form is FnForm => {
+    if (!isTaggedValue<typeof FN_SYM>(form, FN_SYM)) return false;
+    if (!isSymbol(form[1]) && !isArray(form[1])) return false;
+    if (isSymbol(form[1]) && !isArray(form[2])) return false;
+
+    return true;
+}
+
 
 function hasTailCall(form: Form): boolean {
-    if (isArray(form) && RECUR_SYM.equals(form[0])) {
+    if (isRecurForm(form)) {
         return true;
     }
-    else if (isArray(form) && COND_SYM.equals(form[0])) {
+    else if (isCondForm(form)) {
         return form.slice(1).some(hasTailCall);
     }
-    else if (isArray(form) && FN_SYM.equals(form[0])) {
+    else if (isFnForm(form)) {
         return form.slice(2).some(hasTailCall);
     }
     else if (isArray(form)) {
@@ -80,35 +89,37 @@ function hasTailCall(form: Form): boolean {
     }
 }
 
-export type FnForm = BodyForm<typeof FN_SYM>;
-
-export const isFnForm = isBodyForm<typeof FN_SYM>(FN_SYM);
-
-export function emitFunc(form: Form, scope: Context): string {
+export function emitFunc(form: Form, context: Context): string {
     if (!isFnForm(form)) throw new Error(`invalid ${FN_SYM} form: ${prStr(form)}`)
 
-    const env = new Context(scope);
-    const args = form[1];
+    const ctx = new Context(context);
+    const name = isSymbol(form[1]) ? form[1] : null
+    const args = (name ? form[2] : form[1]) as Symbol[]
+    const body = name ? form.slice(3) : form.slice(2);
 
     const argsBuf    = parseArgs(args);
     const argsAssign = genArgAssigns(argsBuf);
     const argsDef    = genArgsDef(argsBuf);
 
     for (let i = 0; i < argsBuf.length; i++) {
-        env.define(argsBuf[i].name, true);
+        ctx.define(argsBuf[i].name, true);
     }
 
-    let buffer = [argsAssign];
-    const body = form.slice(2);
+    let buffer = argsAssign ? [argsAssign] : [];
     const names = map((x) => x.name, argsBuf);
 
     if (hasTailCall(body)) {
-        buffer.push(compileRecursiveBody(body, names, env));
+        buffer.push(compileRecursiveBody(body, names, ctx));
     } else if (body.length === 0) {
         buffer = [];
     } else {
-        buffer.push(compileBody(body, env));
+        buffer.push(compileBody(body, ctx));
     }
 
-    return str("(function(", argsDef, ") { ", buffer.join('; '), "; })");
+
+    if (name) {
+        return `(function ${name}(${argsDef}){${buffer.join('; ')};})`;
+    }
+
+    return `(function(${argsDef}){${buffer.join('; ')};})`;
 }

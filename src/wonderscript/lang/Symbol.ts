@@ -6,8 +6,8 @@ import {merge} from "./runtime";
 
 const SLASH = '/';
 
-export class Symbol implements Named, Meta, Invokable, Comparable, Equality {
-    private readonly _name: string;
+export class Symbol<Name = string> implements Named<Name>, Meta, Invokable, Comparable, Equality {
+    private readonly _name: Name;
     private readonly _namespace?: string;
     private readonly _meta?: MetaData;
 
@@ -24,11 +24,11 @@ export class Symbol implements Named, Meta, Invokable, Comparable, Equality {
         return this.intern(name, ns);
     }
 
-    static intern(name: string, namespace?: string, meta?: MetaData): Symbol {
-        return new this(name, namespace, meta);
+    static intern<Name = string>(name: Name, namespace?: string, meta?: MetaData): Symbol<Name> {
+        return new this<Name>(name, namespace, meta);
     }
 
-    constructor(name: string, namespace?: string, meta?: MetaData) {
+    constructor(name: Name, namespace?: string, meta?: MetaData) {
         this._name = name;
         this._namespace = namespace;
         this._meta = meta;
@@ -39,11 +39,11 @@ export class Symbol implements Named, Meta, Invokable, Comparable, Equality {
         return this._meta;
     }
 
-    withMeta(data: MetaData): Symbol {
-        return new Symbol(this._name, this._namespace, merge(this._meta, data));
+    withMeta(data: MetaData): Symbol<Name> {
+        return new Symbol<Name>(this._name, this._namespace, merge(this._meta, data));
     }
 
-    withoutMeta(): Symbol {
+    withoutMeta(): Symbol<Name> {
         return this.withMeta(null);
     }
 
@@ -51,7 +51,7 @@ export class Symbol implements Named, Meta, Invokable, Comparable, Equality {
         return this._meta != null;
     }
 
-    name(): string {
+    name(): Name {
         return this._name;
     }
 
@@ -74,13 +74,13 @@ export class Symbol implements Named, Meta, Invokable, Comparable, Equality {
         return 0;
     }
 
-    equals(other: Symbol): boolean {
+    equals(other: any): boolean {
         if (!isSymbol(other)) return false
 
         return this._name === other.name() && this._namespace === other.namespace()
     }
 
-    invoke(map: Map<Symbol, any>): any {
+    invoke(map: Map<Symbol<Name>, any>): any {
         if (map == null) return null;
 
         return map.get(this);
@@ -91,7 +91,7 @@ export class Symbol implements Named, Meta, Invokable, Comparable, Equality {
             return `${this._namespace}/${this._name}`;
         }
 
-        return this._name;
+        return `${this._name}`;
     }
 }
 

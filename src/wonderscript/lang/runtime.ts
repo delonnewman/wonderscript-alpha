@@ -1,4 +1,4 @@
-import {First} from "./Sequence";
+import {First, isSequence, Sequence} from "./Sequence";
 import {Nil} from "./Nil";
 import {CORE_NAMES} from "../compiler/constants";
 import {dasherize, escapeChars} from "../compiler/utils";
@@ -123,17 +123,15 @@ export function first(col: Firstable): First {
     throw new Error("Cannot get the first element of: " + col);
 }
 
-type NextMethod = { next: () => any[] | Nil }
 type ForEachMethod = { forEach: (x) => void }
-type Nextable = NextMethod | ArrayLike | ForEachMethod
+type Nextable = Sequence | ArrayLike | ForEachMethod
 
-const hasNextMethod = (col): col is NextMethod => isFunction(col.next)
 const hasForEachMethod = (col): col is ForEachMethod => isFunction(col.forEach)
 
-export function next(col: Nextable): Readonly<any[]> | Nil {
+export function next(col: Nextable): Readonly<any[]> | Sequence | Nil {
     if (col == null) return null;
 
-    if (hasNextMethod(col)) {
+    if (isSequence(col)) {
         return col.next();
     }
 
@@ -161,8 +159,9 @@ export function next(col: Nextable): Readonly<any[]> | Nil {
     throw new Error("Cannot get the next element of: " + col);
 }
 
-export function rest(col: Nextable): Readonly<any[]> {
+export function rest(col: Nextable): Readonly<any[]> | Sequence {
     const val = next(col)
+
     return val == null ? EMPTY_ARRAY : val;
 }
 
@@ -177,7 +176,7 @@ export function isEmpty(x): boolean {
 }
 
 type Mapper<In, Out> = (x: In) => Out
-type Mappable = ArrayLike | (FirstMethod & NextMethod) | Map<any, any> | Set<any>
+type Mappable = ArrayLike | Sequence | Map<any, any> | Set<any>
 
 export function map<In = any, Out = unknown>(f: Mapper<In, Out>, xs: Mappable): Readonly<Out[]> {
     if (arguments.length !== 2) {

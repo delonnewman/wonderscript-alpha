@@ -1,5 +1,6 @@
 import {FALSE_SYM, NIL_SYM, TRUE_SYM} from "./constants";
 import {
+    ArrayLike,
     isArray,
     isArrayLike,
     isBoolean,
@@ -20,7 +21,7 @@ import {isVector} from "../lang/Vector";
 const EMPTY_LIST  = '()';
 const EMPTY_ARRAY = '[]';
 
-export function prStr(form: Form): string {
+export function prStr(form: Form | Function | ArrayLike | Object): string {
     if (form == null) return NIL_SYM;
     if (isNumber(form)) return `${form}`;
 
@@ -63,10 +64,6 @@ export function prStr(form: Form): string {
         return `[${parts.join(' ')}]`;
     }
 
-    if (isFunction(form)) {
-        return `#js/function "${form}"`;
-    }
-
     if (isMap(form)) {
         const parts = [];
         for (let entry of form) {
@@ -86,6 +83,10 @@ export function prStr(form: Form): string {
         return `#{${parts.join(' ')}}`;
     }
 
+    if (isFunction(form)) {
+        return `#js/function "${form}"`;
+    }
+
     if (isArrayLike(form)) {
         const parts = Array.prototype.map.call(form, (x, i) => `${i} ${prStr(x)}`);
         return `#js/object {${parts.join(', ')}}`;
@@ -93,7 +94,9 @@ export function prStr(form: Form): string {
 
     if (isObject(form)) {
         const keys = Object.keys(form);
-        return `#js/object {${keys.map((k) => `${prStr(k)} ${prStr(form[k])}`).join(', ')}}`
+        const ctrName = Object.getPrototypeOf(form)?.constructor?.name ?? "object";
+        console.log("ctrName", ctrName);
+        return `#js/${ctrName} {${keys.map((k) => `${prStr(k)} ${prStr(form[k])}`).join(', ')}}`;
     }
 
     return `${form}`;
