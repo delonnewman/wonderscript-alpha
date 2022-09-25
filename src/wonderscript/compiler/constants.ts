@@ -53,7 +53,7 @@ export const DIV_SYM           = '/';
 export const MULT_SYM          = '*';
 export const AGET_SYM          = 'array-get';
 export const ASET_SYM          = 'array-set!';
-export const ALENGTH_SYM       = 'array-length';
+export const ALENGTH_SYM       = 'length';
 export const INSTANCE_SYM      = 'instance?';
 export const TYPE_SYM          = 'typeof';
 

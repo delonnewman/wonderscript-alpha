@@ -38,10 +38,10 @@
 ; TODO: need gensym for "args" variable
 (def arity-validation-forms
   (fn* (parsed argsym)
-       (let (nargs (array-length parsed))
+       (let (nargs (length parsed))
          (if (.some parsed #(:splat %))
-           (array '> (array 'array-length argsym) (- nargs 1))
-           (array 'identical? nargs (array 'array-length argsym))))))
+           (array '> (array 'length argsym) (- nargs 1))
+           (array 'identical? nargs (array 'length argsym))))))
 
 (def let-bindings-form
   (fn* (pair argsym)
@@ -63,7 +63,7 @@
        (assoc-array? x)
        (let (arglists (map first xs)
              parsed (map parsed-args arglists)
-             arities (.sort (map #(array-length %) arglists) #(cond (< %1 %2) -1 (> %1 %2) 1 :else 0))
+             arities (.sort (map #(length %) arglists) #(cond (< %1 %2) -1 (> %1 %2) 1 :else 0))
              splat (.some parsed (fn* (list) (.some list #(:splat %))))
              arity-str (if splat (str (arities 0) " or more") (.join arities " or "))
              argsym (gensym "args"))
@@ -79,10 +79,10 @@
                               (array 'throw
                                      (array 'js/Error.
                                             (array 'str "wrong number of arguments (given "
-                                                   (array 'array-length argsym) ", expected " arity-str ")"))))))))
+                                                   (array 'length argsym) ", expected " arity-str ")"))))))))
        :else
          (let (parsed (parsed-args x)
-               arity (array-length x)
+               arity (length x)
                splat (.some parsed #(:splat %))
                arity-str (cond splat (str arity " or more") :else (str arity))
                argsym (gensym "args"))
@@ -93,7 +93,7 @@
                          (array 'throw
                                 (array 'js/Error.
                                        (array 'str "wrong number of arguments (given "
-                                              (array 'array-length argsym) ", expected " arity-str ")"))))))))))
+                                              (array 'length argsym) ", expected " arity-str ")"))))))))))
 
 (def ^:macro defn
   (fn
@@ -500,7 +500,7 @@
   (array value)
   (.call (.-indexOf (.-prototype js/Array)) array value))
 
-(defn array-length
+(defn length
   (array) (.-length array))
 
 ;; Strings
@@ -510,7 +510,7 @@
 
 (defn blank?
   (object)
-  (or (nil? object) (zero? (array-length object))
+  (or (nil? object) (zero? (length object))
       (and (string? object)
            (identical? 0 (.-length (.replace object $white-space-regex $empty-string))))))
 
@@ -565,7 +565,7 @@
   (s) (.split s $new-line-pattern))
 
 (defn chop
-  (s) (.slice s 0 (- (array-length s) 1)))
+  (s) (.slice s 0 (- (length s) 1)))
 
 (defn chr
   (ch)
@@ -703,7 +703,7 @@
 
 (defn js-object
   (&kvs)
-  (when (odd? (array-length kvs))
+  (when (odd? (length kvs))
     (throw (js/Error. "key/value pairs should be even")))
   (.fromEntries js/Object (partition 2 kvs)))
 
@@ -735,7 +735,7 @@
 
 (defn partition (n a)
   (let (pairs (array))
-    (for-times (i (.floor js/Math (/ (array-length a) n)))
+    (for-times (i (.floor js/Math (/ (length a) n)))
       (let (p (array))
         (for-times (j n)
           (array-set! p j (array-get a (+ (* n i) j))))
@@ -750,7 +750,7 @@
 ;; see Math.max
 (defn max
   (numbers)
-  (array-get (sort numbers) (- (array-length numbers) 1)))
+  (array-get (sort numbers) (- (length numbers) 1)))
 
 (defn indices
   (indexed)
@@ -770,7 +770,7 @@
 
 (defn hash-map
   (&kvs)
-  (when (odd? (array-length kvs))
+  (when (odd? (length kvs))
     (throw (js/Error. "key/value pairs should be even")))
   (js/Map. (partition 2 kvs)))
 
@@ -871,7 +871,7 @@
 (defn clear!
   (col)
   (cond
-    (array? col) (.splice col 0 (- (array-length col) 1))
+    (array? col) (.splice col 0 (- (length col) 1))
     (slot? col "clear") (begin (.clear col) col)
     :else
       (throw (js/Error. (str "cannot clear" (pr-str col))))))
@@ -894,7 +894,7 @@
 (defn count
   (col)
   (cond
-    (array-like? col) (array-length col)
+    (array-like? col) (length col)
     (or (map? col) (set? col)) (size col)
     (slot? col "count") (.count col)
     :else
@@ -936,7 +936,7 @@
 (defn ^:private js-arrays-equal
   (a b)
   (cond
-    (not-identical? (array-length a) (array-length b)) false
+    (not-identical? (length a) (length b)) false
     :else
       (.every a (fn (x i) (= x (array-get b i))))))
 
