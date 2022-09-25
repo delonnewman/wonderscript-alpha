@@ -67,14 +67,13 @@ import {
     UNDEFINED_SYM,
     SLOT_SYM,
     HAS_SLOT_SYM,
-    SSET_SYM
+    SSET_SYM, IF_SYM
 } from "./constants";
 import {emitMap} from "./emit/emitMap";
 import {RECUR_ERROR_MSG} from "./errorMessages";
 import {emitSymbol} from "./emit/emitSymbol";
 import {emitDef} from "./emit/emitDef";
 import {emitQuote} from "./emit/emitQuote";
-import {emitCond} from "./emit/emitCond";
 import {emitLoop} from "./emit/emitLoop";
 import {emitThrownException} from "./emit/emitThrownException";
 import {emitArrayLength} from "./emit/emitArrayLength";
@@ -101,6 +100,7 @@ import {emitSet} from "./emit/emitSet";
 import {emitSlotMutation} from "./emit/emitSlotMutation";
 import {isVector} from "../lang/Vector";
 import {emitVector} from "./emit/emitVector";
+import {emitIf} from "./emit/emitIf";
 
 export function emit(form_: Form, ctx: Context) {
     const form = macroexpand(form_, ctx);
@@ -139,8 +139,8 @@ export function emit(form_: Form, ctx: Context) {
                     return emitDef(form, ctx);
                 case QUOTE_SYM:
                     return emitQuote(form);
-                case COND_SYM:
-                    return emitCond(form, ctx);
+                case IF_SYM:
+                    return emitIf(form, ctx);
                 case JS_SYM:
                     return emitJS(form, ctx);
                 case FN_SYM:

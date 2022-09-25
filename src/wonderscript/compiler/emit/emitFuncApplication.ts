@@ -2,6 +2,7 @@ import {emit} from "../emit";
 import {Context} from "../../lang/Context";
 import {isSymbol} from "../../lang/Symbol";
 import {isMacro} from "../core";
+import {prStr} from "../prStr";
 
 // @ts-ignore
 Array.prototype.invoke = function(indexes: number[]) {
@@ -49,7 +50,7 @@ Function.prototype.invoke = function(args: any[]) {
 
 export function emitFuncApplication(form, env: Context): string {
     if (isSymbol(form[0]) && isMacro(form[0])) {
-        throw new Error('Macros cannot be evaluated in this context');
+        throw new Error(`macros cannot be evaluated in this context: ${prStr(form)}`);
     }
 
     const fn = emit(form[0], env);

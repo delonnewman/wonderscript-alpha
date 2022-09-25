@@ -4,40 +4,44 @@
 
 (def ^:macro comment (fn* (&xs) nil))
 
+(def ^:macro cond
+  (fn*
+   (&clauses)
+   (if (and clauses (not-identical? 0 (.-length clauses)))
+     (array 'if (first clauses)
+            (if (next clauses)
+              (first (rest clauses))
+              (throw (js/Error. "cond requires an even number of forms")))
+            (cons 'cond (next (next clauses)))))))
+
 (def assoc-array?
   (fn*
    (a)
-   (cond
-     (not (.isArray js/Array a))
-       false
-     :else
-       (.isArray js/Array (a 0)))))
+   (if (not (.isArray js/Array a))
+     false
+     (.isArray js/Array (a 0)))))
 
 (def splat?
   (fn* (sym)
-       (cond (symbol? sym)
-             (.startsWith (.name sym) "&")
-             :else false)))
+       (if (symbol? sym)
+         (.startsWith (.name sym) "&")
+         false)))
 
 (def parsed-args
   (fn* (arglist)
        (.map arglist
              (fn* (sym i)
-                  (cond
-                    (splat? sym)
-                      {:name (symbol (.slice (.name sym) 1)) :order i :splat true}
-                    :else
-                      {:name sym :order i :splat false})))))
+                  (if (splat? sym)
+                    {:name (symbol (.slice (.name sym) 1)) :order i :splat true}
+                    {:name sym :order i :splat false})))))
 
 ; TODO: need gensym for "args" variable
 (def arity-validation-forms
   (fn* (parsed argsym)
        (let (nargs (array-length parsed))
-         (cond
-           (.some parsed #(:splat %))
-             (array '> (array 'array-length argsym) (- nargs 1))
-           :else
-             (array 'identical? nargs (array 'array-length argsym))))))
+         (if (.some parsed #(:splat %))
+           (array '> (array 'array-length argsym) (- nargs 1))
+           (array 'identical? nargs (array 'array-length argsym))))))
 
 (def let-bindings-form
   (fn* (pair argsym)
@@ -45,12 +49,10 @@
              (cons
               (.flatMap (pair 0)
                         (fn* (x i)
-                             (cond
-                               (splat? x)
-                                 (array (symbol (.slice (.name x) 1))
-                                        (array '.slice argsym i))
-                               :else
-                                 (array x (array argsym i)))))
+                             (if (splat? x)
+                               (array (symbol (.slice (.name x) 1))
+                                      (array '.slice argsym i))
+                               (array x (array argsym i)))))
               (.slice pair 1)))))
 
 (def ^:macro fn
@@ -63,7 +65,7 @@
              parsed (map parsed-args arglists)
              arities (.sort (map #(array-length %) arglists) #(cond (< %1 %2) -1 (> %1 %2) 1 :else 0))
              splat (.some parsed (fn* (list) (.some list #(:splat %))))
-             arity-str (cond splat (str (arities 0) " or more") :else (.join arities " or "))
+             arity-str (if splat (str (arities 0) " or more") (.join arities " or "))
              argsym (gensym "args"))
          (array 'fn*
                 (array (symbol (str "&" argsym)))
@@ -156,17 +158,11 @@
 
 ;; Boolean & Logic
 
-(defmacro if
-  ((pred then)
-   (array 'cond pred then))
-  ((pred then other)
-   (array 'cond pred then :else other)))
-
 (defmacro if-not
   ((pred then)
    (array 'if-not pred then nil))
   ((pred then other)
-   (array 'cond (array 'not pred) then :else other)))
+   (array 'if (array 'not pred) then other)))
 
 (defmacro when (pred &acts)
   (array 'cond pred (cons 'begin acts)))
@@ -346,10 +342,11 @@
                     (array 'array-get args 0))
                   :else
                   (array 'js*
+                         "(function(){"
                          "let x = " (array 'if identity identity) ";"
                          "for (let i = 0; i < " (str args) ".length; i++) {"
                          "if (x == null) { x = " (str args) "[i] }"
-                         "else { x = x " (str operator) " " (str args) "[i] } } return x;")))))
+                         "else { x = x " (str operator) " " (str args) "[i] } } return x; }())")))))
 
 (def + (<var-op> + 0))
 (def - (<var-op> - nil))
@@ -714,7 +711,7 @@
   (obj property-name)
   (array-get obj property-name))
 
-;; Return the bound method or thow an exception
+;; Return the bound method or throw an exception
 (defn method
   (obj method-name)
   (let (val (js-property-value obj method-name))

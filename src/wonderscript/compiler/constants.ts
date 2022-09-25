@@ -2,7 +2,7 @@ import {CORE_NS} from "./vars";
 
 export const QUOTE_SYM    = 'quote';
 export const DEF_SYM      = 'def';
-export const COND_SYM     = 'cond';
+export const IF_SYM       = 'if';
 export const FN_SYM       = 'fn*';
 export const LET_SYM      = 'let';
 export const LOOP_SYM     = 'loop';
@@ -90,7 +90,7 @@ export const RECURSION_POINT_CLASS = `${CORE_NS.name}.RecursionPoint`;
 export const SPECIAL_FORMS = {
     quote: true,
     def:   true,
-    cond:  true,
+    if:  true,
     'js*': true,
     'fn*': true,
     loop: true,
