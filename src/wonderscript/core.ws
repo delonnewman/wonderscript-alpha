@@ -639,7 +639,7 @@
 
 (defn times
   (n f)
-  (let (a [])
+  (let (a (make-array))
     (for-times (i n)
       (push! a (f i)))
     a))
@@ -657,7 +657,7 @@
   (&args)
   (.apply (.-log js/console) js/console (.map args pr-str)))
 
-(defn pr
+(defn p
   (x) (print (pr-str x)))
 
 ;; Assertions and Testing
@@ -757,10 +757,17 @@
 
 (defn indices
   (indexed)
-  (let (a [])
+  (let (a (make-array))
     (for-times (i (.-length indexed))
       (push! a i))
     a))
+
+(defn repeat
+  (s n)
+  (let (a (make-array))
+    (for-times (i n)
+      (push! a s))
+    (.join a "")))
 
 ;; Maps & Sets
 
@@ -836,7 +843,6 @@
 
 (defn fourth
   (xs) (first (rest (rest (rest xs)))))
-
 
 ;; TODO: perhaps rename these to include! and include, which might pair nicely with includes?
 (defn add!
