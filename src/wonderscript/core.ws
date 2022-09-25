@@ -10,14 +10,14 @@
    (cond
      (not (.isArray js/Array a))
        false
-     else
-     (.isArray js/Array (a 0)))))
+     :else
+       (.isArray js/Array (a 0)))))
 
 (def splat?
   (fn* (sym)
        (cond (symbol? sym)
              (.startsWith (.name sym) "&")
-             else false)))
+             :else false)))
 
 (def parsed-args
   (fn* (arglist)
@@ -25,9 +25,9 @@
              (fn* (sym i)
                   (cond
                     (splat? sym)
-                    {:name (symbol (.slice (.name sym) 1)) :order i :splat true}
-                    else
-                    {:name sym :order i :splat false})))))
+                      {:name (symbol (.slice (.name sym) 1)) :order i :splat true}
+                    :else
+                      {:name sym :order i :splat false})))))
 
 ; TODO: need gensym for "args" variable
 (def arity-validation-forms
@@ -36,7 +36,7 @@
          (cond
            (.some parsed #(:splat %))
              (array '> (array 'array-length argsym) (- nargs 1))
-           else
+           :else
              (array 'identical? nargs (array 'array-length argsym))))))
 
 (def let-bindings-form
@@ -47,10 +47,10 @@
                         (fn* (x i)
                              (cond
                                (splat? x)
-                               (array (symbol (.slice (.name x) 1))
-                                      (array '.slice argsym i))
-                               else
-                               (array x (array argsym i)))))
+                                 (array (symbol (.slice (.name x) 1))
+                                        (array '.slice argsym i))
+                               :else
+                                 (array x (array argsym i)))))
               (.slice pair 1)))))
 
 (def ^:macro fn
@@ -61,9 +61,9 @@
        (assoc-array? x)
        (let (arglists (map first xs)
              parsed (map parsed-args arglists)
-             arities (.sort (map #(array-length %) arglists) #(cond (< %1 %2) -1 (> %1 %2) 1 else 0))
+             arities (.sort (map #(array-length %) arglists) #(cond (< %1 %2) -1 (> %1 %2) 1 :else 0))
              splat (.some parsed (fn* (list) (.some list #(:splat %))))
-             arity-str (cond splat (str (arities 0) " or more") else (.join arities " or "))
+             arity-str (cond splat (str (arities 0) " or more") :else (.join arities " or "))
              argsym (gensym "args"))
          (array 'fn*
                 (array (symbol (str "&" argsym)))
@@ -73,21 +73,21 @@
                                  (fn* (x i)
                                       (array (arity-validation-forms (parsed i) argsym)
                                              (let-bindings-form x argsym))))
-                       (array 'else
+                       (array :else
                               (array 'throw
                                      (array 'js/Error.
                                             (array 'str "wrong number of arguments (given "
                                                    (array 'array-length argsym) ", expected " arity-str ")"))))))))
-       else
+       :else
          (let (parsed (parsed-args x)
                arity (array-length x)
                splat (.some parsed #(:splat %))
-               arity-str (cond splat (str arity " or more") else (str arity))
+               arity-str (cond splat (str arity " or more") :else (str arity))
                argsym (gensym "args"))
            (array 'fn* (array (symbol (str "&" argsym)))
                   (array 'cond (arity-validation-forms (parsed-args x) argsym)
                          (let-bindings-form xs argsym)
-                         'else
+                         :else
                          (array 'throw
                                 (array 'js/Error.
                                        (array 'str "wrong number of arguments (given "
@@ -102,11 +102,11 @@
                  (array? (rest 0)) (rest 0)
                  (array? (rest 1)) (rest 1)
                  (array? (rest 2)) (rest 2)
-                 else (throw (js/Error. "an arglist is required")))
+                 :else (throw (js/Error. "an arglist is required")))
           body (cond
                  (and doc meta) (.slice rest 3)
                  (or doc meta) (.slice rest 2)
-                 else (.slice rest 1))
+                 :else (.slice rest 1))
           nm (.withMeta name (merge meta {:doc doc})))
      (array 'def nm (cons 'fn (cons args body))))))
 
@@ -160,13 +160,13 @@
   ((pred then)
    (array 'cond pred then))
   ((pred then other)
-   (array 'cond pred then 'else other)))
+   (array 'cond pred then :else other)))
 
 (defmacro if-not
   ((pred then)
    (array 'if-not pred then nil))
   ((pred then other)
-   (array 'cond (array 'not pred) then 'else other)))
+   (array 'cond (array 'not pred) then :else other)))
 
 (defmacro when (pred &acts)
   (array 'cond pred (cons 'begin acts)))
@@ -435,7 +435,7 @@
     (> a b) 1
     (slot? a "cmp") (.cmp a b)
     (slot? b "cmp") (.cmp b a)
-    else 0))
+    :else 0))
 
 (defn sort!
   (array)
@@ -575,7 +575,7 @@
      (array 'array? obj) (array 'array-set! obj key value)
      (array 'has-method? obj 'set) (array '.set obj key value)
      (array 'object? obj) (array 'slot-set! obj key value)
-     'else (array 'throw (array 'js/Error. "can only set keys for associative values")))))
+     :else (array 'throw (array 'js/Error. "can only set keys for associative values")))))
 
 ;; TODO: include let binding for macro output for better performance, will need gensym
 (defmacro for-times
@@ -789,7 +789,7 @@
     (nil? obj) $empty-array
     (seq? obj) obj
     (seqable? obj) (.seq obj)
-    else
+    :else
       (throw "value is not a seq or seqable")))
 
 (defn second
@@ -810,7 +810,7 @@
     (map? col) (add-key! col (at value 0) (at value 1))
     (set? col) (add-member! col value)
     (slot? col "add") (.add col value)
-    else
+    :else
       (throw "don't know how to add a value to this collection")))
 
 (defn add
@@ -822,7 +822,7 @@
   (cond
     (array-like? col) (begin (.splice col ref 1) col)
     (slot? col "delete") (begin (.delete col ref) col)
-    else
+    :else
       (throw "don't know how to remove a value from this collection")))
 
 (defn remove
@@ -834,7 +834,7 @@
   (cond
     (array? col) (.splice col 0 (- (array-length col) 1))
     (slot? col "clear") (begin (.clear col) col)
-    else
+    :else
       (throw (js/Error. (str "cannot clear" (pr-str col))))))
 
 ;; TODO: add alias key as meta data
@@ -849,7 +849,7 @@
   (cond
     (array-like? col) $empty-array
     (has-method? col 'empty) (.empty col)
-    else
+    :else
       (empty! (clone col))))
 
 (defn count
@@ -858,7 +858,7 @@
     (array-like? col) (array-length col)
     (or (map? col) (set? col)) (size col)
     (slot? col "count") (.count col)
-    else
+    :else
      (reduce (fn (n _) (inc n)) col 0)))
 
 (defn includes?
@@ -868,7 +868,7 @@
     (map? col) (key? col value)
     (set? col) (member? col value)
     (has-method? col 'includes) (.includes col value)
-    else
+    :else
       (throw "can't test inclusion")))
 
 (defn all?
@@ -891,14 +891,14 @@
     (and (array? a) (array? b)) (js-arrays-equal a b)
     (slot? a "equals") (.equals a b)
     (slot? b "equals") (.equals b a)
-    else
-     (identical? a b)))
+    :else
+      (identical? a b)))
 
 (defn ^:private js-arrays-equal
   (a b)
   (cond
     (not-identical? (array-length a) (array-length b)) false
-    else
+    :else
       (.every a (fn (x i) (= x (array-get b i))))))
 
 
@@ -909,7 +909,7 @@
   (cons 'cond
          (.flatMap (partition 2 conditions)
                (fn (x)
-                 (if (.equals 'else (x 0))
+                 (if (.equals :else (x 0))
                    x
                    (array (array pred (x 0) value) (x 1)))))))
 
@@ -1048,7 +1048,7 @@
         (render-tag form handlers))
     (component? form) (render-component form handlers)
     (tag-list? form) (render-tag-list form handlers)
-    else
+    :else
       (throw (js/Error. (str "unknown form: " (pr-str form))))))
 
 (defn render-event-handler

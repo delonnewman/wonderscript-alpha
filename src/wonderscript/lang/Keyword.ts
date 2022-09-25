@@ -3,10 +3,10 @@ import {Symbol} from "./Symbol";
 import {Nil} from "./Nil";
 import {Invokable} from "./Invokable";
 
-export class Keyword implements Named, Invokable, Comparable, Equality {
-    private readonly _symbol: Symbol;
+export class Keyword<Name extends string = string> implements Named<Name>, Invokable, Comparable, Equality {
+    private readonly _symbol: Symbol<Name>;
 
-    static CACHE = new Map<string, Keyword>();
+    static CACHE = new Map<string, Keyword<any>>();
 
     static parse(str: string): Keyword {
         const [ns, name] = str.slice(1).split('/');
@@ -18,25 +18,25 @@ export class Keyword implements Named, Invokable, Comparable, Equality {
         return this.intern(name, ns);
     }
 
-    static intern(name: string, namespace?: string): Keyword {
+    static intern<Name extends string = string>(name: Name, namespace?: string): Keyword {
         const s = namedHash(name, namespace);
         if (!this.CACHE.has(s)) {
-            this.CACHE.set(s, new this(new Symbol(name, namespace)));
+            this.CACHE.set(s, new this<Name>(new Symbol<Name>(name, namespace)));
         }
 
         return this.CACHE.get(s);
     }
 
-    constructor(symbol: Symbol) {
+    constructor(symbol: Symbol<Name>) {
         this._symbol = symbol;
         Object.freeze(this);
     }
 
-    symbol(): Symbol {
+    symbol(): Symbol<Name> {
         return this._symbol;
     }
 
-    name(): string {
+    name(): Name {
         return this._symbol.name();
     }
 
@@ -48,19 +48,19 @@ export class Keyword implements Named, Invokable, Comparable, Equality {
         return this._symbol.hasNamespace();
     }
 
-    invoke(map: Map<Keyword, any>): any {
+    invoke(map: Map<Keyword<Name>, unknown>): unknown {
         if (map == null) return null;
 
         return map.get(this);
     }
 
-    cmp(other: Keyword): -1 | 1 | 0 {
+    cmp(other: unknown): -1 | 1 | 0 {
         if (!isKeyword(other)) throw new Error("cannot compare keywords to other values");
 
         return this._symbol.cmp(other.symbol());
     }
 
-    equals(other: Keyword): boolean {
+    equals(other: unknown): boolean {
         if (!isKeyword(other)) return false
 
         return this._symbol.equals(other.symbol());

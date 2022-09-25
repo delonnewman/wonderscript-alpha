@@ -303,6 +303,7 @@ A collection of properties/shapes and doc strings
 ```
 
 Based on https://opendylan.org/documentation/intro-dylan/objects.html
+
 ```clojure
 (defclass Vehicle
   (has serial-owner)

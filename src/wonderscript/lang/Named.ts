@@ -6,7 +6,7 @@ export interface Named<Name = string> {
     hasNamespace(): boolean
 }
 
-export const namedHash = (name: string, namespace?: string): string => {
+export function namedHash<Name extends string = string>(name: Name, namespace?: string): string {
     if (namespace && name) {
         return `${namespace}/${name}`
     }

@@ -47,11 +47,10 @@ export function prStr(form: Form | Function | ArrayLike | Object): string {
     }
 
     if (isArray(form)) {
-        if (form.length === 0) {
-            return EMPTY_LIST;
+        const parts = [];
+        for (let i = 0; i < form.length; i++) {
+            parts.push(prStr(form[i]));
         }
-
-        const parts = form.map(prStr);
         return `(${parts.join(' ')})`;
     }
 

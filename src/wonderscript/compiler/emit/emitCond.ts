@@ -7,9 +7,10 @@ import {COND_SYM as COND_STR} from "../constants";
 import {prStr} from "../prStr";
 import {Symbol} from "../../lang/Symbol";
 import {isNil} from "../../lang/Nil";
+import {Keyword} from "../../lang/Keyword";
 
 export const COND_SYM = Symbol.intern<typeof COND_STR>(COND_STR);
-export const ELSE_SYM = Symbol.intern<'else'>('else');
+export const ELSE_KEY = Keyword.intern<'else'>('else');
 
 export type CondForm = [typeof COND_SYM, ...Form[]];
 
@@ -24,7 +25,7 @@ export function emitCond(form: Form, env: Context): string {
         throw new Error(`the number of body expressions should be even, found ${others.length}`);
     }
 
-    if (others.length === 2 || others.length === 4 && ELSE_SYM.equals(others[2]) && !isThrowForm(others[3])) {
+    if (others.length === 2 || others.length === 4 && ELSE_KEY.equals(others[2]) && !isThrowForm(others[3])) {
         const [pred, consequent, _, alternate] = others;
         return `${emit(pred, env)}?(${emit(consequent, env)}):(${emit(alternate ?? null, env)})`;
     }
@@ -34,7 +35,7 @@ export function emitCond(form: Form, env: Context): string {
 
     for (let i = 0; i < exprs.length; ++i) {
         const cond = i === 0 ? 'if' : 'else if';
-        if (ELSE_SYM.equals(exprs[i][0])) {
+        if (ELSE_KEY.equals(exprs[i][0])) {
             buffer.push(str('else { ', emitTailPosition(exprs[i][1], env), ' }'));
         }
         else {
