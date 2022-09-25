@@ -190,7 +190,11 @@
 
 (def apply
   (fn (f args)
-    (.apply f args)))
+    (.invoke f args)))
+
+(def call
+  (fn (f &args)
+    (.invoke f args)))
 
 (defn freeze!
   (object) (.freeze js/Object object))
@@ -326,22 +330,42 @@
 (defn inc (x) (+ x 1))
 (defn dec (x) (- x 1))
 
-(defmacro <op>
-  (operator)
-  (array 'fn (array 'a 'b) (array operator 'a 'b)))
+(defmacro <var-op>
+  (operator identity)
+  (let (args (gensym "args"))
+    (array 'fn*
+           (array (symbol (str "&" (.name args))))
+           (array 'cond
+                  (array 'identical? 0 (array '.-length args))
+                  (if-not (nil? identity)
+                    identity
+                    (array 'js/Error. "wrong number of arguments expected at least 1 got 0"))
+                  (array 'identical? 1 (array '.-length args))
+                  (if (.equals operator '-)
+                    (array '* -1 (array 'array-get args 0))
+                    (array 'array-get args 0))
+                  :else
+                  (array 'js*
+                         "let x = " (array 'if identity identity) ";"
+                         "for (let i = 0; i < " (str args) ".length; i++) {"
+                         "if (x == null) { x = " (str args) "[i] }"
+                         "else { x = x " (str operator) " " (str args) "[i] } } return x;")))))
 
-(def <+> (<op> +))
-(def <-> (<op> -))
-(def <*> (<op> *))
-(def </> (<op> /))
+(def + (<var-op> + 0))
+(def - (<var-op> - nil))
+(def * (<var-op> * 1))
+(def / (<var-op> / nil))
+
+(defn **
+  (n m) (.pow js/Math n m))
 
 (defn sum
   "Take the sum of the values in the collection"
-  (col) (reduce <+> col 0))
+  (col) (reduce + col 0))
 
 (defn product
   "Take the product of the values in the collection"
-  (col) (reduce <*> col 1))
+  (col) (reduce * col 1))
 
 (defn zero?
   (x) (identical? 0 x))
@@ -375,6 +399,16 @@
   (if n
     (.floor js/Math (* n (.random js/Math)))
     (.random js/Math)))
+
+(defn floor
+  (n) (.floor js/Math n))
+
+(defn ceil
+  (n) (.ceil js/Math n))
+
+(defn round
+  ((n) (.round js/Math n))
+  ((n factor) (* factor (.round js/Math (/ n factor)))))
 
 ;; Basic Array, Strings & ArrayLike
 
@@ -711,10 +745,12 @@
         (array-set! pairs i p)))
     pairs))
 
+;; see Math.min
 (defn min
   (numbers)
   (array-get (sort numbers) 0))
 
+;; see Math.max
 (defn max
   (numbers)
   (array-get (sort numbers) (- (array-length numbers) 1)))

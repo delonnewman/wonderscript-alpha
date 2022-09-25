@@ -142,7 +142,7 @@ export function emit(form_: Form, ctx: Context) {
                 case COND_SYM:
                     return emitCond(form, ctx);
                 case JS_SYM:
-                    return emitJS(form);
+                    return emitJS(form, ctx);
                 case FN_SYM:
                     return emitFunc(form, ctx);
                 case LOOP_SYM:

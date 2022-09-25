@@ -10,6 +10,7 @@ import {List} from "../lang/List";
 import {Vector} from "../lang/Vector";
 import {isSlotMutationForm, SlotMutationForm} from "./emit/emitSlotMutation";
 import {ArrayMutationForm, isArrayMutationForm} from "./emit/emitArrayMutation";
+import {isJSForm} from "./emit/emitJS";
 
 export function isMacro(sym: Symbol): boolean {
     const meta = findDefinitionMetaData(sym)
@@ -68,7 +69,7 @@ export function isThrowForm(x): x is TaggedValue {
 export type StatementForm = SlotMutationForm | ArrayMutationForm
 
 export function isStatementForm(form: Form): form is StatementForm {
-    return isSlotMutationForm(form) || isArrayMutationForm(form)
+    return isSlotMutationForm(form) || isArrayMutationForm(form) || isJSForm(form)
 }
 
 export const EOF = { eof: true } as const;

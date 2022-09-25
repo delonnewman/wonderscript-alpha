@@ -80,10 +80,15 @@ export class Symbol<Name = string> implements Named<Name>, Meta, Invokable, Comp
         return this._name === other.name() && this._namespace === other.namespace()
     }
 
-    invoke(map: Map<Symbol<Name>, any>): any {
-        if (map == null) return null;
+    invoke(args: Map<Symbol<Name>, any>[]): any {
+        if (args.length === 0) return null;
 
-        return map.get(this);
+        if (args.length === 1) {
+            const map = args[0];
+            return map.get(this);
+        }
+
+        return args.map((m) => m.get(this));
     }
 
     toString() {

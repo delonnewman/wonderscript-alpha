@@ -1,3 +1,3 @@
 export interface Invokable {
-    invoke(...args): any
+    invoke(args: any[]): any
 }

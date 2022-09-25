@@ -48,10 +48,15 @@ export class Keyword<Name extends string = string> implements Named<Name>, Invok
         return this._symbol.hasNamespace();
     }
 
-    invoke(map: Map<Keyword<Name>, unknown>): unknown {
-        if (map == null) return null;
+    invoke(args: Map<Keyword<Name>, unknown>[]): unknown {
+        if (args.length === 0) return null;
 
-        return map.get(this);
+        if (args.length === 1) {
+            const map = args[0];
+            return map.get(this);
+        }
+
+        return args.map((m) => m.get(this));
     }
 
     cmp(other: unknown): -1 | 1 | 0 {
