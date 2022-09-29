@@ -32,7 +32,7 @@
        (.map arglist
              (fn* (sym i)
                   (if (splat? sym)
-                    {:name (symbol (.slice (.name sym) 1)) :order i :splat true}
+                    {:name (.intern wonderscript.lang/Symbol (.slice (.name sym) 1)) :order i :splat true}
                     {:name sym :order i :splat false})))))
 
 ; TODO: need gensym for "args" variable
@@ -50,9 +50,9 @@
               (.flatMap (pair 0)
                         (fn* (x i)
                              (if (splat? x)
-                               (array (symbol (.slice (.name x) 1))
+                               (array (.intern wonderscript.lang/Symbol (.slice (.name x) 1))
                                       (array '.slice argsym i))
-                               (array x (array argsym i)))))
+                               (array x (array 'array-get argsym i)))))
               (.slice pair 1)))))
 
 (def ^:macro fn
@@ -68,7 +68,7 @@
              arity-str (if splat (str (arities 0) " or more") (.join arities " or "))
              argsym (gensym "args"))
          (array 'fn*
-                (array (symbol (str "&" argsym)))
+                (array (.intern wonderscript.lang/Symbol (str "&" argsym)))
                 (cons 'cond
                       (.concat
                        (.flatMap xs
@@ -84,12 +84,11 @@
          (let (parsed (parsed-args x)
                arity (length x)
                splat (.some parsed #(:splat %))
-               arity-str (cond splat (str arity " or more") :else (str arity))
+               arity-str (if splat (str arity " or more") (str arity))
                argsym (gensym "args"))
-           (array 'fn* (array (symbol (str "&" argsym)))
-                  (array 'cond (arity-validation-forms (parsed-args x) argsym)
+           (array 'fn* (array (.intern wonderscript.lang/Symbol (str "&" argsym)))
+                  (array 'if (arity-validation-forms (parsed-args x) argsym)
                          (let-bindings-form xs argsym)
-                         :else
                          (array 'throw
                                 (array 'js/Error.
                                        (array 'str "wrong number of arguments (given "
@@ -147,6 +146,24 @@
 (deftype Array     array?)
 (deftype Nil       nil?)
 
+;; Keyword & Symbol
+
+(defn keyword
+  ((name)
+   (cond
+     (keyword? name) name
+     (symbol? name) (.intern wonderscript.lang/Keyword (.name name) (.namespace name))
+     (string? name) (.intern wonderscript.lang/Keyword name)))
+  ((ns name) (.intern wonderscript.lang/Keyword name ns)))
+
+(defn symbol
+  ((name)
+   (cond
+     (symbol? name) name
+     (keyword? name) (.intern wonderscript.lang/Symbol (.name name) (.namespace name))
+     (string? name) (.intern wonderscript.lang/Symbol name)))
+  ((ns name) (.intern wonderscript.lang/Symbol name ns)))
+
 (defn ==
   (a b)
   (identical? a b))
@@ -171,13 +188,13 @@
   (array 'cond (array 'not pred) (cons 'begin acts)))
 
 (defn true?
-  (x) (identical? true x))
+  (x) (or (identical? true x) (identical? true (.valueOf x))))
 
 (defn false?
-  (x) (identical? false x))
+  (x) (or (identical? false x) (identical? false (.valueOf x))))
 
 (defn falsy?
-  (obj) (and (identical? obj false) (nil? obj)))
+  (obj) (or (nil? obj) (false? obj)))
 
 (defn truthy?
   (obj) (not (falsy? obj)))
@@ -285,8 +302,8 @@
 (def Object nil)
 
 (defmacro make-class
-  (() (make-class (fn* ()) Object))
-  ((ctr) (make-class ctr Object))
+  (() (array 'make-class (fn* ()) Object))
+  ((ctr) (array 'make-class ctr Object))
   ((ctr superclass)
    (array 'slot-set! ctr 'prototype
           (array '.create 'js/Object superclass))
@@ -335,7 +352,7 @@
                   (array 'identical? 0 (array '.-length args))
                   (if-not (nil? identity)
                     identity
-                    (array 'js/Error. "wrong number of arguments expected at least 1 got 0"))
+                    (array 'js/Error. "wrong number of arguments (expected at least 1 got 0)"))
                   (array 'identical? 1 (array '.-length args))
                   (if (.equals operator '-)
                     (array '* -1 (array 'array-get args 0))
@@ -343,7 +360,7 @@
                   :else
                   (array 'js*
                          "(function(){"
-                         "let x = " (array 'if identity identity) ";"
+                         "let x = " (if-not (nil? identity) identity) ";"
                          "for (let i = 0; i < " (str args) ".length; i++) {"
                          "if (x == null) { x = " (str args) "[i] }"
                          "else { x = x " (str operator) " " (str args) "[i] } } return x; }())")))))
@@ -652,7 +669,7 @@
 
 (defn say
   (&args)
-  (.apply (.-log js/console) js/console (.map args pr-str)))
+  (apply (.bind (.-log js/console) js/console) (.map args pr-str)))
 
 (defn p
   (x) (print (pr-str x)))
@@ -917,8 +934,6 @@
    (reduce
     (fn (bool x) (and bool (f x))) col true)))
 
-(def ^:private js-arrays-equal)
-
 (defn =
   (a b)
   (cond
@@ -927,19 +942,10 @@
     ;; (see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Equality_comparisons_and_sameness#same-value-zero_equality)
     (and (js-primitive-number? a) (js-primitive-number? b))
        (or (identical? a b) (and (not-identical? a a) (not-identical? b b)))
-    (and (array? a) (array? b)) (js-arrays-equal a b)
-    (slot? a "equals") (.equals a b)
-    (slot? b "equals") (.equals b a)
+    (has-method? a 'equals) (.equals a b)
+    (has-method? b 'equals) (.equals b a)
     :else
-      (identical? a b)))
-
-(defn ^:private js-arrays-equal
-  (a b)
-  (cond
-    (not-identical? (length a) (length b)) false
-    :else
-      (.every a (fn (x i) (= x (array-get b i))))))
-
+      (identical? (hash-code a) (hash-code b))))
 
 (def === isa?)
 

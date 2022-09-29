@@ -1,12 +1,12 @@
 import {escapeChars} from "../utils";
-import {BodyForm, Form, isBodyForm, isRecurForm, isTaggedValue} from "../core";
-import {isArray, map, str} from "../../lang/runtime";
+import {Form, isRecurForm, isTaggedValue} from "../core";
+import {isArray, map} from "../../lang/runtime";
 import {FN_SYM as FN_STR} from "../constants";
 import {Context} from "../../lang/Context";
 import {compileBody, compileRecursiveBody} from "./compileBody";
 import {prStr} from "../prStr";
 import {isSymbol, Symbol} from "../../lang/Symbol";
-import {isCondForm} from "./emitCond";
+import {isIfForm} from "./emitIf";
 
 const SPLAT = '&';
 
@@ -54,7 +54,9 @@ function genArgAssigns(argsBuf: ParsedArgs): string {
 function genArgsDef(argsBuf: ParsedArgs): string {
     const argsDef = [];
     for (let i = 0; i < argsBuf.length; ++i) {
-        argsDef.push(escapeChars(argsBuf[i].name.name()));
+        if (!argsBuf[i].splat) {
+            argsDef.push(escapeChars(argsBuf[i].name.name()));
+        }
     }
     return argsDef.join(',');
 }
@@ -65,9 +67,8 @@ export type FnForm = [typeof FN_SYM, Symbol, Symbol[], ...Form[]] | [typeof FN_S
 export const isFnForm = (form: Form): form is FnForm => {
     if (!isTaggedValue<typeof FN_SYM>(form, FN_SYM)) return false;
     if (!isSymbol(form[1]) && !isArray(form[1])) return false;
-    if (isSymbol(form[1]) && !isArray(form[2])) return false;
 
-    return true;
+    return !(isSymbol(form[1]) && !isArray(form[2]));
 }
 
 
@@ -75,7 +76,7 @@ function hasTailCall(form: Form): boolean {
     if (isRecurForm(form)) {
         return true;
     }
-    else if (isCondForm(form)) {
+    else if (isIfForm(form)) {
         return form.slice(1).some(hasTailCall);
     }
     else if (isFnForm(form)) {

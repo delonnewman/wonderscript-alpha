@@ -3,10 +3,12 @@ import {Meta, MetaData} from "./Meta";
 import {Nil} from "./Nil";
 import {Invokable} from "./Invokable";
 import {merge} from "./runtime";
+import {Value} from "./Value";
+import {stringHash} from "./utils";
 
 const SLASH = '/';
 
-export class Symbol<Name = string> implements Named<Name>, Meta, Invokable, Comparable, Equality {
+export class Symbol<Name = string> implements Named<Name>, Meta, Invokable, Comparable, Value {
     private readonly _name: Name;
     private readonly _namespace?: string;
     private readonly _meta?: MetaData;
@@ -78,6 +80,10 @@ export class Symbol<Name = string> implements Named<Name>, Meta, Invokable, Comp
         if (!isSymbol(other)) return false
 
         return this._name === other.name() && this._namespace === other.namespace()
+    }
+
+    hashCode(): number {
+        return stringHash(`'${this.toString()}`);
     }
 
     invoke(args: Map<Symbol<Name>, any>[]): any {

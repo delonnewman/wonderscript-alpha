@@ -3,12 +3,13 @@ import {Nil} from "./Nil";
 import {CORE_NAMES} from "../compiler/constants";
 import {dasherize, escapeChars} from "../compiler/utils";
 import {CORE_MOD} from "../compiler/vars";
-import {isMeta, Meta, MetaData} from "./Meta";
+import {isMeta, Meta} from "./Meta";
 import {Keyword} from "./Keyword";
 import {Symbol as WSSymbol} from "./Symbol";
 import {List} from "./List";
-import {Object} from "./Object";
 import {Vector} from "./Vector";
+
+export {hashCode} from "./utils"
 
 const EMPTY_ARRAY  = Object.freeze([]);
 const EMPTY_STRING = "";
@@ -245,22 +246,6 @@ export function partition(n: number, xs: ArrayLike): Readonly<any[]> {
     return a;
 }
 
-export function keyword(arg1: string, arg2?: string): Keyword {
-    if (arg2 == null) {
-        return Keyword.intern(arg1);
-    }
-
-    return Keyword.intern(arg2, arg1);
-}
-
-export function symbol(arg1: string, arg2?: string, meta?: MetaData): WSSymbol {
-    if (arg2 == null) {
-        return WSSymbol.intern(arg1, undefined, meta);
-    }
-
-    return WSSymbol.intern(arg2, arg1, meta)
-}
-
 export function list(...args): List {
     let xs = List.EMPTY;
 
@@ -269,26 +254,6 @@ export function list(...args): List {
     }
 
     return xs;
-}
-
-export function setMeta(obj: Object, key: Keyword, value: any): Object {
-    if (!isMeta(obj)) {
-        console.error("not meta", obj);
-    }
-
-    obj.setMeta(key, value);
-
-    return obj;
-}
-
-export function setMacro(obj: Object): Object {
-    return setMeta(obj, Keyword.intern('macro'), true);
-}
-
-export function resetMeta(obj: Object, data: Map<Keyword, any>): Object {
-    obj.resetMeta(data);
-
-    return obj;
 }
 
 export function meta(obj: Meta): Map<Keyword, any> {

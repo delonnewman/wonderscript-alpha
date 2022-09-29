@@ -1,6 +1,6 @@
 import {Context, MUTABLE_KW} from "./wonderscript/lang/Context";
 import {CORE_NS, CURRENT_NS} from "./wonderscript/compiler/vars";
-import {createNs} from "./wonderscript/lang/Namespace";
+import {createNs, Namespace} from "./wonderscript/lang/Namespace";
 import * as core from "./wonderscript/lang";
 import * as compiler from "./wonderscript/compiler";
 import {importModule, importSymbol, isString, Keyword} from "./wonderscript/lang";
@@ -35,6 +35,10 @@ export class Compiler {
     private init() {
         this.env.define(Symbol.intern(CORE_NS.name), CORE_NS);
         this.env.define(JS_SYM, createNs(this.globalName(), this.global));
+        this.env.define(
+            Symbol.intern('wonderscript.lang'),
+            createNs('wonderscript.lang', globalThis.wonderscript.lang)
+        );
 
         importModule(core);
         importModule({

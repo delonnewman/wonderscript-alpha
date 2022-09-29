@@ -5,5 +5,8 @@
     "removeComments": true,
     "preserveConstEnums": true
   },
-  "include": ["src/**/*"]
+  "include": [
+    "src/**/*",
+    "../../../Library/Caches/JetBrains/RubyMine2022.2/javascript/typings/node/17.0.45/node_modules/@types/node/buffer.d.ts"
+  ]
 }

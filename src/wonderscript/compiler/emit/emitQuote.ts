@@ -29,16 +29,16 @@ export function emitQuotedMetaData(meta: MetaData): string {
     return `new Map([${buffer.join(', ')}])`
 }
 
-const SYM_FUNC = 'wonderscript.core.symbol';
+const SYM_FUNC = 'wonderscript.lang.Symbol.intern';
 
 function emitQuotedSymbol(sym: Symbol): string {
     if (sym.hasMeta() && sym.hasNamespace()) {
         const m = emitQuotedMetaData(sym.meta());
-        return `${SYM_FUNC}(${JSON.stringify(sym.namespace())},${JSON.stringify(sym.name())},${m})`
+        return `${SYM_FUNC}(${JSON.stringify(sym.name())},${JSON.stringify(sym.namespace())},${m})`
     }
 
     if (sym.hasNamespace()) {
-        return `${SYM_FUNC}(${JSON.stringify(sym.namespace())},${JSON.stringify(sym.name())})`
+        return `${SYM_FUNC}(${JSON.stringify(sym.name())},${JSON.stringify(sym.namespace())})`
     }
 
     return `${SYM_FUNC}(${JSON.stringify(sym.name())})`

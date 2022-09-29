@@ -2,8 +2,10 @@ import {Named, namedHash} from "./Named";
 import {Symbol} from "./Symbol";
 import {Nil} from "./Nil";
 import {Invokable} from "./Invokable";
+import {Value} from "./Value";
+import {stringHash} from "./utils";
 
-export class Keyword<Name extends string = string> implements Named<Name>, Invokable, Comparable, Equality {
+export class Keyword<Name extends string = string> implements Named<Name>, Invokable, Comparable, Value {
     private readonly _symbol: Symbol<Name>;
 
     static CACHE = new Map<string, Keyword<any>>();
@@ -71,12 +73,16 @@ export class Keyword<Name extends string = string> implements Named<Name>, Invok
         return this._symbol.equals(other.symbol());
     }
 
+    hashCode(): number {
+        return stringHash(this.toString());
+    }
+
     toString() {
         return `:${this._symbol}`
     }
 
     toJS(): string {
-        return `wonderscript.core.keyword(${JSON.stringify(this.name())}, ${JSON.stringify(this.namespace())})`
+        return `wonderscript.lang.Keyword.intern(${JSON.stringify(this.name())}, ${JSON.stringify(this.namespace())})`
     }
 }
 

@@ -12,6 +12,8 @@ export function macroexpand(form: Form, scope: Context): Form {
     if (!isTaggedValue(form) || isSpecialForm(form)) return form;
 
     const sym = form[0];
+
+    // TODO: move this to reader
     const name = sym.name();
     if (!sym.equals(DOT_DASH_SYM) && name.startsWith(DOT_DASH_STR)) {
         return [DOT_SYM, form.slice(1)[0], Symbol.intern(name.slice(1))];

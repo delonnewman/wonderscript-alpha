@@ -2,22 +2,27 @@ import {Meta, MetaData} from "./Meta";
 import {Nil} from "./Nil";
 import {First, isSequence, Next, Sequence} from "./Sequence";
 import {Sequenceable} from "./Sequenceable";
-import {merge} from "./runtime";
+import {merge, reduce} from "./runtime";
+import {Value} from "./Value";
+import {hashCode, hashCombine, stringHash} from "./utils";
 
-export class List implements Meta, Sequence, Sequenceable, Equality {
+const HASH_SEED = 4221954417;
+
+export class List implements Meta, Sequence, Sequenceable, Value {
     static EMPTY = new this(null, null);
 
     private readonly _first: First;
     private readonly _next: Next;
     private readonly _count: number;
     private readonly _meta: MetaData | Nil;
+    private _hashCode: number | null;
 
     constructor(first: First, next: Next, count = 0, meta?: MetaData) {
         this._first = first;
         this._next  = next;
         this._count = count;
         this._meta  = meta;
-        Object.freeze(this);
+        this._hashCode = null;
     }
 
     empty(): List {
@@ -75,6 +80,14 @@ export class List implements Meta, Sequence, Sequenceable, Equality {
         }
 
         return xs == null && ys == null;
+    }
+
+    hashCode(): number {
+        if (this._hashCode == null) {
+            this._hashCode = reduce((n, x) => hashCombine(n, hashCode(x)), this, HASH_SEED);
+        }
+
+        return this._hashCode;
     }
 }
 

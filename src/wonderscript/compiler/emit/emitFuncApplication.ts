@@ -45,7 +45,11 @@ Set.prototype.invoke = function(args: any[]): boolean {
 
 // @ts-ignore
 Function.prototype.invoke = function(args: any[]) {
-    return this.apply(this, args);
+    if (args) {
+        return this.apply(this, args);
+    }
+
+    return this.apply(this);
 };
 
 export function emitFuncApplication(form, env: Context): string {
@@ -55,6 +59,10 @@ export function emitFuncApplication(form, env: Context): string {
 
     const fn = emit(form[0], env);
     const args = form.slice(1, form.length);
+    if (args.length === 0) {
+        return `(${fn}).invoke()`;
+    }
+
     const argBuffer = [];
 
     for (let i = 0; i < args.length; i++) {

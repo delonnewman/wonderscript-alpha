@@ -25,8 +25,6 @@ export const NIL_SYM      = 'nil';
 export const TRUE_SYM     = 'true';
 export const FALSE_SYM    = 'false';
 
-export const KEYWORD_SYM  = 'keyword';
-
 // Operators
 export const MOD_SYM           = 'mod';
 export const LT_SYM            = '<';
