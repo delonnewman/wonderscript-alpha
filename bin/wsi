@@ -4,9 +4,9 @@ const fs = require("fs"),
 
 // load runtime and core library
 const wsc = require("../index.js");
-const {str, pr_DASH_str, _STAR_ns_STAR_} = wonderscript.core;
-const NS = _STAR_ns_STAR_;
-const prStr = pr_DASH_str;
+const NS = wonderscript.core['*ns*'];
+const prStr = wonderscript.core.pr_DASH_str;
+const str = wonderscript.core.str;
 
 function interactive() {
     const rl = readline.createInterface({
