@@ -94,6 +94,7 @@
                                        (array 'str "wrong number of arguments (given "
                                               (array 'length argsym) ", expected " arity-str ")"))))))))))
 
+; # TODO: defn's are type defs also see defclass
 (def ^:macro defn
   (fn
     (name &rest)
@@ -552,7 +553,7 @@
 
 (defn name
   (named)
-  (when (slot? named "name")
+  (when (slot? named "name") ; # TODO: add try macro for this idiom
     (.name named)))
 
 (defn namespace
@@ -712,6 +713,7 @@
 (defn prevent-extensions!
   (object) (.preventExtensions js/Object object))
 
+; TODO: support compiler generated functions
 (defn arity
   (f)
   (if (function? f)
