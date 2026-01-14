@@ -18,6 +18,9 @@ const EMPTY_STRING: "" = "";
 
 export type Indexed<T = unknown> = Array<T> | ArrayLike<T> | Vector<T>;
 
+type Mapper<In, Out> = (x: In) => Out;
+type Reducing<Memo, Item> = (a: Memo, b: Item) => Memo;
+
 export function isString(val: unknown): val is string {
   return (
     typeof val === "string" ||
@@ -90,8 +93,6 @@ export function isEmpty(val: unknown): boolean {
   return next(val as Seq) == null;
 }
 
-type Mapper<In, Out> = (x: In) => Out;
-
 export function map<In = unknown, Out = unknown>(
   f: Mapper<In, Out>,
   xs: Seq<In>
@@ -119,9 +120,12 @@ export function map<In = unknown, Out = unknown>(
   return Object.freeze(a);
 }
 
-type Reducing = (a: any, b: any) => any;
-
-export function reduce(f: Reducing, xs: Seq, init?: any) {
+export function reduce<Item>(f: Reducing<Item, Item>, xs: Seq<Item>): Item;
+export function reduce<Item = unknown, Memo = Item>(
+  f: Reducing<Memo, Item>,
+  xs: Seq<Item>,
+  init?: Memo
+) {
   if (arguments.length !== 2 && arguments.length !== 3) {
     throw new Error(
       "wrong number of arguments expected at least 2 or 3, got: " +
@@ -129,20 +133,20 @@ export function reduce(f: Reducing, xs: Seq, init?: any) {
     );
   }
 
-  if (init == null) {
-    init = first(xs);
-    xs = next(xs);
-  }
-
   if (isEmpty(xs)) {
     return init;
   }
 
-  let memo = init;
+  let memo: Memo | Item;
+
+  if (init == null) {
+    memo = first<Item>(xs);
+    xs = next<Item>(xs);
+  }
 
   while (!isEmpty(xs)) {
-    memo = f.call(xs, memo, first(xs));
-    xs = next(xs);
+    memo = f.call(xs, memo, first<Item>(xs));
+    xs = next<Item>(xs);
   }
 
   return memo;
