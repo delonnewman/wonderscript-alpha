@@ -1,14 +1,16 @@
 import { Nil } from "./Nil";
 import { isFunction } from "./runtime";
 
-export type First = unknown | Nil;
-export type Next = Sequence | Nil;
+export type First<T = unknown> = T | Nil;
+export type Next<T> = Sequence<T> | Nil;
 
-export interface Sequence {
-  cons(x): Sequence;
-  first(): First;
-  next(): Next;
+export interface Sequence<T = unknown> {
+  cons(val: T): Sequence;
+  first(): First<T>;
+  next(): Next<T>;
 }
 
-export const isSequence = (value: any): value is Sequence =>
-  isFunction(value.cons) && isFunction(value.first) && isFunction(value.next);
+export const isSequence = (value: unknown): value is Sequence =>
+  isFunction((value as Sequence).cons) &&
+  isFunction((value as Sequence).first) &&
+  isFunction((value as Sequence).next);
