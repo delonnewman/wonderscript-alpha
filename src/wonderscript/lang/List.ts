@@ -4,7 +4,7 @@ import { First, isSequence, Next, Sequence } from "./Sequence";
 import { Sequenceable } from "./Sequenceable";
 import { merge, reduce } from "./runtime";
 import { Value } from "./Value";
-import { hashCode, hashCombine, stringHash } from "./utils";
+import { hashCode, hashCombine } from "./utils";
 
 const HASH_SEED = 4221954417;
 
