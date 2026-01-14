@@ -1,7 +1,7 @@
-export class Vector {
+export class Vector<T = unknown> {
   readonly length: number;
 
-  constructor(array) {
+  constructor(array: T[]) {
     this.length = array.length;
 
     for (let i = 0; i < array.length; i++) {
@@ -19,11 +19,11 @@ export class Vector {
     return this[n];
   }
 
-  slice(start, end): Vector {
+  slice(start: number, end: number): Vector {
     return new Vector(Array.prototype.slice.call(this, start, end));
   }
 }
 
-export function isVector(obj): obj is Vector {
+export function isVector(obj: unknown): obj is Vector {
   return obj instanceof Vector;
 }
