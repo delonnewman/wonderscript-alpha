@@ -740,7 +740,7 @@
 
 (defn has-method?
   (obj method)
-  (function? (slot obj method)))
+  (function? (slot-get obj method)))
 
 (defn bind
   (f object)

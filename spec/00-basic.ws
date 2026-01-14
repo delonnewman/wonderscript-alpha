@@ -12,6 +12,6 @@
 (throw "Hey!")
 
 ;; slot access
-(is (nil? (slot js/global 'hey)))
+(is (nil? (slot-get js/global 'hey)))
 (slot-set! js/global 'hey "You!")
-(is (= "You!" (slot js/global 'hey)))
+(is (= "You!" (slot-get js/global 'hey)))
