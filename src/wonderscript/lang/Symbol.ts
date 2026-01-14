@@ -2,7 +2,7 @@ import { Named } from "./Named";
 import { Meta, MetaData } from "./Meta";
 import { Nil } from "./Nil";
 import { Invokable } from "./Invokable";
-import { Comparable } from "./Comparable";
+import { Comparable, Order } from "./Comparable";
 import { merge } from "./runtime";
 import { Value } from "./Value";
 import { stringHash } from "./utils";
@@ -75,7 +75,7 @@ export class Symbol<Name = string>
     return this._namespace != null;
   }
 
-  cmp(other: Symbol): -1 | 1 | 0 {
+  cmp(other: Symbol): Order {
     if (!isSymbol(other))
       throw new Error("cannot compare symbols to other values");
 
