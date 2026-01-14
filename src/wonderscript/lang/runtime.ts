@@ -183,9 +183,7 @@ export function next<T = unknown>(col: Nextable<T>): Seq<T> | Nil {
   throw new Error("Cannot get the next element of: " + col);
 }
 
-export function rest<T = unknown>(
-  col: Nextable<T>
-): Readonly<T[]> | Sequence<T> {
+export function rest<T = unknown>(col: Nextable<T>): Seq<T> {
   const val = next(col);
 
   return val == null ? EMPTY_ARRAY : val;
