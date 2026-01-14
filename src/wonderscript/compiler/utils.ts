@@ -108,31 +108,3 @@ export function escapeChars(str: string): string {
 
   return str;
 }
-
-const UNESCAPE_MAPPING = {
-  _EQ_: "=",
-  _DASH_: "-",
-  _STAR_: "*",
-  _BANG_: "!",
-  _QUEST_: "?",
-  _HAT_: "^",
-  _PLUS_: "+",
-  _DOT_: ".",
-  _BSLASH_: "/",
-  _FSLASH_: "\\",
-  _GT_: ">",
-  _LT_: "<",
-  _OBRACK_: "[",
-  _CBRACK_: "]",
-  _DOLLAR_: "$",
-  _AT_: "@",
-  _PERCENT_: "%",
-  _TILDE_: "~",
-} as const;
-
-export function unescapeChars(str: string): string {
-  for (let entry in Object.entries(UNESCAPE_MAPPING)) {
-    str = str.replace(new RegExp(entry[0], "g"), entry[1]);
-  }
-  return str;
-}
