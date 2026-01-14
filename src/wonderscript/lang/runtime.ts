@@ -197,9 +197,9 @@ export function isEmpty(val: unknown): boolean {
 
 type Mapper<In, Out> = (x: In) => Out;
 
-export function map<In = any, Out = unknown>(
+export function map<In = unknown, Out = unknown>(
   f: Mapper<In, Out>,
-  xs: Seq
+  xs: Seq<In>
 ): Readonly<Out[]> {
   if (arguments.length !== 2) {
     throw new Error(
