@@ -169,6 +169,6 @@ export class Definition implements Meta, Named, Reference {
   }
 }
 
-export function isDefinition(obj): obj is Definition {
+export function isDefinition(obj: unknown): obj is Definition {
   return obj instanceof Definition;
 }
