@@ -1,11 +1,12 @@
 import { emit } from "../emit";
+import { Form } from "../core";
 import { Context } from "../../lang/Context";
 import { isSymbol } from "../../lang/Symbol";
 import { isMacro } from "../core";
 import { prStr } from "../prStr";
 
 // @ts-ignore
-Array.prototype.invoke = function (indexes: number[]) {
+Array.prototype.invoke = function(indexes: number[]) {
   if (indexes.length === 0) {
     return null;
   }
@@ -18,7 +19,7 @@ Array.prototype.invoke = function (indexes: number[]) {
 };
 
 // @ts-ignore
-Map.prototype.invoke = function (keys: any[]) {
+Map.prototype.invoke = function(keys: unknown[]) {
   if (keys.length === 0) {
     return null;
   }
@@ -31,7 +32,7 @@ Map.prototype.invoke = function (keys: any[]) {
 };
 
 // @ts-ignore
-Set.prototype.invoke = function (args: any[]): boolean {
+Set.prototype.invoke = function(args: unknown[]): boolean {
   if (args.length === 0) {
     return false;
   }
@@ -44,7 +45,7 @@ Set.prototype.invoke = function (args: any[]): boolean {
 };
 
 // @ts-ignore
-Function.prototype.invoke = function (args: any[]) {
+Function.prototype.invoke = function(args: unknown[]) {
   if (args) {
     return this.apply(this, args);
   }
@@ -52,7 +53,7 @@ Function.prototype.invoke = function (args: any[]) {
   return this.apply(this);
 };
 
-export function emitFuncApplication(form, env: Context): string {
+export function emitFuncApplication(form: Form[], env: Context): string {
   if (isSymbol(form[0]) && isMacro(form[0])) {
     throw new Error(
       `macros cannot be evaluated in this context: ${prStr(form)}`
