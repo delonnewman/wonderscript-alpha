@@ -111,8 +111,8 @@ import { isVector } from "../lang/Vector";
 import { emitVector } from "./emit/emitVector";
 import { emitIf } from "./emit/emitIf";
 
-export function emit(form_: Form, ctx: Context) {
-  const form = macroexpand(form_, ctx);
+export function emit(exp: Form, ctx: Context) {
+  const form = macroexpand(exp, ctx);
   if (isKeyword(form)) {
     return emitKeyword(form);
   } else if (isSymbol(form)) {
