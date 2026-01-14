@@ -102,4 +102,4 @@ export class List implements Meta, Sequence, Sequenceable, Value {
   }
 }
 
-export const isList = (value: any): value is List => value instanceof List;
+export const isList = (value: unknown): value is List => value instanceof List;
