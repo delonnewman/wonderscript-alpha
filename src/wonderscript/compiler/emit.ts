@@ -23,7 +23,6 @@ import {
   BIT_RSHIFT_SYM,
   BIT_URSHIFT_SYM,
   BIT_XOR_SYM,
-  COND_SYM,
   DEF_SYM,
   DIV_SYM,
   DOT_SYM,
