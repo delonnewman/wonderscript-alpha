@@ -11,8 +11,8 @@ import { Vector } from "./Vector";
 
 export { hashCode } from "./utils";
 
-const EMPTY_ARRAY = Object.freeze([]);
-const EMPTY_STRING = "";
+const EMPTY_ARRAY: Readonly<[]> = Object.freeze([]);
+const EMPTY_STRING: "" = "";
 
 export function isString(val: unknown): val is string {
   return (
@@ -256,15 +256,17 @@ export function reduce(f: Reducing, xs: Seq, init?: any) {
 export function partition<T = unknown>(
   n: number,
   xs: Indexed<T>
-): Readonly<T[]> {
+): Readonly<[] | [Indexed<T>]> {
   if (isEmpty(xs)) {
     return EMPTY_ARRAY;
   }
+
   if (xs.length === n) {
     return [xs];
   }
 
   const a = [];
+
   for (let i = 0; i < xs.length; i = i + n) {
     const x = [];
     for (let j = 0; j < n; j++) {
@@ -272,7 +274,8 @@ export function partition<T = unknown>(
     }
     a.push(x);
   }
-  return a;
+
+  return Object.freeze(a) as [Array<T>];
 }
 
 export function list(...args: unknown[]): List {
@@ -347,7 +350,7 @@ export function importSymbol(name: string, obj: unknown) {
 }
 
 export function importModule(module: Object) {
-  Object.keys(module).forEach(function(name) {
+  Object.keys(module).forEach((name) => {
     importSymbol(name, module[name]);
   });
 }
