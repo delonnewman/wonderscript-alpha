@@ -37,3 +37,9 @@ export const isSequence = (value: unknown): value is Sequence =>
   isFunction((value as Sequence).cons) &&
   isFunction((value as Sequence).first) &&
   isFunction((value as Sequence).next);
+
+export const hasFirstMethod = (col: unknown): col is HasFirstMethod =>
+  isFunction((col as HasFirstMethod).first);
+
+export const hasConsMethod = (col: unknown): col is HasConsMethod =>
+  isFunction((col as HasConsMethod).cons);
