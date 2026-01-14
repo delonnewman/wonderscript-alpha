@@ -9,7 +9,7 @@ import { isModule, Module } from "./lang/Module";
 export * from "./lang/Nil";
 export * from "./lang/Meta";
 export * from "./lang/Named";
-export * from "./lang/Sequence";
+export * from "./lang/Seq";
 export * from "./lang/Sequenceable";
 export * from "./lang/Symbol";
 export * from "./lang/Keyword";

@@ -1,6 +1,6 @@
 import { Meta, MetaData } from "./Meta";
 import { Nil } from "./Nil";
-import { First, isSequence, Next, Sequence } from "./Sequence";
+import { First, isSequence, Next, Sequence } from "./Seq";
 import { Sequenceable } from "./Sequenceable";
 import { merge, reduce } from "./runtime";
 import { Value } from "./Value";
