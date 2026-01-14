@@ -6,7 +6,7 @@ import { isMacro } from "../core";
 import { prStr } from "../prStr";
 
 // @ts-ignore
-Array.prototype.invoke = function(indexes: number[]) {
+Array.prototype.invoke = function (indexes: number[]) {
   if (indexes.length === 0) {
     return null;
   }
@@ -19,7 +19,7 @@ Array.prototype.invoke = function(indexes: number[]) {
 };
 
 // @ts-ignore
-Map.prototype.invoke = function(keys: unknown[]) {
+Map.prototype.invoke = function (keys: unknown[]) {
   if (keys.length === 0) {
     return null;
   }
@@ -32,7 +32,7 @@ Map.prototype.invoke = function(keys: unknown[]) {
 };
 
 // @ts-ignore
-Set.prototype.invoke = function(args: unknown[]): boolean {
+Set.prototype.invoke = function (args: unknown[]): boolean {
   if (args.length === 0) {
     return false;
   }
@@ -45,7 +45,7 @@ Set.prototype.invoke = function(args: unknown[]): boolean {
 };
 
 // @ts-ignore
-Function.prototype.invoke = function(args: unknown[]) {
+Function.prototype.invoke = function (args: unknown[]) {
   if (args) {
     return this.apply(this, args);
   }
