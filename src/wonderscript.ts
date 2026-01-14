@@ -14,8 +14,6 @@ import { findDefinitionMetaData } from "./wonderscript/compiler/findDefinitionMe
 import { Symbol } from "./wonderscript/lang";
 import { RecursionPoint } from "./wonderscript/compiler/RecursionPoint";
 import { escapeChars } from "./wonderscript/compiler/utils";
-import { Definition, VAR_KW } from "./wonderscript/lang/Definition";
-import { Module } from "./wonderscript/lang/Module";
 import { findNamespaceVar } from "./wonderscript/compiler/findNamespaceVar";
 
 export * from "./wonderscript/lang";
