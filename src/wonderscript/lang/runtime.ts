@@ -129,7 +129,7 @@ export function reduce<Item = unknown, Memo = Item>(
   if (arguments.length !== 2 && arguments.length !== 3) {
     throw new Error(
       "wrong number of arguments expected at least 2 or 3, got: " +
-      arguments.length
+        arguments.length
     );
   }
 
@@ -138,7 +138,6 @@ export function reduce<Item = unknown, Memo = Item>(
   }
 
   let memo: Memo | Item;
-
   if (init == null) {
     memo = first<Item>(xs);
     xs = next<Item>(xs);
