@@ -101,6 +101,7 @@ export function str(...args: unknown[]): string {
 
 const hasFirstMethod = (col: unknown): col is FirstMethod =>
   isFunction((col as FirstMethod).first);
+
 const hasConsMethod = (col: unknown): col is ConsMethod =>
   isFunction((col as ConsMethod).cons);
 
