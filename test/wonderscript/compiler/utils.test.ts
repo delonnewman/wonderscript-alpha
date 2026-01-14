@@ -1,7 +1,7 @@
 import { expect, test, describe } from "bun:test";
-import { isInternable } from "../../../src/wonderscript/compiler/symbol-utils";
+import { isInternable } from "../../../src/wonderscript/compiler/utils";
 
-describe("JS Symbol Utils", () => {
+describe("Compiler Utils", () => {
     describe("isInternable", () => {
         const examples = [
             { value: "aName", valid: true },

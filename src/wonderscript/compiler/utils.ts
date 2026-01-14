@@ -92,20 +92,15 @@ const SPECIAL_CHARS = {
   "~": "_TILDE_",
 } as const;
 
-const KEYWORDS = {
-  else: "_else_",
-  default: "_default_",
-  if: "_if_",
-  switch: "_switch_",
-  case: "_case_",
-} as const;
+export function isInternable(val: string): boolean {
+  return /^[a-zA-Z_$]+[a-zA-Z0-9_$]*$/.test(val);
+}
 
 export function escapeChars(str: string): string {
   if (!isString(str))
     throw new Error("only strings can be escaped not " + JSON.stringify(str));
-  // if (KEYWORDS[str] != null) {
-  //     return KEYWORDS[str];
-  // }
+
+  if (isInternable(str)) return str;
 
   for (let ch in SPECIAL_CHARS) {
     str = str.replace(new RegExp(ch, "g"), SPECIAL_CHARS[ch]);
