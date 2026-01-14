@@ -14,101 +14,111 @@ export { hashCode } from "./utils";
 const EMPTY_ARRAY = Object.freeze([]);
 const EMPTY_STRING = "";
 
-export function isString(x): x is string {
+export function isString(val: unknown): val is string {
   return (
-    typeof x === "string" ||
-    Object.prototype.toString.call(x) === "[object String]"
+    typeof val === "string" ||
+    Object.prototype.toString.call(val) === "[object String]"
   );
 }
 
-export function isObject(x): x is object {
-  return Object.prototype.toString.call(x) === "[object Object]";
+export function isObject(val: unknown): val is object {
+  return Object.prototype.toString.call(val) === "[object Object]";
 }
 
-export function isUndefined(x): x is undefined {
-  return x === void 0;
+export function isUndefined(val: unknown): val is undefined {
+  return val === void 0;
 }
 
-export function isNull(x): x is null {
-  return x === null;
+export function isNull(val: unknown): val is null {
+  return val === null;
 }
 
-export function isBoolean(x): x is boolean {
-  return Object.prototype.toString.call(x) === "[object Boolean]";
+export function isBoolean(val: unknown): val is boolean {
+  return Object.prototype.toString.call(val) === "[object Boolean]";
 }
 
-export function isNumber(x): x is number {
-  return Object.prototype.toString.call(x) === "[object Number]";
+export function isNumber(val: unknown): val is number {
+  return Object.prototype.toString.call(val) === "[object Number]";
 }
 
-export function isInteger(x): x is number {
-  return isNumber(x) && Math.round(x) === x;
+export function isInteger(val: unknown): val is number {
+  return isNumber(val) && Math.round(val) === val;
 }
 
-export function isArray(x): x is any[] {
-  return Object.prototype.toString.call(x) === "[object Array]";
+export function isArray(val: unknown): val is unknown[] {
+  return Object.prototype.toString.call(val) === "[object Array]";
 }
 
-export function isSet(x): x is Set<any> {
-  return Object.prototype.toString.call(x) === "[object Set]";
+export function isSet(val: unknown): val is Set<unknown> {
+  return Object.prototype.toString.call(val) === "[object Set]";
 }
 
-export function isMap(x): x is Map<any, any> {
-  return Object.prototype.toString.call(x) === "[object Map]";
+export function isMap(val: unknown): val is Map<unknown, unknown> {
+  return Object.prototype.toString.call(val) === "[object Map]";
 }
 
-export type ArrayLike = {
+export type ArrayLike<T = unknown> = {
   length: number;
-  [index: number]: unknown;
+  [index: number]: T;
 };
 
-export function isArrayLike(x): x is ArrayLike {
-  return x != null && isNumber(x.length);
+export function isArrayLike(val: unknown): val is ArrayLike {
+  return val != null && isNumber((val as ArrayLike).length);
 }
 
-export function isFunction(x): x is Function {
-  return Object.prototype.toString.call(x) === "[object Function]";
+export function isFunction(val: unknown): val is Function {
+  return Object.prototype.toString.call(val) === "[object Function]";
 }
 
-export function isIterator(x): x is Iterator<any> {
-  return x != null && isFunction(x[Symbol.iterator]);
+export function isIterator(val: unknown): val is Iterator<any> {
+  return val != null && isFunction(val[Symbol.iterator]);
 }
 
-// NOTE: eventually this can go
-export function str(...args): string {
+export function str(...args: unknown[]): string {
   if (args.length === 0) return EMPTY_STRING;
   return Array.prototype.join.call(arguments, EMPTY_STRING);
 }
 
-type ConsMethod = { cons: (x) => any[] };
+type ConsMethod = { cons: (val: unknown) => unknown[] };
 type Consable = ArrayLike | Nil | ConsMethod;
 
-const hasConsMethod = (col): col is ConsMethod => isFunction(col.cons);
+const hasConsMethod = (col: unknown): col is ConsMethod =>
+  isFunction((col as ConsMethod).cons);
 
-export function cons(x, col: Consable): Readonly<any[]> | string {
-  if (col == null) return [x];
+export function cons(
+  val: unknown,
+  col: Consable
+): Readonly<unknown[]> | string {
+  if (col == null) return [val];
 
   if (hasConsMethod(col)) {
-    return col.cons(x);
+    return col.cons(val);
   }
 
   if (isArrayLike(col)) {
     if (isString(col)) {
-      return [x, col].join("");
+      return [val, col].join("");
     } else {
-      return [x].concat(col);
+      return [val].concat(col);
     }
   }
 
   throw new Error("Cannot cons and element to: " + col);
 }
 
-type FirstMethod = { first: () => any | Nil };
-type Firstable = FirstMethod | ArrayLike | Map<any, any> | Set<any>;
+type FirstMethod<T = unknown> = { first: () => T | Nil };
+type Firstable<T = unknown, U = unknown> =
+  | FirstMethod<T>
+  | ArrayLike<T>
+  | Map<T, U>
+  | Set<T>;
 
-const hasFirstMethod = (col): col is FirstMethod => isFunction(col.first);
+const hasFirstMethod = (col: unknown): col is FirstMethod =>
+  isFunction((col as FirstMethod).first);
 
-export function first(col: Firstable): First {
+export function first<T = unknown, U = unknown>(
+  col: Firstable<T, U>
+): First<T> {
   if (col == null) return null;
 
   if (hasFirstMethod(col)) {
@@ -126,12 +136,15 @@ export function first(col: Firstable): First {
   throw new Error("Cannot get the first element of: " + col);
 }
 
-type ForEachMethod = { forEach: (x) => void };
-type Nextable = Sequence | ArrayLike | ForEachMethod;
+type ForEachMethod<T = unknown> = { forEach: (cb: (val: T) => void) => void };
+type Nextable<T = unknown> = Sequence<T> | ArrayLike<T> | ForEachMethod<T>;
 
-const hasForEachMethod = (col): col is ForEachMethod => isFunction(col.forEach);
+const hasForEachMethod = (col: unknown): col is ForEachMethod =>
+  isFunction((col as ForEachMethod).forEach);
 
-export function next(col: Nextable): Readonly<any[]> | Sequence | Nil {
+export function next<T = unknown>(
+  col: Nextable<T>
+): Readonly<T[]> | Sequence<T> | Nil {
   if (col == null) return null;
 
   if (isSequence(col)) {
@@ -149,7 +162,7 @@ export function next(col: Nextable): Readonly<any[]> | Sequence | Nil {
   if (hasForEachMethod(col)) {
     const a = [];
     let i = 0;
-    col.forEach(function (val) {
+    col.forEach((val: T) => {
       if (i > 0) {
         a.push(val);
       }
@@ -161,28 +174,32 @@ export function next(col: Nextable): Readonly<any[]> | Sequence | Nil {
   throw new Error("Cannot get the next element of: " + col);
 }
 
-export function rest(col: Nextable): Readonly<any[]> | Sequence {
+export function rest<T = unknown>(
+  col: Nextable<T>
+): Readonly<T[]> | Sequence<T> {
   const val = next(col);
 
   return val == null ? EMPTY_ARRAY : val;
 }
 
-export function isEmpty(x): boolean {
-  if (x == null) return true;
+type Seq<T = unknown> = Sequence<T> | (Firstable<T> & Nextable<T>);
+type Indexed<T = unknown> = Array<T> | ArrayLike<T> | Vector<T>;
 
-  if (isArrayLike(x)) {
-    return x.length === 0;
+export function isEmpty(val: unknown): boolean {
+  if (val == null) return true;
+
+  if (isArrayLike(val)) {
+    return val.length === 0;
   }
 
-  return next(x) == null;
+  return next(val as Seq) == null;
 }
 
 type Mapper<In, Out> = (x: In) => Out;
-type Mappable = ArrayLike | Sequence | Map<any, any> | Set<any>;
 
 export function map<In = any, Out = unknown>(
   f: Mapper<In, Out>,
-  xs: Mappable
+  xs: Seq
 ): Readonly<Out[]> {
   if (arguments.length !== 2) {
     throw new Error(
@@ -209,11 +226,11 @@ export function map<In = any, Out = unknown>(
 
 type Reducing = (a: any, b: any) => any;
 
-export function reduce(f: Reducing, xs, init?: any) {
+export function reduce(f: Reducing, xs: Seq, init?: any) {
   if (arguments.length !== 2 && arguments.length !== 3) {
     throw new Error(
       "wrong number of arguments expected at least 2 or 3, got: " +
-        arguments.length
+      arguments.length
     );
   }
 
@@ -236,7 +253,10 @@ export function reduce(f: Reducing, xs, init?: any) {
   return memo;
 }
 
-export function partition(n: number, xs: ArrayLike): Readonly<any[]> {
+export function partition<T = unknown>(
+  n: number,
+  xs: Indexed<T>
+): Readonly<T[]> {
   if (isEmpty(xs)) {
     return EMPTY_ARRAY;
   }
@@ -255,7 +275,7 @@ export function partition(n: number, xs: ArrayLike): Readonly<any[]> {
   return a;
 }
 
-export function list(...args): List {
+export function list(...args: unknown[]): List {
   let xs = List.EMPTY;
 
   for (let i = args.length - 1; i >= 0; i--) {
@@ -265,7 +285,7 @@ export function list(...args): List {
   return xs;
 }
 
-export function meta(obj: Meta): Map<Keyword, any> {
+export function meta(obj: Meta): Map<Keyword, unknown> {
   if (!isMeta(obj)) {
     console.error("not meta", obj);
   }
@@ -273,11 +293,13 @@ export function meta(obj: Meta): Map<Keyword, any> {
   return obj.meta();
 }
 
-export function getMeta(obj: Meta, key: Keyword): any {
+export function getMeta(obj: Meta, key: Keyword): unknown {
   return meta(obj)?.get(key);
 }
 
-export function merge(...maps: Map<any, any>[]): Map<any, any> {
+export function merge<K = unknown, V = unknown>(
+  ...maps: Map<unknown, unknown>[]
+): Map<K, V> {
   const merged = new Map();
 
   for (let i = 0; i < maps.length; i++) {
@@ -292,8 +314,8 @@ export function merge(...maps: Map<any, any>[]): Map<any, any> {
   return merged;
 }
 
-export function vector(...args): Vector {
-  return new Vector(args);
+export function vector<T = unknown>(...args: T[]): Vector<T> {
+  return new Vector<T>(args);
 }
 
 export function escapeHtml(str: string): string {
@@ -306,7 +328,7 @@ export function gensym(template = "sym"): WSSymbol {
   return WSSymbol.intern(`${template}${num}`);
 }
 
-export function importSymbol(name: string, obj) {
+export function importSymbol(name: string, obj: unknown) {
   let wsName = CORE_NAMES[name];
 
   if (name[0] === name[0].toUpperCase()) {
@@ -324,8 +346,8 @@ export function importSymbol(name: string, obj) {
   CORE_MOD[wsName] = obj;
 }
 
-export function importModule(module) {
-  Object.keys(module).forEach(function (name) {
+export function importModule(module: Object) {
+  Object.keys(module).forEach(function(name) {
     importSymbol(name, module[name]);
   });
 }
