@@ -2,7 +2,7 @@ import { Nil } from "./Nil";
 import { isFunction } from "./runtime";
 
 export type First<T = unknown> = T | Nil;
-export type Next<T> = Sequence<T> | Nil;
+export type Next<T = unknown> = Sequence<T> | Nil;
 
 export interface Sequence<T = unknown> {
   cons(val: T): Sequence;
