@@ -1,11 +1,11 @@
-import {PushBackReader} from "./PushBackReader";
+import { PushBackReader } from "./PushBackReader";
 
 export function commentReader(r: PushBackReader, semicolon, opts) {
-    let ch;
+  let ch;
 
-    do {
-        ch = r.read();
-    } while (ch !== null && ch !== '\n' && ch !== '\r');
+  do {
+    ch = r.read();
+  } while (ch !== null && ch !== "\n" && ch !== "\r");
 
-    return r;
+  return r;
 }

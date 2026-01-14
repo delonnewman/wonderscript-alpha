@@ -1,12 +1,12 @@
-import {isFunction} from "./runtime";
-import {Equality, isEquality} from "./Equality";
+import { isFunction } from "./runtime";
+import { Equality, isEquality } from "./Equality";
 
 export interface Value extends Equality {
-    hashCode(): number
+  hashCode(): number;
 }
 
 export const isValue = (value: any): value is Value => {
-    if (value == null) return false;
+  if (value == null) return false;
 
-    return isFunction(value.hashCode) && isEquality(value);
-}
+  return isFunction(value.hashCode) && isEquality(value);
+};

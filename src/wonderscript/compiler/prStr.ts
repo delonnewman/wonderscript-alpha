@@ -1,102 +1,102 @@
-import {FALSE_SYM, NIL_SYM, TRUE_SYM} from "./constants";
+import { FALSE_SYM, NIL_SYM, TRUE_SYM } from "./constants";
 import {
-    ArrayLike,
-    isArray,
-    isArrayLike,
-    isBoolean,
-    isFunction,
-    isMap,
-    isNumber,
-    isObject,
-    isSet,
-    isString,
-    map,
+  ArrayLike,
+  isArray,
+  isArrayLike,
+  isBoolean,
+  isFunction,
+  isMap,
+  isNumber,
+  isObject,
+  isSet,
+  isString,
+  map,
 } from "../lang/runtime";
-import {Form} from "./core";
-import {isSymbol} from "../lang/Symbol";
-import {isKeyword} from "../lang/Keyword";
-import {isList} from "../lang/List";
-import {isVector} from "../lang/Vector";
+import { Form } from "./core";
+import { isSymbol } from "../lang/Symbol";
+import { isKeyword } from "../lang/Keyword";
+import { isList } from "../lang/List";
+import { isVector } from "../lang/Vector";
 
-const EMPTY_LIST  = '()';
-const EMPTY_ARRAY = '[]';
+const EMPTY_LIST = "()";
+const EMPTY_ARRAY = "[]";
 
 export function prStr(form: Form | Function | ArrayLike | Object): string {
-    if (form == null) return NIL_SYM;
-    if (isNumber(form)) return `${form}`;
+  if (form == null) return NIL_SYM;
+  if (isNumber(form)) return `${form}`;
 
-    if (isBoolean(form)) {
-        return form ? TRUE_SYM : FALSE_SYM;
+  if (isBoolean(form)) {
+    return form ? TRUE_SYM : FALSE_SYM;
+  }
+
+  if (isSymbol(form) || isKeyword(form)) {
+    return form.toString();
+  }
+
+  if (isString(form)) {
+    return JSON.stringify(form);
+  }
+
+  if (isList(form)) {
+    if (form.count() === 0) {
+      return EMPTY_LIST;
     }
 
-    if (isSymbol(form) || isKeyword(form)) {
-        return form.toString();
+    const parts = map(prStr, form);
+    return `(${parts.join(" ")})`;
+  }
+
+  if (isArray(form)) {
+    const parts = [];
+    for (let i = 0; i < form.length; i++) {
+      parts.push(prStr(form[i]));
+    }
+    return `(${parts.join(" ")})`;
+  }
+
+  if (isVector(form)) {
+    if (form.length === 0) {
+      return EMPTY_ARRAY;
     }
 
-    if (isString(form)) {
-        return JSON.stringify(form);
+    const parts = Array.prototype.map.call(form, prStr);
+    return `[${parts.join(" ")}]`;
+  }
+
+  if (isMap(form)) {
+    const parts = [];
+    for (let entry of form) {
+      const key = prStr(entry[0]);
+      const val = prStr(entry[1]);
+      parts.push(`${key} ${val}`);
     }
+    return `{${parts.join(" ")}}`;
+  }
 
-    if (isList(form)) {
-        if (form.count() === 0) {
-            return EMPTY_LIST;
-        }
-
-        const parts = map(prStr, form);
-        return `(${parts.join(' ')})`;
+  if (isSet(form)) {
+    const parts = [];
+    for (let entry of form) {
+      const val = prStr(entry);
+      parts.push(val);
     }
+    return `#{${parts.join(" ")}}`;
+  }
 
-    if (isArray(form)) {
-        const parts = [];
-        for (let i = 0; i < form.length; i++) {
-            parts.push(prStr(form[i]));
-        }
-        return `(${parts.join(' ')})`;
-    }
+  if (isFunction(form)) {
+    return `#js/function "${form}"`;
+  }
 
-    if (isVector(form)) {
-        if (form.length === 0) {
-            return EMPTY_ARRAY;
-        }
+  if (isArrayLike(form)) {
+    const parts = Array.prototype.map.call(form, (x, i) => `${i} ${prStr(x)}`);
+    return `#js/object {${parts.join(", ")}}`;
+  }
 
-        const parts = Array.prototype.map.call(form, prStr);
-        return `[${parts.join(' ')}]`;
-    }
+  if (isObject(form)) {
+    const keys = Object.keys(form);
+    const ctrName = Object.getPrototypeOf(form)?.constructor?.name ?? "object";
+    console.log("ctrName", ctrName);
+    return `#js/${ctrName} {${keys.map((k) => `${prStr(k)} ${prStr(form[k])}`).join(", ")}}`;
+  }
 
-    if (isMap(form)) {
-        const parts = [];
-        for (let entry of form) {
-            const key = prStr(entry[0]);
-            const val = prStr(entry[1]);
-            parts.push(`${key} ${val}`);
-        }
-        return `{${parts.join(' ')}}`;
-    }
-
-    if (isSet(form)) {
-        const parts = [];
-        for (let entry of form) {
-            const val = prStr(entry);
-            parts.push(val);
-        }
-        return `#{${parts.join(' ')}}`;
-    }
-
-    if (isFunction(form)) {
-        return `#js/function "${form}"`;
-    }
-
-    if (isArrayLike(form)) {
-        const parts = Array.prototype.map.call(form, (x, i) => `${i} ${prStr(x)}`);
-        return `#js/object {${parts.join(', ')}}`;
-    }
-
-    if (isObject(form)) {
-        const keys = Object.keys(form);
-        const ctrName = Object.getPrototypeOf(form)?.constructor?.name ?? "object";
-        console.log("ctrName", ctrName);
-        return `#js/${ctrName} {${keys.map((k) => `${prStr(k)} ${prStr(form[k])}`).join(', ')}}`;
-    }
-
-    return `${form}`;
+  return `${form}`;
 }

@@ -1,13 +1,18 @@
-import {MetaData} from "./Meta";
-import {Keyword} from "./Keyword";
+import { MetaData } from "./Meta";
+import { Keyword } from "./Keyword";
 
-export type Watcher = (previous: any, current: any, key?: string, ref?: Reference) => void
+export type Watcher = (
+  previous: any,
+  current: any,
+  key?: string,
+  ref?: Reference
+) => void;
 
 export interface Reference {
-    deref(): any;
-    reset(value: any): Reference;
-    swap(f: (value: any) => any): Reference;
-    addWatcher(key: string, f: Watcher): Reference;
-    removeWatcher(key: string): Reference;
-    hasWatcher(key: string): boolean;
+  deref(): any;
+  reset(value: any): Reference;
+  swap(f: (value: any) => any): Reference;
+  addWatcher(key: string, f: Watcher): Reference;
+  removeWatcher(key: string): Reference;
+  hasWatcher(key: string): boolean;
 }

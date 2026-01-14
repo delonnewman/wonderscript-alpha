@@ -1,6 +1,6 @@
 # WonderScript
 
-A simple lisp for web development 
+A simple lisp for web development
 
 # Synopsis
 
@@ -35,6 +35,7 @@ user> (reduce + (range 10))
 - `.`
 
 ## Operators
+
 (treated specially by the compiler)
 
 Consider making is possible to define within WS, they would function as low-level code generating macros
@@ -58,7 +59,7 @@ that can also (optionally) be used as functions.
 
 ## Equality
 
-- `=`  value equality
+- `=` value equality
 - `==` object identity
 - `=~` pattern match overloaded by different classes by implementing match(value)
 
@@ -98,21 +99,21 @@ Can be dispatched on any type and arbitrary Generic Functions
 
 ## Modules
 
-The broadest context for state.  With the macro forms `defconst` and `defvar` module level constants and dynamically
-scoped variables can be defined.  By convention constants are spelled `$contstant`, and variables are spelled
-`*variable*`.  Constants and variable can be accessed globally when scoped with the module name i.e. `$Module::constant`
-or `*Module::variable*`.  By convention modules names are camel cased.  All other definitions with in a module must be
-explicitly exported and imported to be used.  Keywords that are prefixed with a `::` like `::keyword` are automatically
-expanded into `:Module::keyword`.  Modules can be nested inner modules can be accessed with the same notation as other
-definitions i.e. `OuterModule::InnerModule`.  Definitions specified with `def` and relatives, `defn`, `defmacro`,
+The broadest context for state. With the macro forms `defconst` and `defvar` module level constants and dynamically
+scoped variables can be defined. By convention constants are spelled `$contstant`, and variables are spelled
+`*variable*`. Constants and variable can be accessed globally when scoped with the module name i.e. `$Module::constant`
+or `*Module::variable*`. By convention modules names are camel cased. All other definitions with in a module must be
+explicitly exported and imported to be used. Keywords that are prefixed with a `::` like `::keyword` are automatically
+expanded into `:Module::keyword`. Modules can be nested inner modules can be accessed with the same notation as other
+definitions i.e. `OuterModule::InnerModule`. Definitions specified with `def` and relatives, `defn`, `defmacro`,
 `defclass`, `deftype`, `defprotocol`, `defrecord` are namespaced by their module and private unless exported.
-Definitions can be exported with the `module` form, and imports can be specified with the `use` form.  `use` with or
+Definitions can be exported with the `module` form, and imports can be specified with the `use` form. `use` with or
 without imports makes the modules and all shared definitions accessible (scoped by the module name).
 
 ```lisp
 (module Dragnet
   (export View TemplateView PageView Button Link))
-  
+
 (use Web
   (import html css js))
 ```
@@ -129,6 +130,7 @@ Exports and shared symbols can also be specified with meta data on the symbol:
 
 (defclass View ...)
 ```
+
 ## Definition Meta Data
 
 - `:private` (only seen in module defaults to true)
@@ -208,7 +210,7 @@ A collection of properties/shapes and doc strings
 - ImmutableStack
   - pop()
   - peek()
-  - push() 
+  - push()
 - MutableStack
   - pop()
   - push()
@@ -256,7 +258,7 @@ A collection of properties/shapes and doc strings
 - `str`
 - `number?`, `string?`, `boolean?`, `function?`
 - `set?`, `map?`, `iterator?`, `get`
-- `array-like?`, `array?`,  `->array`, `array`, `slice`,
+- `array-like?`, `array?`, `->array`, `array`, `slice`,
   `push!`, `pop!`, `shift!`, `unshift!`
 - `object?`, `undefined?`, `null?`, `nil?`
 - `memoize`, `compose`, `apply`
@@ -271,7 +273,7 @@ A collection of properties/shapes and doc strings
 (defprotocol Invokable
   "The interface for all invokable objects"
   (invoke (*args)))
-  
+
 (defprotocol Type
   (satisfies (object)))
 
@@ -279,22 +281,22 @@ A collection of properties/shapes and doc strings
   (has      Symbol name)
   (has-many Symbol arglist)
   (has?     String doc))
-  
+
 (defclass Protocol :does Type
   (has-many? Protocol  ^:key protocols)
   (has-many  MethodSig ^:key signatures)
   (has?      String    ^:key doc))
-  
+
 (defclass Method :does Invokable
   (has      Symbol name)
   (has?     String doc)
   (has-many Symbol arglist)
   (has-many Form   body))
-  
+
 (defclass Property
   (has Symbol  name)
   (has Boolean required :default true))
-  
+
 (defclass Class :does Type
   (has?      String   doc)
   (has-many? Protocol protocols)
@@ -308,7 +310,7 @@ Based on https://opendylan.org/documentation/intro-dylan/objects.html
 (defclass Vehicle
   (has serial-owner)
   (has owner))
-  
+
 (defclass Vehicle
   (has  Integer serial-number :key :sn)
   (has? String  owner
@@ -327,18 +329,18 @@ Based on https://opendylan.org/documentation/intro-dylan/objects.html
 - [ ] Implement browser-based IDE
 - [ ] Add abstractions for browser APIs
 - [ ] Add a database interface
-    - Datalog based by default
-    - Abstract over SQL and KV stores
-    - DBI-like interface for SQL stores
+  - Datalog based by default
+  - Abstract over SQL and KV stores
+  - DBI-like interface for SQL stores
 - [ ] Implement ST or CL-like images called a "world" (a reified notion of static and dynamic state)
-    - [ ] Create new compilers based on "world" objects
-    - [ ] Create encoders for world objects so they can be persisted and transmitted
+  - [ ] Create new compilers based on "world" objects
+  - [ ] Create encoders for world objects so they can be persisted and transmitted
 - [x] Update JS
-    - [x] Make use of `let` and `const`
-    - [x] Make use of `class`
-    - [x] Refactor into modules
-    - [x] TypeScript
-  
+  - [x] Make use of `let` and `const`
+  - [x] Make use of `class`
+  - [x] Refactor into modules
+  - [x] TypeScript
+
 # Author
 
 Delon Newman <contact@delonnewman.name>

@@ -1,5 +1,5 @@
-import {Sequence} from "./Sequence";
+import { Sequence } from "./Sequence";
 
 export interface Sequenceable {
-    seq(): Sequence
+  seq(): Sequence;
 }

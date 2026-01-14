@@ -1,65 +1,65 @@
 #!/usr/bin/env node
 const fs = require("fs"),
-    readline = require("readline");
+  readline = require("readline");
 
 // load runtime and core library
 const wsc = require("../index.js");
-const NS = wonderscript.core['*ns*'];
+const NS = wonderscript.core["*ns*"];
 const prStr = wonderscript.core.pr_DASH_str;
 const str = wonderscript.core.str;
 
 function interactive() {
-    const rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout,
-        removeHistoryDuplicates: true,
-        terminal: true
-    });
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+    removeHistoryDuplicates: true,
+    terminal: true,
+  });
 
-    // NS.value = createNs('user');
-    // wonderscript.core.import('user', NS.value);
-    rl.setPrompt(str(NS.name, "> "));
-    rl.prompt();
+  // NS.value = createNs('user');
+  // wonderscript.core.import('user', NS.value);
+  rl.setPrompt(str(NS.name, "> "));
+  rl.prompt();
 
-    rl.on("line", function(line) {
-        try {
-            const input = line.trim();
-            if (input === "exit") {
-                console.log("Bye for now!");
-                process.exit(0);
-            } else {
-                const res = wsc.evalString(input);
-                console.log(str("=> ", prStr(res)));
-                rl.setPrompt(str(NS.name, "> "));
-            }
-        } catch (e) {
-            console.error(e);
-        }
-        rl.prompt();
-    }).on("close", function() {
+  rl.on("line", function (line) {
+    try {
+      const input = line.trim();
+      if (input === "exit") {
         console.log("Bye for now!");
         process.exit(0);
-    });
-    process.exitCode = 0;
+      } else {
+        const res = wsc.evalString(input);
+        console.log(str("=> ", prStr(res)));
+        rl.setPrompt(str(NS.name, "> "));
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    rl.prompt();
+  }).on("close", function () {
+    console.log("Bye for now!");
+    process.exit(0);
+  });
+  process.exitCode = 0;
 }
 
 if (process.argv.length >= 3) {
-    try {
-        wsc.loadFile([process.cwd(), process.argv[2]].join("/"));
-        process.exitCode = 0;
-    } catch (e) {
-        console.error(e);
-        process.exitCode = 1;
-    }
+  try {
+    wsc.loadFile([process.cwd(), process.argv[2]].join("/"));
+    process.exitCode = 0;
+  } catch (e) {
+    console.error(e);
+    process.exitCode = 1;
+  }
 } else {
-    let INTERATIVE = false;
-    setTimeout(() => {
-        interactive();
-        INTERACTIVE = true;
-    }, 1);
-    process.stdin.on("data", chunk => {
-        if (!INTERACTIVE) {
-            wsc.evalString(chunk.toString("utf8"));
-        }
-    });
+  let INTERATIVE = false;
+  setTimeout(() => {
+    interactive();
+    INTERACTIVE = true;
+  }, 1);
+  process.stdin.on("data", (chunk) => {
+    if (!INTERACTIVE) {
+      wsc.evalString(chunk.toString("utf8"));
+    }
+  });
 }

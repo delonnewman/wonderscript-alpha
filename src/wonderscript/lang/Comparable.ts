@@ -1,3 +1,3 @@
 interface Comparable {
-    cmp(other): -1 | 1 | 0;
+  cmp(other): -1 | 1 | 0;
 }

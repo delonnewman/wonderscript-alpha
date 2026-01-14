@@ -42,11 +42,11 @@
   <body>
     <main id="main">
       <div class="frame">
-        <div style="width:50%">
+        <div style="width: 50%">
           <div id="output"></div>
           <div id="error"></div>
         </div>
-        <div style="width:50%">
+        <div style="width: 50%">
           <label for="input">WonderScript Listener</label>
           <textarea id="input" name="input"></textarea>
           <button id="evalButton" type="button">Eval</button>
@@ -61,8 +61,10 @@
       const historyItems = [];
 
       function renderHistory() {
-        const entries = historyItems.map((h => `<pre class="history-entry">${h}</pre>`))
-        historyListing.innerHTML = entries.join('');
+        const entries = historyItems.map(
+          (h) => `<pre class="history-entry">${h}</pre>`
+        );
+        historyListing.innerHTML = entries.join("");
       }
 
       function clearErrorAndOutput() {
@@ -75,13 +77,13 @@
           try {
             historyItems.push(input.value);
             clearErrorAndOutput();
-            const result = compiler.evalString(input.value, 'listener-input');
+            const result = compiler.evalString(input.value, "listener-input");
             output.innerHTML = compiler.prHTML(result);
             renderHistory();
           } catch (e) {
             error.innerHTML = `
                 <strong>${e.constructor.name}</strong>:${e.message}<br>
-                ${e.stack.replace(/\n/g, '<br>')}
+                ${e.stack.replace(/\n/g, "<br>")}
             `;
           }
         });
@@ -92,7 +94,7 @@
       const wsInter = setInterval(() => {
         if (window.wonderscript) {
           clearInterval(wsInter);
-          compiler = new wonderscript.Compiler('browser', this)
+          compiler = new wonderscript.Compiler("browser", this);
           compiler.loadFile("src/wonderscript/core.ws");
           initListener();
         }

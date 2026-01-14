@@ -1,29 +1,29 @@
 export class Vector {
-    readonly length: number
+  readonly length: number;
 
-    constructor(array) {
-        this.length = array.length;
+  constructor(array) {
+    this.length = array.length;
 
-        for (let i = 0; i < array.length; i++) {
-            this[i] = array[i];
-        }
-
-        Object.freeze(this);
+    for (let i = 0; i < array.length; i++) {
+      this[i] = array[i];
     }
 
-    invoke(n: number) {
-        return this[n];
-    }
+    Object.freeze(this);
+  }
 
-    at(n: number) {
-        return this[n];
-    }
+  invoke(n: number) {
+    return this[n];
+  }
 
-    slice(start, end): Vector {
-        return new Vector(Array.prototype.slice.call(this, start, end));
-    }
+  at(n: number) {
+    return this[n];
+  }
+
+  slice(start, end): Vector {
+    return new Vector(Array.prototype.slice.call(this, start, end));
+  }
 }
 
 export function isVector(obj): obj is Vector {
-    return obj instanceof Vector;
+  return obj instanceof Vector;
 }

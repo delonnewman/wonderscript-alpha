@@ -34,4 +34,7 @@ spec:
 test:
 	bun test
 
+prettier:
+	bun x prettier . --write
+
 .PHONY: all clean deps spec test
