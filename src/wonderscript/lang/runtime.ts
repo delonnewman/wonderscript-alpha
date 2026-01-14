@@ -82,6 +82,25 @@ export function str(...args: unknown[]): string {
 type ConsMethod = { cons: (val: unknown) => unknown[] };
 type Consable = ArrayLike | Nil | ConsMethod;
 
+type FirstMethod<T = unknown> = { first: () => T | Nil };
+type Firstable<T = unknown, U = unknown> =
+  | FirstMethod<T>
+  | ArrayLike<T>
+  | Map<T, U>
+  | Set<T>;
+
+type ForEachMethod<T = unknown> = { forEach: (cb: (val: T) => void) => void };
+type Nextable<T = unknown> = Sequence<T> | ArrayLike<T> | ForEachMethod<T>;
+
+export type Seq<T = unknown> =
+  | Readonly<T[]>
+  | Sequence<T>
+  | (Firstable<T> & Nextable<T>);
+
+export type Indexed<T = unknown> = Array<T> | ArrayLike<T> | Vector<T>;
+
+const hasFirstMethod = (col: unknown): col is FirstMethod =>
+  isFunction((col as FirstMethod).first);
 const hasConsMethod = (col: unknown): col is ConsMethod =>
   isFunction((col as ConsMethod).cons);
 
@@ -106,22 +125,6 @@ export function cons(
   throw new Error("Cannot cons and element to: " + col);
 }
 
-type FirstMethod<T = unknown> = { first: () => T | Nil };
-type Firstable<T = unknown, U = unknown> =
-  | FirstMethod<T>
-  | ArrayLike<T>
-  | Map<T, U>
-  | Set<T>;
-
-type ForEachMethod<T = unknown> = { forEach: (cb: (val: T) => void) => void };
-type Nextable<T = unknown> = Sequence<T> | ArrayLike<T> | ForEachMethod<T>;
-
-type Seq<T = unknown> = Sequence<T> | (Firstable<T> & Nextable<T>);
-type Indexed<T = unknown> = Array<T> | ArrayLike<T> | Vector<T>;
-
-const hasFirstMethod = (col: unknown): col is FirstMethod =>
-  isFunction((col as FirstMethod).first);
-
 export function first<T = unknown, U = unknown>(
   col: Firstable<T, U>
 ): First<T> {
@@ -145,9 +148,7 @@ export function first<T = unknown, U = unknown>(
 const hasForEachMethod = (col: unknown): col is ForEachMethod =>
   isFunction((col as ForEachMethod).forEach);
 
-export function next<T = unknown>(
-  col: Nextable<T>
-): Readonly<T[]> | Sequence<T> | Nil {
+export function next<T = unknown>(col: Nextable<T>): Seq<T> | Nil {
   if (col == null) return null;
 
   if (isSequence(col)) {
