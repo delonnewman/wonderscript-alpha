@@ -5,8 +5,8 @@ import { ArrayLike } from "./ArrayLike";
 export type First<T = unknown> = T | Nil;
 export type Next<T = unknown> = Seq<T> | Nil;
 
-type ConsMethod = { cons: (val: unknown) => unknown[] };
-export type Consable = ArrayLike | Nil | ConsMethod;
+type HasConsMethod = { cons: (val: unknown) => unknown[] };
+export type Consable = ArrayLike | Nil | HasConsMethod;
 
 type HasFirstMethod<T = unknown> = { first: () => T | Nil };
 
