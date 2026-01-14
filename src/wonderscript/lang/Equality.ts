@@ -1,11 +1,11 @@
 import { isFunction } from "./runtime";
 
-export interface Equality {
-  equals(other): boolean;
+export interface Equality<T = unknown> {
+  equals(other: T): boolean;
 }
 
-export const isEquality = (value: any): value is Equality => {
+export const isEquality = (value: unknown): value is Equality => {
   if (value == null) return false;
 
-  return isFunction(value.equals);
+  return isFunction((value as Equality).equals);
 };
