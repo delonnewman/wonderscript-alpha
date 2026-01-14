@@ -14,6 +14,26 @@ export { hashCode } from "./utils";
 const EMPTY_ARRAY: Readonly<[]> = Object.freeze([]);
 const EMPTY_STRING: "" = "";
 
+type ConsMethod = { cons: (val: unknown) => unknown[] };
+type Consable = ArrayLike | Nil | ConsMethod;
+
+type FirstMethod<T = unknown> = { first: () => T | Nil };
+type Firstable<T = unknown, U = unknown> =
+  | FirstMethod<T>
+  | ArrayLike<T>
+  | Map<T, U>
+  | Set<T>;
+
+type ForEachMethod<T = unknown> = { forEach: (cb: (val: T) => void) => void };
+type Nextable<T = unknown> = Sequence<T> | ArrayLike<T> | ForEachMethod<T>;
+
+export type Seq<T = unknown> =
+  | Readonly<T[]>
+  | Sequence<T>
+  | (Firstable<T> & Nextable<T>);
+
+export type Indexed<T = unknown> = Array<T> | ArrayLike<T> | Vector<T>;
+
 export function isString(val: unknown): val is string {
   return (
     typeof val === "string" ||
@@ -78,26 +98,6 @@ export function str(...args: unknown[]): string {
   if (args.length === 0) return EMPTY_STRING;
   return Array.prototype.join.call(arguments, EMPTY_STRING);
 }
-
-type ConsMethod = { cons: (val: unknown) => unknown[] };
-type Consable = ArrayLike | Nil | ConsMethod;
-
-type FirstMethod<T = unknown> = { first: () => T | Nil };
-type Firstable<T = unknown, U = unknown> =
-  | FirstMethod<T>
-  | ArrayLike<T>
-  | Map<T, U>
-  | Set<T>;
-
-type ForEachMethod<T = unknown> = { forEach: (cb: (val: T) => void) => void };
-type Nextable<T = unknown> = Sequence<T> | ArrayLike<T> | ForEachMethod<T>;
-
-export type Seq<T = unknown> =
-  | Readonly<T[]>
-  | Sequence<T>
-  | (Firstable<T> & Nextable<T>);
-
-export type Indexed<T = unknown> = Array<T> | ArrayLike<T> | Vector<T>;
 
 const hasFirstMethod = (col: unknown): col is FirstMethod =>
   isFunction((col as FirstMethod).first);
