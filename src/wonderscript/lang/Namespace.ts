@@ -23,8 +23,8 @@ export class Namespace {
   }
 }
 
-export function isNamespace(x): x is Namespace {
-  return x instanceof Namespace;
+export function isNamespace(obj: unknown): obj is Namespace {
+  return obj instanceof Namespace;
 }
 
 export function createNs(name: string, module: object): Namespace {
