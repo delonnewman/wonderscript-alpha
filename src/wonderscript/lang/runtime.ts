@@ -11,7 +11,7 @@ import { Vector } from "./Vector";
 
 export { hashCode } from "./utils";
 export { cons, first, next, isSequence } from "./Seq";
-export { isArrayLike } from "./ArrayLike";
+export { isArrayLike, ArrayLike } from "./ArrayLike";
 
 const EMPTY_ARRAY: Readonly<[]> = Object.freeze([]);
 const EMPTY_STRING: "" = "";
