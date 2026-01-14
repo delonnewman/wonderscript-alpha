@@ -1,9 +1,9 @@
-import { isArray } from "../../lang/runtime";
 import { emit } from "../emit";
 import { THROW_SYM as THROW_STR } from "../constants";
 import { Form, isTaggedValue } from "../core";
 import { prStr } from "../prStr";
 import { Symbol } from "../../lang/Symbol";
+import { Context } from "../../lang/Context";
 
 export const THROW_SYM = Symbol.intern(THROW_STR);
 
@@ -12,7 +12,7 @@ export type ThrowForm = [typeof THROW_SYM, Form];
 export const isThrowForm = (form: Form): form is ThrowForm =>
   isTaggedValue(form, THROW_SYM) && form.length === 2;
 
-export function emitThrownException(form, env) {
+export function emitThrownException(form: Form, env: Context) {
   if (!isThrowForm(form))
     throw new Error(`invalid ${THROW_SYM} form: ${prStr(form)}`);
 
