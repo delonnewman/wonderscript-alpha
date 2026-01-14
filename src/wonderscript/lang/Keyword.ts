@@ -7,7 +7,8 @@ import { Value } from "./Value";
 import { stringHash } from "./utils";
 
 export class Keyword<Name extends string = string>
-  implements Named<Name>, Invokable, Comparable, Value {
+  implements Named<Name>, Invokable, Comparable, Value
+{
   private readonly _symbol: Symbol<Name>;
 
   static CACHE = new Map<string, Keyword<any>>();
