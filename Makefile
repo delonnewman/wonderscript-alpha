@@ -26,9 +26,12 @@ clean:
 deps:
 	npm install .
 
-test:
+spec:
 	@for file in $(shell find test -name '*.ws'); do \
 		$(WSI) $$file; \
 	done;
 
-.PHONY: all clean deps test
+test:
+	bun test
+
+.PHONY: all clean deps spec test
