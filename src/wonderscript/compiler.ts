@@ -1,6 +1,7 @@
 import { emit } from "./compiler/emit";
 import { Context } from "./lang/Context";
-import { prStr } from "./compiler/prStr";
+import { Form } from "./compiler/core";
+import { jsEval } from "./compiler/jsEval";
 export const compile = emit;
 
 export { evalString } from "./compiler/evalString";
@@ -9,8 +10,8 @@ export { readString } from "./compiler/readString";
 export { macroexpand } from "./compiler/macroexpand";
 export { prStr } from "./compiler/prStr";
 
-export function evaluate(form, scope: Context) {
+export function evaluate(form: Form, scope: Context) {
   const code = emit(form, scope);
-  const result = eval(code);
+  const result = jsEval(code);
   return result;
 }

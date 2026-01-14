@@ -1,0 +1,1 @@
+export const jsEval = eval;

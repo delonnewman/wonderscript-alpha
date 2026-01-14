@@ -8,6 +8,7 @@ import { Form } from "../core";
 import { prStr } from "../prStr";
 import { isSymbol, Symbol } from "../../lang/Symbol";
 import { emitQuotedMetaData } from "./emitQuote";
+import { jsEval } from "../jsEval";
 
 const DEF_SYM = Symbol.intern(DEF_STR);
 
@@ -34,7 +35,7 @@ export function emitDef(form: Form, env: Context): string {
   if (form[2] != null) {
     code = emit(form[2], env);
     // console.log(form[1].name(), code);
-    val = eval(code);
+    val = jsEval(code);
   }
 
   let def = `${CURRENT_NS.value.name}.${name}=${code}`;

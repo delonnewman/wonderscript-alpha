@@ -6,6 +6,7 @@ import { Context } from "../lang/Context";
 import { isString } from "../lang/runtime";
 import { prStr } from "./prStr";
 import { RuntimeError } from "../lang/RuntimeError";
+import { jsEval } from "./jsEval";
 
 export function evalString(input: string, scope: Context, source = "inline") {
   const r = new PushBackReader(input);
@@ -20,7 +21,7 @@ export function evalString(input: string, scope: Context, source = "inline") {
     }
     if (res != null) {
       try {
-        ret = eval(emit(res, scope));
+        ret = jsEval(emit(res, scope));
       } catch (e) {
         if (isString(e)) {
           throw new RuntimeError(e, stack.slice(0));
