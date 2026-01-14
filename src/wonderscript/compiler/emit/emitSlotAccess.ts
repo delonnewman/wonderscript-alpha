@@ -12,7 +12,7 @@ export type SlotAccessForm = [typeof SLOT_SYM, Form, Form];
 export const isSlotAccessForm = (form: Form): form is SlotAccessForm =>
   isTaggedValue(form) && form[0].equals(SLOT_SYM) && form.length === 3;
 
-export function emitSlotAccess(form, env: Context): string {
+export function emitSlotAccess(form: Form, env: Context): string {
   if (!isSlotAccessForm(form))
     throw new Error(`invalid ${SLOT_SYM} form: ${prStr(form)}`);
 
