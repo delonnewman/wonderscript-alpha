@@ -2,6 +2,7 @@ import { Named } from "./Named";
 import { Meta, MetaData } from "./Meta";
 import { Nil } from "./Nil";
 import { Invokable } from "./Invokable";
+import { Comparable } from "./Comparable";
 import { merge } from "./runtime";
 import { Value } from "./Value";
 import { stringHash } from "./utils";
@@ -9,8 +10,7 @@ import { stringHash } from "./utils";
 const SLASH = "/";
 
 export class Symbol<Name = string>
-  implements Named<Name>, Meta, Invokable, Comparable, Value
-{
+  implements Named<Name>, Meta, Invokable, Comparable, Value {
   private readonly _name: Name;
   private readonly _namespace?: string;
   private readonly _meta?: MetaData;
