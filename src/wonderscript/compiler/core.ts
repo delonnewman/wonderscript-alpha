@@ -38,7 +38,7 @@ export type Form =
   | Map<Form, Form>
   | Set<Form>
   | List
-  | Vector
+  | Vector<Form>
   | Array<Form>
   | TaggedValue;
 
