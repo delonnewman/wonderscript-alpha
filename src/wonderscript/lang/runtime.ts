@@ -1,5 +1,5 @@
-import { First, isSequence, Sequence } from "./Sequence";
-import { Nil } from "./Nil";
+import { Seq, Nextable, first, next } from "./Sequence";
+import { isArrayLike } from "./ArrayLike";
 import { CORE_NAMES } from "../compiler/constants";
 import { dasherize, escapeChars } from "../compiler/utils";
 import { CORE_MOD } from "../compiler/vars";
@@ -10,31 +10,11 @@ import { List } from "./List";
 import { Vector } from "./Vector";
 
 export { hashCode } from "./utils";
+export { cons, first, next, isSequence } from "./Sequence";
+export { isArrayLike } from "./ArrayLike";
 
 const EMPTY_ARRAY: Readonly<[]> = Object.freeze([]);
 const EMPTY_STRING: "" = "";
-
-type ConsMethod = { cons: (val: unknown) => unknown[] };
-type Consable = ArrayLike | Nil | ConsMethod;
-
-type HasFirstMethod<T = unknown> = { first: () => T | Nil };
-
-type Firstable<T = unknown, U = unknown> =
-  | HasFirstMethod<T>
-  | ArrayLike<T>
-  | Map<T, U>
-  | Set<T>;
-
-type HasForEachMethod<T = unknown> = {
-  forEach: (cb: (val: T) => void) => void;
-};
-
-type Nextable<T = unknown> = Sequence<T> | ArrayLike<T> | HasForEachMethod<T>;
-
-export type Seq<T = unknown> =
-  | Readonly<T[]>
-  | Sequence<T>
-  | (Firstable<T> & Nextable<T>);
 
 export type Indexed<T = unknown> = Array<T> | ArrayLike<T> | Vector<T>;
 
@@ -81,15 +61,6 @@ export function isMap(val: unknown): val is Map<unknown, unknown> {
   return Object.prototype.toString.call(val) === "[object Map]";
 }
 
-export type ArrayLike<T = unknown> = {
-  length: number;
-  [index: number]: T;
-};
-
-export function isArrayLike(val: unknown): val is ArrayLike {
-  return val != null && isNumber((val as ArrayLike).length);
-}
-
 export function isFunction(val: unknown): val is Function {
   return Object.prototype.toString.call(val) === "[object Function]";
 }
@@ -101,84 +72,6 @@ export function isIterator(val: unknown): val is Iterator<any> {
 export function str(...args: unknown[]): string {
   if (args.length === 0) return EMPTY_STRING;
   return Array.prototype.join.call(arguments, EMPTY_STRING);
-}
-
-const hasFirstMethod = (col: unknown): col is HasFirstMethod =>
-  isFunction((col as HasFirstMethod).first);
-
-const hasConsMethod = (col: unknown): col is ConsMethod =>
-  isFunction((col as ConsMethod).cons);
-
-export function cons(
-  val: unknown,
-  col: Consable
-): Readonly<unknown[]> | string {
-  if (col == null) return [val];
-
-  if (hasConsMethod(col)) {
-    return col.cons(val);
-  }
-
-  if (isArrayLike(col)) {
-    if (isString(col)) {
-      return [val, col].join("");
-    } else {
-      return [val].concat(col);
-    }
-  }
-
-  throw new Error("Cannot cons and element to: " + col);
-}
-
-export function first<T = unknown>(col: Seq<T>): First<T> {
-  if (col == null) return null;
-
-  if (hasFirstMethod(col)) {
-    return col.first();
-  }
-
-  if (isArrayLike(col)) {
-    return col[0] || null;
-  }
-
-  if (isIterator(col)) {
-    return col[Symbol.iterator]().next().value || null;
-  }
-
-  throw new Error("Cannot get the first element of: " + col);
-}
-
-const hasForEachMethod = (col: unknown): col is HasForEachMethod =>
-  isFunction((col as HasForEachMethod).forEach);
-
-export function next<T = unknown>(col: Nextable<T>): Seq<T> | Nil {
-  if (col == null) return null;
-
-  if (isSequence(col)) {
-    return col.next();
-  }
-
-  if (isArrayLike(col)) {
-    if (col.length === 0) {
-      return null;
-    } else {
-      return Array.prototype.slice.call(col, 1);
-    }
-  }
-
-  if (hasForEachMethod(col)) {
-    const a = [];
-    let i = 0;
-    col.forEach((val: T) => {
-      if (i > 0) {
-        a.push(val);
-      }
-      i++;
-    });
-    return i === 0 ? null : a;
-  }
-
-  throw new Error("Cannot get the next element of: " + col);
 }
 
 export function rest<T = unknown>(col: Nextable<T>): Seq<T> {
