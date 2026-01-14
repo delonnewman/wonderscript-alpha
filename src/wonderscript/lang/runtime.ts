@@ -13,7 +13,7 @@ export { hashCode } from "./utils";
 export { cons, first, next, isSequence } from "./Seq";
 export { isArrayLike, ArrayLike } from "./ArrayLike";
 
-const EMPTY_ARRAY: Readonly<[]> = Object.freeze([]);
+const EMPTY_ARRAY: Readonly<unknown[]> = Object.freeze([]);
 const EMPTY_STRING: "" = "";
 
 export type Indexed<T = unknown> = Array<T> | ArrayLike<T> | Vector<T>;
@@ -80,7 +80,7 @@ export function str(...args: unknown[]): string {
 export function rest<T = unknown>(col: Seq<T>): Seq<T> {
   const val = next(col);
 
-  return val == null ? EMPTY_ARRAY : val;
+  return val == null ? (EMPTY_ARRAY as Seq<T>) : val;
 }
 
 export function isEmpty(val: unknown): boolean {
@@ -104,7 +104,7 @@ export function map<In = unknown, Out = unknown>(
   }
 
   if (xs == null || isEmpty(xs)) {
-    return EMPTY_ARRAY;
+    return EMPTY_ARRAY as Readonly<Out[]>;
   }
 
   if (isArrayLike(xs)) {
@@ -155,7 +155,7 @@ export function partition<T = unknown>(
   xs: Indexed<T>
 ): Readonly<[] | [Indexed<T>]> {
   if (isEmpty(xs)) {
-    return EMPTY_ARRAY;
+    return EMPTY_ARRAY as Readonly<[]>;
   }
 
   if (xs.length === n) {
