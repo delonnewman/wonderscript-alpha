@@ -1,10 +1,9 @@
 import { Context } from "../../lang/Context";
-import { isArray, isString } from "../../lang/runtime";
 import { escapeChars } from "../utils";
 import { compileRecursiveBody } from "./compileBody";
 import { emit } from "../emit";
 import { LOOP_SYM as LOOP_STR } from "../constants";
-import { BodyForm, isBodyForm } from "../core";
+import { BodyForm, isBodyForm, Form } from "../core";
 import { prStr } from "../prStr";
 import { isSymbol, Symbol } from "../../lang/Symbol";
 
@@ -15,7 +14,7 @@ export type LoopForm = BodyForm<typeof LOOP_SYM>;
 export const isLoopForm = isBodyForm<typeof LOOP_SYM>(LOOP_SYM);
 
 // TODO: generalize body form emitters
-export function emitLoop(form, scope: Context): string {
+export function emitLoop(form: Form[], scope: Context): string {
   if (!isLoopForm(form))
     throw new Error(`invalid ${LOOP_SYM} form: ${prStr(form)}`);
   const env = new Context(scope);
