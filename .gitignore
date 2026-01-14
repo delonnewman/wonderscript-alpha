@@ -6,3 +6,5 @@ tags
 /.idea/
 src/**/*.js
 src/**/*.js.map
+/.clj-kondo/
+/.lsp/
