@@ -24,7 +24,7 @@ clean:
 	rm -rf dist
 
 deps:
-	npm install .
+	bun install
 
 spec:
 	@for file in $(shell find test -name '*.ws'); do \
