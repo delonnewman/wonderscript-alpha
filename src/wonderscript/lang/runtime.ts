@@ -17,9 +17,10 @@ const EMPTY_STRING: "" = "";
 type ConsMethod = { cons: (val: unknown) => unknown[] };
 type Consable = ArrayLike | Nil | ConsMethod;
 
-type FirstMethod<T = unknown> = { first: () => T | Nil };
+type HasFirstMethod<T = unknown> = { first: () => T | Nil };
+
 type Firstable<T = unknown, U = unknown> =
-  | FirstMethod<T>
+  | HasFirstMethod<T>
   | ArrayLike<T>
   | Map<T, U>
   | Set<T>;
@@ -99,8 +100,8 @@ export function str(...args: unknown[]): string {
   return Array.prototype.join.call(arguments, EMPTY_STRING);
 }
 
-const hasFirstMethod = (col: unknown): col is FirstMethod =>
-  isFunction((col as FirstMethod).first);
+const hasFirstMethod = (col: unknown): col is HasFirstMethod =>
+  isFunction((col as HasFirstMethod).first);
 
 const hasConsMethod = (col: unknown): col is ConsMethod =>
   isFunction((col as ConsMethod).cons);
