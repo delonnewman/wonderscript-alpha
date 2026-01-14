@@ -13,7 +13,7 @@ export type ClassInitForm = [typeof NEW_SYM, Symbol, ...Form[]];
 export const isClassInitForm = (form: unknown): form is ClassInitForm =>
   isTaggedValue(form) && form[0].equals(NEW_SYM) && isSymbol(form[1]);
 
-export function emitClassInit(form, env: Context): string {
+export function emitClassInit(form: Form, env: Context): string {
   if (!isClassInitForm(form))
     throw new Error(`invalid ${NEW_SYM} form: ${prStr(form)}`);
 
