@@ -113,6 +113,12 @@ type Firstable<T = unknown, U = unknown> =
   | Map<T, U>
   | Set<T>;
 
+type ForEachMethod<T = unknown> = { forEach: (cb: (val: T) => void) => void };
+type Nextable<T = unknown> = Sequence<T> | ArrayLike<T> | ForEachMethod<T>;
+
+type Seq<T = unknown> = Sequence<T> | (Firstable<T> & Nextable<T>);
+type Indexed<T = unknown> = Array<T> | ArrayLike<T> | Vector<T>;
+
 const hasFirstMethod = (col: unknown): col is FirstMethod =>
   isFunction((col as FirstMethod).first);
 
@@ -135,9 +141,6 @@ export function first<T = unknown, U = unknown>(
 
   throw new Error("Cannot get the first element of: " + col);
 }
-
-type ForEachMethod<T = unknown> = { forEach: (cb: (val: T) => void) => void };
-type Nextable<T = unknown> = Sequence<T> | ArrayLike<T> | ForEachMethod<T>;
 
 const hasForEachMethod = (col: unknown): col is ForEachMethod =>
   isFunction((col as ForEachMethod).forEach);
@@ -181,9 +184,6 @@ export function rest<T = unknown>(
 
   return val == null ? EMPTY_ARRAY : val;
 }
-
-type Seq<T = unknown> = Sequence<T> | (Firstable<T> & Nextable<T>);
-type Indexed<T = unknown> = Array<T> | ArrayLike<T> | Vector<T>;
 
 export function isEmpty(val: unknown): boolean {
   if (val == null) return true;
@@ -230,7 +230,7 @@ export function reduce(f: Reducing, xs: Seq, init?: any) {
   if (arguments.length !== 2 && arguments.length !== 3) {
     throw new Error(
       "wrong number of arguments expected at least 2 or 3, got: " +
-        arguments.length
+      arguments.length
     );
   }
 
