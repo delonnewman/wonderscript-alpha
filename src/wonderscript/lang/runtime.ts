@@ -25,8 +25,11 @@ type Firstable<T = unknown, U = unknown> =
   | Map<T, U>
   | Set<T>;
 
-type ForEachMethod<T = unknown> = { forEach: (cb: (val: T) => void) => void };
-type Nextable<T = unknown> = Sequence<T> | ArrayLike<T> | ForEachMethod<T>;
+type HasForEachMethod<T = unknown> = {
+  forEach: (cb: (val: T) => void) => void;
+};
+
+type Nextable<T = unknown> = Sequence<T> | ArrayLike<T> | HasForEachMethod<T>;
 
 export type Seq<T = unknown> =
   | Readonly<T[]>
@@ -147,8 +150,8 @@ export function first<T = unknown, U = unknown>(
   throw new Error("Cannot get the first element of: " + col);
 }
 
-const hasForEachMethod = (col: unknown): col is ForEachMethod =>
-  isFunction((col as ForEachMethod).forEach);
+const hasForEachMethod = (col: unknown): col is HasForEachMethod =>
+  isFunction((col as HasForEachMethod).forEach);
 
 export function next<T = unknown>(col: Nextable<T>): Seq<T> | Nil {
   if (col == null) return null;
