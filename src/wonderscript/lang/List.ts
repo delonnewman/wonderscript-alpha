@@ -29,8 +29,8 @@ export class List implements Meta, Sequence, Sequenceable, Value {
     return List.EMPTY;
   }
 
-  cons(x): List {
-    return new List(x, this, this._count + 1);
+  cons(val: unknown): List {
+    return new List(val, this, this._count + 1);
   }
 
   seq(): List {
