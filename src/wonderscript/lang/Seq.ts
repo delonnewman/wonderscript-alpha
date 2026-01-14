@@ -10,12 +10,6 @@ export type Consable = Nil | ArrayLike | HasConsMethod;
 
 type HasFirstMethod<T = unknown> = { first: () => T | Nil };
 
-type Firstable<T = unknown, U = unknown> =
-  | HasFirstMethod<T>
-  | ArrayLike<T>
-  | Map<T, U>
-  | Set<T>;
-
 type HasForEachMethod<T = unknown> = {
   forEach: (cb: (val: T) => void) => void;
 };
@@ -25,10 +19,13 @@ export type Nextable<T = unknown> =
   | ArrayLike<T>
   | HasForEachMethod<T>;
 
-export type Seq<T = unknown> =
+export type Seq<T = unknown, V = unknown> =
   | Readonly<T[]>
+  | T[]
+  | ArrayLike<T>
   | Sequence<T>
-  | (Firstable<T> & Nextable<T>);
+  | Map<T, V>
+  | (HasFirstMethod<T> & Nextable<T>);
 
 export interface Sequence<T = unknown> {
   cons(val: T): Sequence;
