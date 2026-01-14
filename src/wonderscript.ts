@@ -23,14 +23,6 @@ export * from "./wonderscript/lang";
 type Platform = "node" | "browser";
 
 export const JS_SYM = Symbol.intern("js");
-export const CURRENT_MOD_SYM = Symbol.intern(
-  "*module*",
-  null,
-  new Map([
-    [MUTABLE_KW, true],
-    [VAR_KW, true],
-  ])
-);
 
 export class Compiler {
   private readonly env: Context;
