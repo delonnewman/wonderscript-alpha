@@ -10,15 +10,17 @@ import { isIfForm } from "./emitIf";
 
 const SPLAT = "&";
 
-type ParsedArgs = Array<{
+type ParsedArg = {
   name: Symbol;
   order: number;
   splat: boolean;
-}>;
+};
+
+type ParsedArgs = Array<ParsedArg>;
 
 function parseArgs(args: Symbol[]): ParsedArgs {
   let splat = false,
-    name;
+    name: Symbol;
   const parsed: ParsedArgs = [];
 
   for (let i = 0; i < args.length; ++i) {
@@ -106,7 +108,7 @@ export function emitFunc(form: Form, context: Context): string {
   }
 
   let buffer = argsAssign ? [argsAssign] : [];
-  const names = map<{ name: string }, string>((x) => x.name, argsBuf);
+  const names = map<ParsedArg, Symbol>((x) => x.name, argsBuf);
 
   if (hasTailCall(body)) {
     buffer.push(compileRecursiveBody(body, names, ctx));

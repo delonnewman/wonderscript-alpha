@@ -4,6 +4,7 @@ import { Form } from "../core";
 import { emit } from "../emit";
 import { RECURSION_POINT_CLASS } from "../constants";
 import { Context } from "../../lang/Context";
+import { Symbol } from "../../lang";
 
 export function compileBody(body: Form[], env: Context, tailDef?: string) {
   const last = body[body.length - 1];
@@ -16,7 +17,7 @@ export function compileBody(body: Form[], env: Context, tailDef?: string) {
 
 export function compileRecursiveBody(
   body: Form[],
-  names: string[] | Readonly<string[]>,
+  names: Symbol[] | Readonly<Symbol[]>,
   env: Context
 ): string {
   const buff = [];
