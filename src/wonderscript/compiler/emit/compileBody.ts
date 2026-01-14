@@ -9,14 +9,14 @@ export function compileBody(body: Form[], env: Context, tailDef?: string) {
   const last = body[body.length - 1];
   const head = body.slice(0, body.length - 1);
 
-  return map((x) => emit(x, env), head)
+  return map<Form>((x) => emit(x, env), head)
     .concat(emitTailPosition(last, env, tailDef))
     .join("; ");
 }
 
 export function compileRecursiveBody(
   body: Form[],
-  names: string[],
+  names: string[] | Readonly<string[]>,
   env: Context
 ): string {
   const buff = [];
