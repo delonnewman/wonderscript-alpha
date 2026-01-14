@@ -130,9 +130,7 @@ export function cons(
   throw new Error("Cannot cons and element to: " + col);
 }
 
-export function first<T = unknown, U = unknown>(
-  col: Firstable<T, U>
-): First<T> {
+export function first<T = unknown>(col: Seq<T>): First<T> {
   if (col == null) return null;
 
   if (hasFirstMethod(col)) {
