@@ -1,5 +1,5 @@
 import { Sequence } from "./Sequence";
 
-export interface Sequenceable {
-  seq(): Sequence;
+export interface Sequenceable<T = unknown> {
+  seq(): Sequence<T>;
 }
