@@ -6,7 +6,7 @@ export type First<T = unknown> = T | Nil;
 export type Next<T = unknown> = Seq<T> | Nil;
 
 type HasConsMethod = { cons: (val: unknown) => unknown[] };
-export type Consable = ArrayLike | Nil | HasConsMethod;
+export type Consable = Nil | ArrayLike | HasConsMethod;
 
 type HasFirstMethod<T = unknown> = { first: () => T | Nil };
 
@@ -43,3 +43,6 @@ export const hasFirstMethod = (col: unknown): col is HasFirstMethod =>
 
 export const hasConsMethod = (col: unknown): col is HasConsMethod =>
   isFunction((col as HasConsMethod).cons);
+
+export const hasForEachMethod = (col: unknown): col is HasForEachMethod =>
+  isFunction((col as HasForEachMethod).forEach);
