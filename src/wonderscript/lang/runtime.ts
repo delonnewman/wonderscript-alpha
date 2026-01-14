@@ -114,7 +114,7 @@ export function map<In = unknown, Out = unknown>(
   const a = [];
   while (xs != null) {
     a.push(f.call(xs, first(xs)));
-    xs = next(xs);
+    xs = next<In>(xs);
     if (isEmpty(xs)) break;
   }
   return Object.freeze(a);
