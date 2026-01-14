@@ -28,11 +28,11 @@ export class Module {
     return this;
   }
 
-  importSymbol(name: Symbol, value, meta?: MetaData): Module {
+  importSymbol(name: Symbol, value: unknown, meta?: MetaData): Module {
     return this.addDefinition(new Definition(name, value, meta));
   }
 
-  importAlienSymbol(name: string, value, meta?: MetaData): Module {
+  importAlienSymbol(name: string, value: unknown, meta?: MetaData): Module {
     return this.importSymbol(
       Symbol.intern(name),
       value,
