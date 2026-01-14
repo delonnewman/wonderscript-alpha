@@ -10,5 +10,7 @@ export interface Meta {
   withMeta(data: MetaData): Meta;
 }
 
-export const isMeta = (value: any): value is Meta =>
-  value != null && isFunction(value.meta) && isFunction(value.withMeta);
+export const isMeta = (value: unknown): value is Meta =>
+  value != null &&
+  isFunction((value as Meta).meta) &&
+  isFunction((value as Meta).withMeta);
