@@ -5,7 +5,7 @@ import { prStr } from "../prStr";
 
 export type BinOpForm = [Symbol, Form, Form];
 
-export const isBinOpForm = (form: Form): form is BinOpForm =>
+export const isBinOpForm = (form: unknown): form is BinOpForm =>
   isTaggedValue(form) && form.length === 3;
 
 export function emitBinOp(form: Form, env: Context, op = form[0]): string {
