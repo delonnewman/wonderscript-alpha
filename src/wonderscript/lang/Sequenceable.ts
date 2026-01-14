@@ -1,4 +1,4 @@
-import { Seq } from "./Sequence";
+import { Seq } from "./Seq";
 
 export interface Sequenceable<T = unknown> {
   seq(): Seq<T>;
