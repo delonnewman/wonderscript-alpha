@@ -106,7 +106,7 @@ export function emitFunc(form: Form, context: Context): string {
   }
 
   let buffer = argsAssign ? [argsAssign] : [];
-  const names = map((x) => x.name, argsBuf);
+  const names = map<{ name: string }, string>((x) => x.name, argsBuf);
 
   if (hasTailCall(body)) {
     buffer.push(compileRecursiveBody(body, names, ctx));
