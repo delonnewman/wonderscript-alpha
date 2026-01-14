@@ -87,14 +87,16 @@ export function prStr(form: Form | Function | ArrayLike | Object): string {
   }
 
   if (isArrayLike(form)) {
-    const parts = Array.prototype.map.call(form, (x, i) => `${i} ${prStr(x)}`);
+    const parts = Array.prototype.map.call(
+      form,
+      (x: unknown, i: number) => `${i} ${prStr(x)}`
+    );
     return `#js/object {${parts.join(", ")}}`;
   }
 
   if (isObject(form)) {
     const keys = Object.keys(form);
     const ctrName = Object.getPrototypeOf(form)?.constructor?.name ?? "object";
-    console.log("ctrName", ctrName);
     return `#js/${ctrName} {${keys.map((k) => `${prStr(k)} ${prStr(form[k])}`).join(", ")}}`;
   }
 
