@@ -12,13 +12,13 @@ import { isVector } from "./Vector";
 import { prStr } from "../compiler/prStr";
 import { isValue, Value } from "./Value";
 
-export const stringHash = (function () {
+export const stringHash = (function() {
   const SEED = Math.random() * 10000;
 
   return (s: string): number => murmurhash3_32_gc(s, SEED);
 })();
 
-export function hashCombine(seed, hash): number {
+export function hashCombine(seed: number, hash: number): number {
   // a la boost, a la clojure
   seed ^= hash + 0x9e3779b9 + (seed << 6) + (seed >> 2);
   return seed;
@@ -48,7 +48,7 @@ export function hashCode(form: Form | Value): number {
   if (isArray(form) || isVector(form)) {
     return Array.prototype.reduce.call(
       form,
-      (n, x) => hashCombine(n, hashCode(x)),
+      (n: number, x: number) => hashCombine(n, hashCode(x)),
       ARRAY_SEED
     );
   }

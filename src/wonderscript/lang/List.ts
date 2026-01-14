@@ -6,18 +6,18 @@ import { merge, reduce } from "./runtime";
 import { Value } from "./Value";
 import { hashCode, hashCombine } from "./utils";
 
-const HASH_SEED = 4221954417;
+const HASH_SEED: number = 4221954417;
 
 export class List implements Meta, Sequence, Sequenceable, Value {
   static EMPTY = new this(null, null);
 
   private readonly _first: First;
-  private readonly _next: Next;
+  private readonly _next: List | Nil;
   private readonly _count: number;
   private readonly _meta: MetaData | Nil;
   private _hashCode: number | null;
 
-  constructor(first: First, next: Next, count = 0, meta?: MetaData) {
+  constructor(first: First, next: List | Nil, count = 0, meta?: MetaData) {
     this._first = first;
     this._next = next;
     this._count = count;
@@ -58,7 +58,7 @@ export class List implements Meta, Sequence, Sequenceable, Value {
     return this._first;
   }
 
-  next(): Next {
+  next(): List | Nil {
     return this._next;
   }
 
@@ -66,7 +66,7 @@ export class List implements Meta, Sequence, Sequenceable, Value {
     return this._count;
   }
 
-  equals(other: Sequence): boolean {
+  equals(other: List): boolean {
     if (!isSequence(other)) return false;
     // TODO: generalize to isCounted add counted interface
     if (isList(other) && this.count() !== other.count()) {
@@ -74,7 +74,7 @@ export class List implements Meta, Sequence, Sequenceable, Value {
     }
 
     let x = this.first();
-    let xs: Sequence = this;
+    let xs: List = this;
     let y = other.first();
     let ys = other;
 
@@ -91,8 +91,8 @@ export class List implements Meta, Sequence, Sequenceable, Value {
 
   hashCode(): number {
     if (this._hashCode == null) {
-      this._hashCode = reduce(
-        (n, x) => hashCombine(n, hashCode(x)),
+      this._hashCode = reduce<number>(
+        (n: number, x: Value) => hashCombine(n, hashCode(x)),
         this,
         HASH_SEED
       );

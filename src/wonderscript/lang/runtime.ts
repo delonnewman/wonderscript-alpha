@@ -1,4 +1,4 @@
-import { Seq, Nextable, first, next } from "./Seq";
+import { Seq, first, next } from "./Seq";
 import { isArrayLike } from "./ArrayLike";
 import { CORE_NAMES } from "../compiler/constants";
 import { dasherize, escapeChars } from "../compiler/utils";
@@ -77,7 +77,7 @@ export function str(...args: unknown[]): string {
   return Array.prototype.join.call(arguments, EMPTY_STRING);
 }
 
-export function rest<T = unknown>(col: Nextable<T>): Seq<T> {
+export function rest<T = unknown>(col: Seq<T>): Seq<T> {
   const val = next(col);
 
   return val == null ? EMPTY_ARRAY : val;
@@ -120,16 +120,15 @@ export function map<In = unknown, Out = unknown>(
   return Object.freeze(a);
 }
 
-export function reduce<Item>(f: Reducing<Item, Item>, xs: Seq<Item>): Item;
-export function reduce<Item = unknown, Memo = Item>(
+export function reduce<Memo = unknown, Item = unknown>(
   f: Reducing<Memo, Item>,
   xs: Seq<Item>,
   init?: Memo
-) {
+): Memo {
   if (arguments.length !== 2 && arguments.length !== 3) {
     throw new Error(
       "wrong number of arguments expected at least 2 or 3, got: " +
-        arguments.length
+      arguments.length
     );
   }
 
@@ -148,7 +147,7 @@ export function reduce<Item = unknown, Memo = Item>(
     xs = next<Item>(xs);
   }
 
-  return memo;
+  return memo as Memo;
 }
 
 export function partition<T = unknown>(

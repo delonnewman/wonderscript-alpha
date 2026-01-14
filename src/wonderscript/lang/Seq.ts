@@ -5,8 +5,8 @@ import { ArrayLike, isArrayLike } from "./ArrayLike";
 export type First<T = unknown> = T | Nil;
 export type Next<T = unknown> = Seq<T> | Nil;
 
-type HasConsMethod = { cons: (val: unknown) => unknown[] };
-export type Consable = Nil | ArrayLike | HasConsMethod;
+type HasConsMethod<T = unknown> = { cons: (val: T) => T[] };
+export type Consable<T = unknown> = Nil | ArrayLike<T> | HasConsMethod<T>;
 
 type HasFirstMethod<T = unknown> = { first: () => T | Nil };
 
@@ -14,18 +14,16 @@ type HasForEachMethod<T = unknown> = {
   forEach: (cb: (val: T) => void) => void;
 };
 
-export type Nextable<T = unknown> =
-  | Sequence<T>
-  | ArrayLike<T>
-  | HasForEachMethod<T>;
+type Nextable<T = unknown> = Sequence<T> | ArrayLike<T> | HasForEachMethod<T>;
 
 export type Seq<T = unknown, V = unknown> =
-  | Readonly<T[]>
+  | Nil
   | T[]
+  | Readonly<T[]>
   | ArrayLike<T>
   | Sequence<T>
   | Map<T, V>
-  | (HasFirstMethod<T> & Nextable<T>);
+  | (HasFirstMethod<T> & HasConsMethod<T> & Nextable<T>);
 
 export interface Sequence<T = unknown> {
   cons(val: T): Sequence;
@@ -65,7 +63,7 @@ export function first<T = unknown>(col: Seq<T>): First<T> {
   throw new Error("Cannot get the first element of: " + col);
 }
 
-export function next<T = unknown>(col: Nextable<T>): Seq<T> | Nil {
+export function next<T = unknown>(col: Seq<T>): Seq<T> | Nil {
   if (col == null) return null;
 
   if (isSequence(col)) {
@@ -95,10 +93,7 @@ export function next<T = unknown>(col: Nextable<T>): Seq<T> | Nil {
   throw new Error("Cannot get the next element of: " + col);
 }
 
-export function cons(
-  val: unknown,
-  col: Consable
-): Readonly<unknown[]> | string {
+export function cons(val: unknown, col: Seq): Readonly<unknown[]> | string {
   if (col == null) return [val];
 
   if (hasConsMethod(col)) {
