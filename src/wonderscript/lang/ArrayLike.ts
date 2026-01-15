@@ -1,10 +1,10 @@
-import { isNumber } from "./runtime";
+import { isNumber } from "./core";
 
 export type ArrayLike<T = unknown> = {
-  length: number;
-  [index: number]: T;
+    length: number;
+    [index: number]: T;
 };
 
 export function isArrayLike(val: unknown): val is ArrayLike {
-  return val != null && isNumber((val as ArrayLike).length);
+    return val != null && isNumber((val as ArrayLike).length);
 }

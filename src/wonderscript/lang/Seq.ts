@@ -1,5 +1,5 @@
 import { Nil } from "./Nil";
-import { isFunction, isString, isIterator } from "./runtime";
+import { isFunction, isString, isIterator } from "./core";
 import { ArrayLike, isArrayLike } from "./ArrayLike";
 
 export type First<T = unknown> = T | Nil;

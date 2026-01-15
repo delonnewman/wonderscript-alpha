@@ -1,8 +1,6 @@
 import { FALSE_SYM, NIL_SYM, TRUE_SYM } from "./constants";
 import {
-  ArrayLike,
   isArray,
-  isArrayLike,
   isBoolean,
   isFunction,
   isMap,
@@ -10,8 +8,9 @@ import {
   isObject,
   isSet,
   isString,
-  map,
-} from "../lang/runtime";
+} from "../lang/core";
+import { ArrayLike, isArrayLike } from "../lang/runtime";
+import { map } from "../lang/runtime";
 import { Form } from "./core";
 import { isSymbol } from "../lang/Symbol";
 import { isKeyword } from "../lang/Keyword";

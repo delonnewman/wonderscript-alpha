@@ -1,4 +1,4 @@
-import { isString } from "../lang/runtime";
+import { isString } from "../lang/core";
 
 const names = {
   "=": "eq",

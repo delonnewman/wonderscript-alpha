@@ -1,6 +1,6 @@
 import { Keyword } from "./Keyword";
 import { Nil } from "./Nil";
-import { isFunction } from "./runtime";
+import { isFunction } from "./core";
 
 export type MetaData = Map<Keyword, any>;
 
