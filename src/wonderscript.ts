@@ -16,10 +16,9 @@ import { RecursionPoint } from "./wonderscript/compiler/RecursionPoint";
 import { escapeChars } from "./wonderscript/compiler/utils";
 import { findNamespaceVar } from "./wonderscript/compiler/findNamespaceVar";
 import { UncaughtThrowError } from "./wonderscript/lang/UncaughtThrowError";
+import type { Platform } from "./wonderscript/compiler/platforms";
 
 export * from "./wonderscript/lang";
-
-type Platform = "node" | "browser";
 
 export const JS_SYM = Symbol.intern("js");
 
