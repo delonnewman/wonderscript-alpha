@@ -57,5 +57,6 @@ export function emitSymbol(s: Symbol, context: Context): string {
     CURRENT_NS.value.name,
     Object.keys(CURRENT_NS.value.module)
   );
+
   throw new Error(`Undefined variable: ${prStr(s)}`);
 }
