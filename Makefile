@@ -26,13 +26,15 @@ clean:
 deps:
 	bun install
 
-spec:
+test: clean all test[unit] test[spec]
+
+test[spec]:
 	@for file in $(shell find spec -name '*.ws'); do \
 		echo $$file; \
 		$(WSI) $$file; \
 	done;
 
-test:
+test[unit]:
 	bun test
 
 prettier:
