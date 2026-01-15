@@ -8,6 +8,13 @@
 (is (identical? 5 side-effect))
 (is (identical? 3 (begin 1 2 3)))
 
+;; Lexical Scope
+
+(def nested 10)
+(let (x 5)
+  (set! nested (+ x nested)))
+(is (identical? 15 nested))
+(is (identical? 1 (let (nested 1) nested)))
 
 ;; Truth & Falsehood
 
