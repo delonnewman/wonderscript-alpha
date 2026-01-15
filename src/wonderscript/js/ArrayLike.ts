@@ -1,4 +1,4 @@
-import { isNumber } from "./index";
+import { isNumber } from "./predicates";
 
 export type ArrayLike<T = unknown> = {
     length: number;
