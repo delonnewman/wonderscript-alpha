@@ -5,8 +5,8 @@ import { CORE_NS, CURRENT_NS } from "../vars";
 import { Symbol } from "../../lang/Symbol";
 import { prStr } from "../prStr";
 
-const CTX_SYM = Symbol.intern("*ctx*");
-const FORM_SYM = Symbol.intern("*form*");
+export const CTX_SYM = Symbol.intern("*ctx*");
+export const FORM_SYM = Symbol.intern("*form*");
 
 const JS_CTX_ENV = "this.context";
 const JS_CTX_FORM = "this.form";
