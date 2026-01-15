@@ -41,24 +41,13 @@ function parseArgs(args: Symbol[]): ParsedArgs {
   return parsed;
 }
 
-function genArgAssigns(argsBuf: ParsedArgs): string {
-  const argsAssign = [];
-
-  for (let i = 0; i < argsBuf.length; ++i) {
-    if (argsBuf[i].splat) {
-      const splat = `var ${escapeChars(argsBuf[i].name.name())}=Array.prototype.slice.call(arguments, ${i})`;
-      argsAssign.push(splat);
-    }
-  }
-
-  return argsAssign.join("");
-}
-
 function genArgsDef(argsBuf: ParsedArgs): string {
   const argsDef = [];
   for (let i = 0; i < argsBuf.length; ++i) {
     if (!argsBuf[i].splat) {
       argsDef.push(escapeChars(argsBuf[i].name.name()));
+    } else {
+      argsDef.push(`...${escapeChars(argsBuf[i].name.name())}`);
     }
   }
   return argsDef.join(",");
@@ -100,14 +89,13 @@ export function emitFunc(form: Form, context: Context): string {
   const body = name ? form.slice(3) : form.slice(2);
 
   const argsBuf = parseArgs(args);
-  const argsAssign = genArgAssigns(argsBuf);
   const argsDef = genArgsDef(argsBuf);
 
   for (let i = 0; i < argsBuf.length; i++) {
     ctx.define(argsBuf[i].name, true);
   }
 
-  let buffer = argsAssign ? [argsAssign] : [];
+  let buffer = [];
   const names = map<ParsedArg, Symbol>((x) => x.name, argsBuf);
 
   if (hasTailCall(body)) {
