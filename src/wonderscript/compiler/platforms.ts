@@ -8,7 +8,8 @@ type Node = typeof Node;
 type Bun = typeof Bun;
 type Browser = typeof Browser;
 
-type JavaScript = typeof JavaScript | Node | Bun | Browser;
+type GenericJavaScript = typeof JavaScript;
+type JavaScript = GenericJavaScript | Node | Bun | Browser;
 type PHP = typeof PHP;
 
 export type Platform = JavaScript | PHP;
