@@ -7,6 +7,26 @@
 (is (nil? (js* "null")))
 (is (nil? (js* "undefined")))
 
+;; True
+(is (boolean? true))
+(is (identical? true true))
+(is (= true true))
+
+;; False
+(is (boolean? false))
+(is (identical? false false))
+(is (= false false))
+
+;; Symbols
+(is (symbol? 'x))
+(is (not-identical? 'a 'b))
+(is (= 'a 'a))
+
+;; Keywords
+(is (keyword? :x))
+;; (is (identical? :a :b))
+(is (= :a :a))
+
 ;; Numbers
 (is (number? 10))
 (is (identical? 1 1))
