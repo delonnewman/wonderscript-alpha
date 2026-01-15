@@ -4,6 +4,7 @@ import { isUndefined } from "../../lang/runtime";
 import { CORE_NS, CURRENT_NS } from "../vars";
 import { Symbol } from "../../lang/Symbol";
 import { prStr } from "../prStr";
+import { Namespace } from "../../lang";
 
 export const CTX_SYM = Symbol.intern("*ctx*");
 export const FORM_SYM = Symbol.intern("*form*");
@@ -27,8 +28,8 @@ export function emitSymbol(s: Symbol, context: Context): string {
       throw new Error(`Unknown namespace: ${prStr(s.namespace())}`);
     }
 
-    let ns = ctx.get(Symbol.intern(s.namespace()));
-    if (isUndefined(ns.module[escapeChars(s.name())])) {
+    let ns = ctx.get(Symbol.intern(s.namespace())) as Namespace | undefined;
+    if (ns === undefined || ns.module[escapeChars(s.name())] === undefined) {
       throw new Error(
         `Undefined variable: ${prStr(s.name())} in namespace: ${prStr(s.namespace())}`
       );
@@ -52,11 +53,8 @@ export function emitSymbol(s: Symbol, context: Context): string {
   }
 
   console.error("env", context);
-  console.error(
-    s_,
-    CURRENT_NS.value.name,
-    Object.keys(CURRENT_NS.value.module)
-  );
 
-  throw new Error(`Undefined variable: ${prStr(s)}`);
+  throw new Error(
+    `Undefined variable: ${prStr(s)}\n\t${context.getSource()}:${context.getLine()}`
+  );
 }

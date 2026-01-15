@@ -1,23 +1,27 @@
 import { isUndefined } from "./runtime";
 import { Nil } from "./Nil";
-import { Symbol, isSymbol } from "./Symbol";
+import { Symbol } from "./Symbol";
 import { MetaData } from "./Meta";
 import { Keyword } from "./Keyword";
 import { CTX_SYM } from "../compiler/emit/emitSymbol";
+import { Form } from "../compiler/core";
 
 export const MUTABLE_KW = Keyword.intern("mutable");
+
+type Vars = Map<string, unknown>;
+type VarMeta = Map<string, MetaData>;
 
 type Params = {
   source?: string;
   line?: number;
-  vars?: Map<string, any>;
-  varMeta?: Map<string, MetaData>;
+  vars?: Vars;
+  varMeta?: VarMeta;
   recursive?: boolean;
 };
 
 export class Context {
-  private readonly vars: Map<string, any>;
-  private readonly varMeta: Map<string, MetaData>;
+  private readonly vars: Vars;
+  private readonly varMeta: VarMeta;
   readonly parent: Context | null;
   private _isRecursive: boolean;
   private currentSource: string;
@@ -25,8 +29,8 @@ export class Context {
 
   constructor(parent?: Context, params: Params = {}) {
     this.parent = parent;
-    this.vars = params.vars ?? new Map<string, any>();
-    this.varMeta = params.varMeta ?? new Map<string, MetaData>();
+    this.vars = params.vars ?? new Map();
+    this.varMeta = params.varMeta ?? new Map();
     this._isRecursive = params.recursive ?? false;
     this.define(CTX_SYM, this);
   }
@@ -63,8 +67,9 @@ export class Context {
     return this._isRecursive;
   }
 
-  get(sym: Symbol): any | Nil {
-    return this.vars.get(sym.name());
+  get(name: string | Symbol) {
+    if (name instanceof Symbol) name = name.name();
+    return this.vars.get(name);
   }
 
   has(sym: Symbol): boolean {
@@ -83,7 +88,7 @@ export class Context {
   }
 
   getVarMeta(name: string | Symbol) {
-    if (isSymbol(name)) name = name.name();
+    if (name instanceof Symbol) name = name.name();
     return this.varMeta.get(name);
   }
 
