@@ -5,18 +5,18 @@ import { CORE_NS, CURRENT_NS } from "../vars";
 import { Symbol } from "../../lang/Symbol";
 import { prStr } from "../prStr";
 
-const CTX_ENV = Symbol.intern("*ctx*");
-const CTX_FORM = Symbol.intern("*form*");
+const CTX_SYM = Symbol.intern("*ctx*");
+const FORM_SYM = Symbol.intern("*form*");
 
 const JS_CTX_ENV = "this.context";
 const JS_CTX_FORM = "this.form";
 
 export function emitSymbol(s: Symbol, context: Context): string {
-  if (s.equals(CTX_ENV)) {
+  if (s.equals(CTX_SYM)) {
     return JS_CTX_ENV;
   }
 
-  if (s.equals(CTX_FORM)) {
+  if (s.equals(FORM_SYM)) {
     return JS_CTX_FORM;
   }
 
