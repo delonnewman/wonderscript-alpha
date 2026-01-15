@@ -29,8 +29,10 @@ deps:
 test: clean all test[unit] test[spec]
 
 test[spec]:
+	@echo
+	@echo Running WonderScript Spec...
 	@for file in $(shell find spec -name '*.ws' | sort); do \
-		echo $$file; \
+		echo - $$file; \
 		$(WSI) $$file; \
 	done;
 
