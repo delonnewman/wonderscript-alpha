@@ -16,7 +16,7 @@ import { RecursionPoint } from "./wonderscript/compiler/RecursionPoint";
 import { escapeChars } from "./wonderscript/compiler/utils";
 import { findNamespaceVar } from "./wonderscript/compiler/findNamespaceVar";
 import { UncaughtThrowError } from "./wonderscript/lang/UncaughtThrowError";
-import type { Platform } from "./wonderscript/compiler/platforms";
+import { Platform } from "./wonderscript/compiler/platforms";
 
 export * from "./wonderscript/lang";
 
@@ -25,12 +25,12 @@ export const JS_SYM = Symbol.intern("js");
 export class Compiler {
   private readonly env: Context;
   private readonly global: object;
-  readonly platform: Platform;
+  readonly currentPlatform: Platform;
 
   constructor(platform: Platform, global: object) {
     this.env = new Context();
     this.global = global;
-    this.platform = platform;
+    this.currentPlatform = platform;
     this.init();
   }
 
@@ -75,11 +75,11 @@ export class Compiler {
   }
 
   private isNode(): boolean {
-    return this.platform === "node";
+    return this.currentPlatform === Platform.Node;
   }
 
   private isBrowser(): boolean {
-    return this.platform === "browser";
+    return this.currentPlatform === Platform.Browser;
   }
 
   private globalName(): string {
