@@ -9,7 +9,7 @@ import {
   isSet,
   isString,
 } from "../js/index";
-import { ArrayLike, isArrayLike } from "../lang/runtime";
+import { ArrayLike, isArrayLike } from "../js/ArrayLike";
 import { map } from "../lang/runtime";
 import { Form } from "./core";
 import { isSymbol } from "../lang/Symbol";
