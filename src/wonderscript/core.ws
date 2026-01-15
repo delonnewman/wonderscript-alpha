@@ -246,11 +246,11 @@
   ((name) (array 'var name nil))
   ((name value)
    (let (nm (.withMeta name {:mutable true}))
-     (.define %context nm value)
+     (.define *ctx* nm value)
      value)))
 
 (defmacro this-context
-  () %context)
+  () *ctx*)
 
 (defmacro defonce
   ((name value)
