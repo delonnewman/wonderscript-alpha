@@ -1,10 +1,8 @@
 import { FALSE_SYM, NIL_SYM, TRUE_SYM } from "./constants";
 import {
   isArray,
-  isBoolean,
   isFunction,
   isMap,
-  isNumber,
   isObject,
   isSet,
   isString,
@@ -12,8 +10,8 @@ import {
 import { ArrayLike, isArrayLike } from "../js/ArrayLike";
 import { map } from "../lang/runtime";
 import { Form } from "./core";
-import { isSymbol } from "../lang/Symbol";
-import { isKeyword } from "../lang/Keyword";
+import { Symbol } from "../lang/Symbol";
+import { Keyword } from "../lang/Keyword";
 import { isList } from "../lang/List";
 import { isVector } from "../lang/Vector";
 
@@ -22,13 +20,13 @@ const EMPTY_ARRAY = "[]";
 
 export function prStr(form: Form | Function | ArrayLike | Object): string {
   if (form == null) return NIL_SYM;
-  if (isNumber(form)) return `${form}`;
+  if (typeof form === "number") return `${form}`;
 
-  if (isBoolean(form)) {
+  if (typeof form === "boolean") {
     return form ? TRUE_SYM : FALSE_SYM;
   }
 
-  if (isSymbol(form) || isKeyword(form)) {
+  if (form instanceof Symbol || form instanceof Keyword) {
     return form.toString();
   }
 
