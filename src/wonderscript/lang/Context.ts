@@ -11,12 +11,32 @@ export class Context {
   private readonly varMeta: Map<string, MetaData>;
   private readonly parent: Context | null;
   private _isRecursive: boolean;
+  private currentSource: string;
+  private currentLine: number;
 
   constructor(parent?: Context) {
     this.parent = parent;
     this.vars = new Map<string, any>();
     this.varMeta = new Map<string, MetaData>();
     this._isRecursive = false;
+  }
+
+  setSource(source: string) {
+    this.currentSource = source;
+    return this;
+  }
+
+  setLine(line: number) {
+    this.currentLine = line;
+    return this;
+  }
+
+  getLine(): number {
+    return this.currentLine;
+  }
+
+  getSource(): string {
+    return this.currentSource;
   }
 
   setRecursive(): Context {
