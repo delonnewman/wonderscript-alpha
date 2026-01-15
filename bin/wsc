@@ -5,4 +5,10 @@ const { Compiler } = require("../dist/wonderscript.js");
 const platform = process.argv[2];
 const compiler = new Compiler(platform, "node", globalThis);
 
+if (process.env.NODE_ENV === "production") {
+  require("./dist/wonderscript/core.ws.js");
+} else {
+  compiler.loadFile(__dirname + "/../src/wonderscript/core.ws");
+}
+
 console.log(compiler.compileFile(process.argv[3]));
