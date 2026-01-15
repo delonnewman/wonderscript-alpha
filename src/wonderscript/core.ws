@@ -641,10 +641,10 @@
   (bindings &body)
   (let (nm  (bindings 0)
         col (bindings 1))
-    (array 'loop (array nm (array 'col 0) 'i 0)
+    (array 'loop (array nm (array col 0) 'i 0)
            (cons 'when
                  (cons (array 'not (array 'nil? nm))
-                       (concat body (array (array 'recur (array 'col (array 'inc 'i)) (array 'inc 'i))))))
+                       (concat body (array (array 'recur (array col (array 'inc 'i)) (array 'inc 'i))))))
            col)))
 
 (defmacro while
