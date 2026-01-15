@@ -15,6 +15,7 @@ import { Symbol } from "./wonderscript/lang";
 import { RecursionPoint } from "./wonderscript/compiler/RecursionPoint";
 import { escapeChars } from "./wonderscript/compiler/utils";
 import { findNamespaceVar } from "./wonderscript/compiler/findNamespaceVar";
+import { UncaughtThrowError } from "./wonderscript/lang/UncaughtThrowError";
 
 export * from "./wonderscript/lang";
 
@@ -57,6 +58,7 @@ export class Compiler {
       theMeta: (sym: Symbol) => findDefinitionMetaData(sym, this.env),
       isDefined: (sym: Symbol) => findNamespaceVar(sym, this.env) != null,
       RecursionPoint,
+      UncaughtThrowError,
       escapeChars,
     });
 

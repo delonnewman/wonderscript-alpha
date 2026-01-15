@@ -1,5 +1,5 @@
 import { emit } from "../emit";
-import { THROW_SYM as THROW_STR } from "../constants";
+import { THROW_SYM as THROW_STR, THROW_CLASS } from "../constants";
 import { Form, isTaggedValue } from "../core";
 import { prStr } from "../prStr";
 import { Symbol } from "../../lang/Symbol";
@@ -16,5 +16,5 @@ export function emitThrownException(form: Form, env: Context) {
   if (!isThrowForm(form))
     throw new Error(`invalid ${THROW_SYM} form: ${prStr(form)}`);
 
-  return `throw ${emit(form[1], env)}`;
+  return `throw new ${THROW_CLASS}(${emit(form[1], env)})`;
 }

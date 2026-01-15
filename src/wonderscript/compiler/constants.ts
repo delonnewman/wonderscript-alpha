@@ -84,6 +84,7 @@ export const OPEN_PEREN = "(";
 export const CLOSE_PEREN = ")";
 
 export const RECURSION_POINT_CLASS = `${CORE_NS.name}.RecursionPoint`;
+export const THROW_CLASS = `${CORE_NS.name}.UncaughtThrowError`;
 
 export const SPECIAL_FORMS = {
   quote: true,
