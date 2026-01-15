@@ -1,17 +1,21 @@
 const Node = "node";
 const Bun = "bun";
-const PHP = "php";
 const Browser = "browser";
+const PHP = "php";
+const JavaScript = "javascript";
 
 type Node = typeof Node;
 type Bun = typeof Bun;
-type PHP = typeof PHP;
 type Browser = typeof Browser;
 
-export type Platform = Node | Bun | Browser | PHP;
-export const Platform = Object.freeze({
+type JavaScript = typeof JavaScript | Node | Bun | Browser;
+type PHP = typeof PHP;
+
+export type Platform = JavaScript | PHP;
+export const Platform = {
     Node,
     Bun,
     PHP,
     Browser,
-}) as const;
+} as const;
+Object.freeze(Platform);
