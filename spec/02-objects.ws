@@ -1,3 +1,5 @@
+; -*- mode: clojure -*-
+
 ;; Slot Access
 
 (def slot-access (js-object "a" 1 "b" 2))
