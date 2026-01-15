@@ -4,7 +4,6 @@ import { Symbol } from "./Symbol";
 import { MetaData } from "./Meta";
 import { Keyword } from "./Keyword";
 import { CTX_SYM } from "../compiler/emit/emitSymbol";
-import { Form } from "../compiler/core";
 
 export const MUTABLE_KW = Keyword.intern("mutable");
 
