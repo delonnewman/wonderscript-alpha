@@ -27,7 +27,8 @@ deps:
 	bun install
 
 spec:
-	@for file in $(shell find test -name '*.ws'); do \
+	@for file in $(shell find spec -name '*.ws'); do \
+		echo $$file; \
 		$(WSI) $$file; \
 	done;
 
