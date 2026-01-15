@@ -1,9 +1,8 @@
 #!/usr/bin/env node --enable-source-maps
 
-const fs = require("fs");
-const wsc = require("../index.js");
+const { Compiler } = require("../dist/wonderscript.js");
 
 const platform = process.argv[2];
-const src = fs.readFileSync(process.argv[3], "utf8");
+const compiler = new Compiler("node", globalThis);
 
-console.log(wsc.compileString(src));
+console.log(compiler.compileFile(process.argv[3]));
