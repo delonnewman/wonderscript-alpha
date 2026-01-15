@@ -26,11 +26,17 @@ export class Compiler {
   private readonly env: Context;
   private readonly global: object;
   readonly currentPlatform: Platform;
+  readonly targetPlatform: Platform;
 
-  constructor(platform: Platform, global: object) {
+  constructor(
+    targetPlatform: Platform,
+    currentPlatform: Platform,
+    global: object
+  ) {
     this.env = new Context();
     this.global = global;
-    this.currentPlatform = platform;
+    this.targetPlatform = targetPlatform;
+    this.currentPlatform = currentPlatform;
     this.init();
   }
 
@@ -63,14 +69,12 @@ export class Compiler {
 
     importSymbol(CORE_NS.name, CORE_NS);
     importSymbol("*ns*", CURRENT_NS.value);
-    importSymbol("$is-browser", this.isBrowser());
-    importSymbol("$is-node", this.isNode());
-    importSymbol("$platform-info", this.platformInfo());
+    importSymbol("*platform*", this.platformInfo());
   }
 
   platformInfo(): Map<Keyword, any> {
     const info = new Map();
-
+    info.set(Keyword.intern("name"), this.targetPlatform);
     return info;
   }
 
