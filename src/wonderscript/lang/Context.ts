@@ -3,22 +3,32 @@ import { Nil } from "./Nil";
 import { Symbol } from "./Symbol";
 import { MetaData } from "./Meta";
 import { Keyword } from "./Keyword";
+import { CTX_SYM } from "../compiler/emit/emitSymbol";
 
 export const MUTABLE_KW = Keyword.intern("mutable");
+
+type Params = {
+  source?: string;
+  line?: number;
+  vars?: Map<string, any>;
+  varMeta?: Map<string, MetaData>;
+  recursive?: boolean;
+};
 
 export class Context {
   private readonly vars: Map<string, any>;
   private readonly varMeta: Map<string, MetaData>;
-  private readonly parent: Context | null;
+  readonly parent: Context | null;
   private _isRecursive: boolean;
   private currentSource: string;
   private currentLine: number;
 
-  constructor(parent?: Context) {
+  constructor(parent?: Context, params: Params = {}) {
     this.parent = parent;
-    this.vars = new Map<string, any>();
-    this.varMeta = new Map<string, MetaData>();
-    this._isRecursive = false;
+    this.vars = params.vars ?? new Map<string, any>();
+    this.varMeta = params.varMeta ?? new Map<string, MetaData>();
+    this._isRecursive = params.recursive ?? false;
+    this.define(CTX_SYM, this);
   }
 
   setSource(source: string) {
