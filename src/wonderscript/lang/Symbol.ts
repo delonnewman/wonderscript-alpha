@@ -3,7 +3,7 @@ import { Meta, MetaData } from "./Meta";
 import { Nil } from "./Nil";
 import { Invokable } from "./Invokable";
 import { Comparable, Order } from "./Comparable";
-import { merge } from "./core";
+import { merge } from "../js/core";
 import { Value } from "./Value";
 import { stringHash } from "./utils";
 

@@ -1,5 +1,5 @@
 import { Seq, first, next } from "./Seq";
-import { isArrayLike } from "./ArrayLike";
+import { isArrayLike } from "../js/ArrayLike";
 import { CORE_NAMES } from "../compiler/constants";
 import { dasherize, escapeChars } from "../compiler/utils";
 import { CORE_MOD } from "../compiler/vars";
@@ -8,11 +8,11 @@ import { Keyword } from "./Keyword";
 import { Symbol as WSSymbol } from "./Symbol";
 import { List } from "./List";
 import { Vector } from "./Vector";
-import { str } from "./core";
+import { str } from "../js/core";
 
 export { hashCode } from "./utils";
 export { cons, first, next, isSequence } from "./Seq";
-export { isArrayLike, ArrayLike } from "./ArrayLike";
+export { isArrayLike, ArrayLike } from "../js/ArrayLike";
 export {
   isString,
   isObject,
@@ -28,7 +28,7 @@ export {
   isIterator,
   str,
   merge,
-} from "./core";
+} from "../js/core";
 
 const EMPTY_ARRAY: Readonly<unknown[]> = Object.freeze([]);
 

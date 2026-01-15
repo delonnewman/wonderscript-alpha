@@ -1,6 +1,6 @@
 import { Nil } from "./Nil";
-import { isFunction, isString, isIterator } from "./core";
-import { ArrayLike, isArrayLike } from "./ArrayLike";
+import { isFunction, isString, isIterator } from "../js/core";
+import { ArrayLike, isArrayLike } from "../js/ArrayLike";
 
 export type First<T = unknown> = T | Nil;
 export type Next<T = unknown> = Seq<T> | Nil;

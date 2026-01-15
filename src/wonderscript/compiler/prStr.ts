@@ -8,7 +8,7 @@ import {
   isObject,
   isSet,
   isString,
-} from "../lang/core";
+} from "../js/core";
 import { ArrayLike, isArrayLike } from "../lang/runtime";
 import { map } from "../lang/runtime";
 import { Form } from "./core";
