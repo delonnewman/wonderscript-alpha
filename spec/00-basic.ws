@@ -29,6 +29,10 @@
 (is (not-identical? #{1 2 3} #{1 2 3}))
 (is (#{1 2 3} 1))
 
+;;
+;; Objects
+;; 
+
 ;; Slot Access
 (def slot-access (js-object "a" 1 "b" 2))
 
