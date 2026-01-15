@@ -15,7 +15,7 @@ const COND_SYM = Symbol.intern<"cond">("cond");
 
 export type IfForm = [typeof IF_SYM, Form, Form, Form?];
 
-export const isIfForm = (form: any): form is IfForm =>
+export const isIfForm = (form: unknown): form is IfForm =>
   isTaggedValue(form, IF_SYM) && form.length >= 3 && form.length <= 4;
 
 export function emitIf(form: Form, env: Context): string {
