@@ -1,4 +1,4 @@
-import { isString } from "../js/core";
+import { isString } from "../js/index";
 
 const names = {
   "=": "eq",

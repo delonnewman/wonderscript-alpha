@@ -1,4 +1,4 @@
-import { isFunction } from "../js/core";
+import { isFunction } from "../js/index";
 import { Equality, isEquality } from "./Equality";
 
 export interface Value extends Equality {

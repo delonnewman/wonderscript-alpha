@@ -1,4 +1,4 @@
-import { isNumber } from "./core";
+import { isNumber } from "./index";
 
 export type ArrayLike<T = unknown> = {
     length: number;

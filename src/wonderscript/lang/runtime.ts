@@ -8,7 +8,7 @@ import { Keyword } from "./Keyword";
 import { Symbol as WSSymbol } from "./Symbol";
 import { List } from "./List";
 import { Vector } from "./Vector";
-import { str } from "../js/core";
+import { str } from "../js/index";
 
 export { hashCode } from "./utils";
 export { cons, first, next, isSequence } from "./Seq";
@@ -28,7 +28,7 @@ export {
   isIterator,
   str,
   merge,
-} from "../js/core";
+} from "../js/index";
 
 const EMPTY_ARRAY: Readonly<unknown[]> = Object.freeze([]);
 

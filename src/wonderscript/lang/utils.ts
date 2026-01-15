@@ -1,6 +1,6 @@
 import { murmurhash3_32_gc } from "./murmur";
 import { Form } from "../compiler/core";
-import { isArray, isBoolean, isMap, isNumber, isSet, isString } from "../js/core";
+import { isArray, isBoolean, isMap, isNumber, isSet, isString } from "../js/index";
 import { isVector } from "./Vector";
 import { prStr } from "../compiler/prStr";
 import { isValue, Value } from "./Value";
