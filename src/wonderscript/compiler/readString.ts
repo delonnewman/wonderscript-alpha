@@ -2,13 +2,18 @@ import { PushBackReader } from "../reader/PushBackReader";
 import { read } from "../reader/read";
 import { EOF, Form, isEOF } from "./core";
 
-export function readString(s: string): Form[] {
+export type ReadForm = {
+  form: Form;
+  line: number;
+};
+
+export function readString(s: string): ReadForm[] {
   const r = new PushBackReader(s);
-  const seq = [];
+  const forms = [];
 
   while (true) {
-    let res = read(r, { eofIsError: false, eofValue: EOF });
-    if (isEOF(res)) return seq;
-    if (res != null) seq.push(res);
+    let form = read(r, { eofIsError: false, eofValue: EOF });
+    if (isEOF(form)) return forms;
+    if (form != null) forms.push({ form, line: r.line() });
   }
 }

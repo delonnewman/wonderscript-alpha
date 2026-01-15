@@ -1,4 +1,4 @@
-import { readString } from "./readString";
+import { readString, ReadForm } from "./readString";
 import { emit } from "./emit";
 import { Form, isTaggedValue } from "./core";
 import { macroexpand } from "./macroexpand";
@@ -6,11 +6,12 @@ import { cons, isArray, map } from "../lang/runtime";
 import { Context } from "../lang/Context";
 import { evaluate } from "../compiler";
 
-function evalAll(seq: Form[], scope: Context): Form[] {
+function evalAll(forms: ReadForm[], scope: Context): Form[] {
   const evaled = [];
 
-  for (let i = 0; i < seq.length; i++) {
-    const form = seq[i];
+  for (let i = 0; i < forms.length; i++) {
+    const { form, line } = forms[i];
+    scope.setLine(line);
     evaluate(form, scope);
     evaled.push(form);
   }
