@@ -1,6 +1,6 @@
-import { Context, MUTABLE_KW } from "./wonderscript/lang/Context";
+import { Context } from "./wonderscript/lang/Context";
 import { CORE_NS, CURRENT_NS } from "./wonderscript/compiler/vars";
-import { createNs, Namespace } from "./wonderscript/lang/Namespace";
+import { createNs } from "./wonderscript/lang/Namespace";
 import * as core from "./wonderscript/lang";
 import * as compiler from "./wonderscript/compiler";
 import {
