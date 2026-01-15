@@ -2,7 +2,7 @@ import { Context } from "../../lang/Context";
 import { prStr } from "../prStr";
 import { SLOT_SYM as SLOT_STR } from "../constants";
 import { Symbol, isSymbol } from "../../lang/Symbol";
-import { isString } from "../../lang";
+import { isKeyword, isString } from "../../lang";
 import { Form, isTaggedValue } from "../core";
 import { emit } from "../emit";
 import { escapeChars } from "../utils";
@@ -22,6 +22,10 @@ export function emitSlotAccess(form: Form, env: Context): string {
   let [_, obj, slot] = form;
   if (isTaggedValue(slot) && slot[0].equals(QUOTE_SYM) && isSymbol(slot[1])) {
     slot = slot[1].name();
+  }
+
+  if (isKeyword(slot)) {
+    slot = slot.name();
   }
 
   if (isString(slot)) {
