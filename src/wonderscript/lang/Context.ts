@@ -1,6 +1,6 @@
 import { isUndefined } from "./runtime";
 import { Nil } from "./Nil";
-import { Symbol } from "./Symbol";
+import { Symbol, isSymbol } from "./Symbol";
 import { MetaData } from "./Meta";
 import { Keyword } from "./Keyword";
 import { CTX_SYM } from "../compiler/emit/emitSymbol";
@@ -29,6 +29,10 @@ export class Context {
     this.varMeta = params.varMeta ?? new Map<string, MetaData>();
     this._isRecursive = params.recursive ?? false;
     this.define(CTX_SYM, this);
+  }
+
+  getVarNames() {
+    return Array.from(this.vars.keys());
   }
 
   setSource(source: string) {
@@ -68,15 +72,19 @@ export class Context {
   }
 
   isMutable(sym: Symbol): boolean {
-    if (!this.varHasMeta(sym)) {
-      return false;
-    }
+    const meta = this.getVarMeta(sym);
+    if (!meta) return false;
 
-    return this.varMeta.get(sym.name())?.get(MUTABLE_KW) === true;
+    return meta.get(MUTABLE_KW) === true;
   }
 
   varHasMeta(sym: Symbol): boolean {
     return this.varMeta.has(sym.name());
+  }
+
+  getVarMeta(name: string | Symbol) {
+    if (isSymbol(name)) name = name.name();
+    return this.varMeta.get(name);
   }
 
   lookup(name: Symbol): Context | Nil {
