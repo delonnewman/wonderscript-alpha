@@ -10,7 +10,8 @@ import { stringHash } from "./utils";
 const SLASH = "/";
 
 export class Symbol<Name = string>
-  implements Named<Name>, Meta, Invokable, Comparable, Value {
+  implements Named<Name>, Meta, Invokable, Comparable, Value
+{
   private readonly _name: Name;
   private readonly _namespace?: string;
   private readonly _meta?: MetaData;

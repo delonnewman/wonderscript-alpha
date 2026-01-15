@@ -1,11 +1,18 @@
 import { murmurhash3_32_gc } from "./murmur";
 import { Form } from "../compiler/core";
-import { isArray, isBoolean, isMap, isNumber, isSet, isString } from "../js/index";
+import {
+  isArray,
+  isBoolean,
+  isMap,
+  isNumber,
+  isSet,
+  isString,
+} from "../js/index";
 import { isVector } from "./Vector";
 import { prStr } from "../compiler/prStr";
 import { isValue, Value } from "./Value";
 
-export const stringHash = (function() {
+export const stringHash = (function () {
   const SEED = Math.random() * 10000;
 
   return (s: string): number => murmurhash3_32_gc(s, SEED);

@@ -88,7 +88,7 @@ export function reduce<Memo = unknown, Item = unknown>(
   if (arguments.length !== 2 && arguments.length !== 3) {
     throw new Error(
       "wrong number of arguments expected at least 2 or 3, got: " +
-      arguments.length
+        arguments.length
     );
   }
 
