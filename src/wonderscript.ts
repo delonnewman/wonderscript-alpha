@@ -87,6 +87,11 @@ export class Compiler {
     return this.isBrowser() ? "window" : "global";
   }
 
+  compileFile(path: string): string {
+    this.env.setSource(path);
+    return this.compileString(this.slurp(path));
+  }
+
   loadFile(path: string): Compiler {
     if (this.isNode()) {
       this.evalString(this.slurp(path), path);
