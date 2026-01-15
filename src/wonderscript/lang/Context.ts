@@ -132,6 +132,6 @@ export class Context {
   }
 }
 
-export function isContext(x): x is Context {
-  return x instanceof Context;
+export function isContext(val: unknown): val is Context {
+  return val instanceof Context;
 }
