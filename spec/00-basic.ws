@@ -1,5 +1,12 @@
 ; -*- mode: clojure -*-
 
+;; Nil
+(is (nil? nil))
+(is (identical? nil nil))
+(is (= nil nil))
+(is (nil? (js* "null")))
+(is (nil? (js* "undefined")))
+
 ;; Numbers
 (is (number? 10))
 (is (identical? 1 1))
