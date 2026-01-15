@@ -12,7 +12,8 @@ import { str } from "../js/index";
 
 export { hashCode } from "./utils";
 export { cons, first, next, isSequence } from "./Seq";
-export { isArrayLike, ArrayLike } from "../js/ArrayLike";
+export { isArrayLike } from "../js/ArrayLike";
+export type { ArrayLike } from "../js/ArrayLike";
 export {
   isString,
   isObject,
