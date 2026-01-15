@@ -29,7 +29,7 @@ deps:
 test: clean all test[unit] test[spec]
 
 test[spec]:
-	@for file in $(shell find spec -name '*.ws'); do \
+	@for file in $(shell find spec -name '*.ws' | sort); do \
 		echo $$file; \
 		$(WSI) $$file; \
 	done;
