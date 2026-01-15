@@ -3,6 +3,6 @@
 const { Compiler } = require("../dist/wonderscript.js");
 
 const platform = process.argv[2];
-const compiler = new Compiler("node", globalThis);
+const compiler = new Compiler(platform, "node", globalThis);
 
 console.log(compiler.compileFile(process.argv[3]));
