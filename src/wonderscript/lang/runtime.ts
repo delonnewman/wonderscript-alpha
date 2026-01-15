@@ -148,6 +148,7 @@ export function list(...args: unknown[]): List {
 export function meta(obj: Meta): Map<Keyword, unknown> {
   if (!isMeta(obj)) {
     console.error("not meta", obj);
+    throw new Error("not meta");
   }
 
   return obj.meta();
