@@ -1,9 +1,10 @@
 import { Context } from "../../lang/Context";
 import { prStr } from "../prStr";
 import { SLOT_SYM as SLOT_STR } from "../constants";
-import { Symbol } from "../../lang/Symbol";
+import { Symbol, isSymbol } from "../../lang/Symbol";
 import { Form, isTaggedValue } from "../core";
 import { emit } from "../emit";
+import { escapeChars } from "../utils";
 
 export const SLOT_SYM = Symbol.intern(SLOT_STR);
 
@@ -17,6 +18,11 @@ export function emitSlotAccess(form: Form, env: Context): string {
     throw new Error(`invalid ${SLOT_SYM} form: ${prStr(form)}`);
 
   const [_, obj, slot] = form;
+
+  if (isSymbol(slot)) {
+    const name = slot.name();
+    return `(${emit(obj, env)}).${escapeChars(name)}`;
+  }
 
   return `(${emit(obj, env)})[${emit(slot, env)}]`;
 }
