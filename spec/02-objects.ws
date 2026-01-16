@@ -11,4 +11,4 @@
 (is (nil? (slot-get slot-access :c)))
 
 (slot-set! slot-access :c 3)
-;; (is (identical? 3 (slot-get slot-access :c)))
+(is (identical? 3 (slot-get slot-access :c)))
