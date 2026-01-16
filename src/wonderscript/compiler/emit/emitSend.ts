@@ -6,29 +6,36 @@ import { SEND_SYM as SEND_STR } from "../constants";
 import { Form, isTaggedValue, TaggedValue } from "../core";
 import { prStr } from "../prStr";
 import { isSymbol, Symbol } from "../../lang/Symbol";
+import { emitSlotName } from "./slots";
+import { isKeyword, isVector } from "../../lang";
 
 export const SEND_SYM = Symbol.intern(SEND_STR);
 
 export type SendForm = [typeof SEND_SYM, Form, TaggedValue | Symbol];
 
-export const isObjectResForm = (form: Form): form is SendForm =>
+export const isSendForm = (form: Form): form is SendForm =>
   isTaggedValue(form) && form[0].equals(SEND_SYM) && form.length === 3;
 
 export function emitSend(form: Form, ctx: Context): string {
-  if (!isObjectResForm(form))
+  if (!isSendForm(form))
     throw new Error(`invalid ${SEND_SYM} form: ${prStr(form)}`);
 
-  const [_, obj, msg] = form;
+  let [_, obj, msg] = form;
+  let slotName = emitSlotName(msg);
 
-  if (isTaggedValue(msg)) {
-    const [method, ...args] = msg;
-
-    return `(${emit(obj, ctx)}).${escapeChars(method.name())}(${map((x) => emit(x, ctx), args).join(", ")})`;
+  if (slotName === undefined && isSymbol(msg)) {
+    slotName = msg.name();
   }
 
-  if (isSymbol(msg)) {
-    const name = msg.name();
-      return `(${emit(obj, ctx)}).${escapeChars(name)}()`;
+  if (slotName) {
+    return `(${emit(obj, ctx)}).${escapeChars(slotName)}()`;
+  }
+
+  if (isTaggedValue(msg) || (isVector(msg) && isKeyword(msg[0]))) {
+    const [method, ...args] = Array.prototype.slice.call(msg);
+
+    const strArgs = map<Form>((x) => emit(x, ctx), args).join(", ");
+    return `(${emit(obj, ctx)}).${escapeChars(method.name())}(${strArgs})`;
   }
 
   throw new Error(`invalid ${SEND_SYM} form: ${prStr(form)}`);

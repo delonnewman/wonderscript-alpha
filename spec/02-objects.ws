@@ -27,6 +27,10 @@
 ;; Message Passing
 
 (is (identical? 2025 (send object getFullYear)))
+(is (identical? 1 (send object :getMonth)))
+(is (identical? 2 (send object 'getDate)))
 
 (send object (setYear 2020)) ;; let's go back in time
+(send object [:setMonth 5])
 (is (identical? 2020 (send object getFullYear)))
+(is (identical? 5 (send object getMonth)))
