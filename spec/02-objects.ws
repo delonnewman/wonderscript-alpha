@@ -15,3 +15,11 @@
 
 (is (slot? slot-access :a))
 (is (not (slot? slot-access :d)))
+
+;; Instantiation
+
+(def object (new js/Date))
+
+(is (function? (slot-get object :getYear)))
+(is (function? (slot-get object :getMonth)))
+(is (function? (slot-get object :getDay)))
