@@ -12,3 +12,6 @@
 
 (slot-set! slot-access :c 3)
 (is (identical? 3 (slot-get slot-access :c)))
+
+(is (slot? slot-access :a))
+(is (not (slot? slot-access :d)))
