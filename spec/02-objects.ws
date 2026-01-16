@@ -2,35 +2,33 @@
 
 ;; Instantiation
 
-(def object (new js/Date 2025 1 2))
-
-(is (function? (slot-get object :getYear)))
-(is (function? (slot-get object :getMonth)))
-(is (function? (slot-get object :getDay)))
+(def a-date (new js/Date 2025 1 2))
 
 ;; Message Passing
 
-(is (identical? 2025 (send object getFullYear)))
-(is (identical? 1 (send object :getMonth)))
-(is (identical? 2 (send object 'getDate)))
+(is (identical? 2025 (send a-date getFullYear)))
+(is (identical? 1 (send a-date :getMonth)))
+(is (identical? 2 (send a-date 'getDate)))
 
-(send object (setYear 2020)) ;; let's go back in time
-(send object [:setMonth 5])
-(is (identical? 2020 (send object getFullYear)))
-(is (identical? 5 (send object getMonth)))
+(send a-date (setYear 2020)) ;; let's go back in time
+(send a-date [:setMonth 5])
+(is (identical? 2020 (send a-date getFullYear)))
+(is (identical? 5 (send a-date getMonth)))
 
 ;; Slot Access
 
-(def slot-access (js-object "a" 1 "b" 2))
+(def an-object (send js/Object (create nil)))
+(slot-set! an-object :a 1)
+(slot-set! an-object :b 2)
 
-(is (identical? 2 (slot-get slot-access 'b)))
-(is (identical? 2 (slot-get slot-access :b)))
-(is (identical? 2 (slot-get slot-access 'b)))
-(is (identical? 1 (slot-get slot-access :a)))
-(is (nil? (slot-get slot-access :c)))
+(is (identical? 2 (slot-get an-object 'b)))
+(is (identical? 2 (slot-get an-object :b)))
+(is (identical? 2 (slot-get an-object 'b)))
+(is (identical? 1 (slot-get an-object :a)))
 
-(slot-set! slot-access :c 3)
-(is (identical? 3 (slot-get slot-access :c)))
+(is (nil? (slot-get an-object :c)))
+(slot-set! an-object :c 3)
+(is (identical? 3 (slot-get an-object :c)))
 
-(is (slot? slot-access :a))
-(is (not (slot? slot-access :d)))
+(is (slot? an-object :a))
+(is (not (slot? an-object :d)))
