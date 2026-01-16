@@ -38,31 +38,39 @@
 
 (def parsed-args
   (fn* (arglist)
-       (.map arglist
-             (fn* (sym i)
-                  (if (splat? sym)
-                    {:name (.intern wonderscript.lang/Symbol (.slice (.name sym) 1)) :order i :splat true}
-                    {:name sym :order i :splat false})))))
+    (send arglist
+     (map
+      (fn* (sym i)
+        (if (splat? sym)
+          {:name
+           (send
+            wonderscript.lang/Symbol
+            (intern (send (send sym :name) (slice 1))))
+           :order i
+           :splat true}
+          {:name sym
+           :order i
+           :splat false}))))))
 
 ; TODO: need gensym for "args" variable
 (def arity-validation-forms
   (fn* (parsed argsym)
-       (let (nargs (length parsed))
-         (if (.some parsed #(:splat %))
-           (array '> (array 'length argsym) (- nargs 1))
-           (array 'identical? nargs (array 'length argsym))))))
+    (let (nargs (length parsed))
+      (if (send parsed (some #(:splat %)))
+        (array '> (array 'length argsym) (- nargs 1))
+        (array 'identical? nargs (array 'length argsym))))))
 
 (def let-bindings-form
   (fn* (pair argsym)
-       (cons 'let
-             (cons
-              (.flatMap (pair 0)
-                        (fn* (x i)
-                             (if (splat? x)
-                               (array (.intern wonderscript.lang/Symbol (.slice (.name x) 1))
-                                      (array '.slice argsym i))
-                               (array x (array 'array-get argsym i)))))
-              (.slice pair 1)))))
+    (cons 'let
+      (cons
+       (.flatMap (pair 0)
+        (fn* (x i)
+         (if (splat? x)
+           (array (.intern wonderscript.lang/Symbol (.slice (.name x) 1))
+            (array '.slice argsym i))
+           (array x (array 'array-get argsym i)))))
+       (.slice pair 1)))))
 
 (def ^:macro fn
   (fn* (&xs)
