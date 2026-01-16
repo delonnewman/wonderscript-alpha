@@ -1,6 +1,16 @@
 ; -*- mode: clojure -*-
 
 (def array (fn* (&args) args))
+(def array? (fn* (val) (send js/Array (isArray val))))
+
+(def message-sender
+  (fn* (slot)
+   (fn* (obj)
+    (if (and obj (slot? obj slot))
+      (send obj slot)))))
+
+(def name (message-sender "name"))
+(def namespace (message-sender "namespace"))
 
 (def ^:macro comment (fn* (&xs) nil))
 
@@ -11,21 +21,20 @@
      (array 'if (first clauses)
             (if (next clauses)
               (first (rest clauses))
-              (throw (js/Error. "cond requires an even number of forms")))
+              (throw (new js/Error "cond requires an even number of forms")))
             (cons 'cond (next (next clauses)))))))
 
 (def assoc-array?
-  (fn*
-   (a)
-   (if (not (.isArray js/Array a))
+  (fn* (a)
+   (if (not (array? a))
      false
-     (.isArray js/Array (a 0)))))
+     (array? (a 0)))))
 
 (def splat?
   (fn* (sym)
-       (if (symbol? sym)
-         (.startsWith (.name sym) "&")
-         false)))
+    (if (symbol? sym)
+      (send (send sym :name) (startsWith "&"))
+      false)))
 
 (def parsed-args
   (fn* (arglist)
@@ -433,29 +442,25 @@
   (&arrays)
   (.apply (.-concat (.-prototype js/Array)) $empty-array arrays))
 
-(defn array?
-  (object)
-  (.isArray js/Array object))
-
 (defn make-array
-  (() (js/Array.))
-  ((n) (js/Array. n)))
+  (() (new js/Array))
+  ((n) (new js/Array n)))
 
 ;; TODO: will need to extend for seqs
 (defn ->array
-  (object)
-  (.from js/Array object))
+  (obj)
+  (send js/Array (from obj)))
 
 (defn array-like?
-  (object)
-  (and (identical? "object" (typeof object))
-       (number? (.-length object))))
+  (obj)
+  (and (identical? "object" (typeof obj))
+       (number? (slot-get obj :length))))
 
 (defn slice
   ((col start)
-   (.slice col start))
+   (send col (slice start)))
   ((col start end)
-   (.slice col start end)))
+   (send col (slice start end))))
 
 ; TODO: add support for seqs
 (defn at
@@ -550,16 +555,6 @@
 
 (defn trim-trailing
   (s) (.trimEnd s))
-
-(defn name
-  (named)
-  (when (slot? named "name") ; # TODO: add try macro for this idiom
-    (.name named)))
-
-(defn namespace
-  (named)
-  (when (slot? named "namespace")
-    (.namespace named)))
 
 (defn starts-with?
   (s ch)
