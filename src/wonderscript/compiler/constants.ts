@@ -102,7 +102,7 @@ export const SPECIAL_FORMS = {
   ".": true,
   new: true,
   "set*": true,
-  slot-get: true,
+  "slot-get": true,
   "slot-set!": true,
   "slot?": true,
 } as const;
