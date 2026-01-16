@@ -4,6 +4,7 @@ import { Form, isTaggedValue } from "../core";
 import { prStr } from "../prStr";
 import { isSymbol, Symbol } from "../../lang/Symbol";
 import { Context } from "../../lang/Context";
+import { emitSlotName } from "./slots";
 
 export const SSET_SYM = Symbol.intern(SSET_STR);
 
@@ -16,12 +17,12 @@ export function emitSlotMutation(form: Form, ctx: Context): string {
   if (!isSlotMutationForm(form))
     throw new Error(`invalid ${SSET_SYM} form: ${prStr(form)}`);
 
-  const [_tag, obj, prop, value] = form;
+  const [_tag, obj, slot, value] = form;
+  const slotName = emitSlotName(slot);
 
-  if (isSymbol(prop)) {
-    // TODO: what should we do with namespaced symbols
-    return `${emit(obj, ctx)}.${prop.name()}=${emit(value, ctx)}`;
+  if (slotName) {
+    return `(${emit(obj, ctx)}).${slotName}=${emit(value, ctx)}`;
   }
 
-  return `${emit(obj, ctx)}[${emit(prop, ctx)}]=${emit(value, ctx)}`;
+  return `${emit(obj, ctx)}[${emit(slot, ctx)}]=${emit(value, ctx)}`;
 }
