@@ -18,8 +18,15 @@
 
 ;; Instantiation
 
-(def object (new js/Date))
+(def object (new js/Date 2025 1 2))
 
 (is (function? (slot-get object :getYear)))
 (is (function? (slot-get object :getMonth)))
 (is (function? (slot-get object :getDay)))
+
+;; Message Passing
+
+(is (identical? 2025 (send object getFullYear)))
+
+(send object (setYear 2020)) ;; let's go back in time
+(is (identical? 2020 (send object getFullYear)))

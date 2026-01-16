@@ -77,6 +77,7 @@ import {
   HAS_SLOT_SYM,
   SSET_SYM,
   IF_SYM,
+  SEND_SYM,
 } from "./constants";
 import { emitMap } from "./emit/emitMap";
 import { RECUR_ERROR_MSG } from "./errorMessages";
@@ -110,6 +111,7 @@ import { emitSlotMutation } from "./emit/emitSlotMutation";
 import { isVector } from "../lang/Vector";
 import { emitVector } from "./emit/emitVector";
 import { emitIf } from "./emit/emitIf";
+import { emitSend } from "./emit/emitSend";
 
 export function emit(exp: Form, ctx: Context) {
   const form = macroexpand(exp, ctx);
@@ -157,6 +159,8 @@ export function emit(exp: Form, ctx: Context) {
           return emitLet(form, ctx);
         case DOT_SYM:
           return emitObjectRes(form, ctx);
+        case SEND_SYM:
+          return emitSend(form, ctx);
         case NEW_SYM:
           return emitClassInit(form, ctx);
         case SET_SYM:
