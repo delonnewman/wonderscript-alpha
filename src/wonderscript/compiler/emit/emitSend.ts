@@ -23,10 +23,6 @@ export function emitSend(form: Form, ctx: Context): string {
   let [_, obj, msg] = form;
   let slotName = emitSlotName(msg);
 
-  if (slotName === undefined && isSymbol(msg)) {
-    slotName = msg.name();
-  }
-
   if (slotName) {
     return `(${emit(obj, ctx)}).${escapeChars(slotName)}()`;
   }
@@ -38,5 +34,6 @@ export function emitSend(form: Form, ctx: Context): string {
     return `(${emit(obj, ctx)}).${escapeChars(method.name())}(${strArgs})`;
   }
 
-  throw new Error(`invalid ${SEND_SYM} form: ${prStr(form)}`);
+  // TODO: add late bound evaluation of slot names
+  return `(${emit(obj, ctx)})[${emit(msg, ctx)}]()`;
 }
