@@ -19,9 +19,9 @@
    (&clauses)
    (if (and clauses (not-identical? 0 (.-length clauses)))
      (array 'if (first clauses)
-            (if (next clauses)
-              (first (rest clauses))
-              (throw (new js/Error "cond requires an even number of forms")))
+        (if (next clauses)
+          (first (rest clauses))
+          (throw (new js/Error "cond requires an even number of forms")))
             (cons 'cond (next (next clauses)))))))
 
 (def assoc-array?
