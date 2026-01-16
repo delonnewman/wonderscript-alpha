@@ -65,8 +65,7 @@
               (.slice pair 1)))))
 
 (def ^:macro fn
-  (fn*
-   (&xs)
+  (fn* (&xs)
    (let (x (xs 0))
      (cond
        (assoc-array? x)
