@@ -102,7 +102,9 @@ export const SPECIAL_FORMS = {
   ".": true,
   new: true,
   "set*": true,
-  slot: true,
+  slot-get: true,
+  "slot-set!": true,
+  "slot?": true,
 } as const;
 
 export const CORE_NAMES = {
