@@ -7,6 +7,7 @@ import { jsEval } from "./jsEval";
 
 export function evalString(input: string, scope: Context, source = "inline") {
   scope.setSource(source);
+  scope.setLine(0);
   const r = new PushBackReader(input);
   let ret;
   while (true) {
