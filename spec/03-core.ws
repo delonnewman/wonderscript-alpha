@@ -35,3 +35,18 @@
 
 (is (identical? "Hello, World!" (greet)))
 (is (identical? "Hello, Jane!" (greet "Jane")))
+
+;; JavaScript
+
+(is (identical? "[object Date]" (js-object-tag (new js/Date))))
+
+;; OOP
+
+(def AClass (make-class))
+(is (class? AClass))
+
+(add-method AClass "hi" (fn* () "Hi!"))
+
+(def a-instance (new AClass))
+(is (instance? a-instance AClass))
+(is (identical? "Hi!" (send a-instance :hi)))

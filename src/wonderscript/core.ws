@@ -17,7 +17,7 @@
 (def ^:macro cond
   (fn*
    (&clauses)
-   (if (and clauses (not-identical? 0 (.-length clauses)))
+   (if (and clauses (not-identical? 0 (slot-get clauses :length)))
      (array 'if (first clauses)
         (if (next clauses)
           (first (rest clauses))
@@ -281,19 +281,19 @@
 
 (defn js-object-tag
   (object)
-  (.call (.-toString (.-prototype js/Object)) object))
+  (send (slot-get (slot-get js/Object :prototype) :toString) (call object)))
 
 (defn js-prototype
   (object)
-  (.getPrototypeOf js/Object object))
+  (send js/Object (getPrototypeOf object)))
 
 (defn js-constructor
   (object)
-  (.-constructor (js-prototype object)))
+  (slot-get (js-prototype object) :constructor))
 
 (defn js-constructor-name
   (object)
-  (.-name (js-constructor object)))
+  (slot-get (js-constructor object) :name))
 
 (defn type
   (value)
@@ -303,32 +303,35 @@
 
 (defn same-type?
   (a b)
-  (.equals (type a) (type b)))
+  (send (type a) (equals (type b))))
 
 (defn constructor?
-  (obj) (and (function? obj) (.hasOwn obj "prototype")))
+  (obj)
+  (and
+   (function? obj)
+   (send js/Object (hasOwn obj "prototype"))))
 
 (def class? constructor?)
 
 (defn isa?
-  (t value)
-  (if (function? t)
-    (instance? value t)
-    (.equals (type value) t)))
+  (type value)
+  (if (function? type)
+    (instance? value type)
+    (send (type value) (equals type))))
 
 (def Object nil)
 
-(defmacro make-class
-  (() (array 'make-class (fn* ()) Object))
-  ((ctr) (array 'make-class ctr Object))
+(defn make-class
+  (() (make-class (fn* ()) Object))
+  ((ctr) (make-class ctr Object))
   ((ctr superclass)
-   (array 'slot-set! ctr 'prototype
-          (array '.create 'js/Object superclass))
+   (slot-set! ctr :prototype
+    (send js/Object (create superclass)))
    ctr))
 
-(defn define-method
+(defn add-method
   (klass name f)
-  (slot-set! (.-prototype klass) name f))
+  (slot-set! (slot-get klass :prototype) name f))
 
 (defmacro defclass
   ((name) (array 'defclass name nil))
