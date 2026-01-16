@@ -20,6 +20,7 @@ export const DOT_DASH_SYM = ".-";
 export const SLOT_SYM = "slot-get";
 export const HAS_SLOT_SYM = "slot?";
 export const SSET_SYM = "slot-set!";
+export const SEND_SYM = "send";
 
 export const NIL_SYM = "nil";
 export const TRUE_SYM = "true";
@@ -105,6 +106,7 @@ export const SPECIAL_FORMS = {
   "slot-get": true,
   "slot-set!": true,
   "slot?": true,
+  "send": true,
 } as const;
 
 export const CORE_NAMES = {
