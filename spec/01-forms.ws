@@ -4,7 +4,7 @@
 
 (def side-effect 2)
 (begin
-  (set! side-effect (+ side-effect 3)))
+  (set* side-effect (+ side-effect 3)))
 (is (identical? 5 side-effect))
 (is (identical? 3 (begin 1 2 3)))
 
