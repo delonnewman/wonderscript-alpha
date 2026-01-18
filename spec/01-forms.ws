@@ -56,3 +56,8 @@
 
 (for-each (x '(1 2 3))
   (is (number? x)))
+
+;; Type Inspection
+
+(is (instance? (new js/Date) js/Date))
+(is (identical? "string" (typeof "Hey!")))
