@@ -61,3 +61,10 @@
 
 (is (instance? (new js/Date) js/Date))
 (is (identical? "string" (typeof "Hey!")))
+
+;; Arrays
+
+(def an-array (array 1 2 3))
+(is (identical? 1 (array-get an-array 0)))
+(array-set! an-array 1 3.14)
+(is (identical? 3.14 (array-get an-array 1)))

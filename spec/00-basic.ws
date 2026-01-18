@@ -52,11 +52,6 @@
 (is (= '(1 2 3) '(1 2 3)))
 (is (= '(1 2 3) (array 1 2 3)))
 
-(def an-array (array 1 2 3))
-(is (identical? 1 (array-get an-array 0)))
-(array-set! an-array 1 3.14)
-(is (identical? 3.14 (array-get an-array 1)))
-
 ;; Vectors
 (is (vector? [1 2 3]))
 (is (not-identical? [1 2 3] [1 2 3]))
