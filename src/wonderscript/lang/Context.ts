@@ -5,6 +5,8 @@ import { MetaData } from "./Meta";
 import { Keyword } from "./Keyword";
 import { CTX_SYM } from "../compiler/emit/emitSymbol";
 import { CompilerError } from "../compiler/CompilerError";
+import { StackFrame } from "../compiler/StackFrame";
+import { StackTrace } from "../compiler/StackTrace";
 
 export const MUTABLE_KW = Keyword.intern("mutable");
 
@@ -34,6 +36,7 @@ export class Context {
     this.varMeta = params.varMeta ?? new Map();
     this._isRecursive = params.recursive ?? false;
     this.define(CTX_SYM, this);
+    this.currentSource = '<anonymous>';
     this.currentColumn = 0;
     this.currentLine = 0;
   }
@@ -67,6 +70,26 @@ export class Context {
 
   getColumn(): number {
     return this.currentColumn;
+  }
+
+  stackframe(): StackFrame {
+    return new StackFrame(this.getSource(), this.getLine(), this.getColumn());
+  }
+
+  stacktrace(): StackTrace {
+    const frames = [this.stackframe()];
+
+    if (!this.parent) {
+      return new StackTrace(frames);
+    }
+
+    let ctx = this.parent;
+    while (ctx) {
+      frames.push(ctx.stackframe());
+      ctx = ctx.parent;
+    }
+
+    return new StackTrace(frames);
   }
 
   setRecursive(): Context {

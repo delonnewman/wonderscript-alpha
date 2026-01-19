@@ -10,6 +10,6 @@ export class StackFrame {
   }
 
   toString() {
-    return `  at ${this.file}:${this.line}:${this.column}`;
+    return `    at ${this.file}:${this.line}:${this.column}`;
   }
 }

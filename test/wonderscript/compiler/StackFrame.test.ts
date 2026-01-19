@@ -20,6 +20,6 @@ describe("StackFrame", () => {
   });
 
   test("#toString", () => {
-    expect(frame.toString()).toBe(`  at ${file}:${line}:${column}`)
+    expect(frame.toString()).toBe(`    at ${file}:${line}:${column}`)
   });
 });
