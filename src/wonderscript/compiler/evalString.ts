@@ -8,11 +8,13 @@ import { jsEval } from "./jsEval";
 export function evalString(input: string, scope: Context, source = "inline") {
   scope.setSource(source);
   scope.setLine(0);
+  scope.setColumn(0);
   const r = new PushBackReader(input);
   let ret: unknown;
   while (true) {
     const res = read(r, { eofIsError: false, eofValue: EOF });
     scope.setLine(r.line());
+    scope.setColumn(r.column());
     if (isEOF(res)) return ret;
     if (res != null) {
       ret = jsEval(emit(res, scope));
