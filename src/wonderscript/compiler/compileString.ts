@@ -10,8 +10,9 @@ function evalAll(forms: ReadForm[], scope: Context): Form[] {
   const evaled = [];
 
   for (let i = 0; i < forms.length; i++) {
-    const { form, line } = forms[i];
+    const { form, line, column } = forms[i];
     scope.setLine(line);
+    scope.setColumn(column);
     evaluate(form, scope);
     evaled.push(form);
   }

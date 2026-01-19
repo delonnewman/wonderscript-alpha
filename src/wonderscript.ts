@@ -93,6 +93,7 @@ export class Compiler {
   compileFile(path: string): string {
     this.env.setSource(path);
     this.env.setLine(0);
+    this.env.setColumn(0);
     return this.compileString(this.slurp(path));
   }
 
