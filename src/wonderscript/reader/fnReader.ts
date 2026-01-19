@@ -17,7 +17,7 @@ const argNumber = (arg: Symbol): number | null => {
   return num;
 };
 
-function collectArgs(body): Symbol[] {
+function collectArgs(body: unknown[]): Symbol[] {
   const args = [];
   const forms = body.slice(0);
 
@@ -38,7 +38,7 @@ function collectArgs(body): Symbol[] {
   // remove duplicates && error check
   let index = 1;
   for (let i = 0; i < args.length; i++) {
-    let num;
+    let num: number;
     if (
       (i > 0 && args[i].equals(args[i - 1])) ||
       (num = argNumber(args[i])) == null
@@ -58,7 +58,11 @@ function collectArgs(body): Symbol[] {
 }
 
 // TODO: Should throw an error if nested
-export function fnReader(r: PushBackReader, leftbracket, opts): FnForm {
+export function fnReader(
+  r: PushBackReader,
+  _leftbracket: string,
+  opts: Record<string, unknown>
+): FnForm {
   const array = readDelimitedList(")", r, true, opts);
   const args = collectArgs(array);
 
