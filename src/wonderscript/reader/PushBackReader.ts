@@ -10,6 +10,9 @@ export class PushBackReader {
   #line: number;
   #column: number;
 
+  // The last column before the last newline
+  #prevColumn: number | undefined;
+
   constructor(str: string) {
     this.#limit = str.length - 1;
     this.#stream = str.split("");
@@ -37,6 +40,7 @@ export class PushBackReader {
     this.#position++;
 
     if (ch === "\n") {
+      this.#prevColumn = this.#column;
       this.#column = INIT_COL;
       this.#line++;
     } else {
@@ -54,13 +58,14 @@ export class PushBackReader {
     this.#position = INIT_POS;
     this.#column = INIT_COL;
     this.#line = INIT_LINE;
+    this.#prevColumn = undefined;
   }
 
   unread(ch: string) {
     this.#position -= 1;
     this.#stream[this.#position] = ch;
 
-    this.#column = this.#position;
+    this.#column = this.#prevColumn ?? INIT_COL;
     if (ch === "\n") {
       this.#line--;
     }
