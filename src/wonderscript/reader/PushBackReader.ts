@@ -65,7 +65,7 @@ export class PushBackReader {
     this.#position -= 1;
     this.#stream[this.#position] = ch;
 
-    this.#column = this.#prevColumn ?? INIT_COL;
+    this.#column = this.#prevColumn ?? this.#position;
     if (ch === "\n") {
       this.#line--;
     }
