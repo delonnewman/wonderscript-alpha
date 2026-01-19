@@ -12,7 +12,7 @@
 
 (def nested 10)
 (let (x 5)
-  (set! nested (+ x nested)))
+  (set* nested (+ x nested)))
 (is (identical? 15 nested))
 (is (identical? 1 (let (nested 1) nested)))
 
