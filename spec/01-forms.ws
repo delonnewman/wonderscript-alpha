@@ -1,5 +1,29 @@
 ; -*- mode: clojure -*-
 
+;; Equality
+
+(is (identical? nil nil))
+(is (identical? true true))
+(is (identical? false false))
+(is (identical? 1 1))
+(is (identical? 2.718 2.718))
+(is (identical? "Hey!" "Hey!"))
+(is (identical? "" ""))
+
+(is (not-identical? true 1))
+(is (not-identical? false 0))
+(is (not-identical? false ""))
+
+(is (equiv? true 1))
+(is (equiv? false 0))
+(is (equiv? false ""))
+(is (equiv? 1 "1"))
+(is (equiv? '() ""))
+(is (equiv? '(()) ""))
+
+(is (not-equiv? '(0) ""))
+(is (not-equiv? 1 2))
+
 ;; Programs
 
 (def side-effect 2)
