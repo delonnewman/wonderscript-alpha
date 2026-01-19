@@ -1,12 +1,16 @@
 import { isTerminatingMacro, isWhitespace, nonConstituent } from "./core";
 import { PushBackReader } from "./PushBackReader";
 
-export function readToken(r: PushBackReader, initch, leadConstituent) {
-  if (leadConstituent && nonConstituent(initch)) {
-    throw new Error("Invalid leading character: " + initch);
+export function readToken(
+  r: PushBackReader,
+  initCh: string,
+  leadConstituent: boolean
+) {
+  if (leadConstituent && nonConstituent(initCh)) {
+    throw new Error("Invalid leading character: " + initCh);
   }
 
-  const buff = [initch];
+  const buff = [initCh];
   while (true) {
     const ch = r.read();
     if (ch === null || isWhitespace(ch) || isTerminatingMacro(ch)) {
