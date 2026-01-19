@@ -1,8 +1,8 @@
 import { isMacro, isWhitespace } from "./core";
 import { PushBackReader } from "./PushBackReader";
 
-export function readNumber(r: PushBackReader, initch: string): number {
-  const buff = [initch];
+export function readNumber(r: PushBackReader, initCh: string): number {
+  const buff = [initCh];
 
   while (true) {
     const ch = r.read();
@@ -16,6 +16,7 @@ export function readNumber(r: PushBackReader, initch: string): number {
   const s = buff.join("");
   const n = matchNumber(s);
   if (n === null) throw new Error("invalid number: " + s);
+
   return n;
 }
 
