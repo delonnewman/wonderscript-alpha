@@ -16,7 +16,7 @@ export const isClassInitForm = (form: unknown): form is ClassInitForm =>
 
 export function emitClassInit(form: Form, env: Context): string {
   if (!isClassInitForm(form))
-    throw new CompilerError(`invalid ${NEW_SYM} form: ${prStr(form)}`);
+    throw new CompilerError(`invalid ${NEW_SYM} form: ${prStr(form)}`, env);
 
   const args = map((arg) => emit(arg, env), form.slice(2));
 

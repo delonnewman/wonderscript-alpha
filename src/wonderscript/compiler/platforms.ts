@@ -14,9 +14,9 @@ type PHP = typeof PHP;
 
 export type Platform = JavaScript | PHP;
 export const Platform = {
-    Node,
-    Bun,
-    PHP,
-    Browser,
+  Node,
+  Bun,
+  PHP,
+  Browser,
 } as const;
 Object.freeze(Platform);

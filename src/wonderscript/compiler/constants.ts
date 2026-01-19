@@ -106,7 +106,7 @@ export const SPECIAL_FORMS = {
   "slot-get": true,
   "slot-set!": true,
   "slot?": true,
-  "send": true,
+  send: true,
 } as const;
 
 export const CORE_NAMES = {

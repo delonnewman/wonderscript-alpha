@@ -111,11 +111,11 @@ export class Context {
 
   set(sym: Symbol, value: unknown): Context {
     if (!this.has(sym)) {
-      throw new CompilerError(`undefined variable: ${sym}`);
+      throw new CompilerError(`undefined variable: ${sym}`, this);
     }
 
     if (!this.isMutable(sym)) {
-      throw new CompilerError(`cannot mutate an immutable value: ${sym}`);
+      throw new CompilerError(`cannot mutate an immutable value: ${sym}`, this);
     }
 
     this.vars.set(sym.name(), value);

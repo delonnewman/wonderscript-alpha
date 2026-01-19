@@ -15,7 +15,7 @@ export const isArrayMutationForm = (form: unknown): form is ArrayMutationForm =>
 
 export function emitArrayMutation(form: unknown, env: Context) {
   if (!isArrayMutationForm(form))
-    throw new CompilerError(`invalid ${ASET_SYM} form: ${prStr(form)}`);
+    throw new CompilerError(`invalid ${ASET_SYM} form: ${prStr(form)}`, env);
 
   return `${emit(form[1], env)}[${emit(form[2], env)}]=${emit(form[3], env)}`;
 }

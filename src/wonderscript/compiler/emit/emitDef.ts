@@ -24,7 +24,7 @@ export const isDefForm = (value: any): value is DefForm =>
 // TODO: need to escape JS keywords
 export function emitDef(form: Form, env: Context): string {
   if (!isDefForm(form))
-    throw new CompilerError(`invalid ${DEF_SYM} form: ${prStr(form)}`);
+    throw new CompilerError(`invalid ${DEF_SYM} form: ${prStr(form)}`, env);
 
   let name = escapeChars(form[1].name());
   let code = "null";

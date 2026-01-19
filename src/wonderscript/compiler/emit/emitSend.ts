@@ -19,7 +19,7 @@ export const isSendForm = (form: Form): form is SendForm =>
 
 export function emitSend(form: Form, ctx: Context): string {
   if (!isSendForm(form))
-    throw new CompilerError(`invalid ${SEND_SYM} form: ${prStr(form)}`);
+    throw new CompilerError(`invalid ${SEND_SYM} form: ${prStr(form)}`, ctx);
 
   let [_, obj, msg] = form;
   let slotName = emitSlotName(msg);

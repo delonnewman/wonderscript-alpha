@@ -141,7 +141,7 @@ export function emit(exp: Form, ctx: Context) {
         case DEF_SYM:
           return emitDef(form, ctx);
         case QUOTE_SYM:
-          return emitQuote(form);
+          return emitQuote(form, ctx);
         case IF_SYM:
           return emitIf(form, ctx);
         case JS_SYM:
@@ -235,6 +235,6 @@ export function emit(exp: Form, ctx: Context) {
   } else if (isVector(form)) {
     return emitVector(form, ctx);
   } else {
-    throw new CompilerError(`Invalid form: ${prStr(form)}`);
+    throw new CompilerError(`Invalid form: ${prStr(form)}`, ctx);
   }
 }

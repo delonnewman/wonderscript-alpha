@@ -17,7 +17,7 @@ export const isObjectResForm = (form: Form): form is ObjectResForm =>
 
 export function emitObjectRes(form: Form, env: Context): string {
   if (!isObjectResForm(form))
-    throw new CompilerError(`invalid ${DOT_SYM} form: ${prStr(form)}`);
+    throw new CompilerError(`invalid ${DOT_SYM} form: ${prStr(form)}`, env);
 
   const [_, obj, prop] = form;
 
@@ -44,5 +44,5 @@ export function emitObjectRes(form: Form, env: Context): string {
     }
   }
 
-  throw new CompilerError(`invalid ${DOT_SYM} form: ${prStr(form)}`);
+  throw new CompilerError(`invalid ${DOT_SYM} form: ${prStr(form)}`, env);
 }

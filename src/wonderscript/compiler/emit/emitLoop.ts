@@ -17,7 +17,7 @@ export const isLoopForm = isBodyForm<typeof LOOP_SYM>(LOOP_SYM);
 // TODO: generalize body form emitters
 export function emitLoop(form: Form[], scope: Context): string {
   if (!isLoopForm(form))
-    throw new CompilerError(`invalid ${LOOP_SYM} form: ${prStr(form)}`);
+    throw new CompilerError(`invalid ${LOOP_SYM} form: ${prStr(form)}`, scope);
   const env = new Context(scope);
 
   const buffer = ["(function("];
@@ -26,7 +26,8 @@ export function emitLoop(form: Form[], scope: Context): string {
 
   const names = [];
   for (let i = 0; i < binds.length; i += 2) {
-    if (!isSymbol(binds[i])) throw new CompilerError("Invalid binding name");
+    if (!isSymbol(binds[i]))
+      throw new CompilerError("Invalid binding name", env);
     env.define(binds[i], true);
 
     const bind = escapeChars(binds[i].name());

@@ -57,7 +57,8 @@ Function.prototype.invoke = function (args: unknown[]) {
 export function emitFuncApplication(form: Form[], env: Context): string {
   if (isSymbol(form[0]) && isMacro(form[0])) {
     throw new CompilerError(
-      `macros cannot be evaluated in this context: ${prStr(form)}`
+      `macros cannot be evaluated in this context: ${prStr(form)}`,
+      env
     );
   }
 

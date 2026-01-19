@@ -82,7 +82,7 @@ function hasTailCall(form: Form): boolean {
 
 export function emitFunc(form: Form, context: Context): string {
   if (!isFnForm(form))
-    throw new CompilerError(`invalid ${FN_SYM} form: ${prStr(form)}`);
+    throw new CompilerError(`invalid ${FN_SYM} form: ${prStr(form)}`, context);
 
   const ctx = new Context(context);
   const name = isSymbol(form[1]) ? form[1] : null;

@@ -11,7 +11,7 @@ export const isUnaryOpForm = (form: Form): form is UnaryOpForm =>
 
 export function emitUnaryOp(form: Form, env: Context, op: string): string {
   if (!isUnaryOpForm(form))
-    throw new CompilerError(`invalid unary operator form: ${prStr(form)}`);
+    throw new CompilerError(`invalid unary operator form: ${prStr(form)}`, env);
 
   return `${op}(${emit(form[1], env)})`;
 }

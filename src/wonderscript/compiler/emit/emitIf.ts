@@ -21,7 +21,7 @@ export const isIfForm = (form: unknown): form is IfForm =>
 
 export function emitIf(form: Form, env: Context): string {
   if (!isIfForm(form))
-    throw new CompilerError(`invalid ${IF_SYM} form: ${prStr(form)}`);
+    throw new CompilerError(`invalid ${IF_SYM} form: ${prStr(form)}`, env);
 
   let [_, pred, consequent, alternate] = form;
 

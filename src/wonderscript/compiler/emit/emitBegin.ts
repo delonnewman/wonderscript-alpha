@@ -17,7 +17,7 @@ export const isBeginForm = (form: Form): form is BeginForm =>
 
 export function emitBegin(form: Form, env: Context): string {
   if (!isBeginForm(form))
-    throw new CompilerError(`invalid ${BEGIN_SYM} form: ${prStr(form)}`);
+    throw new CompilerError(`invalid ${BEGIN_SYM} form: ${prStr(form)}`, env);
 
   const exprs = form.slice(0, form.length - 1).slice(1);
   const buffer = [];

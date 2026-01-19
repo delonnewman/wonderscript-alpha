@@ -16,7 +16,7 @@ export const isSlotMutationForm = (form: Form): form is SlotMutationForm =>
 
 export function emitSlotMutation(form: Form, ctx: Context): string {
   if (!isSlotMutationForm(form))
-    throw new CompilerError(`invalid ${SSET_SYM} form: ${prStr(form)}`);
+    throw new CompilerError(`invalid ${SSET_SYM} form: ${prStr(form)}`, ctx);
 
   const [_tag, obj, slot, value] = form;
   const slotName = emitSlotName(slot);

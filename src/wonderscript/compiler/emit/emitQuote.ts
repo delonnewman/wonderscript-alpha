@@ -22,6 +22,7 @@ import { MetaData } from "../../lang/Meta";
 import { isKeyword } from "../../lang/Keyword";
 import { emitKeyword } from "./emitKeyword";
 import { CompilerError } from "../CompilerError";
+import { Context } from "../../lang/Context";
 
 export const QUOTE_SYM = Symbol.intern(QUOTE_STR);
 export type QuoteForm = [typeof QUOTE_SYM, Form];
@@ -29,11 +30,11 @@ export type QuoteForm = [typeof QUOTE_SYM, Form];
 export const isQuoteForm = (form: Form): form is QuoteForm =>
   isTaggedValue(form) && form[0].equals(QUOTE_SYM) && form.length === 2;
 
-export function emitQuote(form: Form): string {
+export function emitQuote(form: Form, scope: Context): string {
   if (!isQuoteForm(form))
-    throw new CompilerError(`invalid ${QUOTE_SYM} form: ${prStr(form)}`);
+    throw new CompilerError(`invalid ${QUOTE_SYM} form: ${prStr(form)}`, scope);
 
-  return emitQuotedValue(form[1]);
+  return emitQuotedValue(form[1], scope);
 }
 
 export function emitQuotedMetaData(meta: MetaData): string {
@@ -61,7 +62,7 @@ function emitQuotedSymbol(sym: Symbol): string {
   return `${SYM_FUNC}(${JSON.stringify(sym.name())})`;
 }
 
-function emitQuotedValue(val: any): string {
+function emitQuotedValue(val: unknown, scope: Context): string {
   if (isString(val)) {
     return JSON.stringify(val);
   }
@@ -88,16 +89,22 @@ function emitQuotedValue(val: any): string {
   }
   if (isArray(val)) {
     if (val.length === 0) return EMPTY_ARRAY;
-    return str("[", map(emitQuotedValue, val).join(", "), "]");
+    return str("[", map((x) => emitQuotedValue(x, scope), val).join(", "), "]");
   }
   if (isMap(val)) {
     const parts = map(
       (xs) =>
-        str("[", emitQuotedValue(xs[0]), ",", emitQuotedValue(xs[1]), "]"),
+        str(
+          "[",
+          emitQuotedValue(xs[0], scope),
+          ",",
+          emitQuotedValue(xs[1], scope),
+          "]"
+        ),
       val
     );
     return str("(new Map([", parts.join(", "), "]))");
   }
 
-  throw new CompilerError(`Invalid quoted form: ${prStr(val)}`);
+  throw new CompilerError(`Invalid quoted form: ${prStr(val)}`, scope);
 }

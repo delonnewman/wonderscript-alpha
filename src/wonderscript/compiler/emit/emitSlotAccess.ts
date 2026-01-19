@@ -16,7 +16,7 @@ export const isSlotAccessForm = (form: Form): form is SlotAccessForm =>
 
 export function emitSlotAccess(form: Form, env: Context): string {
   if (!isSlotAccessForm(form))
-    throw new CompilerError(`invalid ${SLOT_SYM} form: ${prStr(form)}`);
+    throw new CompilerError(`invalid ${SLOT_SYM} form: ${prStr(form)}`, env);
 
   let [_, obj, slot] = form;
   const slotName = emitSlotName(slot);

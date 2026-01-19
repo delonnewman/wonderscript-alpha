@@ -26,13 +26,17 @@ export function emitSymbol(s: Symbol, context: Context): string {
     let ctx = context.lookup(Symbol.intern(s.namespace()));
     if (ctx == null) {
       console.error(prStr(s), context);
-      throw new CompilerError(`Unknown namespace: ${prStr(s.namespace())}`);
+      throw new CompilerError(
+        `Unknown namespace: ${prStr(s.namespace())}`,
+        ctx
+      );
     }
 
     let ns = ctx.get(Symbol.intern(s.namespace())) as Namespace | undefined;
     if (ns === undefined || ns.module[escapeChars(s.name())] === undefined) {
       throw new CompilerError(
-        `Undefined variable: ${prStr(s.name())} in namespace: ${prStr(s.namespace())}`
+        `Undefined variable: ${prStr(s.name())} in namespace: ${prStr(s.namespace())}`,
+        ctx
       );
     }
 
@@ -56,6 +60,7 @@ export function emitSymbol(s: Symbol, context: Context): string {
   console.error("env", context);
 
   throw new CompilerError(
-    `Undefined variable: ${prStr(s)}\n\t${context.getSource()}:${context.getLine()}`
+    `Undefined variable: ${prStr(s)}\n\t${context.getSource()}:${context.getLine()}`,
+    ctx
   );
 }

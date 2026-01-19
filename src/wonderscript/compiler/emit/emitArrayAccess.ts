@@ -15,7 +15,7 @@ export const isArrayAccessForm = (form: Form): form is ArrayAccessForm =>
 
 export function emitArrayAccess(form: Form, env: Context) {
   if (!isArrayAccessForm(form))
-    throw new CompilerError(`invalid ${AGET_SYM} form: ${prStr(form)}`);
+    throw new CompilerError(`invalid ${AGET_SYM} form: ${prStr(form)}`, env);
 
   return `${emit(form[1], env)}[${emit(form[2], env)}]`;
 }

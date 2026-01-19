@@ -16,7 +16,10 @@ export const isSlotInspectionForm = (form: Form): form is SlotInspectionForm =>
 
 export function emitSlotInspection(form: Form, env: Context): string {
   if (!isSlotInspectionForm(form))
-    throw new CompilerError(`invalid ${HAS_SLOT_SYM} form: ${prStr(form)}`);
+    throw new CompilerError(
+      `invalid ${HAS_SLOT_SYM} form: ${prStr(form)}`,
+      env
+    );
 
   const [_, obj, slot] = form;
   const slotName = emitSlotName(slot);

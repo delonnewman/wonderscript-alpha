@@ -5,7 +5,7 @@ import { Form, isTaggedValue } from "../core";
 import { escapeChars } from "../utils";
 import { QUOTE_SYM } from "./emitQuote";
 
-export function emitSlotName (slot: Form) {
+export function emitSlotName(slot: Form) {
   if (isTaggedValue(slot) && slot[0].equals(QUOTE_SYM) && isSymbol(slot[1])) {
     slot = slot[1].name();
   }

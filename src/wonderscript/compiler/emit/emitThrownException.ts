@@ -15,7 +15,7 @@ export const isThrowForm = (form: Form): form is ThrowForm =>
 
 export function emitThrownException(form: Form, env: Context) {
   if (!isThrowForm(form))
-    throw new CompilerError(`invalid ${THROW_SYM} form: ${prStr(form)}`);
+    throw new CompilerError(`invalid ${THROW_SYM} form: ${prStr(form)}`, env);
 
   return `throw new ${THROW_CLASS}(${emit(form[1], env)})`;
 }
