@@ -5,7 +5,7 @@ import { Context } from "../../lang/Context";
 import { SEND_SYM as SEND_STR } from "../constants";
 import { Form, isTaggedValue, TaggedValue } from "../core";
 import { prStr } from "../prStr";
-import { isSymbol, Symbol } from "../../lang/Symbol";
+import { Symbol } from "../../lang/Symbol";
 import { emitSlotName } from "./slots";
 import { isKeyword, isVector } from "../../lang";
 
