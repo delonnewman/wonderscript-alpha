@@ -47,4 +47,30 @@ describe("PushBackReader", () => {
       expect(reader.line).toBe(3);
     });
   });
+
+  describe("column counting", () => {
+    const reader = new PushBackReader("(+ 1 2)\n(* 3 4)\n(/ 4 5)");
+
+    it("starts at 0", () => {
+      expect(reader.column).toBe(0);
+    });
+
+    it("increments with each read", () => {
+      reader.read();
+      reader.read();
+
+      expect(reader.column).toBe(2);
+    });
+
+    it("gets reset when a newline character is read", () => {
+      reader.read();
+      reader.read();
+      reader.read();
+      reader.read();
+      reader.read();
+      reader.read();
+
+      expect(reader.column).toBe(0);
+    });
+  });
 });

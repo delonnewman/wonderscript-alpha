@@ -14,7 +14,6 @@ export function readDelimitedList(
   while (true) {
     let ch = r.read();
     while (isWhitespace(ch)) {
-      if (ch === "\n") r.incrementLine();
       ch = r.read();
     }
 
