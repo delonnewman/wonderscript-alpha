@@ -1,7 +1,11 @@
 import { DISPATCH_MACROS } from "./core";
 import { PushBackReader } from "./PushBackReader";
 
-export function dispatchReader(r: PushBackReader, hash, opts) {
+export function dispatchReader(
+  r: PushBackReader,
+  _hash: string,
+  opts: Record<string, unknown>
+) {
   const ch = r.read();
   if (ch === null) throw new Error("EOF while reading character");
   const fn = DISPATCH_MACROS[ch];

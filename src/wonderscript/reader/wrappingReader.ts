@@ -4,7 +4,7 @@ import { TaggedValue } from "../compiler/core";
 import { PushBackReader } from "./PushBackReader";
 
 export function wrappingReader(sym: Symbol) {
-  return (r: PushBackReader, _, opts): TaggedValue => {
+  return (r: PushBackReader, _, opts: Record<string, unknown>): TaggedValue => {
     const value = _read(r, true, null, true, opts);
     return [sym, value];
   };
