@@ -3,9 +3,9 @@ import { PushBackReader } from "./PushBackReader";
 
 export function mapReader(
   r: PushBackReader,
-  openbracket,
-  opts
-): ReadonlyMap<any, any> {
+  _openbracket: string,
+  opts: Record<string, unknown>
+): ReadonlyMap<unknown, unknown> {
   const a = readDelimitedList("}", r, true, opts);
   const map = new Map();
 
