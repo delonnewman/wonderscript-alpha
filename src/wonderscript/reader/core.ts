@@ -18,14 +18,14 @@ export const LINE_KEY = Keyword.intern("line");
 export const COLUMN_KEY = Keyword.intern("column");
 export const TAG_KEY = Keyword.intern("tag");
 
-export function isWhitespace(ch): boolean {
+export function isWhitespace(ch: string): boolean {
   if (ch == null) return false;
 
-  return ch === "," || ch.match(/^\s$/);
+  return !!(ch === "," || ch.match(/^\s$/));
 }
 
-export function isDigit(ch): boolean {
-  return ch && ch.match(/^\d$/);
+export function isDigit(ch: string): boolean {
+  return !!(ch && ch.match(/^\d$/));
 }
 
 export const MACROS = {
@@ -52,15 +52,15 @@ export const DISPATCH_MACROS = {
   "(": fnReader,
 } as const;
 
-export function isMacro(ch): boolean {
+export function isMacro(ch: string): boolean {
   return !!MACROS[ch];
 }
 
-export function isTerminatingMacro(ch): boolean {
+export function isTerminatingMacro(ch: string): boolean {
   return ch !== "#" && ch !== "'" && isMacro(ch);
 }
 
-export function nonConstituent(ch): ch is "@" | "`" | "~" {
+export function nonConstituent(ch: string): ch is "@" | "`" | "~" {
   return ch === "@" || ch === "`" || ch === "~";
 }
 
