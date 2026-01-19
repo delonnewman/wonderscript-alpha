@@ -32,16 +32,5 @@ export function emitIf(form: Form, env: Context): string {
     alternate = [[FN_SYM, [], alternate]];
   }
 
-  if (ELSE_KEY.equals(pred)) {
-    pred = true;
-  }
-
-  if (
-    pred === true &&
-    (alternate == null || (isArray(alternate) && COND_SYM.equals(alternate[0])))
-  ) {
-    return `${emit(consequent, env)}`;
-  }
-
   return `(${emit(pred, env)}?(${emit(consequent, env)}):(${emit(alternate ?? null, env)}))`;
 }
