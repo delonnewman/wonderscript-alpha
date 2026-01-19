@@ -1,7 +1,7 @@
 export class StackFrame {
-  readonly file: string
-  readonly line: number
-  readonly column: number
+  readonly file: string;
+  readonly line: number;
+  readonly column: number;
 
   constructor(file: string, line: number, column: number) {
     this.file = file;

@@ -36,7 +36,7 @@ export class Context {
     this.varMeta = params.varMeta ?? new Map();
     this._isRecursive = params.recursive ?? false;
     this.define(CTX_SYM, this);
-    this.currentSource = '<anonymous>';
+    this.currentSource = "<anonymous>";
     this.currentColumn = 0;
     this.currentLine = 0;
   }

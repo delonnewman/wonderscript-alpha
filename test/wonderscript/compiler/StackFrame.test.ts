@@ -2,10 +2,10 @@ import { expect, test, describe } from "bun:test";
 import { StackFrame } from "../../../src/wonderscript/compiler/StackFrame";
 
 describe("StackFrame", () => {
-  const file   = "test.ws";
-  const line   = 341;
+  const file = "test.ws";
+  const line = 341;
   const column = 7;
-  const frame  = new StackFrame(file, line, column);
+  const frame = new StackFrame(file, line, column);
 
   test("#file", () => {
     expect(frame.file).toBe(file);
@@ -20,6 +20,6 @@ describe("StackFrame", () => {
   });
 
   test("#toString", () => {
-    expect(frame.toString()).toBe(`    at ${file}:${line}:${column}`)
+    expect(frame.toString()).toBe(`    at ${file}:${line}:${column}`);
   });
 });

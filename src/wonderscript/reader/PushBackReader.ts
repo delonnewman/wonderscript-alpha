@@ -1,6 +1,6 @@
 const INIT_LINE = 1;
-const INIT_COL  = 0;
-const INIT_POS  = 0;
+const INIT_COL = 0;
+const INIT_POS = 0;
 
 export class PushBackReader {
   #limit: number;

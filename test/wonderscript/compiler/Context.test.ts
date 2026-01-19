@@ -6,10 +6,10 @@ describe("Context", () => {
   const file = "test.ws";
   const line = 304;
   const column = 11;
-  
+
   const subject = new Context();
   subject.setSource(file);
-  subject.setLine(line)
+  subject.setLine(line);
   subject.setColumn(column);
 
   it("is initialized with a reference to itself", () => {
