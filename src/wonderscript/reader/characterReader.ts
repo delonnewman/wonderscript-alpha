@@ -1,9 +1,15 @@
 import { PushBackReader } from "./PushBackReader";
 import { readToken } from "./readToken";
 
-export function characterReader(r: PushBackReader, _slash: string, _opts) {
+export function characterReader(
+  r: PushBackReader,
+  _slash: string,
+  _opts: Record<string, unknown>
+) {
   const ch = r.read();
-  if (ch === null) throw new Error("EOF while reading character");
+  if (ch === null) {
+    throw new Error("EOF while reading character");
+  }
 
   const token = readToken(r, ch, false);
 
