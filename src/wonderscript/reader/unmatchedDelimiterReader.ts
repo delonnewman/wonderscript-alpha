@@ -1,9 +1,9 @@
 import { PushBackReader } from "./PushBackReader";
 
 export function unmatchedDelimiterReader(
-  r: PushBackReader,
+  _r: PushBackReader,
   delim: string,
-  opts
+  _opts: Record<string, unknown>
 ) {
   throw new Error("Unmatched delimiter: " + delim);
 }
