@@ -1,7 +1,11 @@
 import { PushBackReader } from "./PushBackReader";
 
-export function commentReader(r: PushBackReader, semicolon, opts) {
-  let ch;
+export function commentReader(
+  r: PushBackReader,
+  _semicolon: string,
+  _opts: Record<string, unknown>
+) {
+  let ch: string | null;
 
   do {
     ch = r.read();
