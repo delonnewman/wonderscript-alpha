@@ -1,14 +1,23 @@
 import { PushBackReader } from "./PushBackReader";
 
-export function stringReader(r: PushBackReader, doublequote, opts): string {
+export function stringReader(
+  r: PushBackReader,
+  _doublequote: string,
+  _opts: Record<string, unknown>
+): string {
   const buff = [];
 
   for (let ch = r.read(); ch !== '"'; ch = r.read()) {
-    if (ch === null) throw new Error("EOF while reading string");
+    if (ch === null) {
+      throw new Error("EOF while reading string");
+    }
+
     if (ch === "\\") {
       // escape
       ch = r.read();
-      if (ch === null) throw new Error("EOF while reading string");
+      if (ch === null) {
+        throw new Error("EOF while reading string");
+      }
       switch (ch) {
         case "t":
           ch = "\t";
