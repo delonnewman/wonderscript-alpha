@@ -11,7 +11,6 @@ import { isArray } from "../../lang/runtime";
 
 export const IF_SYM = Symbol.intern<typeof IF_STR>(IF_STR);
 export const ELSE_KEY = Keyword.intern<"else">("else");
-const COND_SYM = Symbol.intern<"cond">("cond");
 
 export type IfForm = [typeof IF_SYM, Form, Form, Form?];
 
