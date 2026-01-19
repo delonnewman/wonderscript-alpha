@@ -2,7 +2,7 @@ import { expect, it, describe } from "bun:test";
 import { PushBackReader } from "../../../src/wonderscript/reader/PushBackReader";
 
 describe("PushBackReader", () => {
-  it("reads on character at a time", () => {
+  it("reads one character at a time", () => {
     const reader = new PushBackReader("testing");
 
     const chars: unknown[] = [];
