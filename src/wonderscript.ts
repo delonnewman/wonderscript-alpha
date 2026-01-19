@@ -125,7 +125,7 @@ export class Compiler {
     return fs.readFileSync(path, "utf8");
   }
 
-  private fetchFile(path: string): Promise<string> {
+  private async fetchFile(path: string): Promise<string> {
     return fetch(path).then((res) => res.text());
   }
 
