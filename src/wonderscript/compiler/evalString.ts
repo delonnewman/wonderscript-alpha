@@ -9,7 +9,7 @@ export function evalString(input: string, scope: Context, source = "inline") {
   scope.setSource(source);
   scope.setLine(0);
   const r = new PushBackReader(input);
-  let ret;
+  let ret: unknown;
   while (true) {
     const res = read(r, { eofIsError: false, eofValue: EOF });
     scope.setLine(r.line());
