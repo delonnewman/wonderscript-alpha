@@ -26,6 +26,7 @@ export class Context {
   private _isRecursive: boolean;
   private currentSource: string;
   private currentLine: number;
+  private currentColumn: number;
 
   constructor(parent?: Context, params: Params = {}) {
     this.parent = parent;
@@ -33,6 +34,8 @@ export class Context {
     this.varMeta = params.varMeta ?? new Map();
     this._isRecursive = params.recursive ?? false;
     this.define(CTX_SYM, this);
+    this.currentColumn = 0;
+    this.currentLine = 0;
   }
 
   getVarNames() {
@@ -44,6 +47,10 @@ export class Context {
     return this;
   }
 
+  getSource(): string {
+    return this.currentSource;
+  }
+
   setLine(line: number) {
     this.currentLine = line;
     return this;
@@ -53,8 +60,13 @@ export class Context {
     return this.currentLine;
   }
 
-  getSource(): string {
-    return this.currentSource;
+  setColumn(col: number) {
+    this.currentColumn = col;
+    return this;
+  }
+
+  getColumn(): number {
+    return this.currentColumn;
   }
 
   setRecursive(): Context {
