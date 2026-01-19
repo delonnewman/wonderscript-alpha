@@ -13,8 +13,6 @@ import { setReader } from "./setReader";
 import { Symbol } from "../lang/Symbol";
 import { Keyword } from "../lang/Keyword";
 import { fnReader } from "./fnReader";
-import { DOT_DASH_SYM } from "../compiler/constants";
-import { DOT_SYM } from "../compiler/emit/emitObjectRes";
 
 export const LINE_KEY = Keyword.intern("line");
 export const COLUMN_KEY = Keyword.intern("column");
