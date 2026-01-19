@@ -40,6 +40,40 @@ describe("PushBackReader", () => {
     });
   });
 
+  describe("#unread", () => {
+    const char = "z";
+    const reader = new PushBackReader("testing");
+    reader.read();
+    reader.read();
+    reader.unread(char);
+
+    it("decrements it's position", () => {
+      expect(reader.position).toBe(1);
+    });
+
+    it("sets the column to the new position", () => {
+      expect(reader.column).toBe(1);
+    });
+
+    it("sets the character in the stream", () => {
+      expect(reader.read()).toBe(char);
+    });
+
+    describe("when the character is a newline", () => {
+      const reader = new PushBackReader("abba\n\b");
+      reader.read();
+      reader.read();
+      reader.read();
+      reader.read();
+      reader.read();
+      reader.unread("\n");
+
+      it("decrements the line", () => {
+        expect(reader.line).toBe(1);
+      });
+    });
+  });
+
   describe("line counting", () => {
     const reader = new PushBackReader("a\nb\nc");
 

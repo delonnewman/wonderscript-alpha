@@ -59,5 +59,10 @@ export class PushBackReader {
   unread(ch: string) {
     this.#position -= 1;
     this.#stream[this.#position] = ch;
+
+    this.#column = this.#position;
+    if (ch === "\n") {
+      this.#line--;
+    }
   }
 }
