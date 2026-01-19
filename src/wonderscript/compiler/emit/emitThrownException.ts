@@ -4,6 +4,7 @@ import { Form, isTaggedValue } from "../core";
 import { prStr } from "../prStr";
 import { Symbol } from "../../lang/Symbol";
 import { Context } from "../../lang/Context";
+import { CompilerError } from "../CompilerError";
 
 export const THROW_SYM = Symbol.intern(THROW_STR);
 
@@ -14,7 +15,7 @@ export const isThrowForm = (form: Form): form is ThrowForm =>
 
 export function emitThrownException(form: Form, env: Context) {
   if (!isThrowForm(form))
-    throw new Error(`invalid ${THROW_SYM} form: ${prStr(form)}`);
+    throw new CompilerError(`invalid ${THROW_SYM} form: ${prStr(form)}`);
 
   return `throw new ${THROW_CLASS}(${emit(form[1], env)})`;
 }
