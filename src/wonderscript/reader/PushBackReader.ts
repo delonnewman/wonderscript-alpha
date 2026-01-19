@@ -1,3 +1,7 @@
+const INIT_LINE = 1;
+const INIT_COL  = 0;
+const INIT_POS  = 0;
+
 export class PushBackReader {
   #limit: number;
   #stream: string[];
@@ -9,9 +13,7 @@ export class PushBackReader {
   constructor(str: string) {
     this.#limit = str.length - 1;
     this.#stream = str.split("");
-    this.#position = 0;
-    this.#line = 1;
-    this.#column = 0;
+    this.reset();
   }
 
   get position(): number {
@@ -35,7 +37,7 @@ export class PushBackReader {
     this.#position++;
 
     if (ch === "\n") {
-      this.#column = 0;
+      this.#column = INIT_COL;
       this.#line++;
     } else {
       this.#column++;
@@ -49,7 +51,9 @@ export class PushBackReader {
   }
 
   reset() {
-    this.#position = 0;
+    this.#position = INIT_POS;
+    this.#column = INIT_COL;
+    this.#line = INIT_LINE;
   }
 
   unread(ch: string) {

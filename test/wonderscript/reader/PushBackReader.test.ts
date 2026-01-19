@@ -21,6 +21,25 @@ describe("PushBackReader", () => {
     expect(reader.position).toBe(2);
   });
 
+  describe("#reset", () => {
+    const reader = new PushBackReader("testing");
+    reader.read();
+    reader.read();
+    reader.reset();
+
+    it("resets it's position", () => {
+      expect(reader.position).toBe(0);
+    });
+
+    it("resets it's column", () => {
+      expect(reader.column).toBe(0);
+    });
+
+    it("resets it's line", () => {
+      expect(reader.line).toBe(1);
+    });
+  });
+
   describe("line counting", () => {
     const reader = new PushBackReader("a\nb\nc");
 
