@@ -5,7 +5,7 @@ export class PushBackReader {
   private _line: number;
   private _column: number;
 
-  constructor(str) {
+  constructor(str: string) {
     this.limit = str.length - 1;
     this.stream = str.split("");
     this.position = 0;
