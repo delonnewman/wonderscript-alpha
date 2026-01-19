@@ -1,14 +1,14 @@
 export class PushBackReader {
-  private readonly limit: number;
-  private readonly stream: string[];
+  #limit: number;
+  #stream: string[];
 
   #position: number;
   #line: number;
   #column: number;
 
   constructor(str: string) {
-    this.limit = str.length - 1;
-    this.stream = str.split("");
+    this.#limit = str.length - 1;
+    this.#stream = str.split("");
     this.#position = 0;
     this.#line = 1;
     this.#column = 0;
@@ -27,9 +27,11 @@ export class PushBackReader {
   }
 
   read() {
-    if (this.#position > this.limit) return null;
+    if (this.#position > this.#limit) {
+      return null;
+    }
 
-    const ch = this.stream[this.#position];
+    const ch = this.#stream[this.#position];
     this.#position++;
 
     if (ch === "\n") {
@@ -52,6 +54,6 @@ export class PushBackReader {
 
   unread(ch: string) {
     this.#position -= 1;
-    this.stream[this.#position] = ch;
+    this.#stream[this.#position] = ch;
   }
 }
