@@ -8,6 +8,7 @@ import { prStr } from "../prStr";
 import { Symbol } from "../../lang/Symbol";
 import { emitSlotName } from "./slots";
 import { isKeyword, isVector } from "../../lang";
+import { CompilerError } from "../CompilerError";
 
 export const SEND_SYM = Symbol.intern(SEND_STR);
 
@@ -18,7 +19,7 @@ export const isSendForm = (form: Form): form is SendForm =>
 
 export function emitSend(form: Form, ctx: Context): string {
   if (!isSendForm(form))
-    throw new Error(`invalid ${SEND_SYM} form: ${prStr(form)}`);
+    throw new CompilerError(`invalid ${SEND_SYM} form: ${prStr(form)}`);
 
   let [_, obj, msg] = form;
   let slotName = emitSlotName(msg);

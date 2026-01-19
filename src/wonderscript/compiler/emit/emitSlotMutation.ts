@@ -2,9 +2,10 @@ import { emit } from "../emit";
 import { SSET_SYM as SSET_STR } from "../constants";
 import { Form, isTaggedValue } from "../core";
 import { prStr } from "../prStr";
-import { isSymbol, Symbol } from "../../lang/Symbol";
+import { Symbol } from "../../lang/Symbol";
 import { Context } from "../../lang/Context";
 import { emitSlotName } from "./slots";
+import { CompilerError } from "../CompilerError";
 
 export const SSET_SYM = Symbol.intern(SSET_STR);
 
@@ -15,7 +16,7 @@ export const isSlotMutationForm = (form: Form): form is SlotMutationForm =>
 
 export function emitSlotMutation(form: Form, ctx: Context): string {
   if (!isSlotMutationForm(form))
-    throw new Error(`invalid ${SSET_SYM} form: ${prStr(form)}`);
+    throw new CompilerError(`invalid ${SSET_SYM} form: ${prStr(form)}`);
 
   const [_tag, obj, slot, value] = form;
   const slotName = emitSlotName(slot);

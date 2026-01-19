@@ -6,6 +6,7 @@ import { BodyForm, Form, isBodyForm } from "../core";
 import { LET_SYM as LET_STR } from "../constants";
 import { prStr } from "../prStr";
 import { isSymbol, Symbol } from "../../lang/Symbol";
+import { CompilerError } from "../CompilerError";
 
 export const LET_SYM = Symbol.intern(LET_STR);
 
@@ -16,12 +17,12 @@ export const isLetForm = isBodyForm<typeof LET_SYM>(LET_SYM);
 // TODO: move the changes from here to loop
 export function emitLet(form: Form, scope: Context): string {
   if (!isLetForm(form))
-    throw new Error(`invalid ${LET_SYM} form: ${prStr(form)}`);
+    throw new CompilerError(`invalid ${LET_SYM} form: ${prStr(form)}`);
 
   const env = new Context(scope);
 
   if (form.length < 2)
-    throw new Error("A let expression should have at least 2 elements");
+    throw new CompilerError("A let expression should have at least 2 elements");
 
   const buffer = ["(function(){"];
   const binds = form[1];
@@ -30,7 +31,7 @@ export function emitLet(form: Form, scope: Context): string {
   // add names to function scope
   const names = [];
   for (let i = 0; i < binds.length; i += 2) {
-    if (!isSymbol(binds[i])) throw new Error("binding names should be symbols");
+    if (!isSymbol(binds[i])) throw new CompilerError("binding names should be symbols");
     // TODO: should throw error for namespaced symbols
     env.define(binds[i], true);
 

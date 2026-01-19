@@ -8,6 +8,7 @@ import { isThrowForm } from "./emitThrownException";
 import { FN_SYM } from "./emitFunc";
 import { Keyword } from "../../lang/Keyword";
 import { emitTailPosition } from "./emitTailPosition";
+import { CompilerError } from "../CompilerError";
 
 export const IF_SYM = Symbol.intern<typeof IF_STR>(IF_STR);
 export const ELSE_KEY = Keyword.intern<"else">("else");
@@ -20,7 +21,7 @@ export const isIfForm = (form: unknown): form is IfForm =>
 
 export function emitIf(form: Form, env: Context): string {
   if (!isIfForm(form))
-    throw new Error(`invalid ${IF_SYM} form: ${prStr(form)}`);
+    throw new CompilerError(`invalid ${IF_SYM} form: ${prStr(form)}`);
 
   let [_, pred, consequent, alternate] = form;
 

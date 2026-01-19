@@ -2,6 +2,7 @@ import { Form, isTaggedValue } from "../core";
 import { emit } from "../emit";
 import { Context } from "../../lang/Context";
 import { prStr } from "../prStr";
+import { CompilerError } from "../CompilerError";
 
 export type UnaryOpForm = [string, Form];
 
@@ -10,7 +11,7 @@ export const isUnaryOpForm = (form: Form): form is UnaryOpForm =>
 
 export function emitUnaryOp(form: Form, env: Context, op: string): string {
   if (!isUnaryOpForm(form))
-    throw new Error(`invalid unary operator form: ${prStr(form)}`);
+    throw new CompilerError(`invalid unary operator form: ${prStr(form)}`);
 
   return `${op}(${emit(form[1], env)})`;
 }

@@ -4,6 +4,7 @@ import { Form, isTaggedValue } from "../core";
 import { prStr } from "../prStr";
 import { Symbol } from "../../lang/Symbol";
 import { Context } from "../../lang/Context";
+import { CompilerError } from "../CompilerError";
 
 export const ASET_SYM = Symbol.intern(ASET_STR);
 
@@ -14,7 +15,7 @@ export const isArrayMutationForm = (form: unknown): form is ArrayMutationForm =>
 
 export function emitArrayMutation(form: unknown, env: Context) {
   if (!isArrayMutationForm(form))
-    throw new Error(`invalid ${ASET_SYM} form: ${prStr(form)}`);
+    throw new CompilerError(`invalid ${ASET_SYM} form: ${prStr(form)}`);
 
   return `${emit(form[1], env)}[${emit(form[2], env)}]=${emit(form[3], env)}`;
 }

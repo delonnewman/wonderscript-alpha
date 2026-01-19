@@ -4,6 +4,7 @@ import { Context } from "../../lang/Context";
 import { isSymbol } from "../../lang/Symbol";
 import { isMacro } from "../core";
 import { prStr } from "../prStr";
+import { CompilerError } from "../CompilerError";
 
 // @ts-ignore
 Array.prototype.invoke = function (indexes: number[]) {
@@ -55,7 +56,7 @@ Function.prototype.invoke = function (args: unknown[]) {
 
 export function emitFuncApplication(form: Form[], env: Context): string {
   if (isSymbol(form[0]) && isMacro(form[0])) {
-    throw new Error(
+    throw new CompilerError(
       `macros cannot be evaluated in this context: ${prStr(form)}`
     );
   }

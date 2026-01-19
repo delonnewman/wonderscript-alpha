@@ -6,6 +6,7 @@ import { DOT_SYM as DOT_STR } from "../constants";
 import { Form, isTaggedValue, TaggedValue } from "../core";
 import { prStr } from "../prStr";
 import { isSymbol, Symbol } from "../../lang/Symbol";
+import { CompilerError } from "../CompilerError";
 
 export const DOT_SYM = Symbol.intern(DOT_STR);
 
@@ -16,7 +17,7 @@ export const isObjectResForm = (form: Form): form is ObjectResForm =>
 
 export function emitObjectRes(form: Form, env: Context): string {
   if (!isObjectResForm(form))
-    throw new Error(`invalid ${DOT_SYM} form: ${prStr(form)}`);
+    throw new CompilerError(`invalid ${DOT_SYM} form: ${prStr(form)}`);
 
   const [_, obj, prop] = form;
 
@@ -43,5 +44,5 @@ export function emitObjectRes(form: Form, env: Context): string {
     }
   }
 
-  throw new Error(`invalid ${DOT_SYM} form: ${prStr(form)}`);
+  throw new CompilerError(`invalid ${DOT_SYM} form: ${prStr(form)}`);
 }

@@ -5,6 +5,7 @@ import { prStr } from "../prStr";
 import { Context } from "../../lang/Context";
 import { emit } from "../emit";
 import { emitSlotName } from "./slots";
+import { CompilerError } from "../CompilerError";
 
 export const HAS_SLOT_SYM = Symbol.intern(HAS_SLOT_STR);
 
@@ -15,7 +16,7 @@ export const isSlotInspectionForm = (form: Form): form is SlotInspectionForm =>
 
 export function emitSlotInspection(form: Form, env: Context): string {
   if (!isSlotInspectionForm(form))
-    throw new Error(`invalid ${HAS_SLOT_SYM} form: ${prStr(form)}`);
+    throw new CompilerError(`invalid ${HAS_SLOT_SYM} form: ${prStr(form)}`);
 
   const [_, obj, slot] = form;
   const slotName = emitSlotName(slot);

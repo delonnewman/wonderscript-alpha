@@ -3,6 +3,7 @@ import { ALENGTH_SYM as ALENGTH_STR } from "../constants";
 import { Form, isTaggedValue } from "../core";
 import { prStr } from "../prStr";
 import { Symbol } from "../../lang/Symbol";
+import { CompilerError } from "../CompilerError";
 
 export const ALENGTH_SYM = Symbol.intern(ALENGTH_STR);
 
@@ -13,7 +14,7 @@ export const isArrayLengthForm = (form: Form): form is ArrayLengthForm =>
 
 export function emitArrayLength(form, env) {
   if (!isArrayLengthForm(form))
-    throw new Error(`invalid ${ALENGTH_SYM} form: ${prStr(form)}`);
+    throw new CompilerError(`invalid ${ALENGTH_SYM} form: ${prStr(form)}`);
 
   return `${emit(form[1], env)}.length`;
 }

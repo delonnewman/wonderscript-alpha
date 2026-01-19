@@ -21,6 +21,7 @@ import { isSymbol, Symbol } from "../../lang/Symbol";
 import { MetaData } from "../../lang/Meta";
 import { isKeyword } from "../../lang/Keyword";
 import { emitKeyword } from "./emitKeyword";
+import { CompilerError } from "../CompilerError";
 
 export const QUOTE_SYM = Symbol.intern(QUOTE_STR);
 export type QuoteForm = [typeof QUOTE_SYM, Form];
@@ -30,7 +31,7 @@ export const isQuoteForm = (form: Form): form is QuoteForm =>
 
 export function emitQuote(form: Form): string {
   if (!isQuoteForm(form))
-    throw new Error(`invalid ${QUOTE_SYM} form: ${prStr(form)}`);
+    throw new CompilerError(`invalid ${QUOTE_SYM} form: ${prStr(form)}`);
 
   return emitQuotedValue(form[1]);
 }
@@ -98,5 +99,5 @@ function emitQuotedValue(val: any): string {
     return str("(new Map([", parts.join(", "), "]))");
   }
 
-  throw new Error(`Invalid quoted form: ${prStr(val)}`);
+  throw new CompilerError(`Invalid quoted form: ${prStr(val)}`);
 }

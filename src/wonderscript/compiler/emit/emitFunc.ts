@@ -7,6 +7,7 @@ import { compileBody, compileRecursiveBody } from "./compileBody";
 import { prStr } from "../prStr";
 import { isSymbol, Symbol } from "../../lang/Symbol";
 import { isIfForm } from "./emitIf";
+import { CompilerError } from "../CompilerError";
 
 const SPLAT = "&";
 
@@ -81,7 +82,7 @@ function hasTailCall(form: Form): boolean {
 
 export function emitFunc(form: Form, context: Context): string {
   if (!isFnForm(form))
-    throw new Error(`invalid ${FN_SYM} form: ${prStr(form)}`);
+    throw new CompilerError(`invalid ${FN_SYM} form: ${prStr(form)}`);
 
   const ctx = new Context(context);
   const name = isSymbol(form[1]) ? form[1] : null;

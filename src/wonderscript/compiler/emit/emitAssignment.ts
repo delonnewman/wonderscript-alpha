@@ -4,6 +4,7 @@ import { Form, isTaggedValue } from "../core";
 import { prStr } from "../prStr";
 import { isSymbol, Symbol } from "../../lang/Symbol";
 import { Context } from "../../lang/Context";
+import { CompilerError } from "../CompilerError";
 
 export const SET_SYM = Symbol.intern(SET_STR);
 
@@ -14,11 +15,11 @@ export const isAssignmentForm = (form: unknown): form is AssignmentForm =>
 
 export function emitAssignment(form: Form, ctx: Context) {
   if (!isAssignmentForm(form))
-    throw new Error(`invalid ${SET_SYM} form: ${prStr(form)}`);
+    throw new CompilerError(`invalid ${SET_SYM} form: ${prStr(form)}`);
 
   const [_, obj, value] = form;
   if (isSymbol(obj) && ctx.has(obj) && !ctx.isMutable(obj)) {
-    throw new Error(`cannot mutate an immutable value: ${prStr(obj)}`);
+    throw new CompilerError(`cannot mutate an immutable value: ${prStr(obj)}`);
   }
 
   // TODO: check for definition meta data, this will have to wait until put in place definition meta objects

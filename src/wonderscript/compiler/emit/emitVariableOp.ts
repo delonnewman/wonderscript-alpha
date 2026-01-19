@@ -8,6 +8,7 @@ import {
   MINUS_SYM as MINUS_STR,
 } from "../constants";
 import { Symbol } from "../../lang/Symbol";
+import { CompilerError } from "../CompilerError";
 
 export const PLUS_SYM = Symbol.intern<typeof PLUS_STR>(PLUS_STR);
 export const MULT_SYM = Symbol.intern<typeof MULT_STR>(MULT_STR);
@@ -18,7 +19,7 @@ const ZERO = "0";
 
 export function emitVariableOp(form: Form, env: Context, op = form[0]): string {
   if (!isTaggedValue(form))
-    throw new Error(`invalid variable operator form: ${prStr(form)}`);
+    throw new CompilerError(`invalid variable operator form: ${prStr(form)}`);
 
   if (form.length === 1 && PLUS_SYM.equals(form[0])) {
     return ZERO;
@@ -29,7 +30,7 @@ export function emitVariableOp(form: Form, env: Context, op = form[0]): string {
   }
 
   if (form.length === 1) {
-    throw new Error("wrong number of arguments, expected at least 1 got 0");
+    throw new CompilerError("wrong number of arguments, expected at least 1 got 0");
   }
 
   if (form.length === 2 && MINUS_SYM.equals(form[0])) {

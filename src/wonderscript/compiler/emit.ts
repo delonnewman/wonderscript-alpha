@@ -112,6 +112,7 @@ import { isVector } from "../lang/Vector";
 import { emitVector } from "./emit/emitVector";
 import { emitIf } from "./emit/emitIf";
 import { emitSend } from "./emit/emitSend";
+import { CompilerError } from "./CompilerError";
 
 export function emit(exp: Form, ctx: Context) {
   const form = macroexpand(exp, ctx);
@@ -234,6 +235,6 @@ export function emit(exp: Form, ctx: Context) {
   } else if (isVector(form)) {
     return emitVector(form, ctx);
   } else {
-    throw new Error(`Invalid form: ${prStr(form)}`);
+    throw new CompilerError(`Invalid form: ${prStr(form)}`);
   }
 }

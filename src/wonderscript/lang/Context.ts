@@ -4,6 +4,7 @@ import { Symbol } from "./Symbol";
 import { MetaData } from "./Meta";
 import { Keyword } from "./Keyword";
 import { CTX_SYM } from "../compiler/emit/emitSymbol";
+import { CompilerError } from "../compiler/CompilerError";
 
 export const MUTABLE_KW = Keyword.intern("mutable");
 
@@ -110,11 +111,11 @@ export class Context {
 
   set(sym: Symbol, value: unknown): Context {
     if (!this.has(sym)) {
-      throw new Error(`undefined variable: ${sym}`);
+      throw new CompilerError(`undefined variable: ${sym}`);
     }
 
     if (!this.isMutable(sym)) {
-      throw new Error(`cannot mutate an immutable value: ${sym}`);
+      throw new CompilerError(`cannot mutate an immutable value: ${sym}`);
     }
 
     this.vars.set(sym.name(), value);
