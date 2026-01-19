@@ -13,7 +13,7 @@ export function evalString(input: string, scope: Context, source = "inline") {
   let ret: unknown;
   while (true) {
     const res = read(r, { eofIsError: false, eofValue: EOF });
-    scope.setLine(r.line());
+    scope.setLine(r.line);
     scope.setColumn(r.column());
     if (isEOF(res)) return ret;
     if (res != null) {

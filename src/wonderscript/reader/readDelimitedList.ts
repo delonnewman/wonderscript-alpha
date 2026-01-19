@@ -3,12 +3,12 @@ import { _read } from "./read";
 import { PushBackReader } from "./PushBackReader";
 
 export function readDelimitedList(
-  delim,
+  delim: string,
   r: PushBackReader,
   isRecursive: boolean,
-  opts
+  opts: Record<string, unknown>
 ) {
-  const firstLine = r.line();
+  const firstLine = r.line;
   const a = [];
 
   while (true) {

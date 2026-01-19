@@ -1,28 +1,32 @@
 export class PushBackReader {
   private readonly limit: number;
   private readonly stream: string[];
-  private position: number;
-  private _line: number;
+  #position: number;
+  #line: number;
   private _column: number;
 
   constructor(str: string) {
     this.limit = str.length - 1;
     this.stream = str.split("");
-    this.position = 0;
-    this._line = 0;
+    this.#position = 0;
+    this.#line = 1;
     this._column = 0;
   }
 
-  line() {
-    return this._line;
+  get position(): number {
+    return this.#position;
+  }
+
+  get line() {
+    return this.#line;
   }
 
   incrementLine() {
-    this._line++;
+    this.#line++;
   }
 
   decrementLine() {
-    this._line--;
+    this.#line--;
   }
 
   incrementColumn() {
@@ -38,28 +42,31 @@ export class PushBackReader {
   }
 
   read() {
-    if (this.position > this.limit) return null;
-    const ch = this.stream[this.position];
-    this.position++;
+    if (this.#position > this.limit) return null;
+
+    const ch = this.stream[this.#position];
+    this.#position++;
+
     if (ch === "\n") {
       this.resetColumn();
       this.incrementLine();
     } else {
       this.incrementColumn();
     }
+
     return ch;
   }
 
   skip(n: number) {
-    this.position += n;
+    this.#position += n;
   }
 
   reset() {
-    this.position = 0;
+    this.#position = 0;
   }
 
   unread(ch: string) {
-    this.position -= 1;
-    this.stream[this.position] = ch;
+    this.#position -= 1;
+    this.stream[this.#position] = ch;
   }
 }
