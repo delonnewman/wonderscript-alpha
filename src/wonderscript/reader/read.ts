@@ -5,7 +5,7 @@ import { readToken } from "./readToken";
 
 type Options = {
   eofIsError?: boolean;
-  eofValue?: any;
+  eofValue?: unknown;
 };
 
 const DefaultOptions = {
@@ -19,7 +19,13 @@ export function read(r: PushBackReader, opts: Options = DefaultOptions) {
   return _read(r, eofIsError, eofValue, false, opts);
 }
 
-export function _read(r, eofIsError, eofValue, isRecursive, opts) {
+export function _read(
+  r: PushBackReader,
+  eofIsError: boolean,
+  eofValue: unknown,
+  _isRecursive: boolean,
+  opts: Record<string, unknown>
+) {
   while (true) {
     let ch = r.read();
 
