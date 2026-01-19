@@ -7,7 +7,6 @@ import { Symbol } from "../../lang/Symbol";
 import { isThrowForm } from "./emitThrownException";
 import { FN_SYM } from "./emitFunc";
 import { Keyword } from "../../lang/Keyword";
-import { isArray } from "../../lang/runtime";
 import { emitTailPosition } from "./emitTailPosition";
 
 export const IF_SYM = Symbol.intern<typeof IF_STR>(IF_STR);
@@ -39,7 +38,7 @@ export function emitIf(form: Form, env: Context): string {
 
   if (
     pred === true &&
-    (alternate == null || (isArray(alternate) && COND_SYM.equals(alternate[0])))
+    (alternate == null || isTaggedValue(alternate, COND_SYM))
   ) {
     return `${emit(consequent, env)}`;
   }
