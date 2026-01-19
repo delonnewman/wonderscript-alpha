@@ -6,8 +6,8 @@ const THE_DEF = Symbol.intern("the-def");
 
 export function defReader(
   r: PushBackReader,
-  quote,
-  opts
+  _quote: string,
+  opts: Record<string, unknown>
 ): [typeof THE_DEF, Symbol] {
   const x = _read(r, true, null, true, opts);
   return [THE_DEF, x];
