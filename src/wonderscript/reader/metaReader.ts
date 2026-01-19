@@ -4,8 +4,13 @@ import { isSymbol } from "../lang/Symbol";
 import { TAG_KEY } from "./core";
 import { isKeyword } from "../lang/Keyword";
 import { isMeta } from "../lang/Meta";
+import { PushBackReader } from "./PushBackReader";
 
-export function metaReader(r, hat, opts) {
+export function metaReader(
+  r: PushBackReader,
+  _hat: string,
+  opts: Record<string, unknown>
+) {
   let meta = _read(r, true, null, true, opts);
   if (isSymbol(meta)) {
     meta = new Map([[TAG_KEY, meta]]);
