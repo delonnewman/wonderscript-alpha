@@ -38,5 +38,12 @@ describe("PushBackReader", () => {
 
       expect(reader.line).toBe(2);
     });
+
+    it("counts each newline character", () => {
+      reader.read();
+      reader.read();
+
+      expect(reader.line).toBe(3);
+    });
   });
 });
