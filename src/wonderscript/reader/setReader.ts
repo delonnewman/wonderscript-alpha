@@ -3,8 +3,8 @@ import { PushBackReader } from "./PushBackReader";
 
 export function setReader(
   r: PushBackReader,
-  leftbracket,
-  opts
+  _leftbracket: string,
+  opts: Record<string, unknown>
 ): ReadonlySet<any> {
   const array = readDelimitedList("}", r, true, opts);
 
