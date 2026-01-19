@@ -23,6 +23,7 @@ describe("PushBackReader", () => {
 
   describe("line counting", () => {
     const reader = new PushBackReader("a\nb\nc");
+
     it("starts at 1", () => {
       expect(reader.line).toBe(1);
     });
