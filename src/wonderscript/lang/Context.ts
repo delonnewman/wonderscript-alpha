@@ -166,7 +166,3 @@ export class Context {
     return buffer.join("");
   }
 }
-
-export function isContext(val: unknown): val is Context {
-  return val instanceof Context;
-}
