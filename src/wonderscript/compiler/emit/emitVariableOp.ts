@@ -34,7 +34,7 @@ export function emitVariableOp(form: Form, env: Context, op = form[0]): string {
 
   if (form.length === 1) {
     throw new CompilerError(
-      "wrong number of arguments, expected at least 1 got 0",
+      `wrong number of arguments for ${form[0]}, expected at least 1 got 0`,
       env
     );
   }
