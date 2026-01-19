@@ -40,8 +40,8 @@ function expandMacros(form: Form, scope: Context) {
 function expandAllMacros(seq: Form[], scope: Context) {
   const expanded = [];
   for (let i = 0; i < seq.length; i++) {
-    const form_ = expandMacros(expandMacros(seq[i], scope), scope);
-    expanded.push(form_);
+    const form = expandMacros(expandMacros(seq[i], scope), scope);
+    expanded.push(form);
   }
   return expanded;
 }
