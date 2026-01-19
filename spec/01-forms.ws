@@ -60,10 +60,10 @@
 
 ;; Loops
 
-;; (loop (i 0)
-;;   (if (>= i 5)
-;;     (is (identical? 5 i))
-;;     (recur (+ i 1))))
+(loop (i 0)
+  (if (>= i 5)
+    (is (identical? 5 i))
+    (recur (+ i 1))))
 
 (loop (i 0)
   (when (< i 10)
@@ -74,9 +74,10 @@
 (for-times (i 10)
   (is (< i 10)))
 
-;; (while (< i 5)
-;;   (is (< i 5))
-;;   (set! i (+ i 1)))
+(let (^:mutable i 0)
+  (while (< i 5)
+    (is (< i 5))
+    (set* i (+ i 1))))
 
 (for-each (x '(1 2 3))
   (is (number? x)))

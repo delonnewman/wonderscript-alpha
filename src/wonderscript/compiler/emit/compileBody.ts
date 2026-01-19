@@ -35,6 +35,6 @@ export function compileRecursiveBody(
     RECURSION_POINT_CLASS,
     ") { ",
     rebinds,
-    "; continue loop; } else { throw e; } } };\nreturn retval"
+    "; continue loop; } else { throw e; } } }\nreturn retval"
   );
 }
