@@ -62,7 +62,7 @@
 (is (map? {:a 1, :b 2}))
 (is (not-identical? {:a 1, :b 2} {:a 1 :b 2}))
 (is (= {:a 1, :b 2} {:a 1 :b 2}))
-;; (is (identical? 2 ({:a 1 :b 2} :a)))
+(is (identical? 1 ({:a 1 :b 2} :a)))
 
 ;; Sets
 (is (set? #{1 2 3}))
