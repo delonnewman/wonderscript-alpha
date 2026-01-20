@@ -24,7 +24,7 @@
 
 ;; Keywords
 (is (keyword? :x))
-;; (is (identical? :a :b))
+(is (identical? :a :a))
 (is (= :a :a))
 
 ;; Numbers
