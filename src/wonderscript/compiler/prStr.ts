@@ -1,12 +1,12 @@
 import { FALSE_SYM, NIL_SYM, TRUE_SYM } from "./constants";
-import { isArray, isFunction, isMap, isObject, isSet, isString } from "../js";
+import { isArray, isFunction, isObject, isString } from "../js";
 import { ArrayLike, isArrayLike } from "../js/ArrayLike";
 import { map } from "../lang/runtime";
 import { Form } from "./core";
 import { Symbol } from "../lang/Symbol";
 import { Keyword } from "../lang/Keyword";
-import { isList } from "../lang/List";
-import { isVector } from "../lang/Vector";
+import { List } from "../lang/List";
+import { Vector } from "../lang/Vector";
 
 const EMPTY_LIST = "()";
 const EMPTY_ARRAY = "[]";
@@ -27,7 +27,7 @@ export function prStr(form: Form | Function | ArrayLike | Object): string {
     return JSON.stringify(form);
   }
 
-  if (isList(form)) {
+  if (form instanceof List) {
     if (form.count() === 0) {
       return EMPTY_LIST;
     }
@@ -44,7 +44,7 @@ export function prStr(form: Form | Function | ArrayLike | Object): string {
     return `(${parts.join(" ")})`;
   }
 
-  if (isVector(form)) {
+  if (form instanceof Vector) {
     if (form.length === 0) {
       return EMPTY_ARRAY;
     }
@@ -53,7 +53,7 @@ export function prStr(form: Form | Function | ArrayLike | Object): string {
     return `[${parts.join(" ")}]`;
   }
 
-  if (isMap(form)) {
+  if (form instanceof Map) {
     const parts = [];
     for (let entry of form) {
       const key = prStr(entry[0]);
@@ -63,7 +63,7 @@ export function prStr(form: Form | Function | ArrayLike | Object): string {
     return `{${parts.join(" ")}}`;
   }
 
-  if (isSet(form)) {
+  if (form instanceof Set) {
     const parts = [];
     for (let entry of form) {
       const val = prStr(entry);
