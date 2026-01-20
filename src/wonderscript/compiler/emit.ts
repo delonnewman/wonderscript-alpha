@@ -5,11 +5,9 @@ import {
   isArray,
   isBoolean,
   isMap,
-  isNull,
   isNumber,
   isSet,
   isString,
-  isUndefined,
 } from "../lang/runtime";
 import {
   AGET_SYM,
@@ -124,9 +122,9 @@ export function emit(exp: Form, ctx: Context) {
     return JSON.stringify(form);
   } else if (isBoolean(form)) {
     return form === true ? TRUE_SYM : FALSE_SYM;
-  } else if (isNull(form)) {
+  } else if (form === null) {
     return NULL_SYM;
-  } else if (isUndefined(form)) {
+  } else if (form === undefined) {
     return UNDEFINED_SYM;
   } else if (isMap(form)) {
     return emitMap(form, ctx);
