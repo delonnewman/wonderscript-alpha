@@ -1,5 +1,4 @@
 import { FALSE_SYM, NIL_SYM, TRUE_SYM } from "./constants";
-import { isFunction, isObject } from "../js";
 import { ArrayLike, isArrayLike } from "../js/ArrayLike";
 import { map } from "../lang/runtime";
 import { Form } from "./core";
@@ -80,7 +79,7 @@ export function prStr(form: Form | Function | ArrayLike | Object): string {
     return `#{${parts.join(" ")}}`;
   }
 
-  if (isFunction(form)) {
+  if (typeof form === "function") {
     return `#js/function "${form}"`;
   }
 
@@ -92,7 +91,7 @@ export function prStr(form: Form | Function | ArrayLike | Object): string {
     return `#js/object {${parts.join(", ")}}`;
   }
 
-  if (isObject(form)) {
+  if (typeof form === "object") {
     const keys = Object.keys(form);
     const ctrName = Object.getPrototypeOf(form)?.constructor?.name ?? "object";
     return `#js/${ctrName} {${keys.map((k) => `${prStr(k)} ${prStr(form[k])}`).join(", ")}}`;
