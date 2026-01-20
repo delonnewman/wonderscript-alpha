@@ -7,23 +7,23 @@ export type DefinitionMap = Map<Symbol, Definition>;
 
 export class Module {
   readonly name: Symbol;
-  private readonly _definitions: DefinitionMap;
+  #definitions: DefinitionMap;
 
   constructor(name: Symbol) {
     this.name = name;
-    this._definitions = new Map<Symbol, Definition>();
+    this.#definitions = new Map<Symbol, Definition>();
   }
 
   definitionMap(): DefinitionMap {
-    return this._definitions;
+    return this.#definitions;
   }
 
   definitions(): Definition[] {
-    return Array.from(this._definitions.values());
+    return Array.from(this.#definitions.values());
   }
 
   addDefinition(def: Definition): Module {
-    this._definitions.set(def.symbol().withoutMeta(), def);
+    this.#definitions.set(def.symbol().withoutMeta(), def);
 
     return this;
   }
@@ -49,7 +49,7 @@ export class Module {
   }
 
   get(name: Symbol): Definition {
-    return this._definitions.get(name);
+    return this.#definitions.get(name);
   }
 
   exports(): Definition[] {
