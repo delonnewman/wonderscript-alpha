@@ -29,7 +29,14 @@ export class List implements Meta, Sequence, Sequenceable, Value {
     return List.EMPTY;
   }
 
+  isEmpty(): boolean {
+    return this.count() === 0;
+  }
+
   cons(val: unknown): List {
+    if (this.isEmpty()) {
+      return new List(val, null, 1);
+    }
     return new List(val, this, this.#count + 1);
   }
 
@@ -80,10 +87,10 @@ export class List implements Meta, Sequence, Sequenceable, Value {
 
     while (xs != null && ys != null) {
       if (x !== y) return false; // TODO: toplevel equals needs to be accessible here
-      xs = xs.next();
-      ys = ys.next();
       x = xs.first();
       y = ys.first();
+      xs = xs.next();
+      ys = ys.next();
     }
 
     return xs == null && ys == null;

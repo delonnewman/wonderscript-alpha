@@ -43,7 +43,7 @@
 ;; Lists
 (is (list? (list 1 2 3)))
 (is (not-identical? (list 1 2 3) (list 1 2 3)))
-;; (is (= (list 1 2 3) (list 1 2 3)))
+(is (= (list 1 2 3) (list 1 2 3)))
 
 ;; Arrays
 (is (array? '(1 2 3)))
