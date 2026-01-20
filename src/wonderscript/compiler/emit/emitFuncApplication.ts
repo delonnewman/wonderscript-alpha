@@ -9,7 +9,7 @@ import { CompilerError } from "../CompilerError";
 // @ts-ignore
 Array.prototype.invoke = function (...indexes: number[]) {
   if (indexes.length === 0) {
-    return null;
+    return this;
   }
 
   if (indexes.length === 1) {
@@ -22,7 +22,7 @@ Array.prototype.invoke = function (...indexes: number[]) {
 // @ts-ignore
 Map.prototype.invoke = function (...keys: unknown[]) {
   if (keys.length === 0) {
-    return null;
+    return this;
   }
 
   if (keys.length === 1) {
