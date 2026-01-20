@@ -4,9 +4,7 @@ import { emitKeyword } from "./emit/emitKeyword";
 import {
   isArray,
   isBoolean,
-  isMap,
   isNumber,
-  isSet,
   isString,
 } from "../lang/runtime";
 import {
@@ -126,9 +124,9 @@ export function emit(exp: Form, ctx: Context) {
     return NULL_SYM;
   } else if (form === undefined) {
     return UNDEFINED_SYM;
-  } else if (isMap(form)) {
+  } else if (form instanceof Map) {
     return emitMap(form, ctx);
-  } else if (isSet(form)) {
+  } else if (form instanceof Set) {
     return emitSet(form, ctx);
   } else if (isArray(form)) {
     if (form.length === 0) {
