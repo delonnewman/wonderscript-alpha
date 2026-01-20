@@ -3,17 +3,16 @@ import { CORE_NS, CURRENT_NS, CORE_MOD } from "./wonderscript/compiler/vars";
 import { createNs } from "./wonderscript/lang/Namespace";
 import * as core from "./wonderscript/lang";
 import * as compiler from "./wonderscript/compiler";
-import {
-  importModule,
-  importSymbol,
-  isString,
-  Keyword,
-} from "./wonderscript/lang";
+import { isString, Keyword } from "./wonderscript/lang";
 import { Form } from "./wonderscript/compiler/core";
 import { findDefinitionMetaData } from "./wonderscript/compiler/findDefinitionMetaData";
 import { Symbol } from "./wonderscript/lang";
 import { RecursionPoint } from "./wonderscript/compiler/RecursionPoint";
-import { escapeChars } from "./wonderscript/compiler/utils";
+import {
+  escapeChars,
+  importModule,
+  importSymbol,
+} from "./wonderscript/compiler/utils";
 import { findNamespaceVar } from "./wonderscript/compiler/findNamespaceVar";
 import { UncaughtThrowError } from "./wonderscript/lang/UncaughtThrowError";
 import { Platform } from "./wonderscript/compiler/platforms";

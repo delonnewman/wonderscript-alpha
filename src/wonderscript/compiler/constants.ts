@@ -108,16 +108,3 @@ export const SPECIAL_FORMS = {
   "slot?": true,
   send: true,
 } as const;
-
-export const CORE_NAMES = {
-  eq: "=",
-  noteq: "not=",
-  lt: "<",
-  gt: ">",
-  lteq: "<=",
-  gteq: ">=",
-  add: "+",
-  sub: "-",
-  mult: "*",
-  div: "/",
-} as const;

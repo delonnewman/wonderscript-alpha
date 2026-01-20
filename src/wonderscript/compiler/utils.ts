@@ -108,3 +108,47 @@ export function escapeChars(str: string): string {
 
   return str;
 }
+
+const CORE_NAMES = {
+  eq: "=",
+  noteq: "not=",
+  lt: "<",
+  gt: ">",
+  lteq: "<=",
+  gteq: ">=",
+  add: "+",
+  sub: "-",
+  mult: "*",
+  div: "/",
+};
+
+export function importSymbol(
+  module: Record<string, unknown>,
+  name: string,
+  obj: unknown
+) {
+  let wsName = CORE_NAMES[name];
+
+  if (name[0] === name[0].toUpperCase()) {
+    // Don't escape names that start with uppercase
+    wsName = name;
+  } else if (wsName) {
+    wsName = escapeChars(dasherize(wsName));
+  } else if (name.startsWith("is")) {
+    wsName = `${name.slice(2).toLowerCase()}?`;
+    wsName = escapeChars(dasherize(wsName));
+  } else {
+    wsName = escapeChars(dasherize(name));
+  }
+
+  module[wsName] = obj;
+}
+
+export function importModule(
+  target: Record<string, unknown>,
+  source: Record<string, unknown>
+) {
+  Object.keys(source).forEach((name) => {
+    importSymbol(target, name, source[name]);
+  });
+}

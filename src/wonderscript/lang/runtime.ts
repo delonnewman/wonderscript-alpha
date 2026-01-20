@@ -1,13 +1,10 @@
 import { Seq, first, next } from "./Seq";
 import { isArrayLike } from "../js";
-import { CORE_NAMES } from "../compiler/constants";
-import { dasherize, escapeChars } from "../compiler/utils";
 import { isMeta, Meta } from "./Meta";
 import { Keyword } from "./Keyword";
 import { Symbol as WSSymbol } from "./Symbol";
 import { List } from "./List";
 import { Vector } from "./Vector";
-import { str } from "./str";
 
 export { hashCode } from "./utils";
 export { cons, first, next, isSequence } from "./Seq";
@@ -170,35 +167,4 @@ export function gensym(template = "sym"): WSSymbol {
   const num = Math.floor(Math.random() * 100000);
 
   return WSSymbol.intern(`${template}${num}`);
-}
-
-export function importSymbol(
-  module: Record<string, unknown>,
-  name: string,
-  obj: unknown
-) {
-  let wsName = CORE_NAMES[name];
-
-  if (name[0] === name[0].toUpperCase()) {
-    // Don't escape names that start with uppercase
-    wsName = name;
-  } else if (wsName) {
-    wsName = escapeChars(dasherize(wsName));
-  } else if (name.startsWith("is")) {
-    wsName = str(name.slice(2).toLowerCase(), "?");
-    wsName = escapeChars(dasherize(wsName));
-  } else {
-    wsName = escapeChars(dasherize(name));
-  }
-
-  module[wsName] = obj;
-}
-
-export function importModule(
-  target: Record<string, unknown>,
-  source: Record<string, unknown>
-) {
-  Object.keys(source).forEach((name) => {
-    importSymbol(target, name, source[name]);
-  });
 }
