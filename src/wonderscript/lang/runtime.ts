@@ -8,8 +8,6 @@ import { Vector } from "./Vector";
 
 export { hashCode } from "./utils";
 export { cons, first, next, isSequence } from "./Seq";
-export { isArrayLike } from "../js/ArrayLike";
-export type { ArrayLike } from "../js/ArrayLike";
 export { merge } from "./merge";
 export { str } from "./str";
 export {
