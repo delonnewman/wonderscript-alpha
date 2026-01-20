@@ -1,5 +1,5 @@
 import { FALSE_SYM, NIL_SYM, TRUE_SYM } from "./constants";
-import { isArray, isFunction, isObject, isString } from "../js";
+import { isFunction, isObject } from "../js";
 import { ArrayLike, isArrayLike } from "../js/ArrayLike";
 import { map } from "../lang/runtime";
 import { Form } from "./core";
@@ -12,8 +12,13 @@ const EMPTY_LIST = "()";
 const EMPTY_ARRAY = "[]";
 
 export function prStr(form: Form | Function | ArrayLike | Object): string {
-  if (form == null) return NIL_SYM;
-  if (typeof form === "number") return `${form}`;
+  if (form == null) {
+    return NIL_SYM;
+  }
+
+  if (typeof form === "number") {
+    return `${form}`;
+  }
 
   if (typeof form === "boolean") {
     return form ? TRUE_SYM : FALSE_SYM;
@@ -23,7 +28,10 @@ export function prStr(form: Form | Function | ArrayLike | Object): string {
     return form.toString();
   }
 
-  if (isString(form)) {
+  if (
+    typeof form === "string" ||
+    Object.prototype.toString.call(form) === "[object String]"
+  ) {
     return JSON.stringify(form);
   }
 
@@ -36,7 +44,7 @@ export function prStr(form: Form | Function | ArrayLike | Object): string {
     return `(${parts.join(" ")})`;
   }
 
-  if (isArray(form)) {
+  if (Array.isArray(form)) {
     const parts = [];
     for (let i = 0; i < form.length; i++) {
       parts.push(prStr(form[i]));
