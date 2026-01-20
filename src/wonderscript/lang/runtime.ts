@@ -8,13 +8,14 @@ import { Keyword } from "./Keyword";
 import { Symbol as WSSymbol } from "./Symbol";
 import { List } from "./List";
 import { Vector } from "./Vector";
-import { str } from "../js/index";
+import { str } from "./str";
 
 export { hashCode } from "./utils";
 export { cons, first, next, isSequence } from "./Seq";
 export { isArrayLike } from "../js/ArrayLike";
 export type { ArrayLike } from "../js/ArrayLike";
-export { merge } from "../lang/merge";
+export { merge } from "./merge";
+export { str } from "./str";
 export {
   isString,
   isObject,
@@ -28,7 +29,6 @@ export {
   isMap,
   isFunction,
   isIterator,
-  str,
 } from "../js/index";
 
 const EMPTY_ARRAY: Readonly<unknown[]> = Object.freeze([]);
