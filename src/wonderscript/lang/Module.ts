@@ -1,7 +1,7 @@
 import { ALIEN_KW, Definition } from "./Definition";
 import { Symbol } from "./Symbol";
 import { MetaData } from "./Meta";
-import { merge } from "../js/merge";
+import { merge } from "./merge";
 
 export type DefinitionMap = Map<Symbol, Definition>;
 

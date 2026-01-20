@@ -1,4 +1,4 @@
 export * from "./ArrayLike";
-export * from "./merge";
+export * from "../lang/merge";
 export * from "./predicates";
 export * from "./str";

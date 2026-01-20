@@ -14,6 +14,7 @@ export { hashCode } from "./utils";
 export { cons, first, next, isSequence } from "./Seq";
 export { isArrayLike } from "../js/ArrayLike";
 export type { ArrayLike } from "../js/ArrayLike";
+export { merge } from "../lang/merge";
 export {
   isString,
   isObject,
@@ -28,7 +29,6 @@ export {
   isFunction,
   isIterator,
   str,
-  merge,
 } from "../js/index";
 
 const EMPTY_ARRAY: Readonly<unknown[]> = Object.freeze([]);
