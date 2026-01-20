@@ -56,7 +56,7 @@
 (is (vector? [1 2 3]))
 (is (not-identical? [1 2 3] [1 2 3]))
 (is (= [1 2 3] [1 2 3]))
-;; (is (identical? ([1 2 3] 0)))
+(is (identical? 1 ([1 2 3] 0)))
 
 ;; Maps
 (is (map? {:a 1, :b 2}))
