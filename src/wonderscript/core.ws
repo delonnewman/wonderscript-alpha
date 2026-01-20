@@ -1,7 +1,22 @@
 ; -*- mode: clojure -*-
 
 (def array (fn* (&args) args))
-(def array? (fn* (val) (send js/Array (isArray val))))
+
+(def array?
+  (fn* (val)
+    (send js/Array (isArray val))))
+
+(def string?
+  (fn* (val)
+    (identical? "string" (typeof val))))
+
+(def symbol?
+  (fn* (val)
+    (instance? val wonderscript.lang/Symbol)))
+
+(def keyword?
+  (fn* (val)
+    (instance? val wonderscript.lang/Keyword)))
 
 (def message-sender
   (fn* (slot)
@@ -67,7 +82,7 @@
        (.flatMap (pair 0)
         (fn* (x i)
          (if (splat? x)
-           (array (.intern wonderscript.lang/Symbol (.slice (.name x) 1))
+           (array (send wonderscript.lang/Symbol (intern (send (name  x) (slice 1))))
             (array 'send argsym (array 'slice i)))
            (array x (array 'array-get argsym i)))))
        (send pair (slice 1))))))
