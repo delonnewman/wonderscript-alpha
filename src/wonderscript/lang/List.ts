@@ -11,18 +11,18 @@ const HASH_SEED: number = 4221954417;
 export class List implements Meta, Sequence, Sequenceable, Value {
   static EMPTY = new this(null, null);
 
-  private readonly _first: First;
-  private readonly _next: List | Nil;
-  private readonly _count: number;
-  private readonly _meta: MetaData | Nil;
-  private _hashCode: number | null;
+  readonly #first: First;
+  readonly #next: List | Nil;
+  readonly #count: number;
+  readonly #meta: MetaData | Nil;
+  #hashCode: number | null;
 
   constructor(first: First, next: List | Nil, count = 0, meta?: MetaData) {
-    this._first = first;
-    this._next = next;
-    this._count = count;
-    this._meta = meta;
-    this._hashCode = null;
+    this.#first = first;
+    this.#next = next;
+    this.#count = count;
+    this.#meta = meta;
+    this.#hashCode = null;
   }
 
   empty(): List {
@@ -30,7 +30,7 @@ export class List implements Meta, Sequence, Sequenceable, Value {
   }
 
   cons(val: unknown): List {
-    return new List(val, this, this._count + 1);
+    return new List(val, this, this.#count + 1);
   }
 
   seq(): List {
@@ -38,38 +38,38 @@ export class List implements Meta, Sequence, Sequenceable, Value {
   }
 
   meta(): MetaData | Nil {
-    return this._meta;
+    return this.#meta;
   }
 
   withMeta(data: MetaData): List {
     return new List(
-      this._first,
-      this._next,
-      this._count,
-      merge(this._meta, data)
+      this.#first,
+      this.#next,
+      this.#count,
+      merge(this.#meta, data)
     );
   }
 
   hasMeta(): boolean {
-    return this._meta != null;
+    return this.#meta != null;
   }
 
   first(): First {
-    return this._first;
+    return this.#first;
   }
 
   next(): List | Nil {
-    return this._next;
+    return this.#next;
   }
 
   count(): number {
-    return this._count;
+    return this.#count;
   }
 
   equals(other: List): boolean {
     if (!isSequence(other)) return false;
     // TODO: generalize to isCounted add counted interface
-    if (isList(other) && this.count() !== other.count()) {
+    if (other instanceof List && this.count() !== other.count()) {
       return false;
     }
 
@@ -90,15 +90,15 @@ export class List implements Meta, Sequence, Sequenceable, Value {
   }
 
   hashCode(): number {
-    if (this._hashCode == null) {
-      this._hashCode = reduce<number>(
+    if (this.#hashCode == null) {
+      this.#hashCode = reduce<number>(
         (n: number, x: Value) => hashCombine(n, hashCode(x)),
         this,
         HASH_SEED
       );
     }
 
-    return this._hashCode;
+    return this.#hashCode;
   }
 }
 
