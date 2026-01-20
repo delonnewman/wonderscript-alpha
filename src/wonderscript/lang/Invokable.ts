@@ -1,3 +1,3 @@
 export interface Invokable {
-  invoke(args: unknown[]): unknown;
+  invoke(...args: unknown[]): unknown;
 }

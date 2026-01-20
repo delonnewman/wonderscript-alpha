@@ -7,7 +7,7 @@ import { prStr } from "../prStr";
 import { CompilerError } from "../CompilerError";
 
 // @ts-ignore
-Array.prototype.invoke = function (indexes: number[]) {
+Array.prototype.invoke = function (...indexes: number[]) {
   if (indexes.length === 0) {
     return null;
   }
@@ -20,7 +20,7 @@ Array.prototype.invoke = function (indexes: number[]) {
 };
 
 // @ts-ignore
-Map.prototype.invoke = function (keys: unknown[]) {
+Map.prototype.invoke = function (...keys: unknown[]) {
   if (keys.length === 0) {
     return null;
   }
@@ -33,7 +33,7 @@ Map.prototype.invoke = function (keys: unknown[]) {
 };
 
 // @ts-ignore
-Set.prototype.invoke = function (args: unknown[]): boolean {
+Set.prototype.invoke = function (...args: unknown[]): boolean {
   if (args.length === 0) {
     return false;
   }
@@ -46,7 +46,7 @@ Set.prototype.invoke = function (args: unknown[]): boolean {
 };
 
 // @ts-ignore
-Function.prototype.invoke = function (args: unknown[]) {
+Function.prototype.invoke = function (...args: unknown[]) {
   if (args) {
     return this.apply(this, args);
   }
@@ -74,5 +74,5 @@ export function emitFuncApplication(form: Form[], env: Context): string {
     argBuffer.push(emit(args[i], env));
   }
 
-  return `(${fn}).invoke([${argBuffer.join(", ")}])`;
+  return `(${fn}).invoke(${argBuffer.join(", ")})`;
 }

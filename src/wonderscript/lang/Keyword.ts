@@ -56,7 +56,7 @@ export class Keyword<Name extends string = string>
     return this._symbol.hasNamespace();
   }
 
-  invoke(args: Map<Keyword<Name>, unknown>[]): unknown {
+  invoke(...args: Map<Keyword<Name>, unknown>[]): unknown {
     if (args.length === 0) return null;
 
     if (args.length === 1) {
