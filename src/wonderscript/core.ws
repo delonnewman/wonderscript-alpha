@@ -68,9 +68,9 @@
         (fn* (x i)
          (if (splat? x)
            (array (.intern wonderscript.lang/Symbol (.slice (.name x) 1))
-            (array '.slice argsym i))
+            (array 'send argsym (array 'slice i)))
            (array x (array 'array-get argsym i)))))
-       (.slice pair 1)))))
+       (send pair (slice 1))))))
 
 (def ^:macro fn
   (fn* (&xs)
