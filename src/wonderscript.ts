@@ -1,5 +1,5 @@
 import { Context } from "./wonderscript/lang/Context";
-import { CORE_NS, CURRENT_NS } from "./wonderscript/compiler/vars";
+import { CORE_NS, CURRENT_NS, CORE_MOD } from "./wonderscript/compiler/vars";
 import { createNs } from "./wonderscript/lang/Namespace";
 import * as core from "./wonderscript/lang";
 import * as compiler from "./wonderscript/compiler";
@@ -43,13 +43,19 @@ export class Compiler {
   private init() {
     this.env.define(Symbol.intern(CORE_NS.name), CORE_NS);
     this.env.define(JS_SYM, createNs(this.globalName(), this.global));
+
     this.env.define(
       Symbol.intern("wonderscript.lang"),
       createNs("wonderscript.lang", globalThis.wonderscript.lang)
     );
 
-    importModule(core);
-    importModule({
+    this.env.define(
+      Symbol.intern("wonderscript.js"),
+      createNs("wonderscript.js", globalThis.wonderscript.js)
+    );
+
+    importModule(CORE_MOD, core);
+    importModule(CORE_MOD, {
       loadFile: this.loadFile.bind(this),
       readFile: this.readFile.bind(this),
       eval: this.eval.bind(this),
@@ -67,9 +73,9 @@ export class Compiler {
       escapeChars,
     });
 
-    importSymbol(CORE_NS.name, CORE_NS);
-    importSymbol("*ns*", CURRENT_NS.value);
-    importSymbol("*platform*", this.platformInfo());
+    importSymbol(CORE_MOD, CORE_NS.name, CORE_NS);
+    importSymbol(CORE_MOD, "*ns*", CURRENT_NS.value);
+    importSymbol(CORE_MOD, "*platform*", this.platformInfo());
   }
 
   platformInfo(): Map<Keyword, any> {

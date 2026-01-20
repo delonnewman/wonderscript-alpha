@@ -1,6 +1,6 @@
 import { Keyword } from "./Keyword";
 import { Nil } from "./Nil";
-import { isFunction } from "../js/index";
+import { isFunction } from "../js";
 
 export type MetaData = Map<Keyword, any>;
 

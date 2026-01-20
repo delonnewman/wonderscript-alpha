@@ -1,5 +1,5 @@
 import { Nil } from "./Nil";
-import { isFunction, isString, isIterator } from "../js/index";
+import { isFunction, isString, isIterator } from "../js";
 import { ArrayLike, isArrayLike } from "../js/ArrayLike";
 
 export type First<T = unknown> = T | Nil;

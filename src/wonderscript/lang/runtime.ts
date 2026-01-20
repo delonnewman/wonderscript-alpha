@@ -1,8 +1,7 @@
 import { Seq, first, next } from "./Seq";
-import { isArrayLike } from "../js/ArrayLike";
+import { isArrayLike } from "../js";
 import { CORE_NAMES } from "../compiler/constants";
 import { dasherize, escapeChars } from "../compiler/utils";
-import { CORE_MOD } from "../compiler/vars";
 import { isMeta, Meta } from "./Meta";
 import { Keyword } from "./Keyword";
 import { Symbol as WSSymbol } from "./Symbol";
@@ -29,7 +28,7 @@ export {
   isMap,
   isFunction,
   isIterator,
-} from "../js/index";
+} from "../js";
 
 const EMPTY_ARRAY: Readonly<unknown[]> = Object.freeze([]);
 
@@ -173,7 +172,11 @@ export function gensym(template = "sym"): WSSymbol {
   return WSSymbol.intern(`${template}${num}`);
 }
 
-export function importSymbol(name: string, obj: unknown) {
+export function importSymbol(
+  module: Record<string, unknown>,
+  name: string,
+  obj: unknown
+) {
   let wsName = CORE_NAMES[name];
 
   if (name[0] === name[0].toUpperCase()) {
@@ -188,11 +191,14 @@ export function importSymbol(name: string, obj: unknown) {
     wsName = escapeChars(dasherize(name));
   }
 
-  CORE_MOD[wsName] = obj;
+  module[wsName] = obj;
 }
 
-export function importModule(module: Object) {
-  Object.keys(module).forEach((name) => {
-    importSymbol(name, module[name]);
+export function importModule(
+  target: Record<string, unknown>,
+  source: Record<string, unknown>
+) {
+  Object.keys(source).forEach((name) => {
+    importSymbol(target, name, source[name]);
   });
 }

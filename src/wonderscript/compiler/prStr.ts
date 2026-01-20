@@ -1,12 +1,5 @@
 import { FALSE_SYM, NIL_SYM, TRUE_SYM } from "./constants";
-import {
-  isArray,
-  isFunction,
-  isMap,
-  isObject,
-  isSet,
-  isString,
-} from "../js/index";
+import { isArray, isFunction, isMap, isObject, isSet, isString } from "../js";
 import { ArrayLike, isArrayLike } from "../js/ArrayLike";
 import { map } from "../lang/runtime";
 import { Form } from "./core";
