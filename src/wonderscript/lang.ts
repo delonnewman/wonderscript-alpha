@@ -20,19 +20,5 @@ export * from "./lang/Vector";
 export * from "./lang/Module";
 export * from "./lang/Definition";
 
-globalThis.wonderscript ||= {};
-globalThis.wonderscript.lang = {
-  Symbol,
-  isSymbol,
-  Keyword,
-  isKeyword,
-  List,
-  isList,
-  Namespace,
-  Vector,
-  isVector,
-  Module,
-  isModule,
-  Definition,
-  isDefinition,
-};
+globalThis.wonderscript ??= {};
+globalThis.wonderscript.lang = {};
