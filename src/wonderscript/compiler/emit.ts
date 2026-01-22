@@ -98,7 +98,7 @@ import { emitJS } from "./emit/emitJS";
 import { emitUnaryOp } from "./emit/emitUnaryOp";
 import { emitBinOp } from "./emit/emitBinOp";
 import { isKeyword } from "../lang/Keyword";
-import { isSymbol } from "../lang/Symbol";
+import { Symbol } from "../lang/Symbol";
 import { prStr } from "./prStr";
 import { emitSlotAccess } from "./emit/emitSlotAccess";
 import { emitSlotInspection } from "./emit/emitSlotInspection";
@@ -114,7 +114,7 @@ export function emit(exp: Form, ctx: Context) {
   const form = macroexpand(exp, ctx);
   if (isKeyword(form)) {
     return emitKeyword(form);
-  } else if (isSymbol(form)) {
+  } else if (form instanceof Symbol) {
     return emitSymbol(form, ctx);
   } else if (isNumber(form) || isString(form)) {
     return JSON.stringify(form);
@@ -131,7 +131,7 @@ export function emit(exp: Form, ctx: Context) {
   } else if (isArray(form)) {
     if (form.length === 0) {
       return EMPTY_ARRAY;
-    } else if (isSymbol(form[0])) {
+    } else if (form[0] instanceof Symbol) {
       switch (form[0].name()) {
         // special forms
         case DEF_SYM:
