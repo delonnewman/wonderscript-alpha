@@ -12,7 +12,6 @@ export { str } from "./str";
 export {
   isString,
   isObject,
-  isNull,
   isInteger,
   isIterator,
 } from "../js";
