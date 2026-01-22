@@ -1,7 +1,7 @@
 import { readDelimitedList } from "./readDelimitedList";
 import { PushBackReader } from "./PushBackReader";
 import { FN_SYM, FnForm } from "../compiler/emit/emitFunc";
-import { isSymbol, Symbol } from "../lang/Symbol";
+import { Symbol } from "../lang/Symbol";
 import { isInteger } from "../lang/runtime";
 import { isTaggedValue } from "../compiler/core";
 
@@ -24,7 +24,7 @@ function collectArgs(body: unknown[]): Symbol[] {
   while (forms.length !== 0) {
     const form = forms.shift();
 
-    if (isSymbol(form) && form.name().startsWith("%")) {
+    if (form instanceof Symbol && form.name().startsWith("%")) {
       args.push(form);
     } else if (isTaggedValue(form)) {
       for (let x of form) {
