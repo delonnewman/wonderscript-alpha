@@ -2,7 +2,7 @@ import { List } from "./lang/List";
 import { Symbol } from "./lang/Symbol";
 import { Keyword } from "./lang/Keyword";
 import { Namespace } from "./lang/Namespace";
-import { isVector, Vector } from "./lang/Vector";
+import { Vector } from "./lang/Vector";
 import { Definition, isDefinition } from "./lang/Definition";
 import { isModule, Module } from "./lang/Module";
 
@@ -27,7 +27,6 @@ globalThis.wonderscript.lang = {
   List,
   Namespace,
   Vector,
-  isVector,
   Module,
   isModule,
   Definition,

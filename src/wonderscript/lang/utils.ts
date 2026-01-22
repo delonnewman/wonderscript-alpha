@@ -1,7 +1,7 @@
 import { murmurhash3_32_gc } from "./murmur";
 import { Form } from "../compiler/core";
 import { isArray, isBoolean, isMap, isNumber, isSet, isString } from "../js";
-import { isVector } from "./Vector";
+import { Vector } from "./Vector";
 import { prStr } from "../compiler/prStr";
 import { isValue, Value } from "./Value";
 
@@ -38,7 +38,7 @@ export function hashCode(form: Form | Value): number {
     return form.hashCode();
   }
 
-  if (isArray(form) || isVector(form)) {
+  if (isArray(form) || form instanceof Vector) {
     return Array.prototype.reduce.call(
       form,
       (n: number, x: number) => hashCombine(n, hashCode(x)),

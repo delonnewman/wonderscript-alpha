@@ -99,7 +99,7 @@ import { emitSlotAccess } from "./emit/emitSlotAccess";
 import { emitSlotInspection } from "./emit/emitSlotInspection";
 import { emitSet } from "./emit/emitSet";
 import { emitSlotMutation } from "./emit/emitSlotMutation";
-import { isVector } from "../lang/Vector";
+import { Vector } from "../lang/Vector";
 import { emitVector } from "./emit/emitVector";
 import { emitIf } from "./emit/emitIf";
 import { emitSend } from "./emit/emitSend";
@@ -223,7 +223,7 @@ export function emit(exp: Form, ctx: Context) {
     } else {
       return emitFuncApplication(form, ctx);
     }
-  } else if (isVector(form)) {
+  } else if (form instanceof Vector) {
     return emitVector(form, ctx);
   } else {
     throw new CompilerError(`Invalid form: ${prStr(form)}`, ctx);

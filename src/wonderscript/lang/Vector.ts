@@ -23,7 +23,3 @@ export class Vector<T = unknown> {
     return new Vector(Array.prototype.slice.call(this, start, end));
   }
 }
-
-export function isVector(obj: unknown): obj is Vector {
-  return obj instanceof Vector;
-}

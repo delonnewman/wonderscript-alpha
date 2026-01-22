@@ -18,6 +18,14 @@
   (fn* (val)
     (instance? val wonderscript.lang/Keyword)))
 
+(def vector?
+  (fn* (val)
+    (instance? val wonderscript.lang/Vector)))
+
+(def list?
+  (fn* (val)
+    (instance? val wonderscript.lang/List)))
+
 (def message-sender
   (fn* (slot)
    (fn* (obj)
