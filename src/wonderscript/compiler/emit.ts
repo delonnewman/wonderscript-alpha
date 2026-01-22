@@ -97,7 +97,7 @@ import { Context } from "../lang/Context";
 import { emitJS } from "./emit/emitJS";
 import { emitUnaryOp } from "./emit/emitUnaryOp";
 import { emitBinOp } from "./emit/emitBinOp";
-import { isKeyword } from "../lang/Keyword";
+import { Keyword } from "../lang/Keyword";
 import { Symbol } from "../lang/Symbol";
 import { prStr } from "./prStr";
 import { emitSlotAccess } from "./emit/emitSlotAccess";
@@ -112,7 +112,7 @@ import { CompilerError } from "./CompilerError";
 
 export function emit(exp: Form, ctx: Context) {
   const form = macroexpand(exp, ctx);
-  if (isKeyword(form)) {
+  if (form instanceof Keyword) {
     return emitKeyword(form);
   } else if (form instanceof Symbol) {
     return emitSymbol(form, ctx);

@@ -19,7 +19,7 @@ import { Form, isTaggedValue } from "../core";
 import { prStr } from "../prStr";
 import { Symbol } from "../../lang/Symbol";
 import { MetaData } from "../../lang/Meta";
-import { isKeyword } from "../../lang/Keyword";
+import { Keyword } from "../../lang/Keyword";
 import { emitKeyword } from "./emitKeyword";
 import { CompilerError } from "../CompilerError";
 import { Context } from "../../lang/Context";
@@ -69,7 +69,7 @@ function emitQuotedValue(val: unknown, scope: Context): string {
   if (val instanceof Symbol) {
     return emitQuotedSymbol(val);
   }
-  if (isKeyword(val)) {
+  if (val instanceof Keyword) {
     return emitKeyword(val);
   }
   if (isNumber(val)) {

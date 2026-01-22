@@ -1,5 +1,5 @@
 import { isString } from "../../js/predicates";
-import { isKeyword } from "../../lang/Keyword";
+import { Keyword } from "../../lang/Keyword";
 import { Symbol } from "../../lang/Symbol";
 import { Form, isTaggedValue } from "../core";
 import { escapeChars } from "../utils";
@@ -10,7 +10,7 @@ export function emitSlotName(slot: Form) {
     slot = slot[1].name();
   }
 
-  if (isKeyword(slot)) {
+  if (slot instanceof Keyword) {
     slot = slot.name();
   }
 

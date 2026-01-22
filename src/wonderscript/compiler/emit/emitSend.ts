@@ -7,7 +7,7 @@ import { Form, isTaggedValue, TaggedValue } from "../core";
 import { prStr } from "../prStr";
 import { Symbol } from "../../lang/Symbol";
 import { emitSlotName } from "./slots";
-import { isKeyword, isVector } from "../../lang";
+import { Keyword, isVector } from "../../lang";
 import { CompilerError } from "../CompilerError";
 
 export const SEND_SYM = Symbol.intern(SEND_STR);
@@ -28,7 +28,7 @@ export function emitSend(form: Form, ctx: Context): string {
     return `(${emit(obj, ctx)}).${escapeChars(slotName)}()`;
   }
 
-  if (isTaggedValue(msg) || (isVector(msg) && isKeyword(msg[0]))) {
+  if (isTaggedValue(msg) || (isVector(msg) && msg[0] instanceof Keyword)) {
     const [method, ...args] = Array.prototype.slice.call(msg);
 
     const strArgs = map<Form>((x) => emit(x, ctx), args).join(", ");

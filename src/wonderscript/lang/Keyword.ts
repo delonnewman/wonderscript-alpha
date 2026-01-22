@@ -68,14 +68,14 @@ export class Keyword<Name extends string = string>
   }
 
   cmp(other: unknown): -1 | 1 | 0 {
-    if (!isKeyword(other))
+    if (!(other instanceof Keyword))
       throw new Error("cannot compare keywords to other values");
 
     return this._symbol.cmp(other.symbol());
   }
 
   equals(other: unknown): boolean {
-    if (!isKeyword(other)) return false;
+    if (!(other instanceof Keyword)) return false;
 
     return this._symbol.equals(other.symbol());
   }
@@ -92,6 +92,3 @@ export class Keyword<Name extends string = string>
     return `wonderscript.lang.Keyword.intern(${JSON.stringify(this.name())}, ${JSON.stringify(this.namespace())})`;
   }
 }
-
-export const isKeyword = (value: unknown): value is Keyword =>
-  value instanceof Keyword;
