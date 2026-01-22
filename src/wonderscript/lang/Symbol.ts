@@ -12,9 +12,9 @@ const SLASH = "/";
 export class Symbol<Name = string>
   implements Named<Name>, Meta, Invokable, Comparable, Value
 {
-  private readonly _name: Name;
-  private readonly _namespace?: string;
-  private readonly _meta?: MetaData;
+  readonly #name: Name;
+  readonly #namespace?: string;
+  readonly #meta?: MetaData;
 
   static CACHE = new Map<String, Symbol>();
 
@@ -38,21 +38,21 @@ export class Symbol<Name = string>
   }
 
   constructor(name: Name, namespace?: string, meta?: MetaData) {
-    this._name = name;
-    this._namespace = namespace;
-    this._meta = meta;
+    this.#name = name;
+    this.#namespace = namespace;
+    this.#meta = meta;
     Object.freeze(this);
   }
 
   meta(): MetaData {
-    return this._meta;
+    return this.#meta;
   }
 
   withMeta(data: MetaData): Symbol<Name> {
     return new Symbol<Name>(
-      this._name,
-      this._namespace,
-      merge(this._meta, data)
+      this.#name,
+      this.#namespace,
+      merge(this.#meta, data)
     );
   }
 
@@ -61,19 +61,19 @@ export class Symbol<Name = string>
   }
 
   hasMeta(): boolean {
-    return this._meta != null;
+    return this.#meta != null;
   }
 
   name(): Name {
-    return this._name;
+    return this.#name;
   }
 
   namespace(): string | Nil {
-    return this._namespace;
+    return this.#namespace;
   }
 
   hasNamespace(): boolean {
-    return this._namespace != null;
+    return this.#namespace != null;
   }
 
   cmp(other: Symbol): Order {
@@ -91,7 +91,7 @@ export class Symbol<Name = string>
   equals(other: any): boolean {
     if (!isSymbol(other)) return false;
 
-    return this._name === other.name() && this._namespace === other.namespace();
+    return this.#name === other.name() && this.#namespace === other.namespace();
   }
 
   hashCode(): number {
@@ -110,11 +110,11 @@ export class Symbol<Name = string>
   }
 
   toString() {
-    if (this._namespace) {
-      return `${this._namespace}/${this._name}`;
+    if (this.#namespace) {
+      return `${this.#namespace}/${this.#name}`;
     }
 
-    return `${this._name}`;
+    return `${this.#name}`;
   }
 }
 
