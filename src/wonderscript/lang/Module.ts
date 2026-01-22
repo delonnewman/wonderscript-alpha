@@ -64,6 +64,3 @@ export class Module {
     return `#<Module ${this.name}>`;
   }
 }
-
-export const isModule = (value: unknown): value is Module =>
-  value instanceof Module;

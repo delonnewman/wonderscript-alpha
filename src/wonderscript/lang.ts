@@ -3,8 +3,8 @@ import { Symbol } from "./lang/Symbol";
 import { Keyword } from "./lang/Keyword";
 import { Namespace } from "./lang/Namespace";
 import { Vector } from "./lang/Vector";
-import { Definition, isDefinition } from "./lang/Definition";
-import { isModule, Module } from "./lang/Module";
+import { Definition } from "./lang/Definition";
+import { Module } from "./lang/Module";
 
 export * from "./lang/Nil";
 export * from "./lang/Meta";
@@ -28,7 +28,5 @@ globalThis.wonderscript.lang = {
   Namespace,
   Vector,
   Module,
-  isModule,
   Definition,
-  isDefinition,
 };
