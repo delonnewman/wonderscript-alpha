@@ -59,8 +59,5 @@ export function emitSymbol(s: Symbol, context: Context): string {
 
   console.error("env", context);
 
-  throw new CompilerError(
-    `Undefined variable: ${prStr(s)}\n\t${context.getSource()}:${context.getLine()}`,
-    ctx
-  );
+  throw new CompilerError(`Undefined variable: ${prStr(s)}`, context);
 }
