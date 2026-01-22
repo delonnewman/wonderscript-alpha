@@ -5,10 +5,6 @@ export function isString(val: unknown): val is string {
   );
 }
 
-export function isObject(val: unknown): val is object {
-  return Object.prototype.toString.call(val) === "[object Object]";
-}
-
 export function isInteger(val: unknown): val is number {
   return typeof val === "number" && Math.round(val) === val;
 }

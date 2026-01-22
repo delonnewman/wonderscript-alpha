@@ -11,7 +11,6 @@ export { merge } from "./merge";
 export { str } from "./str";
 export {
   isString,
-  isObject,
   isInteger,
   isIterator,
 } from "../js";

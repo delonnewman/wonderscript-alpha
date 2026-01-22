@@ -37,6 +37,14 @@
   (fn* (val)
     (identical? "number" (typeof val))))
 
+(def undefined?
+  (fn* (val)
+    (identical? "undefined" (typeof val))))
+
+(def object?
+  (fn* (val)
+    (identical? "object" (typeof val))))
+
 (def function?
   (fn* (val)
     (identical? "function" (typeof val))))
