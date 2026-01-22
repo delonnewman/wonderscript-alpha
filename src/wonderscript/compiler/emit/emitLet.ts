@@ -5,7 +5,7 @@ import { emit } from "../emit";
 import { BodyForm, Form, isBodyForm } from "../core";
 import { LET_SYM as LET_STR } from "../constants";
 import { prStr } from "../prStr";
-import { isSymbol, Symbol } from "../../lang/Symbol";
+import { Symbol } from "../../lang/Symbol";
 import { CompilerError } from "../CompilerError";
 
 export const LET_SYM = Symbol.intern(LET_STR);
@@ -34,7 +34,7 @@ export function emitLet(form: Form, scope: Context): string {
   // add names to function scope
   const names = [];
   for (let i = 0; i < binds.length; i += 2) {
-    if (!isSymbol(binds[i]))
+    if (!(binds[i] instanceof Symbol))
       throw new CompilerError("binding names should be symbols", scope);
     // TODO: should throw error for namespaced symbols
     env.define(binds[i], true);
