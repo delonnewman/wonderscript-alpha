@@ -17,12 +17,8 @@ export function isNull(val: unknown): val is null {
   return val === null;
 }
 
-export function isNumber(val: unknown): val is number {
-  return Object.prototype.toString.call(val) === "[object Number]";
-}
-
 export function isInteger(val: unknown): val is number {
-  return isNumber(val) && Math.round(val) === val;
+  return typeof val === "number" && Math.round(val) === val;
 }
 
 export function isSet(val: unknown): val is Set<unknown> {

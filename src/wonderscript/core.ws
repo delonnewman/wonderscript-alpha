@@ -30,6 +30,10 @@
   (fn* (val)
     (identical? "boolean" (typeof val))))
 
+(def number?
+  (fn* (val)
+    (identical? "number" (typeof val))))
+
 (def message-sender
   (fn* (slot)
    (fn* (obj)

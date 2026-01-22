@@ -1,6 +1,5 @@
 import {
   isMap,
-  isNumber,
   isString,
   isUndefined,
   map,
@@ -71,8 +70,8 @@ function emitQuotedValue(val: unknown, scope: Context): string {
   if (val instanceof Keyword) {
     return emitKeyword(val);
   }
-  if (isNumber(val)) {
-    return str(val);
+  if (typeof val === "number") {
+    return `${val}`;
   }
   if (val === true) {
     return TRUE_SYM;

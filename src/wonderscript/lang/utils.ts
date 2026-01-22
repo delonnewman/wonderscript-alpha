@@ -1,6 +1,6 @@
 import { murmurhash3_32_gc } from "./murmur";
 import { Form } from "../compiler/core";
-import { isMap, isNumber, isSet, isString } from "../js";
+import { isMap, isSet, isString } from "../js";
 import { Vector } from "./Vector";
 import { prStr } from "../compiler/prStr";
 import { isValue, Value } from "./Value";
@@ -22,7 +22,7 @@ const MAP_SEED = 2930956514;
 const SET_SEED = 3268899600;
 
 export function hashCode(form: Form | Value): number {
-  if (isNumber(form)) {
+  if (typeof form === "number") {
     return form;
   }
 

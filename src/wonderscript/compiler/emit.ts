@@ -1,7 +1,7 @@
 import { macroexpand } from "./macroexpand";
 import { Form } from "./core";
 import { emitKeyword } from "./emit/emitKeyword";
-import { isNumber, isString } from "../lang/runtime";
+import { isString } from "../lang/runtime";
 import {
   AGET_SYM,
   ALENGTH_SYM,
@@ -111,7 +111,7 @@ export function emit(exp: Form, ctx: Context) {
     return emitKeyword(form);
   } else if (form instanceof Symbol) {
     return emitSymbol(form, ctx);
-  } else if (isNumber(form) || isString(form)) {
+  } else if (typeof form === "number" || isString(form)) {
     return JSON.stringify(form);
   } else if (typeof form === "boolean") {
     return form === true ? TRUE_SYM : FALSE_SYM;
