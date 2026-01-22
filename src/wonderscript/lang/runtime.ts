@@ -147,10 +147,6 @@ export function getMeta(obj: Meta, key: Keyword): unknown {
   return meta(obj)?.get(key);
 }
 
-export function vector<T = unknown>(...args: T[]): Vector<T> {
-  return new Vector<T>(args);
-}
-
 export function escapeHtml(str: string): string {
   return new Option(str).innerHTML;
 }

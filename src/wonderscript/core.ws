@@ -22,6 +22,9 @@
   (fn* (val)
     (instance? val wonderscript.lang/Vector)))
 
+(def vector
+  (fn* (&xs) (new wonderscript.lang/Vector xs)))
+
 (def list?
   (fn* (val)
     (instance? val wonderscript.lang/List)))
