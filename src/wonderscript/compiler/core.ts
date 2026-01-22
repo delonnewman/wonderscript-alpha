@@ -4,7 +4,7 @@ import {
   SPECIAL_FORMS,
   THROW_SYM as THROW_STR,
 } from "./constants";
-import { isSymbol, Symbol } from "../lang/Symbol";
+import { Symbol } from "../lang/Symbol";
 import { Keyword } from "../lang/Keyword";
 import { findDefinitionMetaData } from "./findDefinitionMetaData";
 import { FN_SYM } from "./emit/emitFunc";
@@ -55,7 +55,7 @@ export function isTaggedValue<Tag = Symbol>(
   form: unknown,
   tag?: Symbol
 ): form is TaggedValue<Tag> {
-  const tagged = isArray(form) && isSymbol(form[0]);
+  const tagged = isArray(form) && form[0] instanceof Symbol;
   if (tag == null) return tagged;
 
   return tagged && tag.equals(form[0]);
