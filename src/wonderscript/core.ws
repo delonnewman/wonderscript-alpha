@@ -37,13 +37,21 @@
   (fn* (val)
     (identical? "number" (typeof val))))
 
+(def integer?
+  (fn* (val)
+    (and
+     (identical? (typeof val) "number")
+     (identical? val (send js/Math (round val))))))
+
 (def undefined?
   (fn* (val)
     (identical? "undefined" (typeof val))))
 
 (def object?
   (fn* (val)
-    (identical? "object" (typeof val))))
+    (and
+     (not (nil? val))
+     (identical? "object" (typeof val)))))
 
 (def function?
   (fn* (val)
