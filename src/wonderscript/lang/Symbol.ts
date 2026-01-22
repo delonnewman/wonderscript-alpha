@@ -98,7 +98,7 @@ export class Symbol<Name = string>
     return stringHash(`'${this.toString()}`);
   }
 
-  invoke(args: Map<Symbol<Name>, any>[]): any {
+  invoke(args: Map<Symbol<Name>, unknown>[]): unknown {
     if (args.length === 0) return null;
 
     if (args.length === 1) {
