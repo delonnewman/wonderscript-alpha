@@ -77,7 +77,7 @@ export class Symbol<Name = string>
   }
 
   cmp(other: Symbol): Order {
-    if (!isSymbol(other))
+    if (!(other instanceof Symbol))
       throw new Error("cannot compare symbols to other values");
 
     const a = this.toString();
@@ -89,7 +89,7 @@ export class Symbol<Name = string>
   }
 
   equals(other: any): boolean {
-    if (!isSymbol(other)) return false;
+    if (!(other instanceof Symbol)) return false;
 
     return this.#name === other.name() && this.#namespace === other.namespace();
   }

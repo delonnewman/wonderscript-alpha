@@ -1,6 +1,6 @@
 import { _read } from "./read";
 import { isMap } from "../lang/runtime";
-import { isSymbol } from "../lang/Symbol";
+import { Symbol } from "../lang/Symbol";
 import { TAG_KEY } from "./core";
 import { isKeyword } from "../lang/Keyword";
 import { isMeta } from "../lang/Meta";
@@ -12,7 +12,7 @@ export function metaReader(
   opts: Record<string, unknown>
 ) {
   let meta = _read(r, true, null, true, opts);
-  if (isSymbol(meta)) {
+  if (meta instanceof Symbol) {
     meta = new Map([[TAG_KEY, meta]]);
   } else if (isKeyword(meta)) {
     meta = new Map([[meta, true]]);
