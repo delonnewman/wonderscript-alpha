@@ -1,6 +1,6 @@
 import { escapeChars } from "../utils";
 import { Form, isRecurForm, isTaggedValue } from "../core";
-import { isArray, map } from "../../lang/runtime";
+import { map } from "../../lang/runtime";
 import { FN_SYM as FN_STR } from "../constants";
 import { Context } from "../../lang/Context";
 import { compileBody, compileRecursiveBody } from "./compileBody";
@@ -61,9 +61,9 @@ export type FnForm =
 
 export const isFnForm = (form: Form): form is FnForm => {
   if (!isTaggedValue<typeof FN_SYM>(form, FN_SYM)) return false;
-  if (!(form[1] instanceof Symbol) && !isArray(form[1])) return false;
+  if (!(form[1] instanceof Symbol) && !Array.isArray(form[1])) return false;
 
-  return !(form[1] instanceof Symbol && !isArray(form[2]));
+  return !(form[1] instanceof Symbol && !Array.isArray(form[2]));
 };
 
 function hasTailCall(form: Form): boolean {
@@ -73,7 +73,7 @@ function hasTailCall(form: Form): boolean {
     return form.slice(1).some(hasTailCall);
   } else if (isFnForm(form)) {
     return form.slice(2).some(hasTailCall);
-  } else if (isArray(form)) {
+  } else if (Array.isArray(form)) {
     return form.some(hasTailCall);
   } else {
     return false;

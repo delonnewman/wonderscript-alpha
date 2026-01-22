@@ -29,10 +29,6 @@ export function isInteger(val: unknown): val is number {
   return isNumber(val) && Math.round(val) === val;
 }
 
-export function isArray(val: unknown): val is unknown[] {
-  return Object.prototype.toString.call(val) === "[object Array]";
-}
-
 export function isSet(val: unknown): val is Set<unknown> {
   return Object.prototype.toString.call(val) === "[object Set]";
 }

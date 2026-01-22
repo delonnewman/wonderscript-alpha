@@ -1,7 +1,6 @@
 import { escapeChars } from "../utils";
 import { CURRENT_NS } from "../vars";
 import { emit } from "../emit";
-import { isArray } from "../../lang/runtime";
 import { Context } from "../../lang/Context";
 import { DEF_SYM as DEF_STR } from "../constants";
 import { Form } from "../core";
@@ -16,7 +15,7 @@ const DEF_SYM = Symbol.intern(DEF_STR);
 export type DefForm = [typeof DEF_SYM, Symbol, Form?];
 
 export const isDefForm = (value: any): value is DefForm =>
-  isArray(value) &&
+  Array.isArray(value) &&
   (value.length === 2 || value.length === 3) &&
   DEF_SYM.equals(value[0]) &&
   value[1] instanceof Symbol;

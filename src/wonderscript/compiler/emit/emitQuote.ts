@@ -1,5 +1,4 @@
 import {
-  isArray,
   isMap,
   isNumber,
   isString,
@@ -87,7 +86,7 @@ function emitQuotedValue(val: unknown, scope: Context): string {
   if (isUndefined(val)) {
     return UNDEFINED_SYM;
   }
-  if (isArray(val)) {
+  if (Array.isArray(val)) {
     if (val.length === 0) return EMPTY_ARRAY;
     return str("[", map((x) => emitQuotedValue(x, scope), val).join(", "), "]");
   }

@@ -2,7 +2,7 @@ import { readString, ReadForm } from "./readString";
 import { emit } from "./emit";
 import { Form, isTaggedValue } from "./core";
 import { macroexpand } from "./macroexpand";
-import { cons, isArray, map } from "../lang/runtime";
+import { cons, map } from "../lang/runtime";
 import { Context } from "../lang/Context";
 import { evaluate } from "../compiler";
 
@@ -21,7 +21,7 @@ function evalAll(forms: ReadForm[], scope: Context): Form[] {
 }
 
 function expandMacros(form: Form, scope: Context) {
-  if (!isArray(form)) {
+  if (!Array.isArray(form)) {
     return form;
   } else if (isTaggedValue(form)) {
     const args = form.slice(1);

@@ -18,7 +18,6 @@ export {
   isBoolean,
   isNumber,
   isInteger,
-  isArray,
   isSet,
   isMap,
   isFunction,

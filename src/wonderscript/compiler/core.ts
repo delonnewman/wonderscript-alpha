@@ -1,4 +1,3 @@
-import { isArray } from "../lang/runtime";
 import {
   RECUR_SYM as RECUR_STR,
   SPECIAL_FORMS,
@@ -48,14 +47,14 @@ export type BodyForm<Tag extends BodyTag> = [Tag, Symbol[], ...Form[]];
 
 export function isBodyForm<Tag extends BodyTag>(tag: Symbol) {
   return (form: Form): form is BodyForm<Tag> =>
-    isTaggedValue<BodyTag>(form, tag) && isArray(form[1]);
+    isTaggedValue<BodyTag>(form, tag) && Array.isArray(form[1]);
 }
 
 export function isTaggedValue<Tag = Symbol>(
   form: unknown,
   tag?: Symbol
 ): form is TaggedValue<Tag> {
-  const tagged = isArray(form) && form[0] instanceof Symbol;
+  const tagged = Array.isArray(form) && form[0] instanceof Symbol;
   if (tag == null) return tagged;
 
   return tagged && tag.equals(form[0]);

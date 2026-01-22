@@ -1,7 +1,7 @@
 import { macroexpand } from "./macroexpand";
 import { Form } from "./core";
 import { emitKeyword } from "./emit/emitKeyword";
-import { isArray, isBoolean, isNumber, isString } from "../lang/runtime";
+import { isBoolean, isNumber, isString } from "../lang/runtime";
 import {
   AGET_SYM,
   ALENGTH_SYM,
@@ -123,7 +123,7 @@ export function emit(exp: Form, ctx: Context) {
     return emitMap(form, ctx);
   } else if (form instanceof Set) {
     return emitSet(form, ctx);
-  } else if (isArray(form)) {
+  } else if (Array.isArray(form)) {
     if (form.length === 0) {
       return EMPTY_ARRAY;
     } else if (form[0] instanceof Symbol) {
