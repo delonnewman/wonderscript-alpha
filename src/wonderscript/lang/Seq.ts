@@ -1,5 +1,5 @@
 import { Nil } from "./Nil";
-import { isFunction, isString, isIterator } from "../js";
+import { isString, isIterator } from "../js";
 import { ArrayLike, isArrayLike } from "../js/ArrayLike";
 
 export type First<T = unknown> = T | Nil;
@@ -32,18 +32,18 @@ export interface Sequence<T = unknown> {
 }
 
 export const isSequence = (value: unknown): value is Sequence =>
-  isFunction((value as Sequence).cons) &&
-  isFunction((value as Sequence).first) &&
-  isFunction((value as Sequence).next);
+  typeof (value as Sequence).cons === "function" &&
+  typeof (value as Sequence).first === "function" &&
+  typeof (value as Sequence).next === "function";
 
 export const hasFirstMethod = (col: unknown): col is HasFirstMethod =>
-  isFunction((col as HasFirstMethod).first);
+  typeof (col as HasFirstMethod).first === "function";
 
 export const hasConsMethod = (col: unknown): col is HasConsMethod =>
-  isFunction((col as HasConsMethod).cons);
+  typeof (col as HasConsMethod).cons === "function";
 
 export const hasForEachMethod = (col: unknown): col is HasForEachMethod =>
-  isFunction((col as HasForEachMethod).forEach);
+  typeof (col as HasForEachMethod).forEach === "function";
 
 export function first<T = unknown>(col: Seq<T>): First<T> {
   if (col == null) return null;

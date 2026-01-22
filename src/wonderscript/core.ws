@@ -34,6 +34,10 @@
   (fn* (val)
     (identical? "number" (typeof val))))
 
+(def function?
+  (fn* (val)
+    (identical? "function" (typeof val))))
+
 (def map?
   (fn* (val)
     (instance? val js/Map)))

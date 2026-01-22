@@ -1,4 +1,3 @@
-import { isFunction } from "../js";
 import { Equality, isEquality } from "./Equality";
 
 export interface Value extends Equality {
@@ -8,5 +7,5 @@ export interface Value extends Equality {
 export const isValue = (value: unknown): value is Value => {
   if (value == null) return false;
 
-  return isFunction((value as Value).hashCode) && isEquality(value);
+  return typeof (value as Value).hashCode === "function" && isEquality(value);
 };

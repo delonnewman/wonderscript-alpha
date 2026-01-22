@@ -21,10 +21,6 @@ export function isInteger(val: unknown): val is number {
   return typeof val === "number" && Math.round(val) === val;
 }
 
-export function isFunction(val: unknown): val is Function {
-  return Object.prototype.toString.call(val) === "[object Function]";
-}
-
 export function isIterator(val: unknown): val is Iterator<any> {
-  return val != null && isFunction(val[Symbol.iterator]);
+  return val != null && typeof val[Symbol.iterator] === "function";
 }
