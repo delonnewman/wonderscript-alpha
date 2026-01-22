@@ -2,7 +2,7 @@ import { readDelimitedList } from "./readDelimitedList";
 import { PushBackReader } from "./PushBackReader";
 import { FN_SYM, FnForm } from "../compiler/emit/emitFunc";
 import { Symbol } from "../lang/Symbol";
-import { isInteger } from "../lang/runtime";
+import { isInteger } from "../js";
 import { isTaggedValue } from "../compiler/core";
 
 const FIRST_SYM = Symbol.intern("%");
