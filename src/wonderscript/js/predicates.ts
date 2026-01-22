@@ -9,10 +9,6 @@ export function isObject(val: unknown): val is object {
   return Object.prototype.toString.call(val) === "[object Object]";
 }
 
-export function isUndefined(val: unknown): val is undefined {
-  return val === void 0;
-}
-
 export function isNull(val: unknown): val is null {
   return val === null;
 }

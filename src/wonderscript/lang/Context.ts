@@ -1,4 +1,3 @@
-import { isUndefined } from "./runtime";
 import { Nil } from "./Nil";
 import { Symbol } from "./Symbol";
 import { MetaData } from "./Meta";
@@ -160,7 +159,7 @@ export class Context {
 
   // TODO: deal with meta data options here
   define(sym: Symbol, value?: unknown): Context {
-    if (!isUndefined(value)) {
+    if (value !== undefined) {
       this.vars.set(sym.name(), value);
     } else {
       this.vars.set(sym.name(), null);

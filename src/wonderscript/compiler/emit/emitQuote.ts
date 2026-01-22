@@ -1,6 +1,5 @@
 import {
   isString,
-  isUndefined,
   map,
   str,
 } from "../../lang/runtime";
@@ -81,7 +80,7 @@ function emitQuotedValue(val: unknown, scope: Context): string {
   if (val === null) {
     return NULL_SYM;
   }
-  if (isUndefined(val)) {
+  if (val === undefined) {
     return UNDEFINED_SYM;
   }
   if (Array.isArray(val)) {

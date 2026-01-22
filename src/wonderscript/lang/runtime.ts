@@ -2,7 +2,6 @@ import { Seq, first, next } from "./Seq";
 import { isArrayLike } from "../js";
 import { isMeta, Meta } from "./Meta";
 import { Keyword } from "./Keyword";
-import { Symbol as WSSymbol } from "./Symbol";
 import { List } from "./List";
 import { Vector } from "./Vector";
 
@@ -13,7 +12,6 @@ export { str } from "./str";
 export {
   isString,
   isObject,
-  isUndefined,
   isNull,
   isInteger,
   isIterator,

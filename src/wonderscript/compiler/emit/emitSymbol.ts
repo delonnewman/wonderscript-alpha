@@ -1,6 +1,5 @@
 import { Context } from "../../lang/Context";
 import { escapeChars } from "../utils";
-import { isUndefined } from "../../lang/runtime";
 import { CORE_NS, CURRENT_NS } from "../vars";
 import { Symbol } from "../../lang/Symbol";
 import { prStr } from "../prStr";
@@ -49,11 +48,11 @@ export function emitSymbol(s: Symbol, context: Context): string {
     return s_;
   }
 
-  if (!isUndefined(CURRENT_NS.value.module[s_])) {
+  if (CURRENT_NS.value.module[s_] !== undefined) {
     return `${CURRENT_NS.value.name}.${s_}`;
   }
 
-  if (!isUndefined(CORE_NS.module[s_])) {
+  if (CORE_NS.module[s_] !== undefined) {
     return `${CORE_NS.name}.${s_}`;
   }
 
