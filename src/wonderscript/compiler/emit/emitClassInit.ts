@@ -12,7 +12,7 @@ export const NEW_SYM = Symbol.intern(NEW_STR);
 export type ClassInitForm = [typeof NEW_SYM, Symbol, ...Form[]];
 
 export const isClassInitForm = (form: unknown): form is ClassInitForm =>
-  isTaggedValue(form) && form[0].equals(NEW_SYM) && isSymbol(form[1]);
+  isTaggedValue(form) && form[0].equals(NEW_SYM) && form[1] instanceof Symbol;
 
 export function emitClassInit(form: Form, env: Context): string {
   if (!isClassInitForm(form))

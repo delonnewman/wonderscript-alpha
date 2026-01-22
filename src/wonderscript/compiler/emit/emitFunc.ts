@@ -5,7 +5,7 @@ import { FN_SYM as FN_STR } from "../constants";
 import { Context } from "../../lang/Context";
 import { compileBody, compileRecursiveBody } from "./compileBody";
 import { prStr } from "../prStr";
-import { isSymbol, Symbol } from "../../lang/Symbol";
+import { Symbol } from "../../lang/Symbol";
 import { isIfForm } from "./emitIf";
 import { CompilerError } from "../CompilerError";
 
@@ -27,7 +27,7 @@ function parseArgs(args: Symbol[]): ParsedArgs {
   for (let i = 0; i < args.length; ++i) {
     // TODO: probably should throw and error instead
     // TODO: check if there's a namespace that should be an error also
-    if (!isSymbol(args[i])) continue;
+    if (!(args[i] instanceof Symbol)) continue;
 
     if (args[i].name().startsWith(SPLAT)) {
       name = Symbol.intern(args[i].name().slice(1));
@@ -61,9 +61,9 @@ export type FnForm =
 
 export const isFnForm = (form: Form): form is FnForm => {
   if (!isTaggedValue<typeof FN_SYM>(form, FN_SYM)) return false;
-  if (!isSymbol(form[1]) && !isArray(form[1])) return false;
+  if (!(form[1] instanceof Symbol) && !isArray(form[1])) return false;
 
-  return !(isSymbol(form[1]) && !isArray(form[2]));
+  return !((form[1] instanceof Symbol) && !isArray(form[2]));
 };
 
 function hasTailCall(form: Form): boolean {
@@ -85,7 +85,7 @@ export function emitFunc(form: Form, context: Context): string {
     throw new CompilerError(`invalid ${FN_SYM} form: ${prStr(form)}`, context);
 
   const ctx = new Context(context);
-  const name = isSymbol(form[1]) ? form[1] : null;
+  const name = form[1] instanceof Symbol ? form[1] : null;
   const args = (name ? form[2] : form[1]) as Symbol[];
   const body = name ? form.slice(3) : form.slice(2);
 

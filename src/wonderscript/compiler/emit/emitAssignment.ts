@@ -2,7 +2,7 @@ import { emit } from "../emit";
 import { SET_SYM as SET_STR } from "../constants";
 import { Form, isTaggedValue } from "../core";
 import { prStr } from "../prStr";
-import { isSymbol, Symbol } from "../../lang/Symbol";
+import { Symbol } from "../../lang/Symbol";
 import { Context } from "../../lang/Context";
 import { CompilerError } from "../CompilerError";
 
@@ -18,7 +18,7 @@ export function emitAssignment(form: Form, ctx: Context) {
     throw new CompilerError(`invalid ${SET_SYM} form: ${prStr(form)}`, ctx);
 
   const [_, obj, value] = form;
-  if (isSymbol(obj) && ctx.has(obj) && !ctx.isMutable(obj)) {
+  if (obj instanceof Symbol && ctx.has(obj) && !ctx.isMutable(obj)) {
     throw new CompilerError(
       `cannot mutate an immutable value: ${prStr(obj)}`,
       ctx

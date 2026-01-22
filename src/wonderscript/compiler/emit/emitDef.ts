@@ -6,7 +6,7 @@ import { Context } from "../../lang/Context";
 import { DEF_SYM as DEF_STR } from "../constants";
 import { Form } from "../core";
 import { prStr } from "../prStr";
-import { isSymbol, Symbol } from "../../lang/Symbol";
+import { Symbol } from "../../lang/Symbol";
 import { emitQuotedMetaData } from "./emitQuote";
 import { jsEval } from "../jsEval";
 import { CompilerError } from "../CompilerError";
@@ -19,7 +19,7 @@ export const isDefForm = (value: any): value is DefForm =>
   isArray(value) &&
   (value.length === 2 || value.length === 3) &&
   DEF_SYM.equals(value[0]) &&
-  isSymbol(value[1]);
+  value[1] instanceof Symbol;
 
 // TODO: need to escape JS keywords
 export function emitDef(form: Form, env: Context): string {
