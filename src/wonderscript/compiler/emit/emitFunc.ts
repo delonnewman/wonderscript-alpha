@@ -63,7 +63,7 @@ export const isFnForm = (form: Form): form is FnForm => {
   if (!isTaggedValue<typeof FN_SYM>(form, FN_SYM)) return false;
   if (!(form[1] instanceof Symbol) && !isArray(form[1])) return false;
 
-  return !((form[1] instanceof Symbol) && !isArray(form[2]));
+  return !(form[1] instanceof Symbol && !isArray(form[2]));
 };
 
 function hasTailCall(form: Form): boolean {

@@ -1,12 +1,7 @@
 import { macroexpand } from "./macroexpand";
 import { Form } from "./core";
 import { emitKeyword } from "./emit/emitKeyword";
-import {
-  isArray,
-  isBoolean,
-  isNumber,
-  isString,
-} from "../lang/runtime";
+import { isArray, isBoolean, isNumber, isString } from "../lang/runtime";
 import {
   AGET_SYM,
   ALENGTH_SYM,
