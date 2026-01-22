@@ -4,7 +4,7 @@ import { Context } from "../../lang/Context";
 import { NEW_SYM as NEW_STR } from "../constants";
 import { Form, isTaggedValue } from "../core";
 import { prStr } from "../prStr";
-import { isSymbol, Symbol } from "../../lang/Symbol";
+import { Symbol } from "../../lang/Symbol";
 import { CompilerError } from "../CompilerError";
 
 export const NEW_SYM = Symbol.intern(NEW_STR);

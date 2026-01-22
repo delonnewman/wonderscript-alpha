@@ -1,7 +1,7 @@
 import { emit } from "../emit";
 import { Form } from "../core";
 import { Context } from "../../lang/Context";
-import { isSymbol } from "../../lang/Symbol";
+import { Symbol } from "../../lang/Symbol";
 import { isMacro } from "../core";
 import { prStr } from "../prStr";
 import { CompilerError } from "../CompilerError";
@@ -55,7 +55,7 @@ Function.prototype.invoke = function (...args: unknown[]) {
 };
 
 export function emitFuncApplication(form: Form[], env: Context): string {
-  if (isSymbol(form[0]) && isMacro(form[0])) {
+  if (form[0] instanceof Symbol && isMacro(form[0])) {
     throw new CompilerError(
       `macros cannot be evaluated in this context: ${prStr(form)}`,
       env

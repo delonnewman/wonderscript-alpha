@@ -1,5 +1,5 @@
 import { isList, List } from "./lang/List";
-import { isSymbol, Symbol } from "./lang/Symbol";
+import { Symbol } from "./lang/Symbol";
 import { isKeyword, Keyword } from "./lang/Keyword";
 import { Namespace } from "./lang/Namespace";
 import { isVector, Vector } from "./lang/Vector";
@@ -23,7 +23,6 @@ export * from "./lang/Definition";
 globalThis.wonderscript ??= {};
 globalThis.wonderscript.lang = {
   Symbol,
-  isSymbol,
   Keyword,
   isKeyword,
   List,

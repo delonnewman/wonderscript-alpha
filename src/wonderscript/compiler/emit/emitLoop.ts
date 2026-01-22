@@ -5,7 +5,7 @@ import { emit } from "../emit";
 import { LOOP_SYM as LOOP_STR } from "../constants";
 import { BodyForm, isBodyForm, Form } from "../core";
 import { prStr } from "../prStr";
-import { isSymbol, Symbol } from "../../lang/Symbol";
+import { Symbol } from "../../lang/Symbol";
 import { CompilerError } from "../CompilerError";
 
 export const LOOP_SYM = Symbol.intern(LOOP_STR);
@@ -26,7 +26,7 @@ export function emitLoop(form: Form[], scope: Context): string {
 
   const names = [];
   for (let i = 0; i < binds.length; i += 2) {
-    if (!isSymbol(binds[i]))
+    if (!(binds[i] instanceof Symbol))
       throw new CompilerError("Invalid binding name", env);
     env.define(binds[i], true);
 

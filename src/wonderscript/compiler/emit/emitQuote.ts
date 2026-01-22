@@ -17,7 +17,7 @@ import {
 } from "../constants";
 import { Form, isTaggedValue } from "../core";
 import { prStr } from "../prStr";
-import { isSymbol, Symbol } from "../../lang/Symbol";
+import { Symbol } from "../../lang/Symbol";
 import { MetaData } from "../../lang/Meta";
 import { isKeyword } from "../../lang/Keyword";
 import { emitKeyword } from "./emitKeyword";
@@ -66,7 +66,7 @@ function emitQuotedValue(val: unknown, scope: Context): string {
   if (isString(val)) {
     return JSON.stringify(val);
   }
-  if (isSymbol(val)) {
+  if (val instanceof Symbol) {
     return emitQuotedSymbol(val);
   }
   if (isKeyword(val)) {

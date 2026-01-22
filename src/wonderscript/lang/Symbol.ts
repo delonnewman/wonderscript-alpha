@@ -117,6 +117,3 @@ export class Symbol<Name = string>
     return `${this.#name}`;
   }
 }
-
-export const isSymbol = (value: unknown): value is Symbol =>
-  value instanceof Symbol;
