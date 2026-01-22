@@ -21,14 +21,6 @@ export function isInteger(val: unknown): val is number {
   return typeof val === "number" && Math.round(val) === val;
 }
 
-export function isSet(val: unknown): val is Set<unknown> {
-  return Object.prototype.toString.call(val) === "[object Set]";
-}
-
-export function isMap(val: unknown): val is Map<unknown, unknown> {
-  return Object.prototype.toString.call(val) === "[object Map]";
-}
-
 export function isFunction(val: unknown): val is Function {
   return Object.prototype.toString.call(val) === "[object Function]";
 }

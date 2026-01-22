@@ -1,6 +1,6 @@
 import { murmurhash3_32_gc } from "./murmur";
 import { Form } from "../compiler/core";
-import { isMap, isSet, isString } from "../js";
+import { isString } from "../js";
 import { Vector } from "./Vector";
 import { prStr } from "../compiler/prStr";
 import { isValue, Value } from "./Value";
@@ -46,7 +46,7 @@ export function hashCode(form: Form | Value): number {
     );
   }
 
-  if (isMap(form)) {
+  if (form instanceof Map) {
     let n = MAP_SEED;
     for (let entry of form) {
       n = hashCombine(n, hashCombine(hashCode(entry[0]), hashCode(entry[1])));
@@ -54,7 +54,7 @@ export function hashCode(form: Form | Value): number {
     return n;
   }
 
-  if (isSet(form)) {
+  if (form instanceof Set) {
     let n = SET_SEED;
     for (let entry of form) {
       n = hashCombine(n, hashCode(entry));

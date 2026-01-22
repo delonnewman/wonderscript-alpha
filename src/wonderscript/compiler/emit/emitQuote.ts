@@ -1,5 +1,4 @@
 import {
-  isMap,
   isString,
   isUndefined,
   map,
@@ -89,7 +88,7 @@ function emitQuotedValue(val: unknown, scope: Context): string {
     if (val.length === 0) return EMPTY_ARRAY;
     return str("[", map((x) => emitQuotedValue(x, scope), val).join(", "), "]");
   }
-  if (isMap(val)) {
+  if (val instanceof Map) {
     const parts = map(
       (xs) =>
         str(

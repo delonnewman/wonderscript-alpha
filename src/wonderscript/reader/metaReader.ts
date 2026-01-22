@@ -1,5 +1,4 @@
 import { _read } from "./read";
-import { isMap } from "../lang/runtime";
 import { Symbol } from "../lang/Symbol";
 import { TAG_KEY } from "./core";
 import { Keyword } from "../lang/Keyword";
@@ -16,7 +15,7 @@ export function metaReader(
     meta = new Map([[TAG_KEY, meta]]);
   } else if (meta instanceof Keyword) {
     meta = new Map([[meta, true]]);
-  } else if (!isMap(meta)) {
+  } else if (!(meta instanceof Map)) {
     throw new Error("Metadata must be a Symbol, Keyword, String or Map");
   }
 

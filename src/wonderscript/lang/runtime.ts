@@ -16,8 +16,6 @@ export {
   isUndefined,
   isNull,
   isInteger,
-  isSet,
-  isMap,
   isFunction,
   isIterator,
 } from "../js";

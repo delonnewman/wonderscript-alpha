@@ -34,6 +34,14 @@
   (fn* (val)
     (identical? "number" (typeof val))))
 
+(def map?
+  (fn* (val)
+    (instance? val js/Map)))
+
+(def set?
+  (fn* (val)
+    (instance? val js/Set)))
+
 (def message-sender
   (fn* (slot)
    (fn* (obj)
