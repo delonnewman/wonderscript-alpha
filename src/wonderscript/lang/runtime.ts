@@ -15,7 +15,6 @@ export {
   isObject,
   isUndefined,
   isNull,
-  isBoolean,
   isNumber,
   isInteger,
   isSet,

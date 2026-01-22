@@ -1,6 +1,6 @@
 import { murmurhash3_32_gc } from "./murmur";
 import { Form } from "../compiler/core";
-import { isBoolean, isMap, isNumber, isSet, isString } from "../js";
+import { isMap, isNumber, isSet, isString } from "../js";
 import { Vector } from "./Vector";
 import { prStr } from "../compiler/prStr";
 import { isValue, Value } from "./Value";
@@ -26,7 +26,7 @@ export function hashCode(form: Form | Value): number {
     return form;
   }
 
-  if (isBoolean(form)) {
+  if (typeof form === "boolean") {
     return form ? 1 : 0;
   }
 

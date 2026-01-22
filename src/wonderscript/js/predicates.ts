@@ -17,10 +17,6 @@ export function isNull(val: unknown): val is null {
   return val === null;
 }
 
-export function isBoolean(val: unknown): val is boolean {
-  return Object.prototype.toString.call(val) === "[object Boolean]";
-}
-
 export function isNumber(val: unknown): val is number {
   return Object.prototype.toString.call(val) === "[object Number]";
 }

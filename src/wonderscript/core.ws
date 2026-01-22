@@ -26,6 +26,10 @@
   (fn* (val)
     (instance? val wonderscript.lang/List)))
 
+(def boolean?
+  (fn* (val)
+    (identical? "boolean" (typeof val))))
+
 (def message-sender
   (fn* (slot)
    (fn* (obj)
