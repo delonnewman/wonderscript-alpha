@@ -6,7 +6,7 @@ import {
 } from "./constants";
 import { Context } from "../lang/Context";
 import { findNamespaceVar } from "./findNamespaceVar";
-import { isSymbol, Symbol } from "../lang/Symbol";
+import { Symbol } from "../lang/Symbol";
 
 const DOT_DASH_SYM = Symbol.intern(DOT_DASH_STR);
 const DOT_SYM = Symbol.intern(DOT_STR);
@@ -39,7 +39,7 @@ export function macroexpand(form: Form, scope: Context): Form {
     ].concat(form.slice(1));
   }
 
-  if (isSymbol(form[0])) {
+  if (form[0] instanceof Symbol) {
     const val = findNamespaceVar(form[0], scope);
     if (val == null) return form;
 
