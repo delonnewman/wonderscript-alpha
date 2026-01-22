@@ -5,7 +5,7 @@ import { Context } from "../../lang/Context";
 import { DOT_SYM as DOT_STR } from "../constants";
 import { Form, isTaggedValue, TaggedValue } from "../core";
 import { prStr } from "../prStr";
-import { isSymbol, Symbol } from "../../lang/Symbol";
+import { Symbol } from "../../lang/Symbol";
 import { CompilerError } from "../CompilerError";
 
 export const DOT_SYM = Symbol.intern(DOT_STR);
@@ -24,18 +24,11 @@ export function emitObjectRes(form: Form, env: Context): string {
   if (isTaggedValue(prop)) {
     const [method, ...args] = prop;
 
-    return str(
-      "(",
-      emit(obj, env),
-      ").",
-      escapeChars(method.name()),
-      "(",
-      map((x) => emit(x, env), args).join(", "),
-      ")"
-    );
+    const name = escapeChars(method.name());
+    return `(${emit(obj, env)}).${name}(${map((x) => emit(x, env), args).join(", ")})`;
   }
 
-  if (isSymbol(prop)) {
+  if (prop instanceof Symbol) {
     const name = prop.name();
     if (name.startsWith("-")) {
       return str("(", emit(obj, env), ").", escapeChars(name.slice(1)));
