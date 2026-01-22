@@ -1,4 +1,4 @@
-import { isList, List } from "./lang/List";
+import { List } from "./lang/List";
 import { Symbol } from "./lang/Symbol";
 import { Keyword } from "./lang/Keyword";
 import { Namespace } from "./lang/Namespace";
@@ -25,7 +25,6 @@ globalThis.wonderscript.lang = {
   Symbol,
   Keyword,
   List,
-  isList,
   Namespace,
   Vector,
   isVector,

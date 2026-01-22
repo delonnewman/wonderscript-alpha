@@ -108,5 +108,3 @@ export class List implements Meta, Sequence, Sequenceable, Value {
     return this.#hashCode;
   }
 }
-
-export const isList = (value: unknown): value is List => value instanceof List;
