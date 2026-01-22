@@ -49,6 +49,12 @@
   (fn* (val)
     (instance? val js/Set)))
 
+(def gensym
+  (let (^:mutable i 0)
+    (fn* (template)
+      (set* i (+ i 1))
+      (send wonderscript.lang/Symbol (intern (str (or template "sym") i))))))
+
 (def message-sender
   (fn* (slot)
    (fn* (obj)

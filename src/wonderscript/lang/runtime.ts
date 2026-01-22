@@ -150,9 +150,3 @@ export function getMeta(obj: Meta, key: Keyword): unknown {
 export function escapeHtml(str: string): string {
   return new Option(str).innerHTML;
 }
-
-export function gensym(template = "sym"): WSSymbol {
-  const num = Math.floor(Math.random() * 100000);
-
-  return WSSymbol.intern(`${template}${num}`);
-}
