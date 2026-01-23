@@ -1,11 +1,20 @@
 import { Symbol } from "./Symbol";
+import { Ref } from "./Ref";
 
+// Queries are messages with a ref
 export class Message extends Symbol {
-  readonly args: Readonly<unknown[]>
-  
-  constructor(name: string, namespace?: string, args: Readonly<unknown[]> = []) {
+  readonly args: Readonly<unknown[]>;
+  readonly ref?: Ref;
+
+  constructor(
+    name: string,
+    namespace?: string,
+    ref?: Ref,
+    args: Readonly<unknown[]> = []
+  ) {
     super(name, namespace);
     this.args = args;
+    this.ref = ref;
   }
 
   toString() {
