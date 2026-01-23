@@ -1,7 +1,7 @@
 import { Keyword } from "./Keyword";
 import { Nil } from "./Nil";
 
-export type MetaData = Map<Keyword, unknown>;
+export type MetaData = Map<Keyword, any>;
 
 export interface Meta {
   meta(): MetaData | Nil;
