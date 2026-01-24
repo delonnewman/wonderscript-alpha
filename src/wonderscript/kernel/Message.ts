@@ -1,7 +1,6 @@
 import { Symbol } from "./Symbol";
 import { Ref } from "./Ref";
 
-// Queries are messages with a ref
 export class Message extends Symbol {
   readonly args: Readonly<unknown[]>;
   readonly ref?: Ref;
@@ -15,6 +14,10 @@ export class Message extends Symbol {
     super(name, namespace);
     this.args = args;
     this.ref = ref;
+  }
+
+  isQuery() {
+    return this.ref !== undefined;
   }
 
   toString() {
