@@ -9,7 +9,7 @@ export class Message extends Symbol {
     name: string,
     namespace?: string,
     ref?: Ref,
-    args: Readonly<unknown[]> = []
+    args?: Readonly<unknown[]>
   ) {
     super(name, namespace);
     this.args = args;
@@ -20,8 +20,15 @@ export class Message extends Symbol {
     return this.ref !== undefined;
   }
 
+  isUnary() {
+    return this.args === undefined;
+  }
+
   toString() {
     const str = super.toString();
+    if (this.isUnary()) {
+      return str;
+    }
     return `${str}$${this.args.length}`;
   }
 }
