@@ -1,7 +1,6 @@
 import { Message } from "./Message";
 
-// TODO: This should be renamed to MessageDispatch or Statement or something similar
-export class Dispatch {
+export class Statement {
   readonly subject: Object;
   readonly message: Message;
 
