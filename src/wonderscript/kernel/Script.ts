@@ -9,7 +9,7 @@ export class Script {
     this.#statements = [];
   }
 
-  get dispatches () {
+  get statements () {
     return Object.freeze(this.#statements.slice(0));
   }
 
