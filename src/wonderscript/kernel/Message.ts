@@ -1,9 +1,24 @@
-import { Symbol } from "./Symbol";
 import { Ref } from "./Ref";
 
-export class Message extends Symbol {
+export class Message {
+  readonly name: string;
+  readonly namespace?: string;
   readonly args?: Readonly<unknown[]>;
   readonly ref?: Ref;
+
+  static intern(value: string, options: { ref?: Ref, args?: Readonly<unknown[]> }) {
+    const [x, y] = value.split('$');
+
+    let name: string, ns: string | undefined;
+    if (y) {
+      ns = x;
+      name = y;
+    } else {
+      name = x;
+    }
+
+    return new Message(name, ns, options.ref, options.args);
+  }
 
   constructor(
     name: string,
@@ -11,7 +26,8 @@ export class Message extends Symbol {
     ref?: Ref,
     args?: Readonly<unknown[]>
   ) {
-    super(name, namespace);
+    this.name = name;
+    this.namespace ??= namespace;
     this.args ??= args;
     this.ref ??= ref;
   }
@@ -25,9 +41,8 @@ export class Message extends Symbol {
   }
 
   toString() {
-    const str = super.toString();
     if (this.isUnary()) {
-      return str;
+      return this.name;
     }
     return `${str}$${this.args.length}`;
   }
