@@ -1,25 +1,25 @@
+import { Recipient } from "./Dispatch";
 import { Message } from "./Message";
 
 export class Statement {
-  readonly subject: Object;
+  readonly subject: Recipient;
   readonly message: Message;
 
-  constructor(object: Object, message: Message) {
-    this.subject = object;
+  constructor(subject: Recipient, message: Message) {
+    this.subject = subject;
     this.message = message;
   }
 
+  bind() {
+    return this.subject.dispatch.lookup(this.message).bind(this.subject);
+  }
+
   execute() {
-    // TODO: Use Dispatch interface
-    let method = this.subject[this.message.toString()];
-    if (method === undefined) {
-      method = this.subject[this.message.name];
+    const method = this.bind();
+    if (this.message.isUnary()) {
+      method();
+    } else {
+      method(...this.message.args);
     }
-
-    if (typeof method !== "function") {
-      throw new Error(`Don't understand ${this.message}`);
-    }
-
-    method.apply(this.subject, this.message.args);
   }
 }
