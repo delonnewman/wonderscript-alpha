@@ -10,8 +10,13 @@ export class Statement {
     this.message = message;
   }
 
+  isQuery() {
+    return this.message.isQuery();
+  }
+  
   bind() {
-    return this.subject.dispatch.lookup(this.message).bind(this.subject);
+    const method = this.subject.dispatch.lookup(this.message);
+    return method.bind(this.subject);
   }
 
   execute() {
