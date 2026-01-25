@@ -11,6 +11,10 @@ export class Alien extends Symbol implements Recipient {
   }
 }
 
+function getProperty(property: string) {
+  return this[property];
+}
+
 export class AlienDispatch extends Dispatch {
   #object: Object;
 
@@ -22,11 +26,11 @@ export class AlienDispatch extends Dispatch {
   lookup(msg: Message): Function {
     let method = this.#object[msg.toString()];
     if (method === undefined) {
-      method = this.#object[msg.name];
+      throw new Error(`Don't understand ${msg}`);
     }
 
     if (typeof method !== "function") {
-      throw new Error(`Don't understand ${msg}`);
+      method = getProperty.bind(this.#object, msg.toString());
     }
 
     return method;
