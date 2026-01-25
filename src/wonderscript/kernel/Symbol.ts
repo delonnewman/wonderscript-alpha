@@ -3,7 +3,7 @@ export class Symbol {
   readonly namespace?: string
 
   static intern (name: string, namespace?: string) {
-    new this(name, namespace);
+    return new this(name, namespace);
   }
 
   constructor(name: string, namespace?: string) {
