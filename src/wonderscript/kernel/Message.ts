@@ -12,8 +12,8 @@ export class Message extends Symbol {
     args?: Readonly<unknown[]>
   ) {
     super(name, namespace);
-    this.args = args;
-    this.ref = ref;
+    this.args ??= args;
+    this.ref ??= ref;
   }
 
   isQuery() {

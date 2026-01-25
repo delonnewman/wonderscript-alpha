@@ -8,7 +8,7 @@ export class Symbol {
 
   constructor(name: string, namespace?: string) {
     this.name = name;
-    this.namespace = namespace;
+    this.namespace ??= namespace;
   }
 
   toString() {
