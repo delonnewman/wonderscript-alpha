@@ -1,25 +1,26 @@
-import { Dispatch } from "./Dispatch";
+import { Statement } from "./Statement";
 import { Message } from "./Message";
+import { Recipient } from "./Dispatch";
 
 export class Script {
-  #dispatches: Dispatch[];
+  #statements: Statement[];
 
   constructor() {
-    this.#dispatches = [];
+    this.#statements = [];
   }
 
   get dispatches () {
-    return Object.freeze(this.#dispatches.slice(0));
+    return Object.freeze(this.#statements.slice(0));
   }
 
-  send(subject: Object, message: Message) {
-    this.#dispatches.push(new Dispatch(subject, message));
+  send(subject: Recipient, message: Message) {
+    this.#statements.push(new Statement(subject, message));
     return this;
   }
 
   execute() {
-    for (const dispatch of this.#dispatches) {
-      dispatch.execute()
+    for (const statement of this.#statements) {
+      statement.execute()
     }
   }
 }
