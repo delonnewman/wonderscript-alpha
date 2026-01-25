@@ -2,11 +2,11 @@ type Validator = (val: unknown) => boolean;
 type Subscriber = Function;
 
 export class Ref {
-  #value: unknown;
+  #value?: unknown;
   #validator?: Validator
   #subscribers: Subscriber[];
 
-  constructor(value: unknown, validator?: Validator) {
+  constructor(value?: unknown, validator?: Validator) {
     this.#value = value;
     this.#validator = validator;
     this.#subscribers = [];
