@@ -2,7 +2,7 @@ import { Symbol } from "./Symbol";
 import { Ref } from "./Ref";
 
 export class Message extends Symbol {
-  readonly args: Readonly<unknown[]>;
+  readonly args?: Readonly<unknown[]>;
   readonly ref?: Ref;
 
   constructor(
