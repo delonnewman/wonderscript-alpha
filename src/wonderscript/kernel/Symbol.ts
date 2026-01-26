@@ -1,5 +1,6 @@
 import { Dispatch, Recipient } from "./Dispatch";
 import { Message } from "./Message";
+import { Script } from "./Script";
 
 export class Symbol implements Recipient {
   readonly name: string;
@@ -23,7 +24,7 @@ export class Symbol implements Recipient {
   constructor(name: string, namespace?: string) {
     this.name = name;
     this.namespace ??= namespace;
-    this.dispatch = new NativeDispatch(this);
+    this.dispatch = new NativeDispatch();
   }
 
   toString() {
@@ -35,23 +36,24 @@ export class Symbol implements Recipient {
 }
 
 export class NativeDispatch extends Dispatch {
-  #object: Object;
+  #methods: Map<string, Script>;
 
-  constructor(object: Object) {
+  constructor() {
     super();
-    this.#object = object;
+    this.#methods = new Map();
   }
 
-  lookup(msg: Message): Function {
-    let method = this.#object[msg.toString()];
-    if (method === undefined) {
+  lookup(msg: Message): Script {
+    let script = this.#methods.get(msg.toString());
+    if (script === undefined) {
       throw new Error(`Don't understand ${msg}`);
     }
 
-    return method;
+    return script;
   }
 
-  addMethod(msg: Message, method: Function) {
-    this.#object[msg.toString()] = method;
+  add(msg: Message, script: Script) {
+    this.#methods.set(msg.toString(), script);
+    return this;
   }
 }

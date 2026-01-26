@@ -24,7 +24,7 @@ export class AlienDispatch extends Dispatch {
   }
 
   lookup(msg: Message): Function {
-    let method = this.#object[msg.name];
+    let method = this.#object[msg.name.name];
     if (method === undefined) {
       throw new Error(`Don't understand ${msg}`);
     }
@@ -36,7 +36,8 @@ export class AlienDispatch extends Dispatch {
     return method;
   }
 
-  addMethod(msg: Message, method: Function) {
-    this.#object[msg.name] = method;
+  add(msg: Message, method: Function) {
+    this.#object[msg.name.name] = method;
+    return this;
   }
 }

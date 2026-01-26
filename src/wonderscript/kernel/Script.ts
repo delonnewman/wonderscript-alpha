@@ -19,6 +19,12 @@ export class Script {
     return this;
   }
 
+  bind(subject: Recipient) {
+    return (..._: unknown[]) => {
+      this.execute();
+    }
+  }
+
   execute() {
     // TODO: how will we pass the current continuation when requested?
     for (const transmission of this.transmissions) {
