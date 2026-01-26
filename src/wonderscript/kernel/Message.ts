@@ -1,31 +1,31 @@
-import { Ref } from "./Ref";
 import { Symbol } from "./Symbol";
+import { Continuation } from "./Continuation";
 
 export class Message {
   readonly name: Symbol;
   readonly args?: Readonly<unknown[]>;
-  readonly ref?: Ref;
+  readonly continuation?: Continuation;
 
   static intern(
     value: string,
-    options: { ref?: Ref; args?: Readonly<unknown[]> } = {}
+    options: { continue?: Continuation; args?: Readonly<unknown[]> } = {}
   ) {
     const symbol = Symbol.intern(value);
-    return new this(symbol, options.ref, options.args);
+    return new this(symbol, options.continue, options.args);
   }
 
   constructor(
     name: Symbol,
-    ref?: Ref,
+    continuation?: Continuation,
     args?: Readonly<unknown[]>
   ) {
     this.name = name;
     this.args ??= args;
-    this.ref ??= ref;
+    this.continuation ??= continuation;
   }
 
   isQuery() {
-    return this.ref !== undefined;
+    return this.continuation !== undefined;
   }
 
   isUnary() {
