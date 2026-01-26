@@ -1,33 +1,25 @@
 import { Ref } from "./Ref";
+import { Symbol } from "./Symbol";
 
 export class Message {
-  readonly name: string;
-  readonly namespace?: string;
+  readonly name: Symbol;
   readonly args?: Readonly<unknown[]>;
   readonly ref?: Ref;
 
-  static intern(value: string, options: { ref?: Ref, args?: Readonly<unknown[]> }) {
-    const [x, y] = value.split('$');
-
-    let name: string, ns: string | undefined;
-    if (y) {
-      ns = x;
-      name = y;
-    } else {
-      name = x;
-    }
-
-    return new Message(name, ns, options.ref, options.args);
+  static intern(
+    value: string,
+    options: { ref?: Ref; args?: Readonly<unknown[]> } = {}
+  ) {
+    const symbol = Symbol.intern(value);
+    return new this(symbol, options.ref, options.args);
   }
 
   constructor(
-    name: string,
-    namespace?: string,
+    name: Symbol,
     ref?: Ref,
     args?: Readonly<unknown[]>
   ) {
     this.name = name;
-    this.namespace ??= namespace;
     this.args ??= args;
     this.ref ??= ref;
   }
@@ -42,8 +34,8 @@ export class Message {
 
   toString() {
     if (this.isUnary()) {
-      return this.name;
+      return this.name.toString();
     }
-    return `${str}$${this.args.length}`;
+    return `${this.name.toString()}$${this.args.length}`;
   }
 }
