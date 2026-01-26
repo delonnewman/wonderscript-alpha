@@ -24,19 +24,19 @@ export class AlienDispatch extends Dispatch {
   }
 
   lookup(msg: Message): Function {
-    let method = this.#object[msg.toString()];
+    let method = this.#object[msg.name];
     if (method === undefined) {
       throw new Error(`Don't understand ${msg}`);
     }
 
     if (typeof method !== "function") {
-      method = getProperty.bind(this.#object, msg.toString());
+      method = getProperty.bind(this.#object, msg.name);
     }
 
     return method;
   }
 
   addMethod(msg: Message, method: Function) {
-    this.#object[msg.toString()] = method;
+    this.#object[msg.name] = method;
   }
 }
