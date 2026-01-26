@@ -9,11 +9,7 @@ export { hashCode } from "./utils";
 export { cons, first, next, isSequence } from "./Seq";
 export { merge } from "./merge";
 export { str } from "./str";
-export {
-  isString,
-  isInteger,
-  isIterator,
-} from "../js";
+export { isString, isInteger, isIterator } from "../js";
 
 const EMPTY_ARRAY: Readonly<unknown[]> = Object.freeze([]);
 

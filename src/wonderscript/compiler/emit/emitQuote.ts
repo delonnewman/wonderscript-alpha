@@ -1,8 +1,4 @@
-import {
-  isString,
-  map,
-  str,
-} from "../../lang/runtime";
+import { isString, map, str } from "../../lang/runtime";
 import {
   EMPTY_ARRAY,
   FALSE_SYM,

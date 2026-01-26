@@ -1,4 +1,3 @@
-
 import { Message } from "./Message";
 
 export interface Recipient {

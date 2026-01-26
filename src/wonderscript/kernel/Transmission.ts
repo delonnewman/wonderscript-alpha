@@ -13,7 +13,7 @@ export class Transmission {
   isQuery() {
     return this.message.isQuery();
   }
-  
+
   bind() {
     const method = this.subject.dispatch.lookup(this.message);
     return method.bind(this.subject);

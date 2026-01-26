@@ -13,7 +13,7 @@ export class Script {
     this.#references = new Map();
   }
 
-  get statements () {
+  get statements() {
     return Object.freeze(this.#statements.slice(0));
   }
 
@@ -34,7 +34,7 @@ export class Script {
 
   execute() {
     for (const statement of this.#statements) {
-      statement.execute()
+      statement.execute();
     }
   }
 }

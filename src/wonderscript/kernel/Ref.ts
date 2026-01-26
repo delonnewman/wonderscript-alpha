@@ -3,7 +3,7 @@ type Subscriber = Function;
 
 export class Ref {
   #value?: unknown;
-  #validator?: Validator
+  #validator?: Validator;
   #subscribers: Subscriber[];
 
   constructor(value?: unknown, validator?: Validator) {
@@ -25,7 +25,7 @@ export class Ref {
     if (this.#validator && !this.#validator(val)) {
       throw new Error(`${val} is not a valid value`);
     }
-    
+
     for (const subscriber of this.#subscribers) {
       subscriber.call(this, this.#value, val);
     }
