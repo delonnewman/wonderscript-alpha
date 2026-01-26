@@ -3,18 +3,19 @@ import { Recipient } from "./Dispatch";
 import { Ref } from "./Ref";
 import { Symbol } from "./Symbol";
 import { Transmission } from "./Transmission";
+import { Continuation } from "./Continuation";
 
 export class Script {
-  #statements: Transmission[];
+  #transmissions: Continuation;
   #references: Map<string, Ref>;
 
   constructor() {
-    this.#statements = [];
+    this.#transmissions = new Continuation();
     this.#references = new Map();
   }
 
-  get statements() {
-    return Object.freeze(this.#statements.slice(0));
+  get transmissions() {
+    return this.#transmissions.toArray();
   }
 
   createReference(name: Symbol, value?: unknown) {
@@ -28,13 +29,13 @@ export class Script {
   }
 
   send(subject: Recipient, message: Message) {
-    this.#statements.push(new Transmission(subject, message));
+    this.#transmissions = this.#transmissions.append(new Transmission(subject, message));
     return this;
   }
 
   execute() {
-    for (const statement of this.#statements) {
-      statement.execute();
+    for (const transmission of this.transmissions) {
+      transmission.execute();
     }
   }
 }
