@@ -1,11 +1,11 @@
-import { Statement } from "./Statement";
 import { Message } from "./Message";
 import { Recipient } from "./Dispatch";
-import { Symbol } from "./Symbol";
 import { Ref } from "./Ref";
+import { Symbol } from "./Symbol";
+import { Transmission } from "./Transmission";
 
 export class Script {
-  #statements: Statement[];
+  #statements: Transmission[];
   #references: Map<string, Ref>;
 
   constructor() {
@@ -28,7 +28,7 @@ export class Script {
   }
 
   send(subject: Recipient, message: Message) {
-    this.#statements.push(new Statement(subject, message));
+    this.#statements.push(new Transmission(subject, message));
     return this;
   }
 

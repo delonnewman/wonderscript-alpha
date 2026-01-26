@@ -1,7 +1,7 @@
 import { Recipient } from "./Dispatch";
 import { Message } from "./Message";
 
-export class Statement {
+export class Transmission {
   readonly subject: Recipient;
   readonly message: Message;
 
