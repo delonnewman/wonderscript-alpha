@@ -1,33 +1,35 @@
 import { Message } from "./Message";
 import { Recipient } from "./Dispatch";
-import { Transmission } from "./Transmission";
-import { Continuation } from "./Continuation";
+import { Transmission, TransmissionOptions } from "./Transmission";
 
 export class Script {
-  #transmissions: Continuation;
+  #transmissions: Transmission[];
 
   constructor() {
-    this.#transmissions = new Continuation();
+    this.#transmissions = [];
   }
 
   get transmissions() {
-    return this.#transmissions.toArray();
+    return this.#transmissions;
   }
 
-  send(subject: Recipient, message: Message) {
-    this.#transmissions = this.#transmissions.append(new Transmission(subject, message));
+  send(
+    receiver: Recipient,
+    message: Message,
+    options: TransmissionOptions = {}
+  ) {
+    this.#transmissions.push(new Transmission(receiver, message, options));
     return this;
   }
 
   bind(subject: Recipient) {
     return (..._: unknown[]) => {
       this.execute();
-    }
+    };
   }
 
   execute() {
-    // TODO: how will we pass the current continuation when requested?
-    for (const transmission of this.transmissions) {
+    for (const transmission of this.#transmissions) {
       transmission.execute();
     }
   }

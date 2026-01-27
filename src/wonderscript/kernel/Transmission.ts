@@ -1,22 +1,36 @@
+import { Continuation } from "./Continuation";
 import { Recipient } from "./Dispatch";
 import { Message } from "./Message";
 
-export class Transmission {
-  readonly subject: Recipient;
-  readonly message: Message;
+export type TransmissionOptions = {
+  sender?: Recipient;
+  continue?: Continuation;
+};
 
-  constructor(subject: Recipient, message: Message) {
-    this.subject = subject;
+export class Transmission {
+  readonly reciever: Recipient;
+  readonly message: Message;
+  readonly sender?: Recipient;
+  readonly continuation?: Continuation;
+
+  constructor(
+    subject: Recipient,
+    message: Message,
+    options: TransmissionOptions = {}
+  ) {
+    this.reciever = subject;
     this.message = message;
+    this.sender ??= options.sender;
+    this.continuation ??= options.continue;
   }
 
-  isQuery() {
-    return this.message.isQuery();
+  isRequest() {
+    return this.sender !== undefined;
   }
 
   bind() {
-    const method = this.subject.dispatch.lookup(this.message);
-    return method.bind(this.subject);
+    const method = this.reciever.dispatch.lookup(this.message);
+    return method.bind(this.reciever);
   }
 
   execute() {
