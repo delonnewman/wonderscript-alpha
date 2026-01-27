@@ -30,7 +30,7 @@ export class Transmission {
 
   bind() {
     const method = this.reciever.dispatch.lookup(this.message);
-    return method.bind(this.reciever);
+    return method.bind(this);
   }
 
   execute() {
