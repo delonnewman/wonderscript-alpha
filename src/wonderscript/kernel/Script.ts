@@ -22,7 +22,7 @@ export class Script {
     return this;
   }
 
-  bind(subject: Recipient) {
+  bind(transmission: Transmission) {
     return (..._: unknown[]) => {
       this.execute();
     };

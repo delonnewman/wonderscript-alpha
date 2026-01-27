@@ -1,7 +1,8 @@
 import { Message } from "./Message";
+import { Transmission } from "./Transmission";
 
 export interface Method {
-  bind(subject: Recipient): Function;
+  bind(transmission: Transmission): Function;
 }
 
 export interface Recipient {
