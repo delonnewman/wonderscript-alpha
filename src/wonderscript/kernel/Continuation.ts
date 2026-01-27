@@ -24,6 +24,12 @@ export class Continuation {
   }
 
   toArray() {
-    return Object.freeze([]);
+    const array = [];
+    let cont: Continuation | undefined = this;
+    while (cont) {
+      array.push(cont);
+      cont = cont.next;
+    }
+    return array;
   }
 }
