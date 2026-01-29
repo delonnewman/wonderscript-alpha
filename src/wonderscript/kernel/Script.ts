@@ -1,16 +1,13 @@
 import { Message } from "./Message";
 import { Recipient } from "./Dispatch";
 import { Transmission, TransmissionOptions } from "./Transmission";
+import { ExecutionContext } from "./ExecutionContext";
 
 export class Script {
-  #transmissions: Transmission[];
+  #ctx: ExecutionContext;
 
-  constructor() {
-    this.#transmissions = [];
-  }
-
-  get transmissions() {
-    return this.#transmissions;
+  constructor(context?: ExecutionContext) {
+    this.#ctx = new ExecutionContext({ parent: context });
   }
 
   send(
@@ -18,8 +15,12 @@ export class Script {
     message: Message,
     options: TransmissionOptions = {}
   ) {
-    this.#transmissions.push(new Transmission(receiver, message, options));
+    this.#ctx.addTransmission(new Transmission(receiver, message, options));
     return this;
+  }
+
+  child() {
+    return new Script(this.#ctx);
   }
 
   bind(transmission: Transmission) {
@@ -29,8 +30,6 @@ export class Script {
   }
 
   execute() {
-    for (const transmission of this.#transmissions) {
-      transmission.execute();
-    }
+    this.#ctx.execute();
   }
 }
