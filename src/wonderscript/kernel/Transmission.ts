@@ -1,17 +1,14 @@
-import { Continuation } from "./Continuation";
-import { Recipient } from "./Dispatch";
 import { Message } from "./Message";
+import { Recipient } from "./Dispatch";
 
 export type TransmissionOptions = {
   sender?: Recipient;
-  continue?: Continuation;
 };
 
 export class Transmission {
   readonly reciever: Recipient;
   readonly message: Message;
   readonly sender?: Recipient;
-  readonly continuation?: Continuation;
 
   constructor(
     subject: Recipient,
@@ -21,7 +18,6 @@ export class Transmission {
     this.reciever = subject;
     this.message = message;
     this.sender ??= options.sender;
-    this.continuation ??= options.continue;
   }
 
   isRequest() {
