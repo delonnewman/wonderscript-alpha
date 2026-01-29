@@ -15,8 +15,8 @@ export class Transmission {
     message: Message,
     options: TransmissionOptions = {}
   ) {
-    this.reciever = subject;
     this.message = message;
+    this.reciever = subject;
     this.sender ??= options.sender;
   }
 
