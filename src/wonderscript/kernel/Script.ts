@@ -1,25 +1,53 @@
-import { Dispatch } from "./Dispatch";
 import { Message } from "./Message";
+import { Recipient } from "./Dispatch";
+import { Transmission, TransmissionOptions } from "./Transmission";
+import { ExecutionContext } from "./ExecutionContext";
 
 export class Script {
-  #dispatches: Dispatch[];
+  #ctx: ExecutionContext;
+  #bindings: Map<string, unknown>;
 
-  constructor() {
-    this.#dispatches = [];
+  constructor(context?: ExecutionContext) {
+    this.#ctx = new ExecutionContext({ parent: context });
+    this.#bindings = new Map();
   }
 
-  get dispatches () {
-    return Object.freeze(this.#dispatches.slice(0));
-  }
-
-  send(subject: Object, message: Message) {
-    this.#dispatches.push(new Dispatch(subject, message));
+  send(
+    receiver: Recipient,
+    message: Message,
+    options: TransmissionOptions = {}
+  ) {
+    this.#ctx.addTransmission(new Transmission(receiver, message, options));
     return this;
   }
 
-  execute() {
-    for (const dispatch of this.#dispatches) {
-      dispatch.execute()
+  set(name: string, value: unknown) {
+    this.#bindings.set(name, value);
+    return value;
+  }
+
+  get(name: string) {
+    return this.#bindings.get(name);
+  }
+
+  child() {
+    return new Script(this.#ctx);
+  }
+
+  bind(transmission: Transmission) {
+    this.set("message", transmission.message);
+    this.set("receiver", transmission.reciever);
+
+    if (transmission.sender) {
+      this.set("sender", transmission.sender);
     }
+
+    return (..._: unknown[]) => {
+      this.execute();
+    };
+  }
+
+  execute() {
+    this.#ctx.execute();
   }
 }

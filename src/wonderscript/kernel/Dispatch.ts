@@ -1,26 +1,15 @@
 import { Message } from "./Message";
+import { Transmission } from "./Transmission";
 
-// TODO: This should be renamed to MessageDispatch or Statement or something similar
-export class Dispatch {
-  readonly subject: Object;
-  readonly message: Message;
+export interface Method {
+  bind(transmission: Transmission): Function;
+}
 
-  constructor(object: Object, message: Message) {
-    this.subject = object;
-    this.message = message;
-  }
+export interface Recipient {
+  dispatch: Dispatch;
+}
 
-  execute() {
-    // TODO: Use Dispatch interface
-    let method = this.subject[this.message.toString()];
-    if (method === undefined) {
-      method = this.subject[this.message.name];
-    }
-
-    if (typeof method !== "function") {
-      throw new Error(`Don't understand ${this.message}`);
-    }
-
-    method.apply(this.subject, this.message.args);
-  }
+export abstract class Dispatch {
+  abstract lookup(msg: Message): Method;
+  abstract add(msg: Message, script: Method): Dispatch;
 }

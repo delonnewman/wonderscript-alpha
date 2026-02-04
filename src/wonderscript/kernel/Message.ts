@@ -1,24 +1,33 @@
 import { Symbol } from "./Symbol";
-import { Ref } from "./Ref";
 
-// Queries are messages with a ref
-export class Message extends Symbol {
-  readonly args: Readonly<unknown[]>;
-  readonly ref?: Ref;
+export class Message {
+  readonly name: Symbol;
+  readonly args?: Readonly<unknown[]>;
+
+  static intern(
+    value: string,
+    options: { args?: Readonly<unknown[]> } = {}
+  ) {
+    const symbol = Symbol.intern(value);
+    return new this(symbol, options.args);
+  }
 
   constructor(
-    name: string,
-    namespace?: string,
-    ref?: Ref,
-    args: Readonly<unknown[]> = []
+    name: Symbol,
+    args?: Readonly<unknown[]>
   ) {
-    super(name, namespace);
-    this.args = args;
-    this.ref = ref;
+    this.name = name;
+    this.args ??= args;
+  }
+
+  isUnary() {
+    return this.args === undefined;
   }
 
   toString() {
-    const str = super.toString();
-    return `${str}$${this.args.length}`;
+    if (this.isUnary()) {
+      return this.name.toString();
+    }
+    return `${this.name.toString()}$${this.args.length}`;
   }
 }
