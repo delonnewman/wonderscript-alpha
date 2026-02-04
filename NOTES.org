@@ -5,3 +5,6 @@ https://github.com/mozilla/source-map
 
 * JavaScript Generation
 https://github.com/syntax-tree/estree-util-to-js
+
+* Object Model
+https://files.spritely.institute/docs/guile-goblins/0.17.0/What-is-Goblins_003f.html
