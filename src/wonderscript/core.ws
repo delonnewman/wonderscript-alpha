@@ -210,7 +210,7 @@
   "Define a type alias"
   {:added 1.0}
   (name type-val)
-  (let (nm (.withMeta name {:typedef true}))
+  (let (nm (send name (withMeta {:typedef true})))
     (array 'def nm type-val)))
 
 (defn type?
