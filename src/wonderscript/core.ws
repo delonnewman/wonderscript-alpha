@@ -192,10 +192,10 @@
                  (array? (rest 2)) (rest 2)
                  :else (throw (js/Error. "an arglist is required")))
           body (cond
-                 (and doc meta) (.slice rest 3)
-                 (or doc meta) (.slice rest 2)
-                 :else (.slice rest 1))
-          nm (.withMeta name (merge meta {:doc doc})))
+                 (and doc meta) (send rest (slice 3))
+                 (or doc meta) (send rest (slice 2))
+                 :else (send rest (slice 1)))
+          nm (send name (withMeta (merge meta {:doc doc}))))
      (array 'def nm (cons 'fn (cons args body))))))
 
 (defn ^:macro defmacro
