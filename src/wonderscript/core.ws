@@ -275,10 +275,10 @@
   (array 'cond (array 'not pred) (cons 'begin acts)))
 
 (defn true?
-  (x) (or (identical? true x) (identical? true (.valueOf x))))
+  (x) (or (identical? true x) (identical? true (send x :valueOf))))
 
 (defn false?
-  (x) (or (identical? false x) (identical? false (.valueOf x))))
+  (x) (or (identical? false x) (identical? false (send x :valueOf))))
 
 (defn falsy?
   (obj) (or (nil? obj) (false? obj)))
@@ -290,17 +290,17 @@
 
 (def apply
   (fn (f args)
-    (.invoke f args)))
+    (send f (invoke args))))
 
 (def call
   (fn (f &args)
-    (.invoke f args)))
+    (send f (invoke args))))
 
 (defn freeze!
-  (object) (.freeze js/Object object))
+  (object) (send js/Object (freeze object)))
 
 (defn frozen?
-  (object) (.isFrozen js/Object object))
+  (object) (send js/Object (isFrozen object)))
 
 (defn immutable?
   (value) (or (js-primitive-type? value) (frozen? value)))
