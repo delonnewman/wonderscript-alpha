@@ -318,21 +318,21 @@
      (array 'def nm
             (array 'if (array 'immutable? value)
                    value
-                   (array 'throw (array 'js/Error. "only immutable values can be constants")))))))
+                   (array 'throw (array 'new 'js/Error "only immutable values can be constants")))))))
 
 (defmacro defvar
   ((name) (array 'defvar name nil nil))
   ((name value)
    (array 'defvar name nil value))
   ((name doc value)
-   (let (nm (.withMeta name {:doc doc :dynamic true}))
+   (let (nm (send name (withMeta {:doc doc :dynamic true})))
      (array 'def nm value))))
 
 (defmacro var
   ((name) (array 'var name nil))
   ((name value)
-   (let (nm (.withMeta name {:mutable true}))
-     (.define *ctx* nm value)
+   (let (nm (send name (withMeta {:mutable true})))
+     (send *ctx* (define nm value))
      value)))
 
 (defmacro this-context
@@ -345,9 +345,9 @@
 
 (defn clone
   (object)
-  (if (.isArray js/Array object)
-    (.slice object 0)
-    (.assign js/Object (.create js/Object nil) object)))
+  (if (send js/Array (isArray object))
+    (send object (slice 0))
+    (send js/Object (assign (send js/Object (create nil)) object))))
 
 (defn js-object-tag
   (object)
@@ -412,14 +412,14 @@
 ;; Numerical
 
 ;; numerical constants
-(defconst $pi      (.-PI js/Math))
-(defconst $e       (.-E js/Math))
-(defconst $log10e  (.-LOG10e js/Math))
-(defconst $log2e   (.-LOG2e js/Math))
-(defconst $ln10    (.-LN10 js/Math))
-(defconst $ln2     (.-LN2 js/Math))
-(defconst $sqrt1-2 (.-SQRT1_2 js/Math))
-(defconst $sqrt2   (.-SQRT2 js/Math))
+(defconst $pi      (slot-get js/Math :PI))
+(defconst $e       (slot-get js/Math :E))
+(defconst $log10e  (slot-get js/Math :LOG10e))
+(defconst $log2e   (slot-get js/Math :LOG2e))
+(defconst $ln10    (slot-get js/Math :LN10))
+(defconst $ln2     (slot-get js/Math :LN2))
+(defconst $sqrt1-2 (slot-get js/Math :SQRT1_2))
+(defconst $sqrt2   (slot-get js/Math :SQRT2))
 
 (defn ->integer
   (s) (js/parseInt s 10))
@@ -437,13 +437,13 @@
   (operator identity)
   (let (args (gensym "args"))
     (array 'fn*
-           (array (symbol (str "&" (.name args))))
+           (array (symbol (str "&" (send args :name))))
            (array 'cond
-                  (array 'identical? 0 (array '.-length args))
+                  (array 'identical? 0 (array 'slot-get args :length))
                   (if-not (nil? identity)
                     identity
-                    (array 'js/Error. "wrong number of arguments (expected at least 1 got 0)"))
-                  (array 'identical? 1 (array '.-length args))
+                    (array 'new 'js/Error "wrong number of arguments (expected at least 1 got 0)"))
+                  (array 'identical? 1 (array 'slot-get args :length))
                   (if (.equals operator '-)
                     (array '* -1 (array 'array-get args 0))
                     (array 'array-get args 0))
@@ -461,7 +461,7 @@
 (def / (<var-op> / nil))
 
 (defn **
-  (n m) (.pow js/Math n m))
+  (n m) (send js/Math (pow n m)))
 
 (defn sum
   "Take the sum of the values in the collection"
@@ -501,26 +501,26 @@
 (defn rand
   (n)
   (if n
-    (.floor js/Math (* n (.random js/Math)))
-    (.random js/Math)))
+    (send js/Math (floor (* n (send js/Math :random))))
+    (send js/Math :random)))
 
 (defn floor
-  (n) (.floor js/Math n))
+  (n) (send js/Math (floor n)))
 
 (defn ceil
-  (n) (.ceil js/Math n))
+  (n) (send js/Math (ceil n)))
 
 (defn round
-  ((n) (.round js/Math n))
-  ((n factor) (* factor (.round js/Math (/ n factor)))))
+  ((n) (send js/Math (round n)))
+  ((n factor) (* factor (send js/Math (round (/ n factor))))))
 
 ;; Basic Array, Strings & ArrayLike
 
-(defconst $empty-array (freeze! []))
+(defconst $empty-array (freeze! (array)))
 
 (defn concat
   (&arrays)
-  (.apply (.-concat (.-prototype js/Array)) $empty-array arrays))
+  (send (slot-get (slot-get js/Array :prototype) :concat) (apply $empty-array arrays)))
 
 (defn make-array
   (() (new js/Array))
@@ -548,32 +548,32 @@
 
 (defn push!
   (array value)
-  (.call (.-push (.-prototype js/Array)) array value))
+  (send (slot-get (slot-get js/Array :prototype) :push) (call array value)))
 
 (defn pop!
   (array)
-  (.call (.-pop (.-prototype js/Array)) array))
+  (send (slot-get (slot-get js/Array :prototype) :pop) (call array)))
 
 (defn unshift!
   (array value)
-  (.call (.-unshift (.-prototype js/Array)) array value))
+  (send (slot-get (slot-get js/Array :prototype) :unshift) (call array value)))
 
 (defn shift!
   (array)
-  (.call (.-shift (.-prototype js/Array)) array))
+  (send (slot-get (slot-get js/Array :prototype) :shift) (call array)))
 
 (defn <=>
   (a b)
   (cond
     (< a b) -1
     (> a b) 1
-    (slot? a "cmp") (.cmp a b)
-    (slot? b "cmp") (.cmp b a)
+    (slot? a "cmp") (send a (cmp b))
+    (slot? b "cmp") (send b (cmp a))
     :else 0))
 
 (defn sort!
   (array)
-  (.call (.-sort (.-prototype js/Array)) array <=>))
+  (send (slot-get (slot-get js/Array :prototype) :sort) (call array <=>)))
 
 (defn sort
   (array)
@@ -581,17 +581,17 @@
 
 (defn fill!
   ((array value)
-   (.fill array value))
+   (send array (fill value)))
   ((array value start)
-   (.fill array value start))
+   (send array (fill value start)))
   ((array value start end)
-   (.fill array value start end)))
+   (send array (fill value start end))))
 
 (defn reverse!
   (array)
   (unless (array? array)
-    (throw (js/Error. (str "no automatic conversion of " (type array) " to array"))))
-  (.call (.-reverse (.-prototype js/Array)) array))
+    (throw (new js/Error (str "no automatic conversion of " (type array) " to array"))))
+  (send (slot-get (slot-get js/Array :prototype) :reverse) (call array)))
 
 (defn reverse
   (col)
@@ -601,21 +601,21 @@
 
 (defn index-of
   (array value)
-  (.call (.-indexOf (.-prototype js/Array)) array value))
+  (send (slot-get (slot-get js/Array :prototype) :indexOf) (call array value)))
 
 (defn length
-  (array) (.-length array))
+  (array) (slot-get array :length))
 
 ;; Strings
 
-(defconst $white-space-regex (freeze! (js/RegExp. "\\s+")))
+(defconst $white-space-regex (freeze! (new js/RegExp "\\s+")))
 (defconst $empty-string "")
 
 (defn blank?
   (object)
   (or (nil? object) (zero? (length object))
       (and (string? object)
-           (identical? 0 (.-length (.replace object $white-space-regex $empty-string))))))
+           (identical? 0 (slot-get (send object (replace $white-space-regex $empty-string)) :length)))))
 
 (defn present?
   (object)
@@ -628,53 +628,53 @@
     object))
 
 (defn trim
-  (s) (.trim s))
+  (s) (send s :trim))
 
 (defn trim-leading
-  (s) (.trimStart s))
+  (s) (send s :trimStart))
 
 (defn trim-trailing
-  (s) (.trimEnd s))
+  (s) (send s :trimEnd))
 
 (defn starts-with?
   (s ch)
   (if (or (keyword? s) (symbol? s))
-    (.startsWith (name s))
-    (.startsWith s ch)))
+    (send (name s) (startsWith ch))
+    (send s (startsWith ch))))
 
 (defn ends-with?
   (s ch)
   (if (or (keyword? s) (symbol? s))
-    (.startsWith (name s))
-    (.endsWith s ch)))
+    (send (name s) (endsWith ch))
+    (send s (endsWith ch))))
 
-(defconst $ending-new-line-pattern (freeze! (js/RegExp. "(\\n|\\r\\n)$")))
-(defconst $new-line-pattern (freeze! (js/RegExp. "\\r\\n|\\n")))
+(defconst $ending-new-line-pattern (freeze! (new js/RegExp "(\\n|\\r\\n)$")))
+(defconst $new-line-pattern (freeze! (new js/RegExp "\\r\\n|\\n")))
 
 (defn chomp
-  (s) (.replace s $ending-new-line-pattern $empty-string))
+  (s) (send s (replace $ending-new-line-pattern $empty-string)))
 
 (defn lines
-  (s) (.split s $new-line-pattern))
+  (s) (send s (replace $new-line-pattern)))
 
 (defn chop
-  (s) (.slice s 0 (- (length s) 1)))
+  (s) (send s (slice 0 (- (length s) 1))))
 
 (defn chr
   (ch)
   (if (number? ch)
-    (.fromCodePoint js/String ch)
-    (.fromCodePoint js/String (->integer ch))))
+    (send js/String (fromCodePoint ch))
+    (send js/String (fromCodePoint (->integer ch)))))
 
 (defn chrs
   (array)
-  (.join (.map array chr) $empty-string))
+  (send (send array (map chr)) (join $empty-string)))
 
 (defn upcase
-  (s) (.toUpperCase s))
+  (s) (send s :toUpperCase))
 
 (defn downcase
-  (s) (.toLowerCase s))
+  (s) (send s :toLowerCase))
 
 (defn capitalize
   (s) (str (.toUpperCase (.at s 0)) (.slice s 1 (.-length s))))
