@@ -239,17 +239,17 @@
   ((name)
    (cond
      (keyword? name) name
-     (symbol? name) (.intern wonderscript.lang/Keyword (.name name) (.namespace name))
-     (string? name) (.intern wonderscript.lang/Keyword name)))
-  ((ns name) (.intern wonderscript.lang/Keyword name ns)))
+     (symbol? name) (send wonderscript.lang/Keyword (intern (send name :name) (send name :namespace)))
+     (string? name) (send wonderscript.lang/Keyword (intern name))))
+  ((ns name) (send wonderscript.lang/Keyword (intern name ns))))
 
 (defn symbol
   ((name)
    (cond
      (symbol? name) name
-     (keyword? name) (.intern wonderscript.lang/Symbol (.name name) (.namespace name))
-     (string? name) (.intern wonderscript.lang/Symbol name)))
-  ((ns name) (.intern wonderscript.lang/Symbol name ns)))
+     (keyword? name) (send wonderscript.lang/Symbol (intern (send name :name) (send name :namespace)))
+     (string? name) (send wonderscript.lang/Symbol (intern name))))
+  ((ns name) (send wonderscript.lang/Symbol (intern name ns))))
 
 (defn ==
   (a b)
