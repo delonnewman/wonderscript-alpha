@@ -147,30 +147,32 @@
        (assoc-array? x)
        (let (arglists (map first xs)
              parsed (map parsed-args arglists)
-             arities (.sort (map #(length %) arglists) #(cond (< %1 %2) -1 (> %1 %2) 1 :else 0))
-             splat (.some parsed (fn* (list) (.some list #(:splat %))))
+             arities (send (map #(length %) arglists) (sort #(cond (< %1 %2) -1 (> %1 %2) 1 :else 0)))
+             splat (send parsed (some (fn* (list) (send list (some #(:splat %))))))
              arity-str (if splat (str (arities 0) " or more") (.join arities " or "))
              argsym (gensym "args"))
          (array 'fn*
                 (array (.intern wonderscript.lang/Symbol (str "&" argsym)))
                 (cons 'cond
-                      (.concat
-                       (.flatMap xs
-                                 (fn* (x i)
-                                      (array (arity-validation-forms (parsed i) argsym)
-                                             (let-bindings-form x argsym))))
-                       (array :else
-                              (array 'throw
-                                     (array 'js/Error.
-                                            (array 'str "wrong number of arguments (given "
-                                                   (array 'length argsym) ", expected " arity-str ")"))))))))
+                      (send
+                       (send xs
+                             (flatMap
+                              (fn* (x i)
+                                   (array (arity-validation-forms (parsed i) argsym)
+                                          (let-bindings-form x argsym)))))
+                       (concat
+                        (array :else
+                               (array 'throw
+                                      (array 'js/Error.
+                                             (array 'str "wrong number of arguments (given "
+                                                    (array 'length argsym) ", expected " arity-str ")")))))))))
        :else
          (let (parsed (parsed-args x)
                arity (length x)
-               splat (.some parsed #(:splat %))
+               splat (send parsed (some #(:splat %)))
                arity-str (if splat (str arity " or more") (str arity))
                argsym (gensym "args"))
-           (array 'fn* (array (.intern wonderscript.lang/Symbol (str "&" argsym)))
+           (array 'fn* (array (send wonderscript.lang/Symbol (intern (str "&" argsym))))
                   (array 'if (arity-validation-forms (parsed-args x) argsym)
                          (let-bindings-form xs argsym)
                          (array 'throw
@@ -190,15 +192,15 @@
                  (array? (rest 2)) (rest 2)
                  :else (throw (js/Error. "an arglist is required")))
           body (cond
-                 (and doc meta) (.slice rest 3)
-                 (or doc meta) (.slice rest 2)
-                 :else (.slice rest 1))
-          nm (.withMeta name (merge meta {:doc doc})))
+                 (and doc meta) (send rest (slice 3))
+                 (or doc meta) (send rest (slice 2))
+                 :else (send rest (slice 1)))
+          nm (send name (withMeta (merge meta {:doc doc}))))
      (array 'def nm (cons 'fn (cons args body))))))
 
 (defn ^:macro defmacro
   (name &rest)
-  (let (nm (.withMeta name {:macro true}))
+  (let (nm (send name (withMeta {:macro true})))
     (cons 'defn (cons nm rest))))
 
 (defn macro?
@@ -208,7 +210,7 @@
   "Define a type alias"
   {:added 1.0}
   (name type-val)
-  (let (nm (.withMeta name {:typedef true}))
+  (let (nm (send name (withMeta {:typedef true})))
     (array 'def nm type-val)))
 
 (defn type?
