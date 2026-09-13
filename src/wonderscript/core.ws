@@ -875,14 +875,15 @@
 ;; Maps & Sets
 
 (defn hash-map
-  (&kvs)
-  (when (odd? (length kvs))
-    (throw (js/Error. "key/value pairs should be even")))
-  (js/Map. (partition 2 kvs)))
+  (() (new js/Map))
+  ((&kvs)
+   (when (odd? (length kvs))
+     (throw (new js/Error "key/value pairs should be even")))
+   (new js/Map (partition 2 kvs))))
 
 (defn set
   (col)
-  (js/Set. (->array col)))
+  (new js/Set (->array col)))
 
 ;; TODO: Add merge and merge!
 
@@ -903,20 +904,20 @@
 ;; These are map specific
 (defn add-key!
   (map key value)
-  (.set map key value))
+  (send map (set key value)))
 
 (defn key?
   (map key)
-  (.call (.-has (.-prototype js/Map)) map key))
+  (send (slot-get js/Map :prototype :has) (call map key)))
 
 ;; These are set specific
 (defn add-member!
   (set member)
-  (.call (.-add (.-prototype js/Set)) set member))
+  (send (slot-get js/Set :prototype :add) (call set member)))
 
 (defn member?
   (set member)
-  (.call (.-has (.-prototype js/Set)) set member))
+  (send (slot-get js/Set :prototype :has) (call set member)))
 
 ;; Seq & Seqable
 

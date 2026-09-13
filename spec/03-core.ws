@@ -6,6 +6,29 @@
 (is (array? '(1 2 3)))
 (is (not (array? nil)))
 
+;; Hash Map
+
+(def a-map (hash-map :a 1 :b 2))
+(is (= a-map {:a 1 :b 2}))
+(is (key? a-map :a))
+(is (key? a-map :b))
+(is (not (key? a-map :c)))
+(is (= (size a-map) 2))
+(is (= (keys a-map) (array :a :b)))
+(is (= (values a-map) (array 1 2)))
+(is (= (entries a-map) (array (array :a 1) (array :b 2))))
+(add-key! a-map :c PI)
+(is (= (a-map :c) PI))
+
+;; Set
+
+(def a-set (set [1 2 3 3]))
+(is (= a-set #{1 2 3}))
+(is (member? a-set 1))
+(is (not (member? a-set 4)))
+(add-member! a-set 4)
+(is (member? a-set 4))
+
 ;; Named
 
 (is (nil? (namespace 'hey)))
