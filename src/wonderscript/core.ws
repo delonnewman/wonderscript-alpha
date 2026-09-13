@@ -841,7 +841,7 @@
 
 (defn partition (n a)
   (let (pairs (array))
-    (for-times (i (.floor js/Math (/ (length a) n)))
+    (for-times (i (send js/Math (floot (/ (length a) n))))
       (let (p (array))
         (for-times (j n)
           (array-set! p j (array-get a (+ (* n i) j))))
@@ -994,7 +994,7 @@
   (col)
   (cond
     (array-like? col) $empty-array
-    (has-method? col 'empty) (.empty col)
+    (has-method? col :empty) (send col :empty)
     :else
       (empty! (clone col))))
 
@@ -1003,7 +1003,7 @@
   (cond
     (array-like? col) (length col)
     (or (map? col) (set? col)) (size col)
-    (slot? col "count") (.count col)
+    (slot? col :count) (send col :count)
     :else
      (reduce (fn (n _) (inc n)) col 0)))
 
@@ -1013,7 +1013,7 @@
     (array-like? col) (not-identical? -1 (index-of col value))
     (map? col) (key? col value)
     (set? col) (member? col value)
-    (has-method? col 'includes) (.includes col value)
+    (has-method? col :includes) (send col (includes value))
     :else
       (throw "can't test inclusion")))
 
@@ -1032,8 +1032,8 @@
     ;; (see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Equality_comparisons_and_sameness#same-value-zero_equality)
     (and (js-primitive-number? a) (js-primitive-number? b))
        (or (identical? a b) (and (not-identical? a a) (not-identical? b b)))
-    (has-method? a 'equals) (.equals a b)
-    (has-method? b 'equals) (.equals b a)
+    (has-method? a :equals) (send a (equals b))
+    (has-method? b :equals) (send b (equals a))
     :else
       (identical? (hash-code a) (hash-code b))))
 
@@ -1042,11 +1042,11 @@
 (defmacro case-with
   (pred value &conditions)
   (cons 'cond
-         (.flatMap (partition 2 conditions)
-               (fn (x)
-                 (if (.equals :else (x 0))
+         (send (partition 2 conditions)
+               (flatMap (fn (x)
+                 (if (send :else (equals (x 0)))
                    x
-                   (array (array pred (x 0) value) (x 1)))))))
+                   (array (array pred (x 0) value) (x 1))))))))
 
 (defmacro case
   (value &conditions)
@@ -1149,7 +1149,7 @@
 
 (defn render-tag-list
   (form handlers)
-  (.join (map #(render-form % handlers) form) ""))
+  (send (map #(render-form % handlers) form) (join "")))
 
 (defn render-attr-tag
   (form handlers)
@@ -1191,13 +1191,13 @@
   (let (id (handler 0)
         event (handler 1)
         cb (handler 2))
-    (str "document.getElementById(" (.stringify js/JSON id) ").addEventListener("
-         (.stringify js/JSON event) ", " cb ")")))
+    (str "document.getElementById(" (send js/JSON (stringify id)) ").addEventListener("
+         (send js/JSON (stringify event)) ", " cb ")")))
 
 (defn render-event-handlers
   (handlers)
   (str "<script>"
-       (.join (map #(render-event-handler %) handlers) ";") "</script>"))
+       (send (map #(render-event-handler %) handlers) (join ";")) "</script>"))
 
 (defn html
   (form)
