@@ -81,6 +81,8 @@ export function reduce<Memo = unknown, Item = unknown>(
   if (init == null) {
     memo = first<Item>(xs);
     xs = next<Item>(xs);
+  } else {
+    memo = init
   }
 
   while (!isEmpty(xs)) {

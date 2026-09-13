@@ -1,5 +1,5 @@
 import { expect, test, describe } from "bun:test";
-import { partition } from "../../src/wonderscript/lang/runtime";
+import { partition, reduce } from "../../src/wonderscript/lang/runtime";
 
 describe("Runtime functions", () => {
   describe("partition", () => {
@@ -34,6 +34,18 @@ describe("Runtime functions", () => {
         [1, 2],
         [3, undefined],
       ]);
+    });
+  });
+
+  describe("reduce", () => {
+    test("with init", () => {
+      const sum = reduce((a, b) => a + b, [1, 2, 3], 0);
+      expect(sum).toEqual(6);
+    });
+
+    test("without init", () => {
+      const sum = reduce((a, b) => a + b, [1, 2, 3]);
+      expect(sum).toEqual(6);
     });
   });
 });
