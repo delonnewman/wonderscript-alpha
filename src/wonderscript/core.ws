@@ -404,22 +404,22 @@
   (slot-set! (slot-get klass :prototype) name f))
 
 (defmacro defclass
-  ((name) (array 'defclass name nil))
+  ((name) (array 'defclass name Object))
   ((name superclass)
-   (let (nm (.withMeta name {:typedef true}))
+   (let (nm (send name (withMeta {:typedef true})))
      (array 'def nm (array 'make-class superclass)))))
 
 ;; Numerical
 
 ;; numerical constants
-(defconst $pi      (slot-get js/Math :PI))
-(defconst $e       (slot-get js/Math :E))
-(defconst $log10e  (slot-get js/Math :LOG10e))
-(defconst $log2e   (slot-get js/Math :LOG2e))
-(defconst $ln10    (slot-get js/Math :LN10))
-(defconst $ln2     (slot-get js/Math :LN2))
-(defconst $sqrt1-2 (slot-get js/Math :SQRT1_2))
-(defconst $sqrt2   (slot-get js/Math :SQRT2))
+(defconst PI      (slot-get js/Math :PI))
+(defconst E       (slot-get js/Math :E))
+(defconst LOG10E  (slot-get js/Math :LOG10e))
+(defconst LOG2E   (slot-get js/Math :LOG2e))
+(defconst LN10    (slot-get js/Math :LN10))
+(defconst LN2     (slot-get js/Math :LN2))
+(defconst SQRT1-2 (slot-get js/Math :SQRT1_2))
+(defconst SQRT2   (slot-get js/Math :SQRT2))
 
 (defn ->integer
   (s) (js/parseInt s 10))
