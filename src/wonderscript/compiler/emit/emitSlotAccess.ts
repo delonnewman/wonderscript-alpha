@@ -12,18 +12,18 @@ export const SLOT_SYM = Symbol.intern(SLOT_STR);
 export type SlotAccessForm = [typeof SLOT_SYM, Form, Form];
 
 export const isSlotAccessForm = (form: Form): form is SlotAccessForm =>
-  isTaggedValue(form) && form[0].equals(SLOT_SYM) && form.length === 3;
+  isTaggedValue(form) && form[0].equals(SLOT_SYM);
 
 export function emitSlotAccess(form: Form, env: Context): string {
   if (!isSlotAccessForm(form))
     throw new CompilerError(`invalid ${SLOT_SYM} form: ${prStr(form)}`, env);
 
-  let [_, obj, slot] = form;
-  const slotName = emitSlotName(slot);
+  let [_, obj, ...slots] = form;
 
-  if (slotName) {
-    return `(${emit(obj, env)}).${slotName}`;
-  }
+  const slotName = slots.map((slot) => {
+    const name = emitSlotName(slot);
+    return name !== undefined ? `.${name}` : `[${emit(slot, env)}]`;
+  }).join('');
 
-  return `(${emit(obj, env)})[${emit(slot, env)}]`;
+  return `(${emit(obj, env)})${slotName}`;
 }
