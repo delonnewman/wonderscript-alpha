@@ -444,7 +444,7 @@
                     identity
                     (array 'new 'js/Error "wrong number of arguments (expected at least 1 got 0)"))
                   (array 'identical? 1 (array 'slot-get args :length))
-                  (if (.equals operator '-)
+                  (if (send operator (equals '-))
                     (array '* -1 (array 'array-get args 0))
                     (array 'array-get args 0))
                   :else
@@ -542,9 +542,11 @@
   ((col start end)
    (send col (slice start end))))
 
-; TODO: add support for seqs
 (defn at
-  (col n) (.at col n))
+  (col n)
+  (if (< n 0)
+    (send col (at (+ (length col) n)))
+    (send col (at n))))
 
 (defn push!
   (array value)
