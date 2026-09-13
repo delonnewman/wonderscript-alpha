@@ -870,7 +870,7 @@
   (let (a (make-array))
     (for-times (i n)
       (push! a s))
-    (.join a "")))
+    (send a (join ""))))
 
 ;; Maps & Sets
 
@@ -889,16 +889,16 @@
 ;; These are polymorphic on Maps ans Sets and any other
 ;; object that implements the method.
 (defn keys
-  (map) (->array (.keys map)))
+  (map) (->array (send map :keys)))
 
 (defn values
-  (map) (->array (.values map)))
+  (map) (->array (send map :values)))
 
 (defn entries
-  (map) (->array (.entries map)))
+  (map) (->array (send map :entries)))
 
 (defn size
-  (map) (.-size map))
+  (map) (slot-get map :size))
 
 ;; These are map specific
 (defn add-key!
