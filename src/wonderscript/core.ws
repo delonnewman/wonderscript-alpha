@@ -650,6 +650,7 @@
     (send (name s) (endsWith ch))
     (send s (endsWith ch))))
 
+; TODO: make defvar (dynamically scoped) once this has been added
 (defconst $ending-new-line-pattern (freeze! (new js/RegExp "(\\n|\\r\\n)$")))
 (defconst $new-line-pattern (freeze! (new js/RegExp "\\r\\n|\\n")))
 
@@ -679,10 +680,13 @@
   (s) (send s :toLowerCase))
 
 (defn capitalize
-  (s) (str (.toUpperCase (.at s 0)) (.slice s 1 (.-length s))))
+  (s)
+  (str
+   (send (send s (at 0)) :toUpperCase)
+   (send s (slice 1 (slot-get s :length)))))
 
 (defn words
-  (s) (.split s $white-space-regex))
+  (s) (send s (split $white-space-regex)))
 
 (defn titlecase
   (s) (.join (.map (words s) capitalize) " "))
