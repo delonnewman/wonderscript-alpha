@@ -229,7 +229,6 @@
 (deftype String    'string)
 (deftype Boolean   'boolean)
 (deftype Object    'object)
-
 (deftype Array     array?)
 (deftype Nil       nil?)
 
