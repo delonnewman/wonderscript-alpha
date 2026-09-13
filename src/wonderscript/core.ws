@@ -820,8 +820,8 @@
   (obj method-name)
   (let (val (js-property-value obj method-name))
     (if (function? val)
-      (.bind val obj)
-      (throw (js/Error. "undefined method")))))
+      (send val (bind obj))
+      (throw (new js/Error "undefined method")))))
 
 (defn has-method?
   (obj method)
@@ -829,7 +829,7 @@
 
 (defn bind
   (f object)
-  (.call (.-bind (.-prototype js/Function)) f object))
+  (send (slot-get js/Function :prototype :bind) (call f object)))
 
 (defn partial
   (f &args)

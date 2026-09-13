@@ -42,6 +42,7 @@
 (is (identical? "[object Date]" (js-object-tag (new js/Date))))
 (is (sealed? (seal! (js-object))))
 (is (not (extensible? (prevent-extensions! (js-object)))))
+(is (= ((bind (slot-get js/Array :prototype :toString) (array 1 2 3))) "1,2,3"))
 
 ;; OOP
 
