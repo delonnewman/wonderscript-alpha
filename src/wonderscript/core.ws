@@ -689,7 +689,8 @@
   (s) (send s (split $white-space-regex)))
 
 (defn titlecase
-  (s) (.join (.map (words s) capitalize) " "))
+  ; FIXME: without the intermediary #() this throws mysterious error
+  (s) (send (send (words s) (map #(capitalize %))) (join " ")))
 
 (defn mapcat
   (f coll)
