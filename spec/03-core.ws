@@ -39,10 +39,8 @@
 ;; JavaScript
 
 (is (identical? "[object Date]" (js-object-tag (new js/Date))))
-
-(defn js-obj () (send js/Object (create nil)))
-(is (sealed? (seal! (js-obj))))
-(is (not (extensible? (prevent-extensions! (js-obj)))))
+(is (sealed? (seal! (js-object))))
+(is (not (extensible? (prevent-extensions! (js-object)))))
 
 ;; OOP
 

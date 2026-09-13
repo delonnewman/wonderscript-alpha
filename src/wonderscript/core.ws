@@ -802,13 +802,14 @@
   (f)
   (if (function? f)
     (.-length f)
-    (throw (js/Error. "arity cannot be found"))))
+    (throw (new js/Error "arity cannot be found"))))
 
 (defn js-object
-  (&kvs)
-  (when (odd? (length kvs))
-    (throw (js/Error. "key/value pairs should be even")))
-  (.fromEntries js/Object (partition 2 kvs)))
+  (() (send js/Object (create nil)))
+  ((&kvs)
+   (if (odd? (length kvs))
+     (throw (new js/Error "key/value pairs should be even"))
+     (send js/Object (fromEntries (partition 2 kvs))))))
 
 (defn js-property-value
   (obj property-name)
