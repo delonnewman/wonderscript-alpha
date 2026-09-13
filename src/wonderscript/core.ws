@@ -833,7 +833,9 @@
 
 (defn partial
   (f &args)
-  (.apply (.-bind (.-prototype js/Function)) f (.concat [nil] args)))
+  (send
+   (slot-get js/Function :prototype :bind)
+   (apply f (send (array nil) (concat args)))))
 
 ;; More advanced array functions
 
