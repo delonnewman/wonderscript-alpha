@@ -20,13 +20,16 @@
 (def an-object (send js/Object (create nil)))
 (slot-set! an-object :a 1)
 (slot-set! an-object :b 2)
+(slot-set! an-object :c (js-object "d" 3 "e" 4))
 
 (is (identical? 2 (slot-get an-object 'b)))
 (is (identical? 2 (slot-get an-object :b)))
 (is (identical? 2 (slot-get an-object 'b)))
 (is (identical? 1 (slot-get an-object :a)))
+(is (identical? 3 (slot-get an-object :c :d)))
+(is (identical? 4 (slot-get an-object :c :e)))
 
-(is (nil? (slot-get an-object :c)))
+(is (nil? (slot-get an-object :d)))
 (slot-set! an-object :c 3)
 (is (identical? 3 (slot-get an-object :c)))
 
