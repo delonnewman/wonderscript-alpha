@@ -190,7 +190,7 @@
                  (array? (rest 0)) (rest 0)
                  (array? (rest 1)) (rest 1)
                  (array? (rest 2)) (rest 2)
-                 :else (throw (js/Error. "an arglist is required")))
+                 :else (throw (new js/Error "an arglist is required")))
           body (cond
                  (and doc meta) (send rest (slice 3))
                  (or doc meta) (send rest (slice 2))
@@ -706,7 +706,7 @@
      (array 'array? obj) (array 'array-set! obj key value)
      (array 'has-method? obj 'set) (array '.set obj key value)
      (array 'object? obj) (array 'slot-set! obj key value)
-     :else (array 'throw (array 'js/Error. "can only set keys for associative values")))))
+     :else (array 'throw (array 'new 'js/Error "can only set keys for associative values")))))
 
 ;; TODO: include let binding for macro output for better performance, will need gensym
 (defmacro for-times
@@ -841,7 +841,7 @@
 
 (defn partition (n a)
   (let (pairs (array))
-    (for-times (i (send js/Math (floot (/ (length a) n))))
+    (for-times (i (send js/Math (floor (/ (length a) n))))
       (let (p (array))
         (for-times (j n)
           (array-set! p j (array-get a (+ (* n i) j))))
@@ -1184,7 +1184,7 @@
     (component? form) (render-component form handlers)
     (tag-list? form) (render-tag-list form handlers)
     :else
-      (throw (js/Error. (str "unknown form: " (pr-str form))))))
+      (throw (new js/Error (str "unknown form: " (pr-str form))))))
 
 (defn render-event-handler
   (handler)
