@@ -35,6 +35,7 @@
 
 (is (identical? "Hello, World!" (greet)))
 (is (identical? "Hello, Jane!" (greet "Jane")))
+(is (= (arity greet) 0)) ; for now all fns have 0 arity
 
 ;; JavaScript
 

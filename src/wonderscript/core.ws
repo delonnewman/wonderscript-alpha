@@ -801,7 +801,7 @@
 (defn arity
   (f)
   (if (function? f)
-    (.-length f)
+    (slot-get f :length)
     (throw (new js/Error "arity cannot be found"))))
 
 (defn js-object
