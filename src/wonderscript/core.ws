@@ -861,7 +861,7 @@
 (defn indices
   (indexed)
   (let (a (make-array))
-    (for-times (i (.-length indexed))
+    (for-times (i (slot-get indexed :length))
       (push! a i))
     a))
 
