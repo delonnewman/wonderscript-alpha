@@ -42,4 +42,7 @@ test[unit]:
 prettier:
 	bun x prettier . --write
 
+tools:
+	brew bundle check || brew bundle install
+
 .PHONY: all clean deps spec test
