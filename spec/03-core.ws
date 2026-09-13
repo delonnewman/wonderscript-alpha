@@ -6,6 +6,18 @@
 (is (array? '(1 2 3)))
 (is (not (array? nil)))
 
+(def an-array (array 1 2 3))
+(def an-array-copy (add an-array E))
+(add! an-array PI)
+(is (= (at an-array 3) PI))
+(is (= (at an-array-copy 3) E))
+
+(remove! an-array 1)
+(is (= (at an-array 1) 3))
+
+(clear! an-array-copy)
+(is (empty? an-array-copy))
+
 ;; Hash Map
 
 (def a-map (hash-map :a 1 :b 2))

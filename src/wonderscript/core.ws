@@ -935,7 +935,7 @@
   (cond
     (nil? obj) $empty-array
     (seq? obj) obj
-    (seqable? obj) (.seq obj)
+    (seqable? obj) (send obj :seq)
     :else
       (throw "value is not a seq or seqable")))
 
@@ -955,7 +955,7 @@
     (array-like? col) (begin (push! col value) col)
     (map? col) (add-key! col (at value 0) (at value 1))
     (set? col) (add-member! col value)
-    (slot? col "add") (.add col value)
+    (slot? col "add") (send col (add value))
     :else
       (throw "don't know how to add a value to this collection")))
 
@@ -966,8 +966,8 @@
 (defn remove!
   (col ref)
   (cond
-    (array-like? col) (begin (.splice col ref 1) col)
-    (slot? col "delete") (begin (.delete col ref) col)
+    (array? col) (begin (send col (splice ref 1)) col)
+    (slot? col :delete) (begin (send col (delete ref)) col)
     :else
       (throw "don't know how to remove a value from this collection")))
 
@@ -978,10 +978,10 @@
 (defn clear!
   (col)
   (cond
-    (array? col) (.splice col 0 (- (length col) 1))
-    (slot? col "clear") (begin (.clear col) col)
+    (array? col) (send col (splice 0))
+    (slot? col :clear) (begin (send col :clear) col)
     :else
-      (throw (js/Error. (str "cannot clear" (pr-str col))))))
+      (throw (new js/Error (str "cannot clear" (pr-str col))))))
 
 ;; TODO: add alias key as meta data
 (defmacro alias
