@@ -132,12 +132,12 @@
   (fn* (pair argsym)
     (cons 'let
       (cons
-       (.flatMap (pair 0)
-        (fn* (x i)
+       (send (pair 0)
+        (flatMap (fn* (x i)
          (if (splat? x)
            (array (send wonderscript.lang/Symbol (intern (send (name  x) (slice 1))))
             (array 'send argsym (array 'slice i)))
-           (array x (array 'array-get argsym i)))))
+           (array x (array 'array-get argsym i))))))
        (send pair (slice 1))))))
 
 (def ^:macro fn
@@ -149,10 +149,10 @@
              parsed (map parsed-args arglists)
              arities (send (map #(length %) arglists) (sort #(cond (< %1 %2) -1 (> %1 %2) 1 :else 0)))
              splat (send parsed (some (fn* (list) (send list (some #(:splat %))))))
-             arity-str (if splat (str (arities 0) " or more") (.join arities " or "))
+             arity-str (if splat (str (arities 0) " or more") (send arities (join " or ")))
              argsym (gensym "args"))
          (array 'fn*
-                (array (.intern wonderscript.lang/Symbol (str "&" argsym)))
+                (array (send wonderscript.lang/Symbol (intern (str "&" argsym))))
                 (cons 'cond
                       (send
                        (send xs
@@ -314,7 +314,7 @@
   ((name value)
    (array 'defconst name nil value))
   ((name doc value)
-   (let (nm (.withMeta name {:doc doc :constant true}))
+   (let (nm (send name (withMeta {:doc doc :constant true})))
      (array 'def nm
             (array 'if (array 'immutable? value)
                    value
@@ -742,17 +742,19 @@
     a))
 
 (defn each
-  (a f) (.forEach a f) a)
+  (a f) (send a (forEach f)) a)
 
 (defn tap
   (val f) (f val) val)
 
 (defn print
-  (x) (.log js/console x))
+  (x) (send js/console (log x)))
 
 (defn say
   (&args)
-  (apply (.bind (.-log js/console) js/console) (.map args pr-str)))
+  (apply
+   (slot-get js/console :log)
+   (send (send args (map pr-str)) (join ""))))
 
 (defn p
   (x) (print (pr-str x)))
@@ -770,7 +772,7 @@
 
 (defmacro deftest
   (name &body)
-  (let (nm (.withMeta {:test true}))
+  (let (nm (send name (withMeta {:test true})))
     (array 'def nm (cons 'fn (cons '() body)))))
 
 ;; OOP & JS reflection
@@ -784,16 +786,16 @@
   (array-set! (js-prototype object) slot-name value))
 
 (defn seal!
-  (object) (.seal js/Object object))
+  (object) (send js/Object (seal object)))
 
 (defn sealed?
-  (object) (.isSealed js/Object object))
+  (object) (send js/Object (isSealed object)))
 
 (defn extensible?
-  (object) (.isExtensible js/Object object))
+  (object) (send js/Object (isExtensible object)))
 
 (defn prevent-extensions!
-  (object) (.preventExtensions js/Object object))
+  (object) (send js/Object (preventExtensions object)))
 
 ; TODO: support compiler generated functions
 (defn arity
