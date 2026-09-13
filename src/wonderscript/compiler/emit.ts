@@ -149,8 +149,6 @@ export function emit(exp: Form, ctx: Context) {
           return emitBegin(form, ctx);
         case LET_SYM:
           return emitLet(form, ctx);
-        case DOT_SYM:
-          return emitObjectRes(form, ctx);
         case SEND_SYM:
           return emitSend(form, ctx);
         case NEW_SYM:

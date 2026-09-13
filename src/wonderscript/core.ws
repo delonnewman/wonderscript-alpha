@@ -163,7 +163,7 @@
                        (concat
                         (array :else
                                (array 'throw
-                                      (array 'js/Error.
+                                      (array 'new 'js/Error
                                              (array 'str "wrong number of arguments (given "
                                                     (array 'length argsym) ", expected " arity-str ")")))))))))
        :else
@@ -176,7 +176,7 @@
                   (array 'if (arity-validation-forms (parsed-args x) argsym)
                          (let-bindings-form xs argsym)
                          (array 'throw
-                                (array 'js/Error.
+                                (array 'new 'js/Error
                                        (array 'str "wrong number of arguments (given "
                                               (array 'length argsym) ", expected " arity-str ")"))))))))))
 
