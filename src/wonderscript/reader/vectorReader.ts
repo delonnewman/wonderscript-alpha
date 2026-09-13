@@ -9,5 +9,5 @@ export function vectorReader(
 ): Vector {
   const a = readDelimitedList("]", r, true, opts);
 
-  return new Vector(a);
+  return new Vector(...a);
 }

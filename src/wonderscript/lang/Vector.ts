@@ -1,7 +1,7 @@
 export class Vector<T = unknown> {
   readonly length: number;
 
-  constructor(array: T[]) {
+  constructor(...array: T[]) {
     this.length = array.length;
 
     for (let i = 0; i < array.length; i++) {
@@ -20,6 +20,6 @@ export class Vector<T = unknown> {
   }
 
   slice(start: number, end: number): Vector {
-    return new Vector(Array.prototype.slice.call(this, start, end));
+    return new Vector(...Array.prototype.slice.call(this, start, end));
   }
 }

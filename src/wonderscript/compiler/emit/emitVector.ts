@@ -8,5 +8,5 @@ export function emitVector(form: Vector<Form>, ctx: Context): string {
     .call(form, (x: Form) => emit(x, ctx))
     .join(", ");
 
-  return `new wonderscript.lang.Vector([${args}])`;
+  return `new wonderscript.lang.Vector(${args})`;
 }
