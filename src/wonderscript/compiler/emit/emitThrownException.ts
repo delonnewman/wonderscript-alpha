@@ -13,9 +13,9 @@ export type ThrowForm = [typeof THROW_SYM, Form];
 export const isThrowForm = (form: Form): form is ThrowForm =>
   isTaggedValue(form, THROW_SYM) && form.length === 2;
 
-export function emitThrownException(form: Form, env: Context) {
+export function emitThrownException(form: Form, env: Context): string {
   if (!isThrowForm(form))
     throw new CompilerError(`invalid ${THROW_SYM} form: ${prStr(form)}`, env);
 
-  return `throw new ${THROW_CLASS}(${emit(form[1], env)})`;
+  return `throw new ${THROW_CLASS}(${emit(form[1], env)}, ${JSON.stringify(env.stacktrace().toString())})`;
 }

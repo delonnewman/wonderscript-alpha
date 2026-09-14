@@ -23,7 +23,7 @@ type Params = {
 export class Context {
   private readonly vars: Vars;
   private readonly varMeta: VarMeta;
-  readonly parent: Context | null;
+  readonly parent: Context | Nil;
   private _isRecursive: boolean;
   private currentSource: string;
   private currentLine: number;
@@ -76,13 +76,12 @@ export class Context {
   }
 
   stacktrace(): StackTrace {
-    const frames = [this.stackframe()];
-
     if (!this.parent) {
-      return new StackTrace(frames);
+      return StackTrace.empty();
     }
 
-    let ctx = this.parent;
+    const frames = [this.stackframe()];
+    let ctx: Context | Nil = this.parent;
     while (ctx) {
       frames.push(ctx.stackframe());
       ctx = ctx.parent;
