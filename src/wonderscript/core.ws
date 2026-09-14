@@ -311,13 +311,13 @@
   "Define a constant value this means the definition
   cannot change and the value must be immutable"
   ((name value)
-   (array 'defconst name nil value))
+   `(defconst ~name nil ~value))
   ((name doc value)
    (let (nm (send name (withMeta {:doc doc :constant true})))
-     (array 'def nm
-            (array 'if (array 'immutable? value)
-                   value
-                   (array 'throw (array 'new 'js/Error "only immutable values can be constants")))))))
+     `(def ~nm
+        (if (immutable? ~value)
+          ~value
+          (throw (new js/Error "only immutable values can be constants")))))))
 
 (defmacro defvar
   "Define a dynamically scoped variable. It will retain it's global
