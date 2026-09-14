@@ -652,9 +652,8 @@
     (send (name s) (endsWith ch))
     (send s (endsWith ch))))
 
-; TODO: make defvar (dynamically scoped) once this has been added
-(defconst $ending-new-line-pattern (freeze! (new js/RegExp "(\\n|\\r\\n)$")))
-(defconst $new-line-pattern (freeze! (new js/RegExp "\\r\\n|\\n")))
+(defvar $ending-new-line-pattern (freeze! (new js/RegExp "(\\n|\\r\\n)$")))
+(defvar $new-line-pattern (freeze! (new js/RegExp "\\r\\n|\\n")))
 
 (defn chomp
   (s) (send s (replace $ending-new-line-pattern EMPTY-STRING)))
@@ -673,7 +672,7 @@
 
 (defn chrs
   (array)
-  (send (send array (map chr)) (join EMPTY_STRING)))
+  (send (send array (map chr)) (join EMPTY-STRING)))
 
 (defn upcase
   (s) (send s :toUpperCase))
@@ -829,6 +828,13 @@
   (obj method)
   (function? (slot-get obj method)))
 
+(defn responds-to?
+  (msg)
+  (if (or (symbol? msg) (keyword? msg) (string? msg))
+    (has-method? msg)
+    ;; TODO: implement
+    ))
+
 (defn bind
   (f object)
   (send (slot-get js/Function :prototype :bind) (call f object)))
@@ -887,7 +893,26 @@
   (col)
   (new js/Set (->array col)))
 
-;; TODO: Add merge and merge!
+(defn merge!
+  "Merge two or more maps into the first map. The first map will change in
+   place. When one map is given return it."
+  ((x) x)
+  ((x y)
+   (let (entries (send y :entries))
+     (send
+      entries
+      (forEach
+       (fn* (pair)
+         (send x (set (pair 0) (pair 1))))))
+     x))
+  ((x y &zs)
+   (merge! x y)
+   (send
+    xs
+    (forEach
+     (fn* (m)
+       (merge! x m))))
+   x))
 
 ;; These are polymorphic on Maps ans Sets and any other
 ;; object that implements the method.
