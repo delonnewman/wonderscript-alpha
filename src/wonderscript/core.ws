@@ -200,7 +200,7 @@
 (defn ^:macro defmacro
   (name &rest)
   (let (nm (send name (withMeta {:macro true})))
-    (cons 'defn (cons nm rest))))
+    `(defn ~nm ~@rest)))
 
 (defn macro?
   (sym) (:macro (the-meta sym)))
