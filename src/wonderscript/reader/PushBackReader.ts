@@ -6,9 +6,9 @@ export class PushBackReader {
   #limit: number;
   #stream: string[];
 
-  #position: number;
-  #line: number;
-  #column: number;
+  #position: number = INIT_POS;
+  #line: number = INIT_LINE;
+  #column: number = INIT_COL;
 
   // The last column before the last newline
   #prevColumn: number | undefined;
