@@ -213,8 +213,9 @@
   (let (nm (send name (withMeta {:typedef true})))
     (array 'def nm type-val)))
 
-(defn type?
-  (sym) (:typedef (the-meta sym)))
+(defmacro typedef?
+  (sym)
+  (:typedef (the-meta sym)))
 
 (defn js-primitive-type?
   (obj) (not-identical? "object" (typeof obj)))
@@ -367,7 +368,7 @@
 (defn type
   (value)
   (if (identical? "object" (typeof value))
-    (symbol (js-constructor-name value))
+    (js-constructor value)
     (symbol (typeof value))))
 
 (defn same-type?
@@ -383,16 +384,17 @@
 (def class? constructor?)
 
 (defn isa?
-  (type value)
-  (if (function? type)
-    (instance? value type)
-    (send (type value) (equals type))))
-
-(def Object nil)
+  (t value)
+  (if (function? t)
+    (instance? value t)
+    (let (vt (type value))
+      (if (and (send 'object (equals t)) (class? vt))
+        true
+        (send vt (equals t))))))
 
 (defn make-class
-  (() (make-class (fn* ()) Object))
-  ((ctr) (make-class ctr Object))
+  (() (make-class (fn* ()) nil))
+  ((ctr) (make-class ctr nil))
   ((ctr superclass)
    (slot-set! ctr :prototype
     (send js/Object (create superclass)))
@@ -403,7 +405,7 @@
   (slot-set! (slot-get klass :prototype) name f))
 
 (defmacro defclass
-  ((name) (array 'defclass name Object))
+  ((name) (array 'defclass name nil))
   ((name superclass)
    (let (nm (send name (withMeta {:typedef true})))
      (array 'def nm (array 'make-class superclass)))))
@@ -515,11 +517,11 @@
 
 ;; Basic Array, Strings & ArrayLike
 
-(defconst $empty-array (freeze! (array)))
+(defconst EMPTY-ARRAY (freeze! (array)))
 
 (defn concat
   (&arrays)
-  (send (slot-get (slot-get js/Array :prototype) :concat) (apply $empty-array arrays)))
+  (send (slot-get js/Array :prototype :concat) (apply EMPTY-ARRAY arrays)))
 
 (defn make-array
   (() (new js/Array))
@@ -932,7 +934,7 @@
 (defn seq
   (obj)
   (cond
-    (nil? obj) $empty-array
+    (nil? obj) EMPTY-ARRAY
     (seq? obj) obj
     (seqable? obj) (send obj :seq)
     :else
@@ -992,7 +994,7 @@
 (defn empty
   (col)
   (cond
-    (array-like? col) $empty-array
+    (array-like? col) EMPTY-ARRAY
     (has-method? col :empty) (send col :empty)
     :else
       (empty! (clone col))))
