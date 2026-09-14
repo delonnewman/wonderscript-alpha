@@ -72,6 +72,24 @@
 (is (= 3 (when true 1 2 3)))
 (is (= 3 (unless false 1 2 3)))
 
+;; set!
+
+(def v 1)
+(set! v 2)
+(is (= v 2))
+
+(def a (array))
+(set! a 1 2)
+(is (= (a 1) 2))
+
+(def m {})
+(set! m :a 1)
+(is (= (m :a) 1))
+
+(def o (js-object))
+(set! o "name" "Jane")
+(is (= (slot-get o :name) "Jane"))
+
 ;; Fn
 
 (def greet

@@ -552,19 +552,19 @@
 
 (defn push!
   (array value)
-  (send (slot-get (slot-get js/Array :prototype) :push) (call array value)))
+  (send (slot-get js/Array :prototype :push) (call array value)))
 
 (defn pop!
   (array)
-  (send (slot-get (slot-get js/Array :prototype) :pop) (call array)))
+  (send (slot-get js/Array :prototype :pop) (call array)))
 
 (defn unshift!
   (array value)
-  (send (slot-get (slot-get js/Array :prototype) :unshift) (call array value)))
+  (send (slot-get js/Array :prototype :unshift) (call array value)))
 
 (defn shift!
   (array)
-  (send (slot-get (slot-get js/Array :prototype) :shift) (call array)))
+  (send (slot-get js/Array :prototype :shift) (call array)))
 
 (defn <=>
   (a b)
@@ -577,7 +577,7 @@
 
 (defn sort!
   (array)
-  (send (slot-get (slot-get js/Array :prototype) :sort) (call array <=>)))
+  (send (slot-get js/Array :prototype :sort) (call array <=>)))
 
 (defn sort
   (array)
@@ -595,7 +595,7 @@
   (array)
   (unless (array? array)
     (throw (new js/Error (str "no automatic conversion of " (type array) " to array"))))
-  (send (slot-get (slot-get js/Array :prototype) :reverse) (call array)))
+  (send (slot-get js/Array :prototype :reverse) (call array)))
 
 (defn reverse
   (col)
@@ -605,7 +605,7 @@
 
 (defn index-of
   (array value)
-  (send (slot-get (slot-get js/Array :prototype) :indexOf) (call array value)))
+  (send (slot-get js/Array :prototype :indexOf) (call array value)))
 
 (defn length
   (array) (slot-get array :length))
@@ -701,13 +701,13 @@
 
 (defmacro set!
   ((sym value)
-   (array 'set* sym value))
+   `(set* ~sym ~value))
   ((obj key value)
-   (array 'cond
-     (array 'array? obj) (array 'array-set! obj key value)
-     (array 'has-method? obj 'set) (array '.set obj key value)
-     (array 'object? obj) (array 'slot-set! obj key value)
-     :else (array 'throw (array 'new 'js/Error "can only set keys for associative values")))))
+   `(cond
+     (array-like? ~obj) (array-set! ~obj ~key ~value)
+     (slot? ~obj :set) (send ~obj (set ~key ~value))
+     (object? ~obj) (slot-set! ~obj ~key ~value)
+     :else (throw (new js/Error "can only set keys for associative values")))))
 
 ;; TODO: include let binding for macro output for better performance, will need gensym
 (defmacro for-times
