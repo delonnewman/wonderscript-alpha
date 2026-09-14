@@ -705,7 +705,7 @@
   ((obj key value)
    `(cond
      (array-like? ~obj) (array-set! ~obj ~key ~value)
-     (slot? ~obj :set) (send ~obj (set ~key ~value))
+     (respond-to? ~obj :set) (send ~obj (set ~key ~value))
      (object? ~obj) (slot-set! ~obj ~key ~value)
      :else (throw (new js/Error "can only set keys for associative values")))))
 
@@ -824,16 +824,12 @@
       (send val (bind obj))
       (throw (new js/Error "undefined method")))))
 
-(defn has-method?
-  (obj method)
-  (function? (slot-get obj method)))
-
-(defn responds-to?
-  (msg)
+(defmacro respond-to?
+  (obj msg)
   (if (or (symbol? msg) (keyword? msg) (string? msg))
-    (has-method? msg)
+    `(function? (slot-get ~obj ~msg))
     ;; TODO: implement
-    ))
+    false))
 
 (defn bind
   (f object)
@@ -1021,7 +1017,7 @@
   (col)
   (cond
     (array-like? col) EMPTY-ARRAY
-    (has-method? col :empty) (send col :empty)
+    (respond-to? col :empty) (send col :empty)
     :else
       (empty! (clone col))))
 
@@ -1040,7 +1036,7 @@
     (array-like? col) (not-identical? -1 (index-of col value))
     (map? col) (key? col value)
     (set? col) (member? col value)
-    (has-method? col :includes) (send col (includes value))
+    (respond-to? col :includes) (send col (includes value))
     :else
       (throw "can't test inclusion")))
 
@@ -1059,8 +1055,8 @@
     ;; (see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Equality_comparisons_and_sameness#same-value-zero_equality)
     (and (js-primitive-number? a) (js-primitive-number? b))
        (or (identical? a b) (and (not-identical? a a) (not-identical? b b)))
-    (has-method? a :equals) (send a (equals b))
-    (has-method? b :equals) (send b (equals a))
+    (respond-to? a :equals) (send a (equals b))
+    (respond-to? b :equals) (send b (equals a))
     :else
       (identical? (hash-code a) (hash-code b))))
 
