@@ -90,7 +90,7 @@
         (if (next clauses)
           (first (rest clauses))
           (throw (new js/Error "cond requires an even number of forms")))
-            (cons 'cond (next (next clauses)))))))
+        (cons 'cond (next (next clauses)))))))
 
 (def assoc-array?
   (fn* (a)
