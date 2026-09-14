@@ -1,7 +1,6 @@
 import { FALSE_SYM, NIL_SYM, TRUE_SYM } from "./constants";
-import { ArrayLike, isArrayLike } from "../js/ArrayLike";
+import { isArrayLike } from "../js/ArrayLike";
 import { map } from "../lang/runtime";
-import { Form } from "./core";
 import { Symbol } from "../lang/Symbol";
 import { Keyword } from "../lang/Keyword";
 import { List } from "../lang/List";
@@ -10,7 +9,7 @@ import { Vector } from "../lang/Vector";
 const EMPTY_LIST = "()";
 const EMPTY_ARRAY = "[]";
 
-export function prStr(form: Form | Function | ArrayLike | Object): string {
+export function prStr(form: unknown): string {
   if (form == null) {
     return NIL_SYM;
   }
@@ -92,9 +91,8 @@ export function prStr(form: Form | Function | ArrayLike | Object): string {
   }
 
   if (typeof form === "object") {
-    const keys = Object.keys(form);
     const ctrName = Object.getPrototypeOf(form)?.constructor?.name ?? "object";
-    return `#js/${ctrName} {${keys.map((k) => `${prStr(k)} ${prStr(form[k])}`).join(", ")}}`;
+    return `#js/${ctrName} ${Object.prototype.toString.call(form)}`;
   }
 
   return `${form}`;
