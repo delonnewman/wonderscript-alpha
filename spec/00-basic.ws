@@ -69,3 +69,16 @@
 (is (not-identical? #{1 2 3} #{1 2 3}))
 (is (= #{1 2 3} #{1 2 3}))
 (is (#{1 2 3} 1))
+
+;; Syntax Quote
+
+(is (= `a 'a))
+(is (= `(a b c) '(a b c)))
+(def x 1)
+(is (= `(~x) '(1)))
+(is (= `(a ~x) '(a 1)))
+(is (= `(a ~x c) '(a 1 c)))
+(def xs '(1 2 3))
+(is (= `(~@xs) '(1 2 3)))
+(is (= `(a ~@xs) '(a 1 2 3)))
+(is (= `(a ~@xs c) '(a 1 2 3 c)))
