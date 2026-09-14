@@ -330,7 +330,7 @@
      `(def ~nm ~value))))
 
 (defmacro var
-  ((name) (array 'var name nil))
+  ((name) `(var ~name nil))
   ((name value)
    (let (nm (send name (withMeta {:mutable true})))
      (send *ctx* (define nm value))
@@ -342,7 +342,7 @@
 (defmacro defonce
   ((name value)
    (if-not (defined? name)
-     (array 'def name value))))
+     `(def ~name ~value))))
 
 (defn clone
   (object)
