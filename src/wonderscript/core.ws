@@ -406,10 +406,10 @@
   (slot-set! (slot-get klass :prototype) name f))
 
 (defmacro defclass
-  ((name) (array 'defclass name nil))
+  ((name) `(defclass ~name nil))
   ((name superclass)
    (let (nm (send name (withMeta {:typedef true})))
-     (array 'def nm (array 'make-class superclass)))))
+     `(def ~nm (make-class ~superclass)))))
 
 ;; Numerical
 
@@ -437,25 +437,25 @@
 
 (defmacro <var-op>
   (operator identity)
-  (let (args (gensym "args"))
-    (array 'fn*
-           (array (symbol (str "&" (send args :name))))
-           (array 'cond
-                  (array 'identical? 0 (array 'slot-get args :length))
-                  (if-not (nil? identity)
-                    identity
-                    (array 'new 'js/Error "wrong number of arguments (expected at least 1 got 0)"))
-                  (array 'identical? 1 (array 'slot-get args :length))
-                  (if (send operator (equals '-))
-                    (array '* -1 (array 'array-get args 0))
-                    (array 'array-get args 0))
-                  :else
-                  (array 'js*
-                         "(function(){"
-                         "let x = " (if-not (nil? identity) identity) ";"
-                         "for (let i = 0; i < " (str args) ".length; i++) {"
-                         "if (x == null) { x = " (str args) "[i] }"
-                         "else { x = x " (str operator) " " (str args) "[i] } } return x; }())")))))
+  (let (args (gensym "args")
+        arglist (array (symbol (str "&" (send args :name)))))
+    `(fn* ~arglist
+        (cond
+          (identical? 0 (slot-get ~args :length))
+          (if-not (nil? ~identity)
+            ~identity
+            (new js/Error "wrong number of arguments (expected at least 1 got 0)"))
+          (identical? 1 (slot-get ~args :length))
+          (if (send ~operator (equals '-))
+            (* -1 (array-get ~args 0))
+            (array-get ~args 0))
+          :else
+          (js*
+           "(function(){"
+           "let x = " (if-not (nil? ~identity) ~identity) ";"
+           "for (let i = 0; i < " (str ~args) ".length; i++) {"
+           "if (x == null) { x = " (str ~args) "[i] }"
+           "else { x = x " (str ~operator) " " (str ~args) "[i] } } return x; }())")))))
 
 (def + (<var-op> + 0))
 (def - (<var-op> - nil))
