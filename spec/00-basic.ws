@@ -74,11 +74,24 @@
 
 (is (= `a 'a))
 (is (= `(a b c) '(a b c)))
+
 (def x 1)
 (is (= `(~x) '(1)))
 (is (= `(a ~x) '(a 1)))
 (is (= `(a ~x c) '(a 1 c)))
+
 (def xs '(1 2 3))
 (is (= `(~@xs) '(1 2 3)))
 (is (= `(a ~@xs) '(a 1 2 3)))
 (is (= `(a ~@xs c) '(a 1 2 3 c)))
+
+(def x 1)
+(def y 3)
+(def nested
+  `(if ~x
+     (+ 1 ~x)
+     (if ~y
+       (+ 1 ~y)
+       2)))
+
+(is (= nested '(if 1 (+ 1 1) (if 3 (+ 1 3) 2))))

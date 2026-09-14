@@ -4,11 +4,12 @@ import { Symbol } from "../lang/Symbol";
 import { Form, isTaggedValue, TaggedValue } from "../compiler/core";
 import { UNQUOTE_SPLICING_SYM, UNQUOTE_SYM } from "./unquoteReader";
 import { SEND_SYM } from "../compiler/emit/emitSend";
+import { p } from "../util";
 
 export const QUOTE_SYM = Symbol.intern('quote');
 export const ARRAY_SYM = Symbol.intern('array');
 
-function isUnquoteSplicing(form: Form): form is TaggedValue {
+function isUnquoteSplicing(form: unknown): form is TaggedValue {
     return isTaggedValue(form) && form[0].equals(UNQUOTE_SPLICING_SYM);
 }
 
@@ -20,13 +21,17 @@ function syntaxQuote(value: unknown): Form {
         return value;
     }
     if (Array.isArray(value)) {
-        const quoted = value.map(syntaxQuote);
+        if (value.length === 0) return value;
+        if (value.length === 1 && isUnquoteSplicing(value[0])) {
+            return value[0][1];
+        }
 
+        const quoted = value.map(syntaxQuote);
         const indexes: number[] = [0];
         for (let i = 0; i < quoted.length; i++) {
             const val = quoted[i];
             if (isUnquoteSplicing(val)) {
-                quoted[i] = val[1];
+                quoted[i] = val;
                 indexes.push(i);
             }
         }
@@ -43,9 +48,10 @@ function syntaxQuote(value: unknown): Form {
             slices.push(quoted.slice(indexes[i], indexes[i + 1]));
         }
 
+        const rest = slices.slice(1).map(it => isUnquoteSplicing(it[0]) ? it[0][1] : [ARRAY_SYM, ...it]);
         return [SEND_SYM,
             [ARRAY_SYM, ...slices[0]],
-            [Symbol.intern('concat'), ...slices.slice(1).map((it) => [ARRAY_SYM, ...it])]
+            [Symbol.intern('concat'), ...rest]
         ];
     }
     if (value instanceof Symbol) {

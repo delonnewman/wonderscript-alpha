@@ -16,7 +16,7 @@ describe("syntaxQuoteReader", () => {
     test("spliced unquoting", () => {
         const { form: actual } = readString("`(1 ~@x 3)")[0];
 
-        const expected = [SEND_SYM, [ARRAY_SYM, 1], [Symbol.intern('concat'), [ARRAY_SYM, Symbol.intern('x')], [ARRAY_SYM, 3]]];
+        const expected = [SEND_SYM, [ARRAY_SYM, 1], [Symbol.intern('concat'), Symbol.intern('x'), [ARRAY_SYM, 3]]];
         expect(actual).toEqual(expected);
     });
 });
