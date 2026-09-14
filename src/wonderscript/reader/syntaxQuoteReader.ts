@@ -20,9 +20,9 @@ function syntaxQuote(value: unknown): Form {
     }
     if (Array.isArray(value)) {
         const quoted = value.map(syntaxQuote);
-        const indexes = [];
+        const indexes: number[] = [];
         for (let i = 0; i < quoted.length; i++) {
-            if (isUnquoteSplicing(value)) {
+            if (isUnquoteSplicing(quoted[i])) {
                 return indexes.push(i);
             }
         }
