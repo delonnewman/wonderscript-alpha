@@ -324,10 +324,10 @@
   value but can be rebound with the `local` form."
   ((name) (array 'defvar name nil nil))
   ((name value)
-   (array 'defvar name nil value))
+   `(defvar ~name nil ~value))
   ((name doc value)
    (let (nm (send name (withMeta {:doc doc :dynamic true})))
-     (array 'def nm value))))
+     `(def ~nm ~value))))
 
 (defmacro var
   ((name) (array 'var name nil))
