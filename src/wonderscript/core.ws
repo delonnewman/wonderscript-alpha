@@ -1220,7 +1220,7 @@
         event (handler 1)
         cb (handler 2))
     (str "document.getElementById(" (send js/JSON (stringify id)) ").addEventListener("
-         (send js/JSON (stringify event)) ", " cb ")")))
+         (send js/JSON (stringify event)) ", " (compile (array 'fn* (array) cb)) ")")))
 
 (defn render-event-handlers
   (handlers)
@@ -1231,7 +1231,6 @@
   (form)
   (let (event-handlers (make-array)
         content (render-form form event-handlers))
-    (print event-handlers)
     (if-not (empty? event-handlers)
       (str content (render-event-handlers event-handlers))
       content)))
