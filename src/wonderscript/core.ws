@@ -268,10 +268,10 @@
    `(if (not ~pred) ~then ~other)))
 
 (defmacro when (pred &acts)
-  (array 'cond pred (cons 'begin acts)))
+  `(cond ~pred (begin ~@acts)))
 
 (defmacro unless (pred &acts)
-  (array 'cond (array 'not pred) (cons 'begin acts)))
+  `(cond (not ~pred) (begin ~@acts)))
 
 (defn true?
   (x) (or (identical? true x) (identical? true (send x :valueOf))))
