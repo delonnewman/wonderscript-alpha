@@ -320,6 +320,8 @@
                    (array 'throw (array 'new 'js/Error "only immutable values can be constants")))))))
 
 (defmacro defvar
+  "Define a dynamically scoped variable. It will retain it's global
+  value but can be rebound with the `local` form."
   ((name) (array 'defvar name nil nil))
   ((name value)
    (array 'defvar name nil value))
@@ -610,14 +612,14 @@
 
 ;; Strings
 
-(defconst $white-space-regex (freeze! (new js/RegExp "\\s+")))
-(defconst $empty-string "")
+(defvar $white-space-regex (freeze! (new js/RegExp "\\s+")))
+(defconst EMPTY-STRING "")
 
 (defn blank?
   (object)
   (or (nil? object) (zero? (length object))
       (and (string? object)
-           (identical? 0 (slot-get (send object (replace $white-space-regex $empty-string)) :length)))))
+           (identical? 0 (slot-get (send object (replace $white-space-regex EMPTY-STRING)) :length)))))
 
 (defn present?
   (object)
@@ -655,7 +657,7 @@
 (defconst $new-line-pattern (freeze! (new js/RegExp "\\r\\n|\\n")))
 
 (defn chomp
-  (s) (send s (replace $ending-new-line-pattern $empty-string)))
+  (s) (send s (replace $ending-new-line-pattern EMPTY-STRING)))
 
 (defn lines
   (s) (send s (replace $new-line-pattern)))
@@ -671,7 +673,7 @@
 
 (defn chrs
   (array)
-  (send (send array (map chr)) (join $empty-string)))
+  (send (send array (map chr)) (join EMPTY_STRING)))
 
 (defn upcase
   (s) (send s :toUpperCase))
@@ -1173,7 +1175,7 @@
 (defn render-form
   (form handlers)
   (cond
-    (nil? form) $empty-string
+    (nil? form) EMPTY-STRING
     (or (boolean? form) (number? form))
       (str form)
     (string? form) form
