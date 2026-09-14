@@ -21,8 +21,8 @@ export function characterReader(
   else if (token === "formfeed") return "\f";
   else if (token === "return") return "\r";
   else if (token.startsWith("u")) {
-    throw new Error("Don't know how to read unicode characters");
+    return String.fromCodePoint(parseInt(token.slice(1), 16));
   } else if (token.startsWith("o")) {
-    throw new Error("Don't know how to read octal characters");
+    return String.fromCodePoint(parseInt(token.slice(1), 8));
   }
 }
