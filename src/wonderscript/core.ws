@@ -263,9 +263,9 @@
 
 (defmacro if-not
   ((pred then)
-   (array 'if-not pred then nil))
+   `(if-not ~pred ~then nil))
   ((pred then other)
-   (array 'if (array 'not pred) then other)))
+   `(if (not ~pred) ~then ~other)))
 
 (defmacro when (pred &acts)
   (array 'cond pred (cons 'begin acts)))

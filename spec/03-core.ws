@@ -61,6 +61,17 @@
 (is (identical? 1 (cond true 1 :else 2)))
 (is (identical? 1 (cond true 1)))
 
+;; If-Not
+
+(is (= 3 (if-not 1 2 3)))
+(is (= 2 (if-not false 2 3)))
+(is (= 2 (if-not nil 2 3)))
+
+;; When / Unless
+
+(is (= 3 (when true 1 2 3)))
+(is (= 3 (unless false 1 2 3)))
+
 ;; Fn
 
 (def greet
