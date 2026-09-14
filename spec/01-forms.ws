@@ -96,3 +96,9 @@
 
 (array-set! an-array 1 3.14)
 (is (identical? 3.14 (array-get an-array 1)))
+
+;; cond
+
+(is (= 1 (cond true 1)))
+(is (= nil (cond false 1)))
+(is (= 2 (cond false 1 :else 2)))
