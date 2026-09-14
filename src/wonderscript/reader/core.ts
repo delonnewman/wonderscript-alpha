@@ -3,6 +3,8 @@ import { commentReader } from "./commentReader";
 import { listReader } from "./listReader";
 import { unmatchedDelimiterReader } from "./unmatchedDelimiterReader";
 import { vectorReader } from "./vectorReader";
+import { syntaxQuoteReader } from "./syntaxQuoteReader";
+import { unquoteReader } from "./unquoteReader";
 import { mapReader } from "./mapReader";
 import { characterReader } from "./characterReader";
 import { metaReader } from "./metaReader";
@@ -18,20 +20,22 @@ export const LINE_KEY = Keyword.intern("line");
 export const COLUMN_KEY = Keyword.intern("column");
 export const TAG_KEY = Keyword.intern("tag");
 
-export function isWhitespace(ch: string): boolean {
+export function isWhitespace(ch: string | null | undefined): ch is string {
   if (ch == null) return false;
-
   return !!(ch === "," || ch.match(/^\s$/));
 }
 
-export function isDigit(ch: string): boolean {
-  return !!(ch && ch.match(/^\d$/));
+export function isDigit(ch: string | null | undefined): ch is string {
+  if (ch == null) return false;
+  return !!ch.match(/^\d$/);
 }
 
 export const MACROS = {
   '"': stringReader,
   ";": commentReader,
   "'": wrappingReader(Symbol.intern("quote")),
+  "`": syntaxQuoteReader,
+  "~": unquoteReader,
   "@": wrappingReader(Symbol.intern("deref")),
   "^": metaReader,
   "(": listReader,
@@ -56,11 +60,12 @@ export function isMacro(ch: string): boolean {
   return !!MACROS[ch];
 }
 
-export function isTerminatingMacro(ch: string): boolean {
+export function isTerminatingMacro(ch: string | null | undefined): ch is string {
+  if (ch == null) return false;
   return ch !== "#" && ch !== "'" && isMacro(ch);
 }
 
-export function nonConstituent(ch: string): ch is "@" | "`" | "~" {
+export function nonConstituent(ch: string | null | undefined): ch is "@" | "`" | "~" {
   return ch === "@" || ch === "`" || ch === "~";
 }
 
