@@ -908,7 +908,7 @@
   ((x y &zs)
    (merge! x y)
    (send
-    xs
+    zs
     (forEach
      (fn* (m)
        (merge! x m))))
@@ -982,7 +982,7 @@
     (array-like? col) (begin (push! col value) col)
     (map? col) (add-key! col (at value 0) (at value 1))
     (set? col) (add-member! col value)
-    (slot? col "add") (send col (add value))
+    (slot? col :add) (send col (add value))
     :else
       (throw "don't know how to add a value to this collection")))
 
@@ -1008,7 +1008,7 @@
     (array? col) (send col (splice 0))
     (slot? col :clear) (begin (send col :clear) col)
     :else
-      (throw (new js/Error (str "cannot clear" (pr-str col))))))
+      (throw (str "cannot clear" (pr-str col)))))
 
 ;; TODO: add alias key as meta data
 (defmacro alias
@@ -1070,7 +1070,8 @@
   (pred value &conditions)
   (cons 'cond
          (send (partition 2 conditions)
-               (flatMap (fn (x)
+               (flatMap
+                (fn* (x)
                  (if (send :else (equals (x 0)))
                    x
                    (array (array pred (x 0) value) (x 1))))))))
