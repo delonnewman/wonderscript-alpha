@@ -73,8 +73,8 @@ export class Compiler {
     });
 
     importSymbol(CORE_MOD, CORE_NS.name, CORE_NS);
-    importSymbol(CORE_MOD, "*ns*", CURRENT_NS.value);
-    importSymbol(CORE_MOD, "*platform*", this.platformInfo());
+    importSymbol(CORE_MOD, "$package", CURRENT_NS.value);
+    importSymbol(CORE_MOD, "PLATFORM", this.platformInfo());
   }
 
   platformInfo(): Map<Keyword, any> {
