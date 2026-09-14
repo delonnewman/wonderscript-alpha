@@ -210,7 +210,7 @@
   {:added 1.0}
   (name type-val)
   (let (nm (send name (withMeta {:typedef true})))
-    (array 'def nm type-val)))
+    `(def ~nm ~type-val)))
 
 (defmacro typedef?
   (sym)
