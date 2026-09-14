@@ -852,6 +852,17 @@
         (array-set! pairs i p)))
     pairs))
 
+(defn range
+  ((stop) (range 0 stop 1))
+  ((start stop) (range start stop 1))
+  ((start stop step)
+   (let (a (array)
+         ^:mutable i 0)
+     (while (< i stop)
+       (push! a i)
+       (set! i (+ i step)))
+     a)))
+
 ;; see Math.min
 (defn min
   (numbers)
