@@ -47,11 +47,11 @@ Set.prototype.invoke = function (...args: unknown[]): boolean {
 
 // @ts-ignore
 Function.prototype.invoke = function (...args: unknown[]) {
-  if (args) {
-    return this.apply(this, args);
+  if (args.length === 0) {
+    return this.call(this);
   }
 
-  return this.apply(this);
+  return this.apply(this, args);
 };
 
 export function emitFuncApplication(form: Form[], env: Context): string {

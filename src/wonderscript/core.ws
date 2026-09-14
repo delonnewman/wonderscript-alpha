@@ -144,7 +144,7 @@
   (fn* (&xs)
    (let (x (xs 0))
      (cond
-       (assoc-array? x)
+       (assoc-array? x) ;; multiple arities
        (let (arglists (map first xs)
              parsed (map parsed-args arglists)
              arities (send (map #(length %) arglists) (sort #(cond (< %1 %2) -1 (> %1 %2) 1 :else 0)))
@@ -178,7 +178,7 @@
                          (array 'throw
                                 (array 'new 'js/Error
                                        (array 'str "wrong number of arguments (given "
-                                              (array 'length argsym) ", expected " arity-str ")"))))))))))
+                                              (array 'length argsym) ", expected " arity-str ") "))))))))))
 
 (def ^:macro defn
   (fn
@@ -672,7 +672,7 @@
 
 (defn chrs
   (array)
-  (send (send array (map chr)) (join EMPTY-STRING)))
+  (send (send array (map #(chr %))) (join EMPTY-STRING)))
 
 (defn upcase
   (s) (send s :toUpperCase))
