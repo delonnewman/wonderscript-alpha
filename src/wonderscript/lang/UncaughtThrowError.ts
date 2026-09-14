@@ -1,9 +1,12 @@
-import { prStr } from "../compiler";
+import { Context } from "./Context";
 
 export class UncaughtThrowError extends Error {
-  readonly nested: unknown
-  constructor(nested: unknown) {
-    super(`uncaught throw ${prStr(nested)}`);
-    this.nested = nested;
+  constructor(nested: Error | string, scope?: Context) {
+    const message = (nested as Error).message ?? nested;
+    super(message as string);
+    if (scope) {
+      const first = `${this.message}\n${scope.stacktrace().toString()}`;
+      this.stack = this.stack?.replace(this.message, first);
+    }
   }
 }

@@ -22,11 +22,12 @@ export function evalString(input: string, scope: Context, source = "inline") {
         ret = jsEval(emit(res, scope));
       } catch (e) {
         if (e instanceof UncaughtThrowError) {
-          throw e.nested;
-        } else {
           throw e;
+        } else {
+          throw new UncaughtThrowError(e as Error | string, scope);
         }
       }
     }
   }
 }
+
