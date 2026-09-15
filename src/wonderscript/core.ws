@@ -785,9 +785,9 @@
 
 (defmacro is
   ((exp)
-   (array 'is exp (array 'str "Failed assertion: " (pr-str exp " is false"))))
+   `(is ~exp (str "Failed assertion: " (pr-str ~exp " is false"))))
   ((exp msg)
-   (array 'begin (array 'cond (array 'not exp) (array 'throw msg)) exp)))
+   `(begin (cond (not ~exp) (throw ~msg)) ~exp)))
 
 (defmacro is-not (body &args)
   (cons 'is (cons (array 'not body) args)))
