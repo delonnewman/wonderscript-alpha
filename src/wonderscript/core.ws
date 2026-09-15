@@ -172,15 +172,6 @@
                     ~(let-bindings-form xs argsym)
                     (throw (new js/Error (str "wrong number of arguments (given " (length ~argsym) ", expected " ~arity-str ") "))))))))))
 
-(comment
-  (defn greet (() (greet "World")) ((name) (str "Hello, " name "!")))
-  (cond
-    (identical? 0 (length args188)) (let () (greet "World"))
-    (identical? 1 (length args188)) (let (name (array-get args188 0))
-                                      (str "Hello, " name "!"))
-    (throw (new js/Error (str "wrong number of arguments (given " (length args188) ", expeced " "0 or 1" ")"))))
-  )
-
 (def ^:macro defn
   (fn
     (name &rest)
