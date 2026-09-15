@@ -150,9 +150,9 @@
              arities   (send (map #(length %) arglists) (sort #(cond (< %1 %2) -1 (> %1 %2) 1 :else 0)))
              splat     (send parsed (some (fn* (list) (send list (some #(:splat %))))))
              arity-str (if splat (str (arities 0) " or more") (send arities (join " or ")))
-             argsym    (gensym "args"))
-         (array 'fn*
-                (array (send wonderscript.lang/Symbol (intern (str "&" argsym))))
+             argsym    (gensym "args")
+             arglist   (array (send wonderscript.lang/Symbol (intern (str "&" argsym)))))
+         (array 'fn* arglist
                 (cons 'cond
                       (send
                        (send xs
@@ -171,8 +171,9 @@
                arity     (length x)
                splat     (send parsed (some #(:splat %)))
                arity-str (if splat (str arity " or more") (str arity))
-               argsym    (gensym "args"))
-           (array 'fn* (array (send wonderscript.lang/Symbol (intern (str "&" argsym))))
+               argsym    (gensym "args")
+               arglist   (array (send wonderscript.lang/Symbol (intern (str "&" argsym)))))
+           (array 'fn* arglist
                   (array 'if (arity-validation-forms (parsed-args x) argsym)
                          (let-bindings-form xs argsym)
                          (array 'throw
