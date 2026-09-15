@@ -1,6 +1,10 @@
 export class Vector<T = unknown> {
   readonly length: number;
 
+  static fromArray<T = unknown>(array: T[]) {
+    return new this(...array);
+  }
+
   constructor(...array: T[]) {
     this.length = array.length;
 
@@ -21,5 +25,21 @@ export class Vector<T = unknown> {
 
   slice(start: number, end: number): Vector {
     return new Vector(...Array.prototype.slice.call(this, start, end));
+  }
+
+  toArray() {
+    return Array.prototype.slice.call(this);
+  }
+
+  prepend(value) {
+    const elems = this.toArray();
+    elems.unshift(value);
+    return new Vector(...elems);
+  }
+
+  append(value: unknown) {
+    const elems = this.toArray();
+    elems.push(value);
+    return new Vector(...elems);
   }
 }
