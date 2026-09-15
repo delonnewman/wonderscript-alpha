@@ -156,16 +156,14 @@
                              (flatMap
                               (fn* (x i)
                                    (array (arity-validation-forms (parsed i) argsym)
-                                          (let-bindings-form x argsym))))))
+                                          (let-bindings-form x argsym)))))
+             alt       (array :else
+                              (array 'throw
+                                     (array 'new 'js/Error
+                                            (array 'str "wrong number of arguments (given "
+                                                   (array 'length argsym) ", expected " arity-str ")")))))
          `(fn* ~arglist
-               (cond
-                 ~@(send conds
-                       (concat
-                        (array :else
-                               (array 'throw
-                                      (array 'new 'js/Error
-                                             (array 'str "wrong number of arguments (given "
-                                                    (array 'length argsym) ", expected " arity-str ")")))))))))
+               (cond ~@(send conds (concat alt)))))
        :else
          (let (parsed    (parsed-args x)
                arity     (length x)
