@@ -4,7 +4,6 @@ import { Symbol } from "../lang/Symbol";
 import { Form, isTaggedValue, TaggedValue } from "../compiler/core";
 import { UNQUOTE_SPLICING_SYM, UNQUOTE_SYM } from "./unquoteReader";
 import { SEND_SYM } from "../compiler/emit/emitSend";
-import { p } from "../util";
 
 export const QUOTE_SYM = Symbol.intern('quote');
 export const ARRAY_SYM = Symbol.intern('array');
