@@ -120,7 +120,6 @@
            :order i
            :splat false}))))))
 
-; TODO: need gensym for "args" variable
 (def arity-validation-forms
   (fn* (parsed argsym)
     (let (nargs (length parsed))
