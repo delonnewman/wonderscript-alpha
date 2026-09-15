@@ -173,13 +173,10 @@
                arity-str (if splat (str arity " or more") (str arity))
                argsym    (gensym "args")
                arglist   (array (send wonderscript.lang/Symbol (intern (str "&" argsym)))))
-           (array 'fn* arglist
-                  (array 'if (arity-validation-forms parsed argsym)
-                         (let-bindings-form xs argsym)
-                         (array 'throw
-                                (array 'new 'js/Error
-                                       (array 'str "wrong number of arguments (given "
-                                              (array 'length argsym) ", expected " arity-str ") "))))))))))
+           `(fn* ~arglist
+                  (if ~(arity-validation-forms parsed argsym)
+                    ~(let-bindings-form xs argsym)
+                    (throw (new js/Error (str "wrong number of arguments (given " (length ~argsym) ", expected " ~arity-str ") "))))))))))
 
 (def ^:macro defn
   (fn
