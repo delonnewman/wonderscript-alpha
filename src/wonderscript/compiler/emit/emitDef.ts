@@ -34,7 +34,6 @@ export function emitDef(form: Form, env: Context): string {
 
   if (form[2] != null) {
     code = emit(form[2], env);
-    // console.log(form[1].name(), code);
     val = jsEval(code);
   }
 
@@ -43,7 +42,7 @@ export function emitDef(form: Form, env: Context): string {
 
   if (form[1].hasMeta()) {
     const meta = `${CURRENT_NS.value.name}.${name}_META_=${emitQuotedMetaData(form[1].meta())}`;
-    def = `${def};${meta}`;
+    def = `${def};\n${meta}`;
   }
 
   return def;
