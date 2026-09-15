@@ -748,8 +748,8 @@
 
 (defmacro while
   (pred &body)
-  (array 'loop ()
-         (cons 'when (cons pred (concat body (array (array 'recur)))))))
+  `(loop ()
+    (when ~pred ~@body (recur))))
 
 (defn times
   (n f)
