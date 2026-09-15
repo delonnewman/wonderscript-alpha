@@ -709,17 +709,17 @@
      (object? ~obj) (slot-set! ~obj ~key ~value)
      :else (throw (new js/Error "can only set keys for associative values")))))
 
-;; TODO: include let binding for macro output for better performance, will need gensym
 (defmacro for-times
   (bindings &body)
   (let (nm   (bindings 0)
         init (bindings 1))
     `(loop (~nm 0)
-          (when (< ~nm ~init)
-            ~@body
-            (recur (+ ~nm 1)))
-          ~init)))
+       (when (< ~nm ~init)
+         ~@body
+         (recur (+ ~nm 1)))
+       ~init)))
 
+;; TODO: generalize with seq interface
 (defmacro for-each
   (bindings &body)
   (let (nm  (bindings 0)
@@ -731,7 +731,7 @@
               ~i 0)
          (when (not (nil? ~nm))
            ~@body
-           (recur (~xs (inc ~i)) (inc ~i)))
+           (recur (~xs (+ 1 ~i)) (+ 1 ~i)))
          ~xs))))
 
 (defmacro while
