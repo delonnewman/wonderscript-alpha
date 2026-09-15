@@ -162,8 +162,7 @@
                                      (array 'new 'js/Error
                                             (array 'str "wrong number of arguments (given "
                                                    (array 'length argsym) ", expected " arity-str ")")))))
-         `(fn* ~arglist
-               (cond ~@(send conds (concat alt)))))
+         `(fn* ~arglist (cond ~@conds ~@alt)))
        :else
          (let (parsed    (parsed-args x)
                arity     (length x)
