@@ -135,8 +135,8 @@
         (flatMap (fn* (x i)
          (if (splat? x)
            (array (send wonderscript.lang/Symbol (intern (send (name  x) (slice 1))))
-            (array 'send argsym (array 'slice i)))
-           (array x (array 'array-get argsym i))))))
+            `(send ~argsym (slice ~i)))
+           (array x `(array-get ~argsym ~i))))))
        (send pair (slice 1))))))
 
 (def ^:macro fn
