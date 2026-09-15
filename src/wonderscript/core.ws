@@ -751,6 +751,11 @@
   `(loop ()
     (when ~pred ~@body (recur))))
 
+(defmacro until
+  (pred &body)
+  `(loop ()
+    (unless ~pred ~@body (recur))))
+
 (defn times
   (n f)
   (let (a (make-array))

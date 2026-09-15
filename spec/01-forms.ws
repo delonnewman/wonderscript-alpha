@@ -79,6 +79,11 @@
     (is (< i 5))
     (set* i (+ i 1))))
 
+(let (^:mutable i 0)
+  (until (= i 5)
+    (is (< i 5))
+    (set* i (+ i 1))))
+
 (for-each (x '(1 2 3))
   (is (number? x)))
 
