@@ -167,11 +167,11 @@
                                              (array 'str "wrong number of arguments (given "
                                                     (array 'length argsym) ", expected " arity-str ")")))))))))
        :else
-         (let (parsed (parsed-args x)
-               arity (length x)
-               splat (send parsed (some #(:splat %)))
+         (let (parsed    (parsed-args x)
+               arity     (length x)
+               splat     (send parsed (some #(:splat %)))
                arity-str (if splat (str arity " or more") (str arity))
-               argsym (gensym "args"))
+               argsym    (gensym "args"))
            (array 'fn* (array (send wonderscript.lang/Symbol (intern (str "&" argsym))))
                   (array 'if (arity-validation-forms (parsed-args x) argsym)
                          (let-bindings-form xs argsym)
