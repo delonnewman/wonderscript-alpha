@@ -4,7 +4,7 @@
 
 (is (= (array 1 2 3) '(1 2 3)))
 (is (array? '(1 2 3)))
-(is (not (array? nil)))
+(is-not (array? nil))
 
 (def an-array (array 1 2 3))
 (def an-array-copy (add an-array E))
@@ -24,7 +24,7 @@
 (is (= a-map {:a 1 :b 2}))
 (is (key? a-map :a))
 (is (key? a-map :b))
-(is (not (key? a-map :c)))
+(is-not (key? a-map :c))
 (is (= (size a-map) 2))
 (is (= (keys a-map) (array :a :b)))
 (is (= (values a-map) (array 1 2)))
@@ -37,7 +37,7 @@
 (def a-set (set [1 2 3 3]))
 (is (= a-set #{1 2 3}))
 (is (member? a-set 1))
-(is (not (member? a-set 4)))
+(is-not (member? a-set 4))
 (add-member! a-set 4)
 (is (member? a-set 4))
 

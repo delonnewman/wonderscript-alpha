@@ -789,13 +789,14 @@
   ((exp msg)
    `(begin (cond (not ~exp) (throw ~msg)) ~exp)))
 
-(defmacro is-not (body &args)
-  (cons 'is (cons (array 'not body) args)))
+(defmacro is-not
+  ((exp) `(is (not ~exp)))
+  ((exp msg) `(is (not ~exp) ~msg)))
 
 (defmacro deftest
   (name &body)
   (let (nm (send name (withMeta {:test true})))
-    (array 'def nm (cons 'fn (cons '() body)))))
+    `(def ~nm (fn () ~@body))))
 
 ;; OOP & JS reflection
 
