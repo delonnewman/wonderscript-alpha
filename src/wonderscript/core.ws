@@ -714,21 +714,25 @@
   (bindings &body)
   (let (nm   (bindings 0)
         init (bindings 1))
-    (array 'loop (array nm 0)
-          (cons 'when
-                (cons (array '< nm init)
-                      (concat body (array (array 'recur (array '+ nm 1))))))
-          init)))
+    `(loop (~nm 0)
+          (when (< ~nm ~init)
+            ~@body
+            (recur (+ ~nm 1)))
+          ~init)))
 
 (defmacro for-each
   (bindings &body)
   (let (nm  (bindings 0)
-        col (bindings 1))
-    (array 'loop (array nm (array col 0) 'i 0)
-           (cons 'when
-                 (cons (array 'not (array 'nil? nm))
-                       (concat body (array (array 'recur (array col (array 'inc 'i)) (array 'inc 'i))))))
-           col)))
+        col (bindings 1)
+        i   (gensym "i")
+        xs  (gensym "xs"))
+    `(let (~xs ~col)
+       (loop (~nm (~xs 0)
+              ~i 0)
+         (when (not (nil? ~nm))
+           ~@body
+           (recur (~xs (inc ~i)) (inc ~i)))
+         ~xs))))
 
 (defmacro while
   (pred &body)
