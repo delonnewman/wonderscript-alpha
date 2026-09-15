@@ -195,7 +195,7 @@
                  (or doc meta) (send rest (slice 2))
                  :else (send rest (slice 1)))
           nm (send name (withMeta (merge meta {:doc doc}))))
-     (array 'def nm (cons 'fn (cons args body))))))
+     `(def ~nm (fn ~args ~@body)))))
 
 (defn ^:macro defmacro
   (name &rest)
