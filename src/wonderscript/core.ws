@@ -524,6 +524,18 @@
   (&arrays)
   (send (slot-get js/Array :prototype :concat) (apply EMPTY-ARRAY arrays)))
 
+(defn prepend
+  (col x)
+  (if (slot? col :prepend)
+    (send col (prepend x))
+    (throw (new js/Error "unknown method prepend"))))
+
+(defn append
+  (col x)
+  (if (slot? col :append)
+    (send col (append x))
+    (throw (new js/Error "unknown method append"))))
+
 (defn make-array
   (() (new js/Array))
   ((n) (new js/Array n)))
