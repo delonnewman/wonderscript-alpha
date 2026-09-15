@@ -124,8 +124,8 @@
   (fn* (parsed argsym)
     (let (nargs (length parsed))
       (if (send parsed (some #(:splat %)))
-        (array '> (array 'length argsym) (- nargs 1))
-        (array 'identical? nargs (array 'length argsym))))))
+        `(> (length ~argsym) (- ~nargs 1))
+        `(identical? ~nargs (length ~argsym))))))
 
 (def let-bindings-form
   (fn* (pair argsym)
