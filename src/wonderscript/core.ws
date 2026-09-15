@@ -155,17 +155,12 @@
                              (flatMap
                               (fn* (x i)
                                    (array (arity-validation-forms (parsed i) argsym)
-                                          (let-bindings-form x argsym)))))
-             alt       (array :else
-                              (array 'throw
-                                     (array 'new 'js/Error
-                                            (array 'str "wrong number of arguments (given "
-                                                   (array 'length argsym) ", expected " arity-str ")")))))
-         ;; (send js/console (error (pr-str `(cond ~@conds :else (throw (new js/Error (str "wrong number of arguments (given " (length ~argsym) ", expeced " ~arity-str ")")))))))
-         ;; (send js/console (error (length conds)))
-         `(fn* ~arglist (cond ~@conds ~@alt)))
-         ;; `(fn* ~arglist (cond ~@conds :else (throw (new js/Error (str "wrong number of arguments (given " (length ~argsym) ", expeced " ~arity-str ")"))))))
-       :else
+                                          (let-bindings-form x argsym))))))
+         `(fn* ~arglist
+               (cond ~@conds
+                     :else
+                     (throw (new js/Error (str "wrong number of arguments (given " (length ~argsym) ", expeced " ~arity-str ")"))))))
+       :else ;; single arity
          (let (parsed    (parsed-args x)
                arity     (length x)
                splat     (send parsed (some #(:splat %)))
@@ -203,19 +198,10 @@
           nm (send name (withMeta (merge meta {:doc doc}))))
      `(def ~nm (fn ~args ~@body)))))
 
-(defn testing
-  "Testing, testing..."
-  {:added 1.0}
-  () 1)
-
-;; (send js/console (error (pr-str (the-meta 'testing))))
-
 (defn ^:macro defmacro
   (name &rest)
   (let (nm (send name (withMeta {:macro true})))
     `(defn ~nm ~@rest)))
-
-;; (send js/console (error (pr-str (macroexpand '(defmacro deftype "testing" {:added 1.0} (name type-val) name)))))
 
 (defn macro?
   (sym) (:macro (the-meta sym)))
