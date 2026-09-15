@@ -174,7 +174,7 @@
                argsym    (gensym "args")
                arglist   (array (send wonderscript.lang/Symbol (intern (str "&" argsym)))))
            (array 'fn* arglist
-                  (array 'if (arity-validation-forms (parsed-args x) argsym)
+                  (array 'if (arity-validation-forms parsed argsym)
                          (let-bindings-form xs argsym)
                          (array 'throw
                                 (array 'new 'js/Error
