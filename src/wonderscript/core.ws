@@ -713,7 +713,6 @@
      (object? ~obj) (slot-set! ~obj ~key ~value)
      :else (throw (new js/Error "can only set keys for associative values")))))
 
-
 (defmacro for-times
   (bindings &body)
   (let (nm   (bindings 0)
