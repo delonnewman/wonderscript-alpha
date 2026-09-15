@@ -1042,7 +1042,7 @@
 ;; TODO: add alias key as meta data
 (defmacro alias
   (name old)
-  (array 'def name (array 'clone old)))
+  `(def ~name (clone ~old)))
 
 (def empty! clear!)
 
