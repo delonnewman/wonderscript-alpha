@@ -10,6 +10,8 @@ export type Message =
   | Vector<unknown>;
 
 const EMPTY_ARRAY = Object.freeze([]);
+export const JS_DIG_KW = Keyword.intern("dig", "js");
+export const RESPOND_TO_KW = Keyword.intern("respond-to?");
 
 export const Message = {
   intern(msg: Message): string {
@@ -38,7 +40,7 @@ export const Message = {
       return msg.slice(1);
     }
 
-    if (msg instanceof Keyword || msg instanceof Symbol && msg.namespace() === "js.prop") {
+    if ((msg instanceof Keyword || msg instanceof Symbol) && msg.namespace() === "js.prop") {
       return;
     }
 
@@ -46,6 +48,10 @@ export const Message = {
   },
 
   send(obj: Record<string, unknown>, msg: Message) {
+    if ((msg instanceof Vector || msg instanceof Array) && RESPOND_TO_KW.equals(msg[0])) {
+      return Message.intern(msg[1]) in obj;
+    }
+
     const name = this.intern(msg);
     const args = this.args(msg);
 

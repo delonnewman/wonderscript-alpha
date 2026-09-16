@@ -74,7 +74,7 @@
 (def message-sender
   (fn* (slot)
    (fn* (obj)
-    (if (and obj (slot? obj slot))
+    (if (and obj (send obj [:respond-to? slot]))
       (send obj slot)))))
 
 (def name (message-sender "name"))
