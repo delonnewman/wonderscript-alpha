@@ -18,9 +18,9 @@
 ;; Slot Access
 
 (def an-object (send js/Object [:js/create nil]))
-(slot-set! an-object :a 1)
-(slot-set! an-object :b 2)
-(slot-set! an-object :c (js-object "d" 3 "e" 4))
+(send an-object [:js/set! :a 1])
+(send an-object [:js/set! :b 2])
+(send an-object [:js/set! :c (js-object "d" 3 "e" 4)])
 
 (is (identical? 2 (send an-object :js.prop/b)))
 (is (identical? 1 (send an-object :js.prop/a)))
@@ -28,7 +28,7 @@
 (is (identical? 4 (send an-object [:js/dig :c :e])))
 
 (is (nil? (send an-object :js.prop/d)))
-(slot-set! an-object :c 3)
+(send an-object [:js/set! :c 3])
 (is (identical? 3 (send an-object :js.prop/c)))
 
 (is (send an-object [:respond-to? :a]))

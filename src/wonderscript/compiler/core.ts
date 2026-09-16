@@ -11,7 +11,6 @@ import { LET_SYM } from "./emit/emitLet";
 import { LOOP_SYM } from "./emit/emitLoop";
 import { List } from "../lang/List";
 import { Vector } from "../lang/Vector";
-import { isSlotMutationForm, SlotMutationForm } from "./emit/emitSlotMutation";
 import {
   ArrayMutationForm,
   isArrayMutationForm,
@@ -79,11 +78,11 @@ export function isThrowForm(val: unknown): val is TaggedValue {
 }
 
 // forms that compile to JS statements
-export type StatementForm = SlotMutationForm | ArrayMutationForm;
+export type StatementForm = ArrayMutationForm;
 
 export function isStatementForm(form: Form): form is StatementForm {
   return (
-    isSlotMutationForm(form) || isArrayMutationForm(form) || isJSForm(form)
+    isArrayMutationForm(form) || isJSForm(form)
   );
 }
 

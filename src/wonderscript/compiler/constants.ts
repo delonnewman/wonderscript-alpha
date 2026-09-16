@@ -17,9 +17,6 @@ export const JS_SYM = "js*";
 
 export const DOT_SYM = ".";
 export const DOT_DASH_SYM = ".-";
-export const SLOT_SYM = "slot-get";
-export const HAS_SLOT_SYM = "slot?";
-export const SSET_SYM = "slot-set!";
 export const SEND_SYM = "send";
 
 export const NIL_SYM = "nil";
@@ -103,8 +100,5 @@ export const SPECIAL_FORMS = {
   ".": true,
   new: true,
   "set*": true,
-  "slot-get": true,
-  "slot-set!": true,
-  "slot?": true,
   send: true,
 } as const;

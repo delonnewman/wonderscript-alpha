@@ -64,9 +64,6 @@ import {
   BEGIN_SYM,
   TYPE_SYM,
   UNDEFINED_SYM,
-  SLOT_SYM,
-  HAS_SLOT_SYM,
-  SSET_SYM,
   IF_SYM,
   SEND_SYM,
 } from "./constants";
@@ -96,7 +93,6 @@ import { Keyword } from "../lang/Keyword";
 import { Symbol } from "../lang/Symbol";
 import { prStr } from "./prStr";
 import { emitSet } from "./emit/emitSet";
-import { emitSlotMutation } from "./emit/emitSlotMutation";
 import { Vector } from "../lang/Vector";
 import { emitVector } from "./emit/emitVector";
 import { emitIf } from "./emit/emitIf";
@@ -154,8 +150,6 @@ export function emit(exp: Form, ctx: Context) {
         case SET_SYM:
           return emitAssignment(form, ctx);
         // operators
-        case SSET_SYM:
-          return emitSlotMutation(form, ctx);
         case MOD_SYM:
           return emitBinOp(form, ctx);
         case LT_SYM:

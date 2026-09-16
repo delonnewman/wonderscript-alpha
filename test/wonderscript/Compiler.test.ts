@@ -8,7 +8,7 @@ describe("Compiler", () => {
     let output = subject.evalString('(send js/global :js.prop/hey)');
     expect(output).toBeUndefined();
 
-    subject.evalString('(slot-set! js/global "hey" "You")');
+    subject.evalString('(send js/global [:js/set! :hey "You"])');
     output = subject.evalString('(send js/global :js.prop/hey)');
 
     expect(output).toBe("You");

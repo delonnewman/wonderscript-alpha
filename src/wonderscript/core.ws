@@ -389,13 +389,12 @@
   (() (make-class (fn* ()) nil))
   ((ctr) (make-class ctr nil))
   ((ctr superclass)
-   (slot-set! ctr :prototype
-    (send js/Object [:js/create superclass]))
+   (send ctr [:js/set! :prototype (send js/Object [:js/create superclass])])
    ctr))
 
 (defn add-method
   (klass name f)
-  (slot-set! (send klass :js.prop/prototype) name f))
+  (send (send klass :js.prop/prototype) [:js/set! name f]))
 
 (defmacro defclass
   ((name) `(defclass ~name nil))
@@ -709,7 +708,7 @@
    `(cond
      (array-like? ~obj) (array-set! ~obj ~key ~value)
      (send ~obj [:respond-to? :set]) (send ~obj [:js/set ~key ~value])
-     (object? ~obj) (slot-set! ~obj ~key ~value)
+     (object? ~obj) (send ~obj [:js/set! ~key ~value])
      :else (throw (new js/Error "can only set keys for associative values")))))
 
 (defmacro for-times
