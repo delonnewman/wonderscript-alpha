@@ -99,9 +99,9 @@ function emitQuotedValue(val: unknown, scope: Context): string {
     return str("(new Map([", parts.join(", "), "]))");
   }
   if (val instanceof Vector) {
-    return `new wonderscript.core.Vector(${
-      val.map((x) => emitQuotedValue(x, scope)).join(", ")
-    })`;
+    return `new wonderscript.core.Vector(${val
+      .map((x) => emitQuotedValue(x, scope))
+      .join(", ")})`;
   }
 
   throw new CompilerError(`Invalid quoted form: ${prStr(val)}`, scope);

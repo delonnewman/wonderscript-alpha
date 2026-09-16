@@ -25,7 +25,7 @@ export function emitSend(form: Form, ctx: Context): string {
   if (msg instanceof Vector || Array.isArray(msg)) {
     const tag = msg[0];
     const args = Message.args(msg)
-      .map(x => emit(x, ctx))
+      .map((x) => emit(x, ctx))
       .join(", ");
 
     if (tag instanceof Keyword || typeof tag === "string") {

@@ -2,7 +2,12 @@ import { prStr } from "../compiler";
 import { Keyword, Vector, Symbol } from "../lang";
 import { escapeChars } from "../compiler/utils";
 
-export type Message = string | Keyword | Symbol | [Symbol | Keyword, ...unknown[]] | Vector<unknown>;
+export type Message =
+  | string
+  | Keyword
+  | Symbol
+  | [Symbol | Keyword, ...unknown[]]
+  | Vector<unknown>;
 
 const EMPTY_ARRAY = Object.freeze([]);
 
@@ -19,7 +24,7 @@ export const Message = {
         const ns = name.namespace();
 
         name = escapeChars(name.name());
-        if (ns === 'js') return name;
+        if (ns === "js") return name;
       }
 
       return `${name}_${msg.slice(1).length}`;
@@ -40,11 +45,11 @@ export const Message = {
     const name = this.intern(msg);
     const args = this.args(msg);
 
-    const fn = obj[name]
+    const fn = obj[name];
     if (typeof fn === "function") {
       return fn.apply(obj, args);
     }
 
     throw new Error(`unknown message ${prStr(msg)}`);
-  }
+  },
 };
