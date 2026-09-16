@@ -38,7 +38,8 @@ export type Form =
   | Set<Form>
   | List
   | Vector<Form>
-  | Array<Form>
+  | Form[]
+  | readonly Form[]
   | TaggedValue;
 
 export type BodyTag = typeof FN_SYM | typeof LET_SYM | typeof LOOP_SYM;
