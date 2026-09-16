@@ -5,5 +5,5 @@ export function unmatchedDelimiterReader(
   delim: string,
   _opts: Record<string, unknown>
 ) {
-  throw new Error("Unmatched delimiter: " + delim);
+  throw new Error(`Unmatched delimiter: ${delim} ${_r.line}:${_r.column}`);
 }

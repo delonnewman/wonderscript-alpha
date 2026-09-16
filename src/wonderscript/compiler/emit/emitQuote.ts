@@ -15,6 +15,7 @@ import { Keyword } from "../../lang/Keyword";
 import { emitKeyword } from "./emitKeyword";
 import { CompilerError } from "../CompilerError";
 import { Context } from "../../lang/Context";
+import { Vector } from "../../lang/Vector";
 
 export const QUOTE_SYM = Symbol.intern(QUOTE_STR);
 export type QuoteForm = [typeof QUOTE_SYM, Form];
@@ -96,6 +97,11 @@ function emitQuotedValue(val: unknown, scope: Context): string {
       val
     );
     return str("(new Map([", parts.join(", "), "]))");
+  }
+  if (val instanceof Vector) {
+    return `new wonderscript.core.Vector(${
+      val.map((x) => emitQuotedValue(x, scope)).join(", ")
+    })`;
   }
 
   throw new CompilerError(`Invalid quoted form: ${prStr(val)}`, scope);

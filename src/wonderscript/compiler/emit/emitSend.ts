@@ -1,14 +1,12 @@
-import { map, str } from "../../lang/runtime";
 import { emit } from "../emit";
-import { escapeChars } from "../utils";
 import { Context } from "../../lang/Context";
 import { SEND_SYM as SEND_STR } from "../constants";
 import { Form, isTaggedValue, TaggedValue } from "../core";
 import { prStr } from "../prStr";
 import { Symbol } from "../../lang/Symbol";
-import { emitSlotName } from "./slots";
-import { Keyword, Vector } from "../../lang";
+import { Keyword, Message, Vector } from "../../lang";
 import { CompilerError } from "../CompilerError";
+import { pt } from "../../util";
 
 export const SEND_SYM = Symbol.intern(SEND_STR);
 
@@ -22,22 +20,25 @@ export function emitSend(form: Form, ctx: Context): string {
     throw new CompilerError(`invalid ${SEND_SYM} form: ${prStr(form)}`, ctx);
 
   let [_, obj, msg] = form;
-  let slotName = emitSlotName(msg);
+  const objCode = emit(obj, ctx);
 
-  if (slotName) {
-    return `(${emit(obj, ctx)}).${escapeChars(slotName)}()`;
+  if (msg instanceof Vector || Array.isArray(msg)) {
+    const tag = msg[0];
+    const args = Message.args(msg)
+      .map(x => emit(x, ctx))
+      .join(", ");
+
+    if (tag instanceof Keyword || typeof tag === "string") {
+      return `${objCode}.${Message.intern(msg)}(${args})`;
+    } else {
+      pt(`tag is not a keyword or string: ${prStr(form)}`);
+      return `${objCode}[${emit(tag, ctx)}](${args})`;
+    }
   }
 
-  if (
-    isTaggedValue(msg) ||
-    (msg instanceof Vector && msg[0] instanceof Keyword)
-  ) {
-    const [method, ...args] = Array.prototype.slice.call(msg);
-
-    const strArgs = map<Form>((x) => emit(x, ctx), args).join(", ");
-    return `(${emit(obj, ctx)}).${escapeChars(method.name())}(${strArgs})`;
+  if (msg instanceof Keyword || typeof msg === "string") {
+    return `${objCode}.${Message.intern(msg)}()`;
   }
 
-  // TODO: add late bound evaluation of slot names
-  return `(${emit(obj, ctx)})[${emit(msg, ctx)}]()`;
+  return `wonderscript.lang.Message.send(${objCode}, ${emit(msg, ctx)})`;
 }

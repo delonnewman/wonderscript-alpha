@@ -5,6 +5,7 @@ import { Form, isTaggedValue, TaggedValue } from "../compiler/core";
 import { UNQUOTE_SPLICING_SYM, UNQUOTE_SYM } from "./unquoteReader";
 import { SEND_SYM } from "../compiler/emit/emitSend";
 import { Vector } from "../lang/Vector";
+import { Keyword } from "../lang/Keyword";
 
 export const QUOTE_SYM = Symbol.intern("quote");
 export const ARRAY_SYM = Symbol.intern("array");
@@ -61,7 +62,7 @@ function syntaxQuote(value: unknown): Form {
     return [
       SEND_SYM,
       [ARRAY_SYM, ...slices[0]],
-      [Symbol.intern("concat"), ...rest],
+      [Keyword.intern("concat", "js"), ...rest],
     ];
   }
   if (value instanceof Symbol) {

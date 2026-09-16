@@ -6,18 +6,18 @@
 
 ;; Message Passing
 
-(is (identical? 2025 (send a-date 'getFullYear)))
-(is (identical? 1 (send a-date :getMonth)))
-(is (identical? 2 (send a-date "getDate")))
+(is (identical? 2025 (send a-date :js/getFullYear)))
+(is (identical? 1 (send a-date :js/getMonth)))
+(is (identical? 2 (send a-date :js/getDate)))
 
-(send a-date (setYear 2020)) ;; let's go back in time
-(send a-date [:setMonth 5])
-(is (identical? 2020 (send a-date :getFullYear)))
-(is (identical? 5 (send a-date :getMonth)))
+(send a-date [:js/setYear 2020]) ;; let's go back in time
+(send a-date [:js/setMonth 5])
+(is (identical? 2020 (send a-date :js/getFullYear)))
+(is (identical? 5 (send a-date :js/getMonth)))
 
 ;; Slot Access
 
-(def an-object (send js/Object (create nil)))
+(def an-object (send js/Object [:js/create nil]))
 (slot-set! an-object :a 1)
 (slot-set! an-object :b 2)
 (slot-set! an-object :c (js-object "d" 3 "e" 4))

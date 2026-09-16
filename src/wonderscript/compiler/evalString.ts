@@ -5,6 +5,7 @@ import { emit } from "./emit";
 import { Context } from "../lang/Context";
 import { UncaughtThrowError } from "../lang/UncaughtThrowError";
 import { jsEval } from "./jsEval";
+import { pt } from "../util";
 
 export function evalString(input: string, scope: Context, source = "inline") {
   scope.setSource(source);
@@ -19,7 +20,8 @@ export function evalString(input: string, scope: Context, source = "inline") {
     if (isEOF(res)) return ret;
     if (res != null) {
       try {
-        ret = jsEval(emit(res, scope));
+        const code = emit(res, scope);
+        ret = jsEval(code);
       } catch (e) {
         if (e instanceof UncaughtThrowError) {
           throw e;

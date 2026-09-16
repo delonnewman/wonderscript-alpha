@@ -7,6 +7,7 @@ import {
 import { Symbol } from "../../../src/wonderscript/lang/Symbol";
 import { SEND_SYM } from "../../../src/wonderscript/compiler/emit/emitSend";
 import { p } from "../../../src/wonderscript/util";
+import { Keyword } from "../../../src/wonderscript/lang/Keyword";
 
 describe("syntaxQuoteReader", () => {
   test("trivial quoting", () => {
@@ -32,7 +33,7 @@ describe("syntaxQuoteReader", () => {
     const expected = [
       SEND_SYM,
       [ARRAY_SYM, 1, Symbol.intern("x")],
-      [Symbol.intern("concat"), Symbol.intern("ys"), [ARRAY_SYM]],
+      [Keyword.intern("concat", "js"), Symbol.intern("ys"), [ARRAY_SYM]],
     ];
     p(actual);
     p(expected);
@@ -44,7 +45,7 @@ describe("syntaxQuoteReader", () => {
     const expected = [
       SEND_SYM,
       [ARRAY_SYM, [QUOTE_SYM, Symbol.intern("a")], Symbol.intern("x"), 4],
-      [Symbol.intern("concat"), Symbol.intern("ys"), [ARRAY_SYM, 5]],
+      [Keyword.intern("concat", "js"), Symbol.intern("ys"), [ARRAY_SYM, 5]],
     ];
     expect(actual).toEqual(expected);
   });
@@ -54,7 +55,7 @@ describe("syntaxQuoteReader", () => {
     const expected = [
       SEND_SYM,
       [ARRAY_SYM, 1],
-      [Symbol.intern("concat"), Symbol.intern("x"), [ARRAY_SYM, 3]],
+      [Keyword.intern("concat", "js"), Symbol.intern("x"), [ARRAY_SYM, 3]],
     ];
     expect(actual).toEqual(expected);
   });
@@ -65,7 +66,7 @@ describe("syntaxQuoteReader", () => {
       SEND_SYM,
       [ARRAY_SYM, 1],
       [
-        Symbol.intern("concat"),
+        Keyword.intern("concat", "js"),
         Symbol.intern("x"),
         [ARRAY_SYM, 3],
         [ARRAY_SYM, 4],

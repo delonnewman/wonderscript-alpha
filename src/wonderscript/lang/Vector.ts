@@ -31,6 +31,10 @@ export class Vector<T = unknown> {
     return new Vector<T>(...Array.prototype.map.apply(this, args));
   }
 
+  join(...args: unknown[]) {
+    return Array.prototype.join.apply(this, args);
+  }
+
   [Symbol.iterator]() {
     return Array.prototype[Symbol.iterator].apply(this);
   }

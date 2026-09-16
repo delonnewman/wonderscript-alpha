@@ -1,5 +1,3 @@
-import { Context } from "./Context";
-
 export class UncaughtThrowError extends Error {
   constructor(nested: Error | string, trace?: string) {
     if (nested instanceof Error) {

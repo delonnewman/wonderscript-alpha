@@ -5,6 +5,7 @@ import { Namespace } from "./lang/Namespace";
 import { Vector } from "./lang/Vector";
 import { Definition } from "./lang/Definition";
 import { Module } from "./lang/Module";
+import { Message } from "./lang/Message";
 
 export * from "./lang/Nil";
 export * from "./lang/Meta";
@@ -30,4 +31,5 @@ globalThis.wonderscript.lang = {
   Vector,
   Module,
   Definition,
+  Message,
 };

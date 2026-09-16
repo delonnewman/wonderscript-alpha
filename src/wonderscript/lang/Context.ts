@@ -76,10 +76,6 @@ export class Context {
   }
 
   stacktrace(): StackTrace {
-    if (!this.parent) {
-      return StackTrace.empty();
-    }
-
     const frames = [this.stackframe()];
     let ctx: Context | Nil = this.parent;
     while (ctx) {
