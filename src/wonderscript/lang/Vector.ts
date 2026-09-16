@@ -19,25 +19,25 @@ export class Vector<T = unknown> {
     return this[n];
   }
 
-  at(n: number) {
+  at(n: number): T {
     return this[n];
   }
 
-  slice(start: number, end: number): Vector {
-    return new Vector(...Array.prototype.slice.call(this, start, end));
+  slice(...args: unknown[]): Vector {
+    return new Vector(...Array.prototype.slice.apply(this, args));
   }
 
   toArray() {
     return Array.prototype.slice.call(this);
   }
 
-  prepend(value) {
+  prepend(value: T) {
     const elems = this.toArray();
     elems.unshift(value);
     return new Vector(...elems);
   }
 
-  append(value: unknown) {
+  append(value: T) {
     const elems = this.toArray();
     elems.push(value);
     return new Vector(...elems);
