@@ -26,13 +26,14 @@ user> (reduce + (range 10))
 - `set*` (a direct mapping of JS assignment semantics)
 - `js*`
 - `loop`
-- `recur` - `repeat`?
+- `recur` - `repeat`? or maybe `again`
 - `throw`
 - ~~`try`, `catch`, `finally`~~ (not implemented)
 - `do` (a block with it's own environment), `begin` (an immediately executed block with no environment)
   - `rescue`, `ensure`, `else`
-- `new`
-- `.`
+- ~~`new`~~
+- ~~`.`~~
+- `send` (message passing)
 
 ## Operators
 
@@ -53,7 +54,7 @@ that can also (optionally) be used as functions.
 - `typeof` [^1]
 - `+`, `-`, `*`, `/` [^1]
 - ~~`array-get`, `array-set!`, `array-length`~~
-- `slot`, `slot-set!`, `slot?`, `length`
+- `slot-get`, `slot-set!`, `slot?`, `length`
 
 [^1]: Paired with a function equivalent.
 
@@ -66,7 +67,7 @@ that can also (optionally) be used as functions.
 ## Types of Types
 
 - Type Aliases `deftype`
-- Union `(->or Number String)`, `(->and Number String)`
+- Union `(or Number String)`, `(and Number String)`
 - Class `defclass`
   - Multiple inheritance (Look at PicoLisp, Dylan, CLOS), or no inheritance
     either way encourage composition via protocols, method / function composition.
@@ -75,13 +76,13 @@ that can also (optionally) be used as functions.
 
 ## Meta Object Protocol
 
-- Invokable
-- Function
-- Method
+- Callable
+- Procedure : Callable
+- Method : Callable
 - Class
 - Protocol
 - Record
-- GenericFunction
+- GenericFunction : Callable
 - Definition
 - Context
 - Module
