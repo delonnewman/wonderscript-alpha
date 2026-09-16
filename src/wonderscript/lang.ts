@@ -19,6 +19,7 @@ export * from "./lang/runtime";
 export * from "./lang/Vector";
 export * from "./lang/Module";
 export * from "./lang/Definition";
+export * from "./lang/Message";
 
 globalThis.wonderscript ??= {};
 globalThis.wonderscript.lang = {
