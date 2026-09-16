@@ -82,7 +82,7 @@ export function reduce<Memo = unknown, Item = unknown>(
     memo = first<Item>(xs);
     xs = next<Item>(xs);
   } else {
-    memo = init
+    memo = init;
   }
 
   while (!isEmpty(xs)) {

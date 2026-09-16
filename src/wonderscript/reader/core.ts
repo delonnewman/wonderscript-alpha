@@ -60,12 +60,16 @@ export function isMacro(ch: string): boolean {
   return !!MACROS[ch];
 }
 
-export function isTerminatingMacro(ch: string | null | undefined): ch is string {
+export function isTerminatingMacro(
+  ch: string | null | undefined
+): ch is string {
   if (ch == null) return false;
   return ch !== "#" && ch !== "'" && isMacro(ch);
 }
 
-export function nonConstituent(ch: string | null | undefined): ch is "@" | "`" | "~" {
+export function nonConstituent(
+  ch: string | null | undefined
+): ch is "@" | "`" | "~" {
   return ch === "@" || ch === "`" || ch === "~";
 }
 

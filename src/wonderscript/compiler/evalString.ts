@@ -24,10 +24,12 @@ export function evalString(input: string, scope: Context, source = "inline") {
         if (e instanceof UncaughtThrowError) {
           throw e;
         } else {
-          throw new UncaughtThrowError(e as Error | string, scope.stacktrace().toString());
+          throw new UncaughtThrowError(
+            e as Error | string,
+            scope.stacktrace().toString()
+          );
         }
       }
     }
   }
 }
-

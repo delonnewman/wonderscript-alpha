@@ -35,7 +35,10 @@ export function emitLet(form: Form, scope: Context): string {
   const names = [];
   for (let i = 0; i < binds.length; i += 2) {
     if (!(binds[i] instanceof Symbol))
-      throw new CompilerError(`binding names should be symbols, got ${prStr(binds[i])} instead`, scope);
+      throw new CompilerError(
+        `binding names should be symbols, got ${prStr(binds[i])} instead`,
+        scope
+      );
     // TODO: should throw error for namespaced symbols
     env.define(binds[i], true);
 

@@ -20,10 +20,12 @@ export function emitSlotAccess(form: Form, env: Context): string {
 
   let [_, obj, ...slots] = form;
 
-  const slotName = slots.map((slot) => {
-    const name = emitSlotName(slot);
-    return name !== undefined ? `.${name}` : `[${emit(slot, env)}]`;
-  }).join('');
+  const slotName = slots
+    .map((slot) => {
+      const name = emitSlotName(slot);
+      return name !== undefined ? `.${name}` : `[${emit(slot, env)}]`;
+    })
+    .join("");
 
   return `(${emit(obj, env)})${slotName}`;
 }
