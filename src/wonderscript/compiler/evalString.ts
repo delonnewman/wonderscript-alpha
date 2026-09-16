@@ -5,7 +5,6 @@ import { emit } from "./emit";
 import { Context } from "../lang/Context";
 import { UncaughtThrowError } from "../lang/UncaughtThrowError";
 import { jsEval } from "./jsEval";
-import { pt } from "../util";
 
 export function evalString(input: string, scope: Context, source = "inline") {
   scope.setSource(source);
