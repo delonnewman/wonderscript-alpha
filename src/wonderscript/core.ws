@@ -85,7 +85,7 @@
 (def ^:macro cond
   (fn*
    (&clauses)
-   (if (and clauses (not-identical? 0 (slot-get clauses :length)))
+   (if (and clauses (not-identical? 0 (send clauses :js.prop/length)))
      (array 'if (first clauses)
         (if (next clauses)
           (first (rest clauses))
@@ -352,11 +352,11 @@
 
 (defn js-constructor
   (object)
-  (slot-get (js-prototype object) :constructor))
+  (send (js-prototype object) :js.prop/constructor))
 
 (defn js-constructor-name
   (object)
-  (slot-get (js-constructor object) :name))
+  (send (js-constructor object) :js.prop/name))
 
 (defn type
   (value)
@@ -395,7 +395,7 @@
 
 (defn add-method
   (klass name f)
-  (slot-set! (slot-get klass :prototype) name f))
+  (slot-set! (send klass :js.prop/prototype) name f))
 
 (defmacro defclass
   ((name) `(defclass ~name nil))
@@ -406,14 +406,14 @@
 ;; Numerical
 
 ;; numerical constants
-(defconst PI      (slot-get js/Math :PI))
-(defconst E       (slot-get js/Math :E))
-(defconst LOG10E  (slot-get js/Math :LOG10e))
-(defconst LOG2E   (slot-get js/Math :LOG2e))
-(defconst LN10    (slot-get js/Math :LN10))
-(defconst LN2     (slot-get js/Math :LN2))
-(defconst SQRT1-2 (slot-get js/Math :SQRT1_2))
-(defconst SQRT2   (slot-get js/Math :SQRT2))
+(defconst PI      (send js/Math :js.prop/PI))
+(defconst E       (send js/Math :js.prop/E))
+(defconst LOG10E  (send js/Math :js.prop/LOG10e))
+(defconst LOG2E   (send js/Math :js.prop/LOG2e))
+(defconst LN10    (send js/Math :js.prop/LN10))
+(defconst LN2     (send js/Math :js.prop/LN2))
+(defconst SQRT1-2 (send js/Math :js.prop/SQRT1_2))
+(defconst SQRT2   (send js/Math :js.prop/SQRT2))
 
 (defn ->integer
   (s) (js/parseInt s 10))
@@ -433,11 +433,11 @@
         arglist (array (symbol (str "&" (send args :js/name)))))
     `(fn* ~arglist
         (cond
-          (identical? 0 (slot-get ~args :length))
+          (identical? 0 (send ~args :js.prop/length))
           (if-not (nil? ~identity)
             ~identity
             (new js/Error "wrong number of arguments (expected at least 1 got 0)"))
-          (identical? 1 (slot-get ~args :length))
+          (identical? 1 (send ~args :js.prop/length))
           (if (send ~operator [:js/equals '-])
             (* -1 (array-get ~args 0))
             (array-get ~args 0))
@@ -540,7 +540,7 @@
 (defn array-like?
   (obj)
   (and (identical? "object" (typeof obj))
-       (number? (slot-get obj :length))))
+       (number? (send obj :js.prop/length))))
 
 (defn slice
   ((col start)
@@ -612,7 +612,7 @@
   (send (slot-get js/Array :prototype :indexOf) [:js/call array value]))
 
 (defn length
-  (array) (slot-get array :length))
+  (array) (send array :js.prop/length))
 
 ;; Strings
 
@@ -623,7 +623,7 @@
   (object)
   (or (nil? object) (zero? (length object))
       (and (string? object)
-           (identical? 0 (slot-get (send object [:js/replace $white-space-regex ""]) :length)))))
+           (identical? 0 (send (send object [:js/replace $white-space-regex ""]) :js.prop/length)))))
 
 (defn present?
   (object)
@@ -688,7 +688,7 @@
   (s)
   (str
    (send (send s [:js/at 0]) :js/toUpperCase)
-   (send s [:js/slice 1 (slot-get s :length)])))
+   (send s [:js/slice 1 (send s :js.prop/length)])))
 
 (defn words
   (s) (send s [:js/split $white-space-regex]))
@@ -766,7 +766,7 @@
 (defn say
   (&args)
   (apply
-   (slot-get js/console :log)
+   (send js/console :js.prop/log)
    (send (send args [:js/map pr-str]) [:js/join ""])))
 
 (defn p
@@ -815,7 +815,7 @@
 (defn arity
   (f)
   (if (function? f)
-    (slot-get f :length)
+    (send f :js.prop/length)
     (throw (new js/Error "arity cannot be found"))))
 
 (defn js-object
@@ -889,7 +889,7 @@
 (defn indices
   (indexed)
   (let (a (make-array))
-    (for-times (i (slot-get indexed :length))
+    (for-times (i (send indexed :js.prop/length))
       (push! a i))
     a))
 
@@ -946,7 +946,7 @@
   (map) (->array (send map :js/entries)))
 
 (defn size
-  (map) (slot-get map :size))
+  (map) (send map :js.prop/size))
 
 ;; These are map specific
 (defn add-key!

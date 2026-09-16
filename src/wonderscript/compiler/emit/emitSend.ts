@@ -6,7 +6,6 @@ import { prStr } from "../prStr";
 import { Symbol } from "../../lang/Symbol";
 import { Keyword, Message, Vector } from "../../lang";
 import { CompilerError } from "../CompilerError";
-import { pt } from "../../util";
 
 export const SEND_SYM = Symbol.intern(SEND_STR);
 
@@ -31,9 +30,12 @@ export function emitSend(form: Form, ctx: Context): string {
     if (tag instanceof Keyword || typeof tag === "string") {
       return `${objCode}.${Message.intern(msg)}(${args})`;
     } else {
-      pt(`tag is not a keyword or string: ${prStr(form)}`);
       return `${objCode}[${emit(tag, ctx)}](${args})`;
     }
+  }
+
+  if (msg instanceof Keyword && msg.namespace() === 'js.prop') {
+    return `${objCode}.${Message.intern(msg)}`;
   }
 
   if (msg instanceof Keyword || typeof msg === "string") {

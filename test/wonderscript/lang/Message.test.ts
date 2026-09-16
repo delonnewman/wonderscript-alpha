@@ -14,8 +14,13 @@ describe("Message", () => {
       expect(interned).toBe("test");
     });
 
-    test(':test => "test"', () => {
+    test(':js/test => "test"', () => {
       const interned = Message.intern(Keyword.intern("test"));
+      expect(interned).toBe("test");
+    });
+
+    test(':js.prop/test => "test"', () => {
+      const interned = Message.intern(Keyword.intern("test", "js.prop"));
       expect(interned).toBe("test");
     });
 
@@ -39,6 +44,11 @@ describe("Message", () => {
     test("[:js/test, 1] => [1]", () => {
       const message = new Vector(Keyword.intern("test", "js"), 1);
       expect(Message.args(message)).toEqual(new Vector(1));
+    });
+
+    test(':js.prop/test => nil', () => {
+      const interned = Message.args(Keyword.intern("test", 'js.prop'));
+      expect(interned).toBeUndefined();
     });
   });
 });

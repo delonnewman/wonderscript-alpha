@@ -38,6 +38,10 @@ export const Message = {
       return msg.slice(1);
     }
 
+    if (msg instanceof Keyword || msg instanceof Symbol && msg.namespace() === "js.prop") {
+      return;
+    }
+
     return EMPTY_ARRAY;
   },
 
