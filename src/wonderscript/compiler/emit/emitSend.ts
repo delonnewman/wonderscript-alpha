@@ -6,6 +6,7 @@ import { prStr } from "../prStr";
 import { Symbol } from "../../lang/Symbol";
 import { Keyword, Message, Vector } from "../../lang";
 import { CompilerError } from "../CompilerError";
+import { emitSlotName } from "./slots";
 
 export const SEND_SYM = Symbol.intern(SEND_STR);
 
@@ -13,6 +14,8 @@ export type SendForm = [typeof SEND_SYM, Form, TaggedValue | Symbol];
 
 export const isSendForm = (form: Form): form is SendForm =>
   isTaggedValue(form) && form[0].equals(SEND_SYM) && form.length === 3;
+
+const JS_DIG_KW = Keyword.intern("dig", "js");
 
 export function emitSend(form: Form, ctx: Context): string {
   if (!isSendForm(form))
@@ -23,15 +26,27 @@ export function emitSend(form: Form, ctx: Context): string {
 
   if (msg instanceof Vector || Array.isArray(msg)) {
     const tag = msg[0];
+    if (JS_DIG_KW.equals(tag)) {
+      const slots = msg.slice(1);
+      const slotName = slots
+        .map((slot) => {
+          const name = slot instanceof Keyword || typeof slot === "string" ? emitSlotName(slot) : emit(slot, ctx);
+          return name !== undefined ? `.${name}` : `[${emit(slot, ctx)}]`;
+        })
+        .join("");
+
+      return `(${objCode})${slotName}`;
+    }
+
     const args = Message.args(msg)
       .map((x) => emit(x, ctx))
       .join(", ");
 
     if (tag instanceof Keyword || typeof tag === "string") {
       return `${objCode}.${Message.intern(msg)}(${args})`;
-    } else {
-      return `${objCode}[${emit(tag, ctx)}](${args})`;
     }
+
+    return `${objCode}[${emit(tag, ctx)}](${args})`;
   }
 
   if (msg instanceof Keyword && msg.namespace() === 'js.prop') {

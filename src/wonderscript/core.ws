@@ -344,7 +344,7 @@
 
 (defn js-object-tag
   (object)
-  (send (slot-get js/Object :prototype :toString) [:js/call object]))
+  (send (send js/Object [:js/dig :prototype :toString]) [:js/call object]))
 
 (defn js-prototype
   (object)
@@ -514,7 +514,7 @@
 
 (defn concat
   (&arrays)
-  (send (slot-get js/Array :prototype :concat) [:js/apply EMPTY-ARRAY arrays]))
+  (send (send js/Array [:js/dig :prototype :concat]) [:js/apply EMPTY-ARRAY arrays]))
 
 (defn prepend
   (col x)
@@ -556,19 +556,19 @@
 
 (defn push!
   (array value)
-  (send (slot-get js/Array :prototype :push) [:js/call array value]))
+  (send (send js/Array [:js/dig :prototype :push]) [:js/call array value]))
 
 (defn pop!
   (array)
-  (send (slot-get js/Array :prototype :pop) [:js/call array]))
+  (send (send js/Array [:js/dig :prototype :pop]) [:js/call array]))
 
 (defn unshift!
   (array value)
-  (send (slot-get js/Array :prototype :unshift) [:js/call array value]))
+  (send (send js/Array [:js/dig :prototype :unshift]) [:js/call array value]))
 
 (defn shift!
   (array)
-  (send (slot-get js/Array :prototype :shift) [:js/call array]))
+  (send (send js/Array [:js/dig :prototype :shift]) [:js/call array]))
 
 (defn <=>
   (a b)
@@ -581,7 +581,7 @@
 
 (defn sort!
   (array)
-  (send (slot-get js/Array :prototype :sort) [:js/call array <=>]))
+  (send (send js/Array [:js/dig :prototype :sort]) [:js/call array <=>]))
 
 (defn sort
   (array)
@@ -599,7 +599,7 @@
   (array)
   (unless (array? array)
     (throw (new js/Error (str "no automatic conversion of " (type array) " to array"))))
-  (send (slot-get js/Array :prototype :reverse) [:js/call array]))
+  (send (send js/Array [:js/dig :prototype :reverse]) [:js/call array]))
 
 (defn reverse
   (col)
@@ -609,7 +609,7 @@
 
 (defn index-of
   (array value)
-  (send (slot-get js/Array :prototype :indexOf) [:js/call array value]))
+  (send (send js/Array [:js/dig :prototype :indexOf]) [:js/call array value]))
 
 (defn length
   (array) (send array :js.prop/length))
@@ -846,12 +846,12 @@
 
 (defn bind
   (f object)
-  (send (slot-get js/Function :prototype :bind) [:js/call f object]))
+  (send (send js/Function [:js/dig :prototype :bind]) [:js/call f object]))
 
 (defn partial
   (f &args)
   (send
-   (slot-get js/Function :prototype :bind)
+   (send js/Function [:js/dig :prototype :bind])
    [:js/apply f (send (array nil) [:js/concat args])]))
 
 ;; More advanced array functions
@@ -955,16 +955,16 @@
 
 (defn key?
   (map key)
-  (send (slot-get js/Map :prototype :has) [:js/call map key]))
+  (send (send js/Map [:js/dig :prototype :has]) [:js/call map key]))
 
 ;; These are set specific
 (defn add-member!
   (set member)
-  (send (slot-get js/Set :prototype :add) [:js/call set member]))
+  (send (send js/Set [:js/dig :prototype :add]) [:js/call set member]))
 
 (defn member?
   (set member)
-  (send (slot-get js/Set :prototype :has) [:js/call set member]))
+  (send (send js/Set [:js/dig :prototype :has]) [:js/call set member]))
 
 ;; Seq & Seqable
 
