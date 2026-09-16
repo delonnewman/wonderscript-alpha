@@ -46,8 +46,6 @@ describe("syntaxQuoteReader", () => {
       [ARRAY_SYM, [QUOTE_SYM, Symbol.intern("a")], Symbol.intern("x"), 4],
       [Symbol.intern("concat"), Symbol.intern("ys"), [ARRAY_SYM, 5]],
     ];
-    p(actual);
-    p(expected);
     expect(actual).toEqual(expected);
   });
   test("spliced unquoting with 3 forms", () => {
@@ -58,8 +56,6 @@ describe("syntaxQuoteReader", () => {
       [ARRAY_SYM, 1],
       [Symbol.intern("concat"), Symbol.intern("x"), [ARRAY_SYM, 3]],
     ];
-    p(actual);
-    p(expected);
     expect(actual).toEqual(expected);
   });
   test("spliced unquoting with 4 forms", () => {
@@ -75,8 +71,6 @@ describe("syntaxQuoteReader", () => {
         [ARRAY_SYM, 4],
       ],
     ];
-    p(actual);
-    p(expected);
     expect(actual).toEqual(expected);
   });
 });
