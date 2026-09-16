@@ -4,7 +4,14 @@ import { SEND_SYM as SEND_STR } from "../constants";
 import { Form, isTaggedValue, TaggedValue } from "../core";
 import { prStr } from "../prStr";
 import { Symbol } from "../../lang/Symbol";
-import { JS_DIG_KW, Keyword, Message, RESPOND_TO_KW, Vector } from "../../lang";
+import {
+  JS_DIG_KW,
+  JS_PROP_SET,
+  Keyword,
+  Message,
+  RESPOND_TO_KW,
+  Vector,
+} from "../../lang";
 import { CompilerError } from "../CompilerError";
 import { emitSlotName } from "./slots";
 
@@ -44,7 +51,22 @@ export function emitSend(form: Form, ctx: Context): string {
         return `("${Message.intern((msgQuery))}" in ${emit(obj, ctx)})`;
       }
 
-      return `(${emit(msgQuery, ctx)} in ${emit(obj, ctx)})`;
+      return `wonderscript.lang.Message.send(${objCode}, ${emit(msg, ctx)})`;
+    }
+
+    if (JS_PROP_SET.equals(tag)) {
+      const prop = msg[1];
+      if (msg.length !== 3) {
+        throw new Error(
+          `invalid arguments expected 2, got ${msg.length - 1} instead`
+        );
+      }
+
+      if (prop instanceof Keyword || typeof prop === "string") {
+        return `(${emit(obj, ctx)}.${Message.intern(prop)}=${emit(msg[2], ctx)})`;
+      }
+
+      return `wonderscript.lang.Message.send(${objCode}, ${emit(msg, ctx)})`;
     }
 
     const args = Message.args(msg)

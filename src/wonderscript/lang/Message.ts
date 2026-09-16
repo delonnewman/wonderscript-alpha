@@ -12,6 +12,7 @@ export type Message =
 const EMPTY_ARRAY = Object.freeze([]);
 export const JS_DIG_KW = Keyword.intern("dig", "js");
 export const RESPOND_TO_KW = Keyword.intern("respond-to?");
+export const JS_PROP_SET = Keyword.intern("set!", "js");
 
 export const Message = {
   intern(msg: Message): string {
@@ -50,6 +51,18 @@ export const Message = {
   send(obj: Record<string, unknown>, msg: Message) {
     if ((msg instanceof Vector || msg instanceof Array) && RESPOND_TO_KW.equals(msg[0])) {
       return Message.intern(msg[1]) in obj;
+    }
+
+    if (
+      (msg instanceof Vector || msg instanceof Array) &&
+      JS_PROP_SET.equals(msg[0])
+    ) {
+      if (msg.length !== 3) {
+        throw new Error(`invalid arguments expected 2, got ${msg.length - 1} instead`);
+      }
+      const name = Message.intern(msg[1]);
+      obj[name] = msg[2];
+      return obj;
     }
 
     const name = this.intern(msg);
