@@ -518,13 +518,13 @@
 
 (defn prepend
   (col x)
-  (if (slot? col :prepend)
+  (if (send col [:js/applyrespond-to? :prepend])
     (send col [:js/prepend x])
     (throw (new js/Error "unknown method prepend"))))
 
 (defn append
   (col x)
-  (if (slot? col :append)
+  (if (send col [:respond-to? :append])
     (send col [:js/append x])
     (throw (new js/Error "unknown method append"))))
 
@@ -575,8 +575,8 @@
   (cond
     (< a b) -1
     (> a b) 1
-    (slot? a :cmp) (send a [:js/cmp b])
-    (slot? b :cmp) (send b [:js/cmp a])
+    (send a [:respond-to? :cmp]) (send a [:js/cmp b])
+    (send b [:respond-to? :cmp]) (send b [:js/cmp a])
     :else 0))
 
 (defn sort!
@@ -708,7 +708,7 @@
   ((obj key value)
    `(cond
      (array-like? ~obj) (array-set! ~obj ~key ~value)
-     (respond-to? ~obj :set) (send ~obj [:js/set ~key ~value])
+     (send ~obj [:respond-to? :set]) (send ~obj [:js/set ~key ~value])
      (object? ~obj) (slot-set! ~obj ~key ~value)
      :else (throw (new js/Error "can only set keys for associative values")))))
 
@@ -971,11 +971,11 @@
 (defn seq?
   (obj)
   (or (nil? obj) (array? obj) (map? obj) (set? obj)
-      (and (slot? obj "first") (slot? obj "next"))))
+      (and (send obj [:respond-to? :first]) (send obj [:respond-to? :next]))))
 
 (defn seqable?
   (obj)
-  (or (seq? obj) (slot? obj "seq")))
+  (or (seq? obj) (send obj [:respond-to? :seq])))
 
 (defn seq
   (obj)
@@ -1002,7 +1002,7 @@
     (array-like? col) (begin (push! col value) col)
     (map? col) (add-key! col (at value 0) (at value 1))
     (set? col) (add-member! col value)
-    (slot? col :add) (send col [:js/add value])
+    (send col [:respont-o? :add]) (send col [:js/add value])
     :else
       (throw "don't know how to add a value to this collection")))
 
@@ -1014,7 +1014,7 @@
   (col ref)
   (cond
     (array? col) (begin (send col [:js/splice ref 1]) col)
-    (slot? col :delete) (begin (send col [:js/delete ref]) col)
+    (send col [:respond-to? :delete]) (begin (send col [:js/delete ref]) col)
     :else
       (throw "don't know how to remove a value from this collection")))
 
@@ -1026,7 +1026,7 @@
   (col)
   (cond
     (array? col) (send col [:js/splice 0])
-    (slot? col :clear) (begin (send col :js/clear) col)
+    (send col [:respond-to? :clear]) (begin (send col :js/clear) col)
     :else
       (throw (str "cannot clear" (pr-str col)))))
 
@@ -1041,7 +1041,7 @@
   (col)
   (cond
     (array-like? col) EMPTY-ARRAY
-    (respond-to? col :empty) (send col :js/empty)
+    (send col [:respond-to? :empty]) (send col :js/empty)
     :else
       (empty! (clone col))))
 
@@ -1050,7 +1050,7 @@
   (cond
     (array-like? col) (length col)
     (or (map? col) (set? col)) (size col)
-    (slot? col :count) (send col :js/count)
+    (send col [:respond-to? :count]) (send col :js/count)
     :else
      (reduce (fn (n _) (inc n)) col 0)))
 
@@ -1060,7 +1060,7 @@
     (array-like? col) (not-identical? -1 (index-of col value))
     (map? col) (key? col value)
     (set? col) (member? col value)
-    (respond-to? col :includes) (send col [:js/includes value])
+    (send col [:respond-to? :includes]) (send col [:js/includes value])
     :else
       (throw "can't test inclusion")))
 
@@ -1078,9 +1078,10 @@
     (and (nil? a) (nil? b)) (equiv? a b)
     ;; (see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Equality_comparisons_and_sameness#same-value-zero_equality)
     (and (js-primitive-number? a) (js-primitive-number? b))
-       (or (identical? a b) (and (not-identical? a a) (not-identical? b b)))
-    (respond-to? a :equals) (send a [:js/equals b])
-    (respond-to? b :equals) (send b [:js/equals a])
+        (or (identical? a b) (and (not-identical? a a) (not-identical? b b)))
+    (and (js-primitive-type? a) (js-primitive-type? b)) (identical? a b)
+    (send a [:respond-to? :equals]) (send a [:js/equals b])
+    (send b [:respond-to? :equals]) (send b [:js/equals a])
     :else
       (identical? (hash-code a) (hash-code b))))
 
