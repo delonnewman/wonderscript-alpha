@@ -4,7 +4,6 @@ import { Symbol } from "../lang/Symbol";
 import { Form, isTaggedValue, TaggedValue } from "../compiler/core";
 import { UNQUOTE_SPLICING_SYM, UNQUOTE_SYM } from "./unquoteReader";
 import { SEND_SYM } from "../compiler/emit/emitSend";
-import { p, pt } from "../util";
 
 export const QUOTE_SYM = Symbol.intern("quote");
 export const ARRAY_SYM = Symbol.intern("array");
@@ -26,9 +25,7 @@ function syntaxQuote(value: unknown): Form {
       return value[0][1];
     }
 
-    // pt('value', value);
     const quoted = value.map(syntaxQuote);
-    // pt('quoted', quoted);
     const indexes: number[] = [0];
     for (let i = 0; i < quoted.length; i++) {
       const val = quoted[i];
@@ -45,16 +42,13 @@ function syntaxQuote(value: unknown): Form {
     if (indexes[indexes.length - 1] < quoted.length - 1) {
       indexes.push(quoted.length - 1);
     }
-    // pt('indexes', indexes);
 
     const slices: unknown[][] = [];
     for (let i = 0; i < indexes.length; i += 1) {
       const a = indexes[i];
       const b = indexes[i + 1];
       slices.push(quoted.slice(a, b));
-      // if (b >= indexes.length) break;
     }
-    // pt('slices', slices);
 
     const rest = slices
       .slice(1)
