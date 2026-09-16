@@ -4,7 +4,7 @@
 
 (def array?
   (fn* (val)
-    (send js/Array (isArray val))))
+    (send js/Array [:isArray val])))
 
 (def string?
   (fn* (val)
@@ -41,7 +41,7 @@
   (fn* (val)
     (and
      (identical? (typeof val) "number")
-     (identical? val (send js/Math (round val))))))
+     (identical? val (send js/Math [:round val])))))
 
 (def undefined?
   (fn* (val)
@@ -69,7 +69,7 @@
   (let (^:mutable i 0)
     (fn* (template)
       (set* i (+ i 1))
-      (send wonderscript.lang/Symbol (intern (str (or template "sym") i))))))
+      (send wonderscript.lang/Symbol [:intern (str (or template "sym") i)]))))
 
 (def message-sender
   (fn* (slot)
@@ -101,29 +101,29 @@
 (def splat?
   (fn* (sym)
     (if (symbol? sym)
-      (send (send sym :name) (startsWith "&"))
+      (send (send sym :name) [:startsWith "&"])
       false)))
 
 (def parsed-args
   (fn* (arglist)
     (send arglist
-     (map
+     [:map
       (fn* (sym i)
         (if (splat? sym)
           {:name
            (send
             wonderscript.lang/Symbol
-            (intern (send (send sym :name) (slice 1))))
+            (intern (send (send sym :name) [:slice 1])))
            :order i
            :splat true}
           {:name sym
            :order i
-           :splat false}))))))
+           :splat false}))])))
 
 (def arity-validation-forms
   (fn* (parsed argsym)
     (let (nargs (length parsed))
-      (if (send parsed (some #(:splat %)))
+      (if (send parsed [:some #(:splat %)])
         `(> (length ~argsym) (- ~nargs 1))
         `(identical? ~nargs (length ~argsym))))))
 
@@ -132,12 +132,12 @@
     (cons 'let
       (cons
        (send (pair 0)
-        (flatMap (fn* (x i)
+        [:flatMap (fn* (x i)
          (if (splat? x)
-           (array (send wonderscript.lang/Symbol (intern (send (name  x) (slice 1))))
-            `(send ~argsym (slice ~i)))
-           (array x `(array-get ~argsym ~i))))))
-       (send pair (slice 1))))))
+           (array (send wonderscript.lang/Symbol [:intern (send (name  x) [:slice 1])])
+            `(send ~argsym [:slice ~i]))
+           (array x `(array-get ~argsym ~i))))])
+       (send pair [:slice 1])))))
 
 (def ^:macro fn
   (fn* (&xs)
@@ -146,16 +146,16 @@
        (assoc-array? x) ;; multiple arities
        (let (arglists  (map first xs)
              parsed    (map parsed-args arglists)
-             arities   (send (map #(length %) arglists) (sort #(cond (< %1 %2) -1 (> %1 %2) 1 :else 0)))
-             splat     (send parsed (some (fn* (list) (send list (some #(:splat %))))))
-             arity-str (if splat (str (arities 0) " or more") (send arities (join " or ")))
+             arities   (send (map #(length %) arglists) [:sort #(cond (< %1 %2) -1 (> %1 %2) 1 :else 0)])
+             splat     (send parsed (some (fn* (list) (send list [:some #(:splat %)]))))
+             arity-str (if splat (str (arities 0) " or more") (send arities [:join " or "]))
              argsym    (gensym "args")
-             arglist   (array (send wonderscript.lang/Symbol (intern (str "&" argsym))))
+             arglist   (array (send wonderscript.lang/Symbol [:intern (str "&" argsym)]))
              conds     (send xs
-                             (flatMap
+                             [:flatMap
                               (fn* (x i)
                                    (array (arity-validation-forms (parsed i) argsym)
-                                          (let-bindings-form x argsym))))))
+                                          (let-bindings-form x argsym)))]))
          `(fn* ~arglist
                (cond ~@conds
                      :else
@@ -163,10 +163,10 @@
        :else ;; single arity
          (let (parsed    (parsed-args x)
                arity     (length x)
-               splat     (send parsed (some #(:splat %)))
+               splat     (send parsed [:some #(:splat %)])
                arity-str (if splat (str arity " or more") (str arity))
                argsym    (gensym "args")
-               arglist   (array (send wonderscript.lang/Symbol (intern (str "&" argsym)))))
+               arglist   (array (send wonderscript.lang/Symbol [:intern (str "&" argsym)])))
            `(fn* ~arglist
                   (if ~(arity-validation-forms parsed argsym)
                     ~(let-bindings-form xs argsym)
@@ -183,15 +183,15 @@
                  (array? (rest 2)) (rest 2)
                  :else (throw (new js/Error "an arglist is required")))
           body (cond
-                 (and doc meta) (send rest (slice 3))
-                 (or doc meta) (send rest (slice 2))
-                 :else (send rest (slice 1)))
-          nm (send name (withMeta (merge meta {:doc doc}))))
+                 (and doc meta) (send rest [:slice 3])
+                 (or doc meta) (send rest [:slice 2])
+                 :else (send rest [:slice 1]))
+          nm (send name [:withMeta (merge meta {:doc doc})]))
      `(def ~nm (fn ~args ~@body)))))
 
 (defn ^:macro defmacro
   (name &rest)
-  (let (nm (send name (withMeta {:macro true})))
+  (let (nm (send name [:withMeta {:macro true}]))
     `(defn ~nm ~@rest)))
 
 (defn macro?
@@ -201,7 +201,7 @@
   "Define a type alias"
   {:added 1.0}
   (name type-val)
-  (let (nm (send name (withMeta {:typedef true})))
+  (let (nm (send name [:withMeta {:typedef true}]))
     `(def ~nm ~type-val)))
 
 (defmacro typedef?
@@ -230,17 +230,17 @@
   ((name)
    (cond
      (keyword? name) name
-     (symbol? name) (send wonderscript.lang/Keyword (intern (send name :name) (send name :namespace)))
-     (string? name) (send wonderscript.lang/Keyword (intern name))))
-  ((ns name) (send wonderscript.lang/Keyword (intern name ns))))
+     (symbol? name) (send wonderscript.lang/Keyword [:intern (send name :name) (send name :namespace)])
+     (string? name) (send wonderscript.lang/Keyword [:intern name])))
+  ((ns name) (send wonderscript.lang/Keyword [:intern name ns])))
 
 (defn symbol
   ((name)
    (cond
      (symbol? name) name
-     (keyword? name) (send wonderscript.lang/Symbol (intern (send name :name) (send name :namespace)))
-     (string? name) (send wonderscript.lang/Symbol (intern name))))
-  ((ns name) (send wonderscript.lang/Symbol (intern name ns))))
+     (keyword? name) (send wonderscript.lang/Symbol [:intern (send name :name) (send name :namespace)])
+     (string? name) (send wonderscript.lang/Symbol [:intern name])))
+  ((ns name) (send wonderscript.lang/Symbol [:intern name ns])))
 
 (defn ==
   (a b)
@@ -281,17 +281,17 @@
 
 (def apply
   (fn (f args)
-    (send f (invoke args))))
+    (send f [:invoke args])))
 
 (def call
   (fn (f &args)
-    (send f (invoke args))))
+    (send f [:invoke args])))
 
 (defn freeze!
-  (object) (send js/Object (freeze object)))
+  (object) (send js/Object [:freeze object]))
 
 (defn frozen?
-  (object) (send js/Object (isFrozen object)))
+  (object) (send js/Object [:isFrozen object]))
 
 (defn immutable?
   (value) (or (js-primitive-type? value) (frozen? value)))
@@ -305,7 +305,7 @@
   ((name value)
    `(defconst ~name nil ~value))
   ((name doc value)
-   (let (nm (send name (withMeta {:doc doc :constant true})))
+   (let (nm (send name [:withMeta {:doc doc :constant true}]))
      `(def ~nm
         (if (immutable? ~value)
           ~value
@@ -318,14 +318,14 @@
   ((name value)
    `(defvar ~name nil ~value))
   ((name doc value)
-   (let (nm (send name (withMeta {:doc doc :dynamic true})))
+   (let (nm (send name [:withMeta {:doc doc :dynamic true}]))
      `(def ~nm ~value))))
 
 (defmacro var
   ((name) `(var ~name nil))
   ((name value)
-   (let (nm (send name (withMeta {:mutable true})))
-     (send *ctx* (define nm value))
+   (let (nm (send name [:withMeta {:mutable true}]))
+     (send *ctx* [:define nm value])
      value)))
 
 (defmacro this-context
@@ -338,17 +338,17 @@
 
 (defn clone
   (object)
-  (if (send js/Array (isArray object))
-    (send object (slice 0))
-    (send js/Object (assign (send js/Object (create nil)) object))))
+  (if (send js/Array [:isArray object])
+    (send object [:slice 0])
+    (send js/Object [:assign (send js/Object [:create nil]) object])))
 
 (defn js-object-tag
   (object)
-  (send (slot-get (slot-get js/Object :prototype) :toString) (call object)))
+  (send (slot-get js/Object :prototype :toString) [:call object]))
 
 (defn js-prototype
   (object)
-  (send js/Object (getPrototypeOf object)))
+  (send js/Object [:getPrototypeOf object]))
 
 (defn js-constructor
   (object)
@@ -366,13 +366,13 @@
 
 (defn same-type?
   (a b)
-  (send (type a) (equals (type b))))
+  (send (type a) [:equals (type b)]))
 
 (defn constructor?
   (obj)
   (and
    (function? obj)
-   (send js/Object (hasOwn obj "prototype"))))
+   (send js/Object [:hasOwn obj "prototype"])))
 
 (def class? constructor?)
 
@@ -381,16 +381,16 @@
   (if (function? t)
     (instance? value t)
     (let (vt (type value))
-      (if (and (send 'object (equals t)) (class? vt))
+      (if (and (send 'object [:equals t]) (class? vt))
         true
-        (send vt (equals t))))))
+        (send vt [:equals t])))))
 
 (defn make-class
   (() (make-class (fn* ()) nil))
   ((ctr) (make-class ctr nil))
   ((ctr superclass)
    (slot-set! ctr :prototype
-    (send js/Object (create superclass)))
+    (send js/Object [:create superclass]))
    ctr))
 
 (defn add-method
@@ -400,7 +400,7 @@
 (defmacro defclass
   ((name) `(defclass ~name nil))
   ((name superclass)
-   (let (nm (send name (withMeta {:typedef true})))
+   (let (nm (send name [:withMeta {:typedef true}]))
      `(def ~nm (make-class ~superclass)))))
 
 ;; Numerical
@@ -438,7 +438,7 @@
             ~identity
             (new js/Error "wrong number of arguments (expected at least 1 got 0)"))
           (identical? 1 (slot-get ~args :length))
-          (if (send ~operator (equals '-))
+          (if (send ~operator [:equals '-])
             (* -1 (array-get ~args 0))
             (array-get ~args 0))
           :else
@@ -455,7 +455,7 @@
 (def / (<var-op> / nil))
 
 (defn **
-  (n m) (send js/Math (pow n m)))
+  (n m) (send js/Math [:pow n m]))
 
 (defn sum
   "Take the sum of the values in the collection"
@@ -495,18 +495,18 @@
 (defn rand
   (n)
   (if n
-    (send js/Math (floor (* n (send js/Math :random))))
+    (send js/Math [:floor (* n (send js/Math :random))])
     (send js/Math :random)))
 
 (defn floor
-  (n) (send js/Math (floor n)))
+  (n) (send js/Math [:floor n]))
 
 (defn ceil
-  (n) (send js/Math (ceil n)))
+  (n) (send js/Math [:ceil n]))
 
 (defn round
-  ((n) (send js/Math (round n)))
-  ((n factor) (* factor (send js/Math (round (/ n factor))))))
+  ((n) (send js/Math [:round n]))
+  ((n factor) (* factor (send js/Math [:round (/ n factor)]))))
 
 ;; Basic Array, Strings & ArrayLike
 
@@ -514,18 +514,18 @@
 
 (defn concat
   (&arrays)
-  (send (slot-get js/Array :prototype :concat) (apply EMPTY-ARRAY arrays)))
+  (send (slot-get js/Array :prototype :concat) [:apply EMPTY-ARRAY arrays]))
 
 (defn prepend
   (col x)
   (if (slot? col :prepend)
-    (send col (prepend x))
+    (send col [:prepend x])
     (throw (new js/Error "unknown method prepend"))))
 
 (defn append
   (col x)
   (if (slot? col :append)
-    (send col (append x))
+    (send col [:append x])
     (throw (new js/Error "unknown method append"))))
 
 (defn make-array
@@ -535,7 +535,7 @@
 ;; TODO: will need to extend for seqs
 (defn ->array
   (obj)
-  (send js/Array (from obj)))
+  (send js/Array [:from obj]))
 
 (defn array-like?
   (obj)
@@ -544,44 +544,44 @@
 
 (defn slice
   ((col start)
-   (send col (slice start)))
+   (send col [:slice start]))
   ((col start end)
-   (send col (slice start end))))
+   (send col [:slice start end])))
 
 (defn at
   (col n)
   (if (< n 0)
-    (send col (at (+ (length col) n)))
-    (send col (at n))))
+    (send col [:at (+ (length col) n)])
+    (send col [:at n])))
 
 (defn push!
   (array value)
-  (send (slot-get js/Array :prototype :push) (call array value)))
+  (send (slot-get js/Array :prototype :push) [:call array value]))
 
 (defn pop!
   (array)
-  (send (slot-get js/Array :prototype :pop) (call array)))
+  (send (slot-get js/Array :prototype :pop) [:call array]))
 
 (defn unshift!
   (array value)
-  (send (slot-get js/Array :prototype :unshift) (call array value)))
+  (send (slot-get js/Array :prototype :unshift) [:call array value]))
 
 (defn shift!
   (array)
-  (send (slot-get js/Array :prototype :shift) (call array)))
+  (send (slot-get js/Array :prototype :shift) [:call array]))
 
 (defn <=>
   (a b)
   (cond
     (< a b) -1
     (> a b) 1
-    (slot? a "cmp") (send a (cmp b))
-    (slot? b "cmp") (send b (cmp a))
+    (slot? a :cmp) (send a [:cmp b])
+    (slot? b :cmp) (send b [:cmp a])
     :else 0))
 
 (defn sort!
   (array)
-  (send (slot-get js/Array :prototype :sort) (call array <=>)))
+  (send (slot-get js/Array :prototype :sort) [:call array <=>]))
 
 (defn sort
   (array)
@@ -589,17 +589,17 @@
 
 (defn fill!
   ((array value)
-   (send array (fill value)))
+   (send array [:fill value]))
   ((array value start)
-   (send array (fill value start)))
+   (send array [:fill value start]))
   ((array value start end)
-   (send array (fill value start end))))
+   (send array [:fill value start end])))
 
 (defn reverse!
   (array)
   (unless (array? array)
     (throw (new js/Error (str "no automatic conversion of " (type array) " to array"))))
-  (send (slot-get js/Array :prototype :reverse) (call array)))
+  (send (slot-get js/Array :prototype :reverse) [:call array]))
 
 (defn reverse
   (col)
@@ -609,7 +609,7 @@
 
 (defn index-of
   (array value)
-  (send (slot-get js/Array :prototype :indexOf) (call array value)))
+  (send (slot-get js/Array :prototype :indexOf) [:call array value]))
 
 (defn length
   (array) (slot-get array :length))
@@ -623,7 +623,7 @@
   (object)
   (or (nil? object) (zero? (length object))
       (and (string? object)
-           (identical? 0 (slot-get (send object (replace $white-space-regex EMPTY-STRING)) :length)))))
+           (identical? 0 (slot-get (send object [:replace $white-space-regex ""]) :length)))))
 
 (defn present?
   (object)
@@ -647,36 +647,36 @@
 (defn starts-with?
   (s ch)
   (if (or (keyword? s) (symbol? s))
-    (send (name s) (startsWith ch))
-    (send s (startsWith ch))))
+    (send (name s) [:startsWith ch])
+    (send s [:startsWith ch])))
 
 (defn ends-with?
   (s ch)
   (if (or (keyword? s) (symbol? s))
-    (send (name s) (endsWith ch))
-    (send s (endsWith ch))))
+    (send (name s) [:endsWith ch])
+    (send s [:endsWith ch])))
 
 (defvar $ending-new-line-pattern (freeze! (new js/RegExp "(\\n|\\r\\n)$")))
 (defvar $new-line-pattern (freeze! (new js/RegExp "\\r\\n|\\n")))
 
 (defn chomp
-  (s) (send s (replace $ending-new-line-pattern EMPTY-STRING)))
+  (s) (send s [:replace $ending-new-line-pattern ""]))
 
 (defn lines
-  (s) (send s (replace $new-line-pattern)))
+  (s) (send s [:replace $new-line-pattern]))
 
 (defn chop
-  (s) (send s (slice 0 (- (length s) 1))))
+  (s) (send s [:slice 0 (- (length s) 1)]))
 
 (defn chr
   (ch)
   (if (number? ch)
-    (send js/String (fromCodePoint ch))
-    (send js/String (fromCodePoint (->integer ch)))))
+    (send js/String [:fromCodePoint ch])
+    (send js/String [:fromCodePoint (->integer ch)])))
 
 (defn chrs
   (array)
-  (send (send array (map #(chr %))) (join EMPTY-STRING)))
+  (send (send array [:map #(chr %)]) [:join ""]))
 
 (defn upcase
   (s) (send s :toUpperCase))
@@ -694,8 +694,7 @@
   (s) (send s (split $white-space-regex)))
 
 (defn titlecase
-  ; FIXME: without the intermediary #() this throws mysterious error
-  (s) (send (send (words s) (map #(capitalize %))) (join " ")))
+  (s) (send (send (words s) [:map #(capitalize %)]) [:join " "]))
 
 (defn mapcat
   (f coll)
@@ -709,7 +708,7 @@
   ((obj key value)
    `(cond
      (array-like? ~obj) (array-set! ~obj ~key ~value)
-     (respond-to? ~obj :set) (send ~obj (set ~key ~value))
+     (respond-to? ~obj :set) (send ~obj [:set ~key ~value])
      (object? ~obj) (slot-set! ~obj ~key ~value)
      :else (throw (new js/Error "can only set keys for associative values")))))
 
@@ -756,19 +755,19 @@
     a))
 
 (defn each
-  (a f) (send a (forEach f)) a)
+  (a f) (send a [:forEach f]) a)
 
 (defn tap
   (val f) (f val) val)
 
 (defn print
-  (x) (send js/console (log x)))
+  (x) (send js/console [:log x]))
 
 (defn say
   (&args)
   (apply
    (slot-get js/console :log)
-   (send (send args (map pr-str)) (join ""))))
+   (send (send args [:map pr-str]) [:join ""])))
 
 (defn p
   (x) (print (pr-str x)))
@@ -787,7 +786,7 @@
 
 (defmacro deftest
   (name &body)
-  (let (nm (send name (withMeta {:test true})))
+  (let (nm (send name [:withMeta {:test true}]))
     `(def ~nm (fn () ~@body))))
 
 ;; OOP & JS reflection
@@ -801,16 +800,16 @@
   (array-set! (js-prototype object) slot-name value))
 
 (defn seal!
-  (object) (send js/Object (seal object)))
+  (object) (send js/Object [:seal object]))
 
 (defn sealed?
-  (object) (send js/Object (isSealed object)))
+  (object) (send js/Object [:isSealed object]))
 
 (defn extensible?
-  (object) (send js/Object (isExtensible object)))
+  (object) (send js/Object [:isExtensible object]))
 
 (defn prevent-extensions!
-  (object) (send js/Object (preventExtensions object)))
+  (object) (send js/Object [:preventExtensions object]))
 
 ; TODO: support compiler generated functions
 (defn arity
@@ -820,11 +819,11 @@
     (throw (new js/Error "arity cannot be found"))))
 
 (defn js-object
-  (() (send js/Object (create nil)))
+  (() (send js/Object [:create nil]))
   ((&kvs)
    (if (odd? (length kvs))
      (throw (new js/Error "key/value pairs should be even"))
-     (send js/Object (fromEntries (partition 2 kvs))))))
+     (send js/Object [:fromEntries (partition 2 kvs)]))))
 
 (defn js-property-value
   (obj property-name)
@@ -835,7 +834,7 @@
   (obj method-name)
   (let (val (js-property-value obj method-name))
     (if (function? val)
-      (send val (bind obj))
+      (send val [:bind obj])
       (throw (new js/Error "undefined method")))))
 
 (defmacro respond-to?
@@ -847,19 +846,19 @@
 
 (defn bind
   (f object)
-  (send (slot-get js/Function :prototype :bind) (call f object)))
+  (send (slot-get js/Function :prototype :bind) [:call f object]))
 
 (defn partial
   (f &args)
   (send
    (slot-get js/Function :prototype :bind)
-   (apply f (send (array nil) (concat args)))))
+   (apply f (send (array nil) [:concat args]))))
 
 ;; More advanced array functions
 
 (defn partition (n a)
   (let (pairs (array))
-    (for-times (i (send js/Math (floor (/ (length a) n))))
+    (for-times (i (send js/Math [:floor (/ (length a) n)]))
       (let (p (array))
         (for-times (j n)
           (array-set! p j (array-get a (+ (* n i) j))))
@@ -899,7 +898,7 @@
   (let (a (make-array))
     (for-times (i n)
       (push! a s))
-    (send a (join ""))))
+    (send a [:join ""])))
 
 ;; Maps & Sets
 
@@ -922,17 +921,17 @@
    (let (entries (send y :entries))
      (send
       entries
-      (forEach
+      [:forEach
        (fn* (pair)
-         (send x (set (pair 0) (pair 1))))))
+         (send x [:set (pair 0) (pair 1)]))])
      x))
   ((x y &zs)
    (merge! x y)
    (send
     zs
-    (forEach
+    [:forEach
      (fn* (m)
-       (merge! x m))))
+       (merge! x m))])
    x))
 
 ;; These are polymorphic on Maps ans Sets and any other
@@ -952,20 +951,20 @@
 ;; These are map specific
 (defn add-key!
   (map key value)
-  (send map (set key value)))
+  (send map [:set key value]))
 
 (defn key?
   (map key)
-  (send (slot-get js/Map :prototype :has) (call map key)))
+  (send (slot-get js/Map :prototype :has) [:call map key]))
 
 ;; These are set specific
 (defn add-member!
   (set member)
-  (send (slot-get js/Set :prototype :add) (call set member)))
+  (send (slot-get js/Set :prototype :add) [:call set member]))
 
 (defn member?
   (set member)
-  (send (slot-get js/Set :prototype :has) (call set member)))
+  (send (slot-get js/Set :prototype :has) [:call set member]))
 
 ;; Seq & Seqable
 
@@ -1003,7 +1002,7 @@
     (array-like? col) (begin (push! col value) col)
     (map? col) (add-key! col (at value 0) (at value 1))
     (set? col) (add-member! col value)
-    (slot? col :add) (send col (add value))
+    (slot? col :add) (send col [:add value])
     :else
       (throw "don't know how to add a value to this collection")))
 
@@ -1014,8 +1013,8 @@
 (defn remove!
   (col ref)
   (cond
-    (array? col) (begin (send col (splice ref 1)) col)
-    (slot? col :delete) (begin (send col (delete ref)) col)
+    (array? col) (begin (send col [:splice ref 1]) col)
+    (slot? col :delete) (begin (send col [:delete ref]) col)
     :else
       (throw "don't know how to remove a value from this collection")))
 
@@ -1026,7 +1025,7 @@
 (defn clear!
   (col)
   (cond
-    (array? col) (send col (splice 0))
+    (array? col) (send col [:splice 0])
     (slot? col :clear) (begin (send col :clear) col)
     :else
       (throw (str "cannot clear" (pr-str col)))))
@@ -1061,7 +1060,7 @@
     (array-like? col) (not-identical? -1 (index-of col value))
     (map? col) (key? col value)
     (set? col) (member? col value)
-    (respond-to? col :includes) (send col (includes value))
+    (respond-to? col :includes) (send col [:includes value])
     :else
       (throw "can't test inclusion")))
 
@@ -1080,8 +1079,8 @@
     ;; (see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Equality_comparisons_and_sameness#same-value-zero_equality)
     (and (js-primitive-number? a) (js-primitive-number? b))
        (or (identical? a b) (and (not-identical? a a) (not-identical? b b)))
-    (respond-to? a :equals) (send a (equals b))
-    (respond-to? b :equals) (send b (equals a))
+    (respond-to? a :equals) (send a [:equals b])
+    (respond-to? b :equals) (send b [:equals a])
     :else
       (identical? (hash-code a) (hash-code b))))
 
@@ -1093,7 +1092,7 @@
          (send (partition 2 conditions)
                (flatMap
                 (fn* (x)
-                 (if (send :else (equals (x 0)))
+                 (if (send :else [:equals (x 0)])
                    x
                    (array (array pred (x 0) value) (x 1))))))))
 
@@ -1198,7 +1197,7 @@
 
 (defn render-tag-list
   (form handlers)
-  (send (map #(render-form % handlers) form) (join "")))
+  (send (map #(render-form % handlers) form) [:join ""]))
 
 (defn render-attr-tag
   (form handlers)
@@ -1240,13 +1239,13 @@
   (let (id (handler 0)
         event (handler 1)
         cb (handler 2))
-    (str "document.getElementById(" (send js/JSON (stringify id)) ").addEventListener("
-         (send js/JSON (stringify event)) ", " (compile (array 'fn* (array) cb)) ")")))
+    (str "document.getElementById(" (send js/JSON [:stringify id]) ").addEventListener("
+         (send js/JSON [:stringify event]) ", " (compile (array 'fn* (array) cb)) ")")))
 
 (defn render-event-handlers
   (handlers)
   (str "<script>"
-       (send (map #(render-event-handler %) handlers) (join ";")) "</script>"))
+       (send (map #(render-event-handler %) handlers) [:join ";"]) "</script>"))
 
 (defn html
   (form)

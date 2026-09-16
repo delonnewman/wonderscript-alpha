@@ -27,6 +27,14 @@ export class Vector<T = unknown> {
     return new Vector(...Array.prototype.slice.apply(this, args));
   }
 
+  map<T>(...args: unknown[]): Vector {
+    return new Vector<T>(...Array.prototype.map.apply(this, args));
+  }
+
+  [Symbol.iterator]() {
+    return Array.prototype[Symbol.iterator].apply(this);
+  }
+
   toArray() {
     return Array.prototype.slice.call(this);
   }
