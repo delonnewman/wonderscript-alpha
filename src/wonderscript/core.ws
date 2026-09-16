@@ -837,13 +837,6 @@
       (send val [:js/bind obj])
       (throw (new js/Error "undefined method")))))
 
-(defmacro respond-to?
-  (obj msg)
-  (if (or (symbol? msg) (keyword? msg) (string? msg))
-    `(function? (slot-get ~obj ~msg))
-    ;; TODO: implement
-    false))
-
 (defn bind
   (f object)
   (send (send js/Function [:js/dig :prototype :bind]) [:js/call f object]))

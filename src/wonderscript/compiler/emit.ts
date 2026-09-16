@@ -95,8 +95,6 @@ import { emitBinOp } from "./emit/emitBinOp";
 import { Keyword } from "../lang/Keyword";
 import { Symbol } from "../lang/Symbol";
 import { prStr } from "./prStr";
-import { emitSlotAccess } from "./emit/emitSlotAccess";
-import { emitSlotInspection } from "./emit/emitSlotInspection";
 import { emitSet } from "./emit/emitSet";
 import { emitSlotMutation } from "./emit/emitSlotMutation";
 import { Vector } from "../lang/Vector";
@@ -156,10 +154,6 @@ export function emit(exp: Form, ctx: Context) {
         case SET_SYM:
           return emitAssignment(form, ctx);
         // operators
-        case SLOT_SYM:
-          return emitSlotAccess(form, ctx);
-        case HAS_SLOT_SYM:
-          return emitSlotInspection(form, ctx);
         case SSET_SYM:
           return emitSlotMutation(form, ctx);
         case MOD_SYM:

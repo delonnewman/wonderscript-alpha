@@ -88,7 +88,7 @@
 
 (def o (js-object))
 (set! o "name" "Jane")
-(is (= (slot-get o :name) "Jane"))
+(is (= (send o :js.prop/name) "Jane"))
 
 ;; Fn
 
@@ -108,7 +108,7 @@
 (is (frozen? (freeze! (js-object))))
 (is (sealed? (seal! (js-object))))
 (is (not (extensible? (prevent-extensions! (js-object)))))
-(is (= ((bind (slot-get js/Array :prototype :toString) (array 1 2 3))) "1,2,3"))
+(is (= ((bind (send js/Array [:js/dig :prototype :toString]) (array 1 2 3))) "1,2,3"))
 
 ;; OOP
 
