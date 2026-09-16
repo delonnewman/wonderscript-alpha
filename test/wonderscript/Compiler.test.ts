@@ -29,9 +29,7 @@ describe("Compiler", () => {
 
     test("send message that is passed as a function argument", () => {
       const forms = "((fn* (msg) (send '(1 2 3) msg)) :js/toString)";
-      const code = subject.compileString(forms);
       const output = subject.evalString(forms);
-      console.error(code);
       expect(output).toEqual("1,2,3");
     });
   });
