@@ -344,7 +344,7 @@
 
 (defn js-object-tag
   (object)
-  (send (send js/Object [:js/dig :prototype :toString]) [:js/call object]))
+  (send (send js/Object [:js/prop :prototype :toString]) [:js/call object]))
 
 (defn js-prototype
   (object)
@@ -513,7 +513,7 @@
 
 (defn concat
   (&arrays)
-  (send (send js/Array [:js/dig :prototype :concat]) [:js/apply EMPTY-ARRAY arrays]))
+  (send (send js/Array [:js/prop :prototype :concat]) [:js/apply EMPTY-ARRAY arrays]))
 
 (defn prepend
   (col x)
@@ -555,19 +555,19 @@
 
 (defn push!
   (array value)
-  (send (send js/Array [:js/dig :prototype :push]) [:js/call array value]))
+  (send (send js/Array [:js/prop :prototype :push]) [:js/call array value]))
 
 (defn pop!
   (array)
-  (send (send js/Array [:js/dig :prototype :pop]) [:js/call array]))
+  (send (send js/Array [:js/prop :prototype :pop]) [:js/call array]))
 
 (defn unshift!
   (array value)
-  (send (send js/Array [:js/dig :prototype :unshift]) [:js/call array value]))
+  (send (send js/Array [:js/prop :prototype :unshift]) [:js/call array value]))
 
 (defn shift!
   (array)
-  (send (send js/Array [:js/dig :prototype :shift]) [:js/call array]))
+  (send (send js/Array [:js/prop :prototype :shift]) [:js/call array]))
 
 (defn <=>
   (a b)
@@ -580,7 +580,7 @@
 
 (defn sort!
   (array)
-  (send (send js/Array [:js/dig :prototype :sort]) [:js/call array <=>]))
+  (send (send js/Array [:js/prop :prototype :sort]) [:js/call array <=>]))
 
 (defn sort
   (array)
@@ -598,7 +598,7 @@
   (array)
   (unless (array? array)
     (throw (new js/Error (str "no automatic conversion of " (type array) " to array"))))
-  (send (send js/Array [:js/dig :prototype :reverse]) [:js/call array]))
+  (send (send js/Array [:js/prop :prototype :reverse]) [:js/call array]))
 
 (defn reverse
   (col)
@@ -608,7 +608,7 @@
 
 (defn index-of
   (array value)
-  (send (send js/Array [:js/dig :prototype :indexOf]) [:js/call array value]))
+  (send (send js/Array [:js/prop :prototype :indexOf]) [:js/call array value]))
 
 (defn length
   (array) (send array :js.prop/length))
@@ -838,12 +838,12 @@
 
 (defn bind
   (f object)
-  (send (send js/Function [:js/dig :prototype :bind]) [:js/call f object]))
+  (send (send js/Function [:js/prop :prototype :bind]) [:js/call f object]))
 
 (defn partial
   (f &args)
   (send
-   (send js/Function [:js/dig :prototype :bind])
+   (send js/Function [:js/prop :prototype :bind])
    [:js/apply f (send (array nil) [:js/concat args])]))
 
 ;; More advanced array functions
@@ -947,16 +947,16 @@
 
 (defn key?
   (map key)
-  (send (send js/Map [:js/dig :prototype :has]) [:js/call map key]))
+  (send (send js/Map [:js/prop :prototype :has]) [:js/call map key]))
 
 ;; These are set specific
 (defn add-member!
   (set member)
-  (send (send js/Set [:js/dig :prototype :add]) [:js/call set member]))
+  (send (send js/Set [:js/prop :prototype :add]) [:js/call set member]))
 
 (defn member?
   (set member)
-  (send (send js/Set [:js/dig :prototype :has]) [:js/call set member]))
+  (send (send js/Set [:js/prop :prototype :has]) [:js/call set member]))
 
 ;; Seq & Seqable
 

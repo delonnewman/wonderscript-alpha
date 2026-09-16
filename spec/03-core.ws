@@ -108,7 +108,7 @@
 (is (frozen? (freeze! (js-object))))
 (is (sealed? (seal! (js-object))))
 (is (not (extensible? (prevent-extensions! (js-object)))))
-(is (= ((bind (send js/Array [:js/dig :prototype :toString]) (array 1 2 3))) "1,2,3"))
+(is (= ((bind (send js/Array [:js/prop :prototype :toString]) (array 1 2 3))) "1,2,3"))
 
 ;; OOP
 

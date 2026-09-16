@@ -24,8 +24,8 @@
 
 (is (identical? 2 (send an-object :js.prop/b)))
 (is (identical? 1 (send an-object :js.prop/a)))
-(is (identical? 3 (send an-object [:js/dig :c :d])))
-(is (identical? 4 (send an-object [:js/dig :c :e])))
+(is (identical? 3 (send an-object [:js/prop :c :d])))
+(is (identical? 4 (send an-object [:js/prop :c :e])))
 
 (is (nil? (send an-object :js.prop/d)))
 (send an-object [:js/set! :c 3])

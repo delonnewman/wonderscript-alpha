@@ -10,7 +10,7 @@ export type Message =
   | Vector<unknown>;
 
 const EMPTY_ARRAY = Object.freeze([]);
-export const JS_DIG_KW = Keyword.intern("dig", "js");
+export const JS_DIG_KW = Keyword.intern("prop", "js");
 export const RESPOND_TO_KW = Keyword.intern("respond-to?");
 export const JS_PROP_SET = Keyword.intern("set!", "js");
 
