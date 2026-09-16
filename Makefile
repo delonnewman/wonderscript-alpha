@@ -24,7 +24,7 @@ clean:
 	rm -rf dist
 
 deps:
-	bun install
+	npm install
 
 test: clean all test[unit] test[spec]
 
@@ -37,12 +37,12 @@ test[spec]:
 	done;
 
 test[unit]:
-	bun test
+	npm test
 
 prettier:
-	bun x prettier . --write
+	npx prettier . --write
 
 tools:
 	brew bundle check || brew bundle install
 
-.PHONY: all clean deps spec test
+.PHONY: all clean deps test[unit] test[spec] test prettier tools
