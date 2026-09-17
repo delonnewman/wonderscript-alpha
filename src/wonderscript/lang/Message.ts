@@ -7,6 +7,7 @@ import { JSPropMessage } from "./Message/JSPropMessage";
 import { JSSetPropMessage } from "./Message/JSSetPropMessage";
 import { JSMethodMessage } from "./Message/JSMethodMessage";
 import { BaseMessage } from "./Message/BaseMessage";
+import { BoundMessage } from "./Message/BoundMessage";
 
 export type MessageForm =
   string | Keyword | [Keyword, ...unknown[]] | Vector<unknown>;
@@ -34,6 +35,8 @@ export interface Message extends Envelope, CompilableMessage {
 
   withinQuery(): Message;
   isWithinQuery(): boolean;
+  hasSplatArgs(): boolean;
+  bind(obj: Obj): BoundMessage;
 }
 
 export function isMessageForm(form: unknown): form is MessageForm {
