@@ -2,6 +2,11 @@ import { expect, test, describe } from "bun:test";
 import { Compiler } from "../../src/wonderscript";
 
 describe("Compiler", () => {
+  const Global = {
+    global: {
+      console: {},
+    }
+  }
   const subject = new Compiler("node", "node", { global: {} });
 
   describe("send", () => {
@@ -15,14 +20,21 @@ describe("Compiler", () => {
       expect(output).toBe("You");
     });
 
-    test("method query", () => {
-      let output = subject.evalString("(send js/global [:respond-to? :js.prop/heyQuery])");
-      expect(output).toBe(false);
+    describe("method query", () => {
+      const examples: [string, boolean][] = [
+        ["(send js/global [:respond-to? :js.prop/missingProp])", false],
+        ["(send js/global [:respond-to? :js/missingMethod])", false],
+        ["(send js/global [:respond-to? :missingMethod])", false],
+        ["(send js/global [:respond-to? :js/console])", true],
+        ["(send js/global [:respond-to? :js.prop/console])", true],
+      ];
 
-      subject.evalString('(send js/global [:js/set! :heyQuery "You"])');
-      output = subject.evalString("(send js/global [:respond-to? :js.prop/heyQuery])");
-
-      expect(output).toBe(true);
+      examples.forEach(([form, expected]) => {
+        test(`${form} => ${expected}`, () => {
+          const output = subject.evalString(form);
+          expect(output).toBe(expected);
+        });
+      })
     });
 
     test("send unary message", () => {
