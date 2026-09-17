@@ -33,16 +33,14 @@ export function emitDef(form: Form, env: Context): string {
   CURRENT_NS.value.module[name] = val;
 
   if (form[2] != null) {
-    // console.error('evaling def value', prStr(form[2]))
     code = emit(form[2], env);
-    // console.error('    => to', code);
     val = jsEval(code);
   }
 
   let def = `${CURRENT_NS.value.name}.${name}=${code}`;
   CURRENT_NS.value.module[name] = val;
 
-  if (form[1].hasMeta()) {
+  if (form[1].hasMeta() && form[1].meta().size > 0) {
     const meta = `${CURRENT_NS.value.name}.${name}_META_=${emitQuotedMetaData(form[1].meta())}`;
     def = `${def};\n${meta}`;
   }
