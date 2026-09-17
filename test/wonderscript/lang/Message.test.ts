@@ -8,7 +8,7 @@ import {
 import { Symbol } from "../../../src/wonderscript/lang/Symbol";
 
 describe("Message", () => {
-  it('has a name', () => {
+  it("has a name", () => {
     const msg = new Message("to_s");
     expect(msg.name).toBe("to_s");
   });
@@ -18,17 +18,17 @@ describe("Message", () => {
     expect(msg.namespace).toBe("js");
   });
 
-  it('has args', () => {
+  it("has args", () => {
     const msg = new Message("+", undefined, [1]);
     expect(msg.args).toEqual([1]);
   });
 
   it("interns it's name and arity", () => {
     const msg = new Message("add", undefined, [1]);
-    expect(msg.interned).toBe('add_1');
+    expect(msg.interned).toBe("add_1");
   });
 
-  describe('JSSetPropMessage', () => {
+  describe("JSSetPropMessage", () => {
     const msg = new JSSetPropMessage("prop", "js");
   });
 
@@ -75,8 +75,8 @@ describe("Message", () => {
       expect(Message.args(message)).toEqual(new Vector(1));
     });
 
-    test(':js.prop/test => nil', () => {
-      const interned = Message.args(Keyword.intern("test", 'js.prop'));
+    test(":js.prop/test => nil", () => {
+      const interned = Message.args(Keyword.intern("test", "js.prop"));
       expect(interned).toBeUndefined();
     });
   });

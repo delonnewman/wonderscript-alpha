@@ -81,9 +81,7 @@ export function isThrowForm(val: unknown): val is TaggedValue {
 export type StatementForm = ArrayMutationForm;
 
 export function isStatementForm(form: Form): form is StatementForm {
-  return (
-    isArrayMutationForm(form) || isJSForm(form)
-  );
+  return isArrayMutationForm(form) || isJSForm(form);
 }
 
 export const EOF = { eof: true } as const;

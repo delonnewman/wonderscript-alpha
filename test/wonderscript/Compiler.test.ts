@@ -5,11 +5,11 @@ describe("Compiler", () => {
   const subject = new Compiler("node", "node", { global: {} });
 
   test("slot access", () => {
-    let output = subject.evalString('(send js/global :js.prop/hey)');
+    let output = subject.evalString("(send js/global :js.prop/hey)");
     expect(output).toBeUndefined();
 
     subject.evalString('(send js/global [:js/set! :hey "You"])');
-    output = subject.evalString('(send js/global :js.prop/hey)');
+    output = subject.evalString("(send js/global :js.prop/hey)");
 
     expect(output).toBe("You");
   });

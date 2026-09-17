@@ -7,10 +7,7 @@ import { emit } from "../compiler/emit";
 import { emitSlotName } from "../compiler/emit/slots";
 
 export type MessageForm =
-  | string
-  | Keyword
-  | [Keyword, ...unknown[]]
-  | Vector<unknown>;
+  string | Keyword | [Keyword, ...unknown[]] | Vector<unknown>;
 
 export function isMessageForm(form: unknown): form is MessageForm {
   return (
@@ -23,7 +20,7 @@ export function isMessageForm(form: unknown): form is MessageForm {
 
 type Obj = {
   [key: string]: unknown;
-}
+};
 
 type MessageArgs = unknown[] | readonly unknown[] | Vector;
 
@@ -87,7 +84,9 @@ export class Message {
       return Message.simple(msg);
     }
 
-    throw new Error(`message form expected vector or array, got ${prStr(msg)} instead`);
+    throw new Error(
+      `message form expected vector or array, got ${prStr(msg)} instead`
+    );
   }
 
   static compound(msg: unknown[] | Vector): Message {
@@ -103,23 +102,27 @@ export class Message {
     } else if (typeof tag === "string") {
       name = tag;
     } else {
-      throw new Error(`invalid tag expected keyword or string, got ${prStr(tag)} instead`);
+      throw new Error(
+        `invalid tag expected keyword or string, got ${prStr(tag)} instead`
+      );
     }
 
-    if (name === 'respond-to?') {
+    if (name === "respond-to?") {
       return new RespondToMessage(name, ns, msg.slice(1));
     }
 
-    if (ns === 'js') {
-      if (name === 'prop') {
+    if (ns === "js") {
+      if (name === "prop") {
         if (msg.length < 2) {
-          throw new Error(`invalid arguments expected at least 2, got ${msg.length} instead`);
+          throw new Error(
+            `invalid arguments expected at least 2, got ${msg.length} instead`
+          );
         }
 
         return new JSPropMessage(name, ns, msg.slice(1));
       }
 
-      if (name === 'set!') {
+      if (name === "set!") {
         if (msg.length < 2) {
           throw new Error(
             `invalid arguments expected at least 2, got ${msg.length} instead`
@@ -139,10 +142,10 @@ export class Message {
     if (msg instanceof Keyword) {
       if (msg.namespace() === "js.prop") {
         // console.error('building message:', prStr(msg));
-        return new JSPropMessage('prop', 'js', [msg.name()]);
+        return new JSPropMessage("prop", "js", [msg.name()]);
       }
 
-      if (msg.namespace() === 'js') {
+      if (msg.namespace() === "js") {
         return new JSMethodMessage(msg.name(), msg.namespace());
       }
 
@@ -153,7 +156,9 @@ export class Message {
       return new this(msg);
     }
 
-    throw new Error(`message form expected keyword or string, got ${prStr(msg)} instead`);
+    throw new Error(
+      `message form expected keyword or string, got ${prStr(msg)} instead`
+    );
   }
 
   #name: string;
@@ -161,11 +166,15 @@ export class Message {
   #args: MessageArgs;
   #ident: string;
 
-  constructor(name: string, namespace?: string, args: MessageArgs = EMPTY_ARRAY) {
+  constructor(
+    name: string,
+    namespace?: string,
+    args: MessageArgs = EMPTY_ARRAY
+  ) {
     this.#name = name;
     this.#namespace = namespace;
     this.#args = Array.from(args);
-    this.#ident = namespace === 'js' ? name : `${name}_${args.length}`;
+    this.#ident = namespace === "js" ? name : `${name}_${args.length}`;
     Object.freeze(this);
   }
 
@@ -189,7 +198,9 @@ export class Message {
     return this.#args.length;
   }
 
-  get args() { return this.#args }
+  get args() {
+    return this.#args;
+  }
 
   keyword() {
     return Keyword.intern(this.name, this.namespace);
@@ -199,7 +210,9 @@ export class Message {
     if (this.args.length === 0) {
       return prStr(Keyword.intern(this.name, this.namespace));
     }
-    return prStr(new Vector(Keyword.intern(this.name, this.namespace), ...this.args))
+    return prStr(
+      new Vector(Keyword.intern(this.name, this.namespace), ...this.args)
+    );
   }
 
   sendTo(obj: Obj): unknown {
@@ -208,13 +221,18 @@ export class Message {
       return fn.apply(obj, this.args);
     }
 
-    console.log(`unknown message ${this}`, this.interned, prStr(obj), Object.getOwnPropertyNames(Object.getPrototypeOf(obj)));
+    console.log(
+      `unknown message ${this}`,
+      this.interned,
+      prStr(obj),
+      Object.getOwnPropertyNames(Object.getPrototypeOf(obj))
+    );
     throw new Error(`unknown message ${this}`);
   }
 
   toJS(ctx: Context, obj: Form): string {
-    const args = this.args.map(it => emit(it, ctx));
-    return `${emit(obj, ctx)}.${this.interned}(${args.join(', ')})`;
+    const args = this.args.map((it) => emit(it, ctx));
+    return `${emit(obj, ctx)}.${this.interned}(${args.join(", ")})`;
   }
 }
 
@@ -262,7 +280,7 @@ export class JSMethodMessage extends Message {
 }
 
 export class RespondToMessage extends Message {
-  get query() : Message | Form {
+  get query(): Message | Form {
     if (isMessageForm(this.args[0])) {
       return Message.build(this.args[0]);
     }
@@ -312,7 +330,7 @@ export class JSSetPropMessage extends JSMethodMessage {
   }
 
   toJS(ctx: Context, obj: Form): string {
-    const key = this.key
+    const key = this.key;
     if (typeof key === "string") {
       return `${emit(obj, ctx)}.${this.key}=${emit(this.value as Form, ctx)}`;
     } else {
