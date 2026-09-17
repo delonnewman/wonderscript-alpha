@@ -64,9 +64,14 @@ export class BaseMessage implements Message {
       return this;
     }
 
-    return new (this.constructor as typeof BaseMessage)(this.name, this.namespace, this.args, {
-      withinQuery: true,
-    });
+    return new (this.constructor as typeof BaseMessage)(
+      this.name,
+      this.namespace,
+      this.args,
+      {
+        withinQuery: true,
+      }
+    );
   }
 
   keyword() {
@@ -77,13 +82,18 @@ export class BaseMessage implements Message {
     if (this.args.length === 0) {
       return prStr(Keyword.intern(this.name, this.namespace));
     }
+
     return prStr(
       new Vector(Keyword.intern(this.name, this.namespace), ...this.args)
     );
   }
 
   withArgs(args: unknown[]) {
-    return new (this.constructor as typeof BaseMessage)(this.name, this.namespace, args);
+    return new (this.constructor as typeof BaseMessage)(
+      this.name,
+      this.namespace,
+      args
+    );
   }
 
   hasSplatArgs() {

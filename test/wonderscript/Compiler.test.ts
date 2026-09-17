@@ -5,9 +5,9 @@ describe("Compiler", () => {
   const Global = {
     global: {
       console: {
-        log: (..._: unknown[]) => {}
+        log: (..._: unknown[]) => {},
       },
-    }
+    },
   };
 
   const subject = new Compiler("node", "node", Global);
@@ -40,7 +40,7 @@ describe("Compiler", () => {
           const output = subject.evalString(form);
           expect(output).toBe(expected);
         });
-      })
+      });
     });
 
     test("send unary message", () => {

@@ -48,7 +48,7 @@ export class JSPropMessage extends BaseMessage {
 
   get args(): MessageArgs {
     const all = this.allArgs();
-    return this.isWithinQuery() ? all.slice(0, all.length - 1): all;
+    return this.isWithinQuery() ? all.slice(0, all.length - 1) : all;
   }
 
   toJS(ctx: Context, obj: Form): string {

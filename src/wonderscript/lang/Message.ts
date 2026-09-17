@@ -141,6 +141,5 @@ export const Message = {
     throw new Error(
       `message form expected keyword or string, got ${prStr(msg)} instead`
     );
-  }
-}
-
+  },
+};

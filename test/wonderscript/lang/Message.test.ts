@@ -9,7 +9,7 @@ declare global {
     [key: string]: unknown;
     prototype: {
       toString: () => string;
-    }
+    };
   }
 }
 
@@ -38,33 +38,35 @@ describe("Message", () => {
   });
 
   describe("JSPropMessage", () => {
-    const msg = new JSPropMessage(
-      "prop",
-      "js",
-      [Keyword.intern("prototype"), Keyword.intern("toString")],
-    );
+    const msg = new JSPropMessage("prop", "js", [
+      Keyword.intern("prototype"),
+      Keyword.intern("toString"),
+    ]);
 
     test('name is "prop"', () => {
-      expect(msg.name).toBe("prop")
+      expect(msg.name).toBe("prop");
     });
 
     test('namespace is "js"', () => {
       expect(msg.namespace).toBe("js");
     });
 
-    it('is not within a query message by default', () => {
+    it("is not within a query message by default", () => {
       expect(msg.isWithinQuery()).toBe(false);
-    })
+    });
 
     it("interns to the last prop listed", () => {
       expect(msg.interned).toBe("toString");
     });
 
     it("has args that correspond to a chain of props", () => {
-      expect(msg.args).toEqual([Keyword.intern("prototype"), Keyword.intern('toString')]);
+      expect(msg.args).toEqual([
+        Keyword.intern("prototype"),
+        Keyword.intern("toString"),
+      ]);
     });
 
-    describe('within a query message', () => {
+    describe("within a query message", () => {
       it("is within a query message", () => {
         expect(msg.withinQuery().isWithinQuery()).toBe(true);
       });
