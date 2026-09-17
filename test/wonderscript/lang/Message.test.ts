@@ -1,8 +1,21 @@
 import { expect, test, it, describe } from "bun:test";
 import {
   JSSetPropMessage,
+  Keyword,
   Message,
 } from "../../../src/wonderscript/lang";
+
+declare global {
+  interface Object {
+    [key: string]: unknown;
+    prototype: {
+      toString: () => string;
+    }
+  }
+}
+
+// @ts-ignore
+var Object: Object = globalThis.Object;
 
 describe("Message", () => {
   it("has a name", () => {
@@ -27,5 +40,22 @@ describe("Message", () => {
 
   describe("JSSetPropMessage", () => {
     const msg = new JSSetPropMessage("prop", "js");
+  });
+
+  const examples = [
+    [
+      Message.build([
+        Keyword.intern("prop", "js"),
+        Keyword.intern("prototype"),
+        Keyword.intern("toString"),
+      ]).sendTo(Object),
+      Object.prototype.toString,
+    ],
+  ];
+
+  examples.forEach(([actual, expected]) => {
+    it("can bind to a function", () => {
+      expect(actual).toBe(expected);
+    });
   });
 });

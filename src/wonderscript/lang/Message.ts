@@ -9,6 +9,14 @@ import { emitSlotName } from "../compiler/emit/slots";
 export type MessageForm =
   string | Keyword | [Keyword, ...unknown[]] | Vector<unknown>;
 
+export interface Envelope {
+  sendTo(obj: Obj): unknown;
+}
+
+export interface CompilableMessage {
+  toJS(ctx: Context, obj: Form): string;
+}
+
 export function isMessageForm(form: unknown): form is MessageForm {
   return (
     typeof form === "string" ||
@@ -29,7 +37,7 @@ export const JS_DIG_KW = Keyword.intern("prop", "js");
 export const RESPOND_TO_KW = Keyword.intern("respond-to?");
 export const JS_PROP_SET = Keyword.intern("set!", "js");
 
-export class Message {
+export class Message implements Envelope, CompilableMessage {
   static send(obj: Record<string, unknown>, msg: MessageForm) {
     return this.build(msg).sendTo(obj);
   }
@@ -39,7 +47,6 @@ export class Message {
   }
 
   static build(msg: MessageForm): Message {
-    // console.error('building message from', prStr(msg))
     if (msg instanceof Vector || Array.isArray(msg)) {
       return Message.compound(msg);
     }
@@ -105,7 +112,6 @@ export class Message {
   static simple(msg: Keyword | string) {
     if (msg instanceof Keyword) {
       if (msg.namespace() === "js.prop") {
-        // console.error('building message:', prStr(msg));
         return new JSPropMessage("prop", "js", [msg.name()]);
       }
 
@@ -179,18 +185,20 @@ export class Message {
     );
   }
 
+  withArgs(args: unknown[]) {
+    return new Message(this.name, this.namespace, args);
+  }
+
+  bind(obj: Obj): BoundMessage {
+    return new BoundMessage(this, obj);
+  }
+
   sendTo(obj: Obj): unknown {
     const fn = obj[this.interned];
     if (typeof fn === "function") {
       return fn.apply(obj, this.args);
     }
 
-    console.log(
-      `unknown message ${this}`,
-      this.interned,
-      prStr(obj),
-      Object.getOwnPropertyNames(Object.getPrototypeOf(obj))
-    );
     throw new Error(`unknown message ${this}`);
   }
 
@@ -300,5 +308,19 @@ export class JSSetPropMessage extends JSMethodMessage {
     } else {
       return `wonderscript.lang.Message.send(${emit(obj, ctx)}, [${this.keyword().toJS()}, ${emit(key as Form, ctx)}, ${emit(this.value as Form, ctx)}])`;
     }
+  }
+}
+
+export class BoundMessage implements Envelope {
+  #msg: Message;
+  #obj: Obj;
+
+  constructor(msg: Message, obj: Obj) {
+    this.#msg = msg;
+    this.#obj = obj;
+  }
+
+  sendTo(_: Obj) {
+    return this.#msg.sendTo(this.#obj);
   }
 }
