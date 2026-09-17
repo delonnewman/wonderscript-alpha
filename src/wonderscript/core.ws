@@ -417,7 +417,18 @@
 (defconst SQRT2   (send js/Math :js.prop/SQRT2))
 
 (defn ->integer
-  (s) (js/parseInt s 10))
+  ((s) (js/parseInt s 10))
+  ((s base) (js/parseInt s base)))
+
+(defn oct (s)
+  (if (and (string? s) (send s [:js/startsWith "0"]))
+    (js/parseInt (send s [:js/slice 1]) 8)
+    (js/parseInt s 8)))
+
+(defn hex (s)
+  (if (and (string? s) (send s [:js/startsWith "0x"]))
+    (js/parseInt (send s [:js/slice 2]) 16)
+    (js/parseInt s 16)))
 
 (defn ->float
   (s) (js/parseFloat s))
