@@ -209,6 +209,10 @@ export class Message implements Envelope, CompilableMessage {
 }
 
 export class JSPropMessage extends Message {
+  get interned() {
+    return escapeChars(this.args[0]);
+  }
+
   toString(): string {
     if (this.args.length === 0) {
       return prStr(Keyword.intern(this.name, this.namespace));

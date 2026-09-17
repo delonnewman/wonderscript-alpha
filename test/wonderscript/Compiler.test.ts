@@ -15,6 +15,16 @@ describe("Compiler", () => {
       expect(output).toBe("You");
     });
 
+    test("method query", () => {
+      let output = subject.evalString("(send js/global [:respond-to? :js.prop/heyQuery])");
+      expect(output).toBe(false);
+
+      subject.evalString('(send js/global [:js/set! :heyQuery "You"])');
+      output = subject.evalString("(send js/global [:respond-to? :js.prop/heyQuery])");
+
+      expect(output).toBe(true);
+    });
+
     test("send unary message", () => {
       const output = subject.evalString("(send [1 2 3] :js/toArray)");
       expect(output).toEqual([1, 2, 3]);
