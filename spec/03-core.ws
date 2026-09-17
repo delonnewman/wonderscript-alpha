@@ -115,7 +115,7 @@
 (def AClass (make-class))
 (is (class? AClass))
 
-(add-method AClass "hi" (fn* () "Hi!"))
+(add-method AClass :hi (fn* () "Hi!"))
 
 (def a-instance (new AClass))
 (is (instance? a-instance AClass))

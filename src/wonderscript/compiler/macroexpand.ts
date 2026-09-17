@@ -2,6 +2,7 @@ import { Form, isMacro, isSpecialForm, isTaggedValue } from "./core";
 import { Context } from "../lang/Context";
 import { findNamespaceVar } from "./findNamespaceVar";
 import { Symbol } from "../lang/Symbol";
+import { prStr } from "../compiler";
 
 export function macroexpand(form: Form, scope: Context): Form {
   if (!isTaggedValue(form) || isSpecialForm(form)) return form;

@@ -33,7 +33,9 @@ export function emitDef(form: Form, env: Context): string {
   CURRENT_NS.value.module[name] = val;
 
   if (form[2] != null) {
+    // console.error('evaling def value', prStr(form[2]))
     code = emit(form[2], env);
+    // console.error('    => to', code);
     val = jsEval(code);
   }
 

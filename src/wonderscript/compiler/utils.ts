@@ -1,4 +1,5 @@
 import { isString } from "../js";
+import { prStr } from "./prStr";
 
 const names = {
   "=": "eq",
@@ -98,7 +99,7 @@ export function isInternable(val: string): boolean {
 
 export function escapeChars(str: string): string {
   if (!isString(str))
-    throw new Error("only strings can be escaped not " + JSON.stringify(str));
+    throw new Error("only strings can be escaped not " + prStr(str));
 
   if (isInternable(str)) return str;
 

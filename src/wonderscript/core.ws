@@ -77,8 +77,8 @@
     (if (and obj (send obj [:respond-to? slot]))
       (send obj slot)))))
 
-(def name (message-sender "name"))
-(def namespace (message-sender "namespace"))
+(def name (message-sender :js/name))
+(def namespace (message-sender :js/namespace))
 
 (def ^:macro comment (fn* (&xs) nil))
 
@@ -89,7 +89,7 @@
      (array 'if (first clauses)
         (if (next clauses)
           (first (rest clauses))
-          (throw (new js/Error "cond requires an even number of forms")))
+          (throw (new js/Error (str "cond requires an even number of forms " (pr-str clauses)))))
         (cons 'cond (next (next clauses)))))))
 
 (def assoc-array?
@@ -101,7 +101,7 @@
 (def splat?
   (fn* (sym)
     (if (symbol? sym)
-      (send (send sym :name) [:js/startsWith "&"])
+      (send (send sym :js/name) [:js/startsWith "&"])
       false)))
 
 (def parsed-args
@@ -113,7 +113,7 @@
           {:name
            (send
             wonderscript.lang/Symbol
-            [:js/intern (send (send sym :name) [:js/slice 1])])
+            [:js/intern (send (send sym :js/name) [:js/slice 1])])
            :order i
            :splat true}
           {:name sym
@@ -134,7 +134,7 @@
        (send (pair 0)
         [:js/flatMap (fn* (x i)
          (if (splat? x)
-           (array (send wonderscript.lang/Symbol [:js/intern (send (send x :name) [:js/slice 1])])
+           (array (send wonderscript.lang/Symbol [:js/intern (send (send x :js/name) [:js/slice 1])])
             `(send ~argsym [:js/slice ~i]))
            (array x `(array-get ~argsym ~i))))])
        (send pair [:js/slice 1])))))
@@ -186,7 +186,8 @@
                  (and doc meta) (send rest [:js/slice 3])
                  (or doc meta) (send rest [:js/slice 2])
                  :else (send rest [:js/slice 1]))
-          nm (send name [:js/withMeta (merge meta {:doc doc})]))
+          m    (if doc (merge meta {:doc doc}) meta)
+          nm   (send name [:js/withMeta m]))
      `(def ~nm (fn ~args ~@body)))))
 
 (defn ^:macro defmacro
@@ -230,7 +231,7 @@
   ((name)
    (cond
      (keyword? name) name
-     (symbol? name) (send wonderscript.lang/Keyword [:js/intern (send name :name) (send name :namespace)])
+     (symbol? name) (send wonderscript.lang/Keyword [:js/intern (send name :js/name) (send name :js/namespace)])
      (string? name) (send wonderscript.lang/Keyword [:js/intern name])))
   ((ns name) (send wonderscript.lang/Keyword [:js/intern name ns])))
 
@@ -238,7 +239,7 @@
   ((name)
    (cond
      (symbol? name) name
-     (keyword? name) (send wonderscript.lang/Symbol [:js/intern (send name :name) (send name :namespace)])
+     (keyword? name) (send wonderscript.lang/Symbol [:js/intern (send name :js/name) (send name :js/namespace)])
      (string? name) (send wonderscript.lang/Symbol [:js/intern name])))
   ((ns name) (send wonderscript.lang/Symbol [:js/intern name ns])))
 
@@ -393,8 +394,9 @@
    ctr))
 
 (defn add-method
-  (klass name f)
-  (send (send klass :js.prop/prototype) [:js/set! name f]))
+  (klass msg f)
+  (let (m (send (send wonderscript.lang/Message [:js/build msg]) :js.prop/interned))
+    (send (send klass :js.prop/prototype) [:js/set! m f])))
 
 (defmacro defclass
   ((name) `(defclass ~name nil))
@@ -523,7 +525,7 @@
 
 (defn append
   (col x)
-  (if (send col [:respond-to? :append])
+  (if (send col [:respond-to? :js/append])
     (send col [:js/append x])
     (throw (new js/Error "unknown method append"))))
 
@@ -574,8 +576,8 @@
   (cond
     (< a b) -1
     (> a b) 1
-    (send a [:respond-to? :cmp]) (send a [:js/cmp b])
-    (send b [:respond-to? :cmp]) (send b [:js/cmp a])
+    (send a [:respond-to? :js/cmp]) (send a [:js/cmp b])
+    (send b [:respond-to? :js/cmp]) (send b [:js/cmp a])
     :else 0))
 
 (defn sort!
@@ -707,7 +709,7 @@
   ((obj key value)
    `(cond
      (array-like? ~obj) (array-set! ~obj ~key ~value)
-     (send ~obj [:respond-to? :set]) (send ~obj [:js/set ~key ~value])
+     (send ~obj [:respond-to? :js/set]) (send ~obj [:js/set ~key ~value])
      (object? ~obj) (send ~obj [:js/set! ~key ~value])
      :else (throw (new js/Error "can only set keys for associative values")))))
 
@@ -963,11 +965,11 @@
 (defn seq?
   (obj)
   (or (nil? obj) (array? obj) (map? obj) (set? obj)
-      (and (send obj [:respond-to? :first]) (send obj [:respond-to? :next]))))
+      (and (send obj [:respond-to? :js/first]) (send obj [:respond-to? :js/next]))))
 
 (defn seqable?
   (obj)
-  (or (seq? obj) (send obj [:respond-to? :seq])))
+  (or (seq? obj) (send obj [:respond-to? :js/seq])))
 
 (defn seq
   (obj)
@@ -1006,7 +1008,7 @@
   (col ref)
   (cond
     (array? col) (begin (send col [:js/splice ref 1]) col)
-    (send col [:respond-to? :delete]) (begin (send col [:js/delete ref]) col)
+    (send col [:respond-to? :js/delete]) (begin (send col [:js/delete ref]) col)
     :else
       (throw "don't know how to remove a value from this collection")))
 
@@ -1018,7 +1020,7 @@
   (col)
   (cond
     (array? col) (send col [:js/splice 0])
-    (send col [:respond-to? :clear]) (begin (send col :js/clear) col)
+    (send col [:respond-to? :js/clear]) (begin (send col :js/clear) col)
     :else
       (throw (str "cannot clear" (pr-str col)))))
 
@@ -1033,7 +1035,7 @@
   (col)
   (cond
     (array-like? col) EMPTY-ARRAY
-    (send col [:respond-to? :empty]) (send col :js/empty)
+    (send col [:respond-to? :js/empty]) (send col :js/empty)
     :else
       (empty! (clone col))))
 
@@ -1042,7 +1044,7 @@
   (cond
     (array-like? col) (length col)
     (or (map? col) (set? col)) (size col)
-    (send col [:respond-to? :count]) (send col :js/count)
+    (send col [:respond-to? :js/count]) (send col :js/count)
     :else
      (reduce (fn (n _) (inc n)) col 0)))
 
@@ -1052,7 +1054,7 @@
     (array-like? col) (not-identical? -1 (index-of col value))
     (map? col) (key? col value)
     (set? col) (member? col value)
-    (send col [:respond-to? :includes]) (send col [:js/includes value])
+    (send col [:respond-to? :js/includes]) (send col [:js/includes value])
     :else
       (throw "can't test inclusion")))
 
@@ -1072,8 +1074,8 @@
     (and (js-primitive-number? a) (js-primitive-number? b))
         (or (identical? a b) (and (not-identical? a a) (not-identical? b b)))
     (and (js-primitive-type? a) (js-primitive-type? b)) (identical? a b)
-    (send a [:respond-to? :equals]) (send a [:js/equals b])
-    (send b [:respond-to? :equals]) (send b [:js/equals a])
+    (send a [:respond-to? :js/equals]) (send a [:js/equals b])
+    (send b [:respond-to? :js/equals]) (send b [:js/equals a])
     :else
       (identical? (hash-code a) (hash-code b))))
 

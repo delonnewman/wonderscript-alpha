@@ -24,7 +24,7 @@ export function emitSymbol(s: Symbol, context: Context): string {
   if (s.hasNamespace()) {
     let ctx = context.lookup(Symbol.intern(s.namespace()));
     if (ctx == null) {
-      console.error(prStr(s), context);
+      // console.error(prStr(s), context);
       throw new CompilerError(
         `Unknown namespace: ${prStr(s.namespace())}`,
         ctx

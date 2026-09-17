@@ -31,5 +31,5 @@
 (send an-object [:js/set! :c 3])
 (is (identical? 3 (send an-object :js.prop/c)))
 
-(is (send an-object [:respond-to? :a]))
-(is (not (send an-object [:respond-to? :d])))
+(is (send an-object [:respond-to? :js/a]))
+(is (not (send an-object [:respond-to? :js/d])))
