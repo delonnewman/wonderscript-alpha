@@ -4,17 +4,17 @@ import { Compiler } from "../../src/wonderscript";
 describe("Compiler", () => {
   const subject = new Compiler("node", "node", { global: {} });
 
-  test("slot access", () => {
-    let output = subject.evalString("(send js/global :js.prop/hey)");
-    expect(output).toBeUndefined();
-
-    subject.evalString('(send js/global [:js/set! :hey "You"])');
-    output = subject.evalString("(send js/global :js.prop/hey)");
-
-    expect(output).toBe("You");
-  });
-
   describe("send", () => {
+    test("property access", () => {
+      let output = subject.evalString("(send js/global :js.prop/hey)");
+      expect(output).toBeUndefined();
+
+      subject.evalString('(send js/global [:js/set! :hey "You"])');
+      output = subject.evalString("(send js/global :js.prop/hey)");
+
+      expect(output).toBe("You");
+    });
+
     test("send unary message", () => {
       const output = subject.evalString("(send [1 2 3] :js/toArray)");
       expect(output).toEqual([1, 2, 3]);
