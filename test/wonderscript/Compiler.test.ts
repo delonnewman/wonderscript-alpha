@@ -4,10 +4,13 @@ import { Compiler } from "../../src/wonderscript";
 describe("Compiler", () => {
   const Global = {
     global: {
-      console: {},
+      console: {
+        log: (..._: unknown[]) => {}
+      },
     }
-  }
-  const subject = new Compiler("node", "node", { global: {} });
+  };
+
+  const subject = new Compiler("node", "node", Global);
 
   describe("send", () => {
     test("property access", () => {
@@ -27,6 +30,9 @@ describe("Compiler", () => {
         ["(send js/global [:respond-to? :missingMethod])", false],
         ["(send js/global [:respond-to? :js/console])", true],
         ["(send js/global [:respond-to? :js.prop/console])", true],
+        ["(send js/global [:respond-to? :js.prop/console])", true],
+        ["(send js/global [:respond-to? [:js/prop :console :log]])", true],
+        ["(send js/global [:respond-to? [:js/prop :console :hi]])", false],
       ];
 
       examples.forEach(([form, expected]) => {

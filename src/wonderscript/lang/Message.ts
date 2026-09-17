@@ -1,13 +1,21 @@
 import { prStr } from "../compiler";
-import { Keyword, Vector, Symbol } from "../lang";
-import { escapeChars } from "../compiler/utils";
-import { Form, TaggedValue } from "../compiler/core";
+import { Keyword, Vector } from "../lang";
+import { Form } from "../compiler/core";
 import { Context } from "./Context";
-import { emit } from "../compiler/emit";
-import { emitSlotName } from "../compiler/emit/slots";
+import { QueryMessage } from "./Message/QueryMessage";
+import { JSPropMessage } from "./Message/JSPropMessage";
+import { JSSetPropMessage } from "./Message/JSSetPropMessage";
+import { JSMethodMessage } from "./Message/JSMethodMessage";
+import { BaseMessage } from "./Message/BaseMessage";
 
 export type MessageForm =
   string | Keyword | [Keyword, ...unknown[]] | Vector<unknown>;
+
+export type Obj = {
+  [key: string]: unknown;
+};
+
+export type MessageArgs = unknown[] | readonly unknown[] | Vector;
 
 export interface Envelope {
   sendTo(obj: Obj): unknown;
@@ -15,6 +23,17 @@ export interface Envelope {
 
 export interface CompilableMessage {
   toJS(ctx: Context, obj: Form): string;
+}
+
+export interface Message extends Envelope, CompilableMessage {
+  readonly name: string;
+  readonly namespace?: string;
+  readonly args: MessageArgs;
+  readonly interned: string;
+  readonly arity: number;
+
+  withinQuery(): Message;
+  isWithinQuery(): boolean;
 }
 
 export function isMessageForm(form: unknown): form is MessageForm {
@@ -26,41 +45,34 @@ export function isMessageForm(form: unknown): form is MessageForm {
   );
 }
 
-type Obj = {
-  [key: string]: unknown;
-};
-
-type MessageArgs = unknown[] | readonly unknown[] | Vector;
-
-const EMPTY_ARRAY = Object.freeze([]);
 export const JS_DIG_KW = Keyword.intern("prop", "js");
 export const RESPOND_TO_KW = Keyword.intern("respond-to?");
 export const JS_PROP_SET = Keyword.intern("set!", "js");
 
-export class Message implements Envelope, CompilableMessage {
-  static send(obj: Record<string, unknown>, msg: MessageForm) {
+export const Message = {
+  send(obj: Record<string, unknown>, msg: MessageForm): unknown {
     return this.build(msg).sendTo(obj);
-  }
+  },
 
-  static toJS(ctx: Context, msg: MessageForm, obj: Form) {
+  toJS(ctx: Context, msg: MessageForm, obj: Form): string {
     return this.build(msg).toJS(ctx, obj);
-  }
+  },
 
-  static build(msg: MessageForm): Message {
+  build(msg: MessageForm): Message {
     if (msg instanceof Vector || Array.isArray(msg)) {
-      return Message.compound(msg);
+      return this.compound(msg);
     }
 
     if (msg instanceof Keyword || typeof msg === "string") {
-      return Message.simple(msg);
+      return this.simple(msg);
     }
 
     throw new Error(
       `message form expected vector or array, got ${prStr(msg)} instead`
     );
-  }
+  },
 
-  static compound(msg: unknown[] | Vector): Message {
+  compound(msg: unknown[] | Vector): Message {
     if (msg.length === 0) {
       throw new Error(`invalid arguments expected at least 1, got 0 instead`);
     }
@@ -79,7 +91,7 @@ export class Message implements Envelope, CompilableMessage {
     }
 
     if (name === "respond-to?") {
-      return new RespondToMessage(name, ns, msg.slice(1));
+      return new QueryMessage(name, ns, msg.slice(1));
     }
 
     if (ns === "js") {
@@ -106,10 +118,10 @@ export class Message implements Envelope, CompilableMessage {
       return new JSMethodMessage(name, ns, msg.slice(1));
     }
 
-    return new this(name, ns, msg.slice(1));
-  }
+    return new BaseMessage(name, ns, msg.slice(1));
+  },
 
-  static simple(msg: Keyword | string) {
+  simple(msg: Keyword | string): Message {
     if (msg instanceof Keyword) {
       if (msg.namespace() === "js.prop") {
         return new JSPropMessage("prop", "js", [msg.name()]);
@@ -119,212 +131,16 @@ export class Message implements Envelope, CompilableMessage {
         return new JSMethodMessage(msg.name(), msg.namespace());
       }
 
-      return new this(msg.name(), msg.namespace());
+      return new BaseMessage(msg.name(), msg.namespace());
     }
 
     if (typeof msg === "string") {
-      return new this(msg);
+      return new BaseMessage(msg);
     }
 
     throw new Error(
       `message form expected keyword or string, got ${prStr(msg)} instead`
     );
   }
-
-  #name: string;
-  #namespace?: string;
-  #args: MessageArgs;
-  #ident: string;
-
-  constructor(
-    name: string,
-    namespace?: string,
-    args: MessageArgs = EMPTY_ARRAY
-  ) {
-    this.#name = name;
-    this.#namespace = namespace;
-    this.#args = Array.from(args);
-    this.#ident = namespace === "js" ? name : `${name}_${args.length}`;
-    Object.freeze(this);
-  }
-
-  get name() {
-    return this.#name;
-  }
-
-  get namespace() {
-    return this.#namespace;
-  }
-
-  get ident(): string {
-    return this.#ident;
-  }
-
-  get interned(): string {
-    return escapeChars(this.ident);
-  }
-
-  get arity(): number {
-    return this.#args.length;
-  }
-
-  get args() {
-    return this.#args;
-  }
-
-  keyword() {
-    return Keyword.intern(this.name, this.namespace);
-  }
-
-  toString() {
-    if (this.args.length === 0) {
-      return prStr(Keyword.intern(this.name, this.namespace));
-    }
-    return prStr(
-      new Vector(Keyword.intern(this.name, this.namespace), ...this.args)
-    );
-  }
-
-  withArgs(args: unknown[]) {
-    return new Message(this.name, this.namespace, args);
-  }
-
-  bind(obj: Obj): BoundMessage {
-    return new BoundMessage(this, obj);
-  }
-
-  sendTo(obj: Obj): unknown {
-    const fn = obj[this.interned];
-    if (typeof fn === "function") {
-      return fn.apply(obj, this.args);
-    }
-
-    throw new Error(`unknown message ${this}`);
-  }
-
-  toJS(ctx: Context, obj: Form): string {
-    const args = this.args.map((it) => emit(it, ctx));
-    return `${emit(obj, ctx)}.${this.interned}(${args.join(", ")})`;
-  }
 }
 
-export class JSPropMessage extends Message {
-  get interned() {
-    return escapeChars(this.args[0]);
-  }
-
-  toString(): string {
-    if (this.args.length === 0) {
-      return prStr(Keyword.intern(this.name, this.namespace));
-    }
-  }
-
-  sendTo(obj: Obj): unknown {
-    const args = Array.from(this.args).map((it) =>
-      it instanceof Keyword ? escapeChars(it.name()) : escapeChars(`${it}`)
-    );
-
-    let val: unknown = obj;
-    while (args.length > 0) {
-      val = val[args.shift()!];
-    }
-
-    return val;
-  }
-
-  toJS(ctx: Context, obj: Form): string {
-    const str = this.args
-      .map((prop) => {
-        const name =
-          prop instanceof Keyword || typeof prop === "string"
-            ? emitSlotName(prop)
-            : emit(prop, ctx);
-        return name !== undefined ? `.${name}` : `[${emit(prop, ctx)}]`;
-      })
-      .join("");
-
-    // console.error('compiling message:', str, this.name, this.namespace);
-
-    return `${emit(obj, ctx)}${str}`;
-  }
-}
-
-export class JSMethodMessage extends Message {
-  get ident(): string {
-    return this.name;
-  }
-}
-
-export class RespondToMessage extends Message {
-  get query(): Message | Form {
-    if (isMessageForm(this.args[0])) {
-      return Message.build(this.args[0]);
-    }
-
-    return this.args[0];
-  }
-
-  sendTo(obj: Obj): boolean {
-    const query = this.query;
-    if (query instanceof Message) {
-      return query.interned in obj;
-    }
-
-    throw new Error(`invalid method query: ${prStr(query)}`);
-  }
-
-  toJS(ctx: Context, obj: Form): string {
-    const query = this.query;
-    if (query instanceof Message) {
-      return `("${query.interned}" in ${emit(obj, ctx)})`;
-    }
-
-    return `wonderscript.lang.Message.send(${emit(obj, ctx)}, [${emit(query as Form, ctx)}])`;
-  }
-}
-
-export class JSSetPropMessage extends JSMethodMessage {
-  get key(): unknown {
-    const key = this.args[0];
-
-    if (key instanceof Keyword) {
-      return escapeChars(key.name());
-    } else if (typeof key === "string") {
-      return escapeChars(key);
-    }
-
-    return key;
-  }
-
-  get value(): unknown {
-    return this.args[1];
-  }
-
-  sendTo(obj: Obj): Obj {
-    obj[`${this.key}`] = this.value;
-    return obj;
-  }
-
-  toJS(ctx: Context, obj: Form): string {
-    const key = this.key;
-    if (typeof key === "string") {
-      return `${emit(obj, ctx)}.${this.key}=${emit(this.value as Form, ctx)}`;
-    } else {
-      return `wonderscript.lang.Message.send(${emit(obj, ctx)}, [${this.keyword().toJS()}, ${emit(key as Form, ctx)}, ${emit(this.value as Form, ctx)}])`;
-    }
-  }
-}
-
-export class BoundMessage implements Envelope {
-  #msg: Message;
-  #obj: Obj;
-
-  constructor(msg: Message, obj: Obj) {
-    this.#msg = msg;
-    this.#obj = obj;
-  }
-
-  sendTo(_: Obj) {
-    return this.#msg.sendTo(this.#obj);
-  }
-}
