@@ -30,42 +30,6 @@ export const RESPOND_TO_KW = Keyword.intern("respond-to?");
 export const JS_PROP_SET = Keyword.intern("set!", "js");
 
 export class Message {
-  static intern(msg: MessageForm): string {
-    if (typeof msg === "string") return escapeChars(msg);
-    if (msg instanceof Keyword || msg instanceof Symbol) {
-      return escapeChars(msg.name());
-    }
-
-    if (Array.isArray(msg) || msg instanceof Vector) {
-      let name = msg[0];
-      if (name instanceof Keyword || name instanceof Symbol) {
-        const ns = name.namespace();
-
-        name = escapeChars(name.name());
-        if (ns === "js") return name;
-      }
-
-      return `${name}_${msg.slice(1).length}`;
-    }
-
-    throw new Error(`unknown message type ${prStr(msg)}`);
-  }
-
-  static args(msg: MessageForm) {
-    if (Array.isArray(msg) || msg instanceof Vector) {
-      return msg.slice(1);
-    }
-
-    if (
-      (msg instanceof Keyword || msg instanceof Symbol) &&
-      msg.namespace() === "js.prop"
-    ) {
-      return;
-    }
-
-    return EMPTY_ARRAY;
-  }
-
   static send(obj: Record<string, unknown>, msg: MessageForm) {
     return this.build(msg).sendTo(obj);
   }
