@@ -1,4 +1,4 @@
-import { Message, MessageArgs, Obj } from "../Message";
+import { MessageArgs, Obj } from "../Message";
 import { Keyword } from "../Keyword";
 import { escapeChars } from "../../compiler/utils";
 import { prStr } from "../../compiler";
@@ -7,7 +7,6 @@ import { Form } from "../../compiler/core";
 import { emitSlotName } from "../../compiler/emit/slots";
 import { emit } from "../../compiler/emit";
 import { BaseMessage } from "./BaseMessage";
-import { pt } from "../../util";
 
 export class JSPropMessage extends BaseMessage {
   get interned() {
