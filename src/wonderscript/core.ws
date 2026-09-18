@@ -387,11 +387,11 @@
         (send vt [:js/equals t])))))
 
 (defn make-class
-  (() (make-class (fn* ()) nil))
-  ((ctr) (make-class ctr nil))
-  ((ctr superclass)
-   (send ctr [:js/set! :prototype (send js/Object [:js/create superclass])])
-   ctr))
+  (() (make-class nil))
+  ((superclass)
+   (let (ctr (fn* ()))
+     (send (fn* ()) [:js/set! :prototype (send js/Object [:js/create superclass])])
+     ctr)))
 
 (defn add-method
   (klass msg f)
