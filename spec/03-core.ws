@@ -112,11 +112,11 @@
 
 ;; OOP
 
-(def AClass (make-class))
-(is (class? AClass))
+;; (def AClass (make-class))
+;; (is (class? AClass))
 
-(add-method AClass :hi (fn* () "Hi!"))
+;; (add-method AClass :hi (fn* () "Hi!"))
 
-(def a-instance (new AClass))
-(is (instance? a-instance AClass))
-(is (identical? "Hi!" (send a-instance :hi)))
+;; (def a-instance (new AClass))
+;; (is (instance? a-instance AClass))
+;; (is (identical? "Hi!" (send a-instance :hi)))

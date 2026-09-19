@@ -387,11 +387,25 @@
         (send vt [:js/equals t])))))
 
 (defn make-class
-  (() (make-class nil))
-  ((superclass)
-   (let (ctr (fn* ()))
-     (send (fn* ()) [:js/set! :prototype (send js/Object [:js/create superclass])])
-     ctr)))
+  (() (make-class (fn* ()) nil))
+  ((ctr) (make-class ctr nil))
+  ((ctr superclass)
+   (send ctr [:js/set! :prototype (send js/Object [:js/create superclass])])
+   ctr))
+
+(def Class (send js/Object [:js/create nil]))
+(send js/Object [:js/setPrototypeOf Class (send js/Object [:js/create nil])])
+
+(def Class<<define-method
+  (fn* define-method (msg f)
+    (let (m (send (send wonderscript.lang/Message [:js/build msg]) :js.prop/interned)
+          proto (send js/Object [:js/getPrototypeOf (js* "this")]))
+      (unless proto
+        (send js/Object [:js/setPrototypeOf (js* "this") (send js/Object [:js/create nil])]))
+      (send (send js/Object [:js/getPrototypeOf (js* "this")]) [:js/set! m f])
+      (keyword m))))
+
+(send (send js/Object [:js/getPrototypeOf Class]) [:js/set! :define-method_2 Class<<define-method])
 
 (defn add-method
   (klass msg f)
