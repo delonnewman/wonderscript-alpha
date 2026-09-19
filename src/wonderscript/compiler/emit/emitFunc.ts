@@ -25,7 +25,7 @@ function parseArgs(args: Symbol[]): ParsedArgs {
   const parsed: ParsedArgs = [];
 
   for (let i = 0; i < args.length; ++i) {
-    // TODO: probably should throw and error instead
+    // TODO: probably should throw an error instead
     // TODO: check if there's a namespace that should be an error also
     if (!(args[i] instanceof Symbol)) continue;
 
@@ -108,7 +108,7 @@ export function emitFunc(form: Form, context: Context): string {
   }
 
   if (name) {
-    return `(function ${name}(${argsDef}){${buffer.join("; ")};})`;
+    return `(function ${escapeChars(name.name())}(${argsDef}){${buffer.join("; ")};})`;
   }
 
   return `(function(${argsDef}){${buffer.join("; ")};})`;
