@@ -101,6 +101,7 @@ export function escapeChars(str: string): string {
   if (!isString(str))
     throw new Error("only strings can be escaped not " + prStr(str));
 
+  if (str === "class") return "_CLASS_";
   if (isInternable(str)) return str;
 
   for (let ch in SPECIAL_CHARS) {
