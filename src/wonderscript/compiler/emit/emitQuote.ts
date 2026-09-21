@@ -16,6 +16,7 @@ import { emitKeyword } from "./emitKeyword";
 import { CompilerError } from "../CompilerError";
 import { Context } from "../../lang/Context";
 import { Vector } from "../../lang/Vector";
+import { hasNamespace } from "../../lang/Named";
 
 export const QUOTE_SYM = Symbol.intern(QUOTE_STR);
 export type QuoteForm = [typeof QUOTE_SYM, Form];
@@ -43,12 +44,12 @@ export function emitQuotedMetaData(meta: MetaData): string {
 const SYM_FUNC = "wonderscript.lang.Symbol.intern";
 
 function emitQuotedSymbol(sym: Symbol): string {
-  if (sym.hasMeta() && sym.hasNamespace()) {
+  if (sym.hasMeta() && hasNamespace(sym)) {
     const m = emitQuotedMetaData(sym.meta());
     return `${SYM_FUNC}(${JSON.stringify(sym.name)},${JSON.stringify(sym.namespace)},${m})`;
   }
 
-  if (sym.hasNamespace()) {
+  if (hasNamespace(sym)) {
     return `${SYM_FUNC}(${JSON.stringify(sym.name)},${JSON.stringify(sym.namespace)})`;
   }
 
