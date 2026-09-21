@@ -13,7 +13,7 @@ export class JSPropMessage extends BaseMessage {
     const args = super.args;
     const last = args[args.length - 1];
     if (last instanceof Keyword) {
-      return escapeChars(last.name());
+      return escapeChars(last.name);
     }
     return escapeChars(`${last}`);
   }
@@ -26,7 +26,7 @@ export class JSPropMessage extends BaseMessage {
 
   sendTo(obj: Obj): unknown {
     const args = Array.from(this.args).map((it) =>
-      it instanceof Keyword ? escapeChars(it.name()) : escapeChars(`${it}`)
+      it instanceof Keyword ? escapeChars(it.name) : escapeChars(`${it}`)
     );
 
     let val: unknown = obj;

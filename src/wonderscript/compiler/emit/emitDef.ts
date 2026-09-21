@@ -25,7 +25,7 @@ export function emitDef(form: Form, env: Context): string {
   if (!isDefForm(form))
     throw new CompilerError(`invalid ${DEF_SYM} form: ${prStr(form)}`, env);
 
-  let name = escapeChars(form[1].name());
+  let name = escapeChars(form[1].name);
   let code = "null";
   let val = null;
 

@@ -77,8 +77,8 @@
     (if (and obj (send obj [:respond-to? slot]))
       (send obj slot)))))
 
-(def name (message-sender :js/name))
-(def namespace (message-sender :js/namespace))
+(def name (message-sender :js.prop/name))
+(def namespace (message-sender :js.prop/namespace))
 
 (def ^:macro comment (fn* (&xs) nil))
 
@@ -101,7 +101,7 @@
 (def splat?
   (fn* (sym)
     (if (symbol? sym)
-      (send (send sym :js/name) [:js/startsWith "&"])
+      (send (send sym :js.prop/name) [:js/startsWith "&"])
       false)))
 
 (def parsed-args
@@ -113,7 +113,7 @@
           {:name
            (send
             wonderscript.lang/Symbol
-            [:js/intern (send (send sym :js/name) [:js/slice 1])])
+            [:js/intern (send (send sym :js.prop/name) [:js/slice 1])])
            :order i
            :splat true}
           {:name sym
@@ -134,7 +134,7 @@
        (send (pair 0)
         [:js/flatMap (fn* (x i)
          (if (splat? x)
-           (array (send wonderscript.lang/Symbol [:js/intern (send (send x :js/name) [:js/slice 1])])
+           (array (send wonderscript.lang/Symbol [:js/intern (send (send x :js.prop/name) [:js/slice 1])])
             `(send ~argsym [:js/slice ~i]))
            (array x `(array-get ~argsym ~i))))])
        (send pair [:js/slice 1])))))
@@ -231,7 +231,7 @@
   ((name)
    (cond
      (keyword? name) name
-     (symbol? name) (send wonderscript.lang/Keyword [:js/intern (send name :js/name) (send name :js/namespace)])
+     (symbol? name) (send wonderscript.lang/Keyword [:js/intern (send name :js.prop/name) (send name :js.prop/namespace)])
      (string? name) (send wonderscript.lang/Keyword [:js/intern name])))
   ((ns name) (send wonderscript.lang/Keyword [:js/intern name ns])))
 
@@ -239,7 +239,7 @@
   ((name)
    (cond
      (symbol? name) name
-     (keyword? name) (send wonderscript.lang/Symbol [:js/intern (send name :js/name) (send name :js/namespace)])
+     (keyword? name) (send wonderscript.lang/Symbol [:js/intern (send name :js.prop/name) (send name :js.prop/namespace)])
      (string? name) (send wonderscript.lang/Symbol [:js/intern name])))
   ((ns name) (send wonderscript.lang/Symbol [:js/intern name ns])))
 
@@ -398,6 +398,7 @@
 
 (def Class<<define-method
   (fn* define-method (msg f)
+    (send js/console [:js/log (js* "this")])
     (let (m (send (send wonderscript.lang/Message [:js/build msg]) :js.prop/interned)
           proto (send js/Object [:js/getPrototypeOf (js* "this")]))
       (unless proto
@@ -456,7 +457,7 @@
 (defmacro <var-op>
   (operator identity)
   (let (args (gensym "args")
-        arglist (array (symbol (str "&" (send args :js/name)))))
+        arglist (array (symbol (str "&" (send args :js.prop/name)))))
     `(fn* ~arglist
         (cond
           (identical? 0 (send ~args :js.prop/length))

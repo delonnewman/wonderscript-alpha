@@ -11,7 +11,7 @@ export class JSSetPropMessage extends JSMethodMessage {
     const key = this.args[0];
 
     if (key instanceof Keyword) {
-      return escapeChars(key.name());
+      return escapeChars(key.name);
     } else if (typeof key === "string") {
       return escapeChars(key);
     }

@@ -8,6 +8,7 @@ import { JSSetPropMessage } from "./Message/JSSetPropMessage";
 import { JSMethodMessage } from "./Message/JSMethodMessage";
 import { BaseMessage } from "./Message/BaseMessage";
 import { BoundMessage } from "./Message/BoundMessage";
+import { pt } from "../util";
 
 export type MessageForm =
   string | Keyword | [Keyword, ...unknown[]] | Vector<unknown>;
@@ -83,8 +84,8 @@ export const Message = {
     let name: string, ns: string | undefined;
     const tag = msg[0];
     if (tag instanceof Keyword) {
-      name = tag.name();
-      ns = tag.namespace();
+      name = tag.name;
+      ns = tag.namespace;
     } else if (typeof tag === "string") {
       name = tag;
     } else {
@@ -126,15 +127,15 @@ export const Message = {
 
   simple(msg: Keyword | string): Message {
     if (msg instanceof Keyword) {
-      if (msg.namespace() === "js.prop") {
-        return new JSPropMessage("prop", "js", [msg.name()]);
+      if (msg.namespace === "js.prop") {
+        return new JSPropMessage("prop", "js", [msg.name]);
       }
 
-      if (msg.namespace() === "js") {
-        return new JSMethodMessage(msg.name(), msg.namespace());
+      if (msg.namespace === "js") {
+        return new JSMethodMessage(msg.name, msg.namespace);
       }
 
-      return new BaseMessage(msg.name(), msg.namespace());
+      return new BaseMessage(msg.name, msg.namespace);
     }
 
     if (typeof msg === "string") {

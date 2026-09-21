@@ -97,12 +97,12 @@ export class Context {
   }
 
   get(name: string | Symbol) {
-    if (name instanceof Symbol) name = name.name();
+    if (name instanceof Symbol) name = name.name;
     return this.vars.get(name);
   }
 
   has(sym: Symbol): boolean {
-    return this.vars.has(sym.name());
+    return this.vars.has(sym.name);
   }
 
   isMutable(sym: Symbol): boolean {
@@ -113,11 +113,11 @@ export class Context {
   }
 
   varHasMeta(sym: Symbol): boolean {
-    return this.varMeta.has(sym.name());
+    return this.varMeta.has(sym.name);
   }
 
   getVarMeta(name: string | Symbol) {
-    if (name instanceof Symbol) name = name.name();
+    if (name instanceof Symbol) name = name.name;
     return this.varMeta.get(name);
   }
 
@@ -147,7 +147,7 @@ export class Context {
       throw new CompilerError(`cannot mutate an immutable value: ${sym}`, this);
     }
 
-    this.vars.set(sym.name(), value);
+    this.vars.set(sym.name, value);
 
     return this;
   }
@@ -155,13 +155,13 @@ export class Context {
   // TODO: deal with meta data options here
   define(sym: Symbol, value?: unknown): Context {
     if (value !== undefined) {
-      this.vars.set(sym.name(), value);
+      this.vars.set(sym.name, value);
     } else {
-      this.vars.set(sym.name(), null);
+      this.vars.set(sym.name, null);
     }
 
     if (sym.hasMeta()) {
-      this.varMeta.set(sym.name(), sym.meta());
+      this.varMeta.set(sym.name, sym.meta());
     }
 
     return this;

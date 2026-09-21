@@ -95,4 +95,4 @@ export type SpecialFormSymbol = keyof typeof SPECIAL_FORMS;
 export type SpecialForm = TaggedValue<Symbol<SpecialFormSymbol>>;
 
 export const isSpecialForm = (value: unknown): value is SpecialForm =>
-  isTaggedValue(value) && SPECIAL_FORMS[value[0].name()] === true;
+  isTaggedValue(value) && SPECIAL_FORMS[value[0].name] === true;

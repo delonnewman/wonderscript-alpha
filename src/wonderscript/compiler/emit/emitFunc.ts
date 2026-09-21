@@ -29,8 +29,8 @@ function parseArgs(args: Symbol[]): ParsedArgs {
     // TODO: check if there's a namespace that should be an error also
     if (!(args[i] instanceof Symbol)) continue;
 
-    if (args[i].name().startsWith(SPLAT)) {
-      name = Symbol.intern(args[i].name().slice(1));
+    if (args[i].name.startsWith(SPLAT)) {
+      name = Symbol.intern(args[i].name.slice(1));
       splat = true;
     } else {
       name = args[i];
@@ -46,9 +46,9 @@ function genArgsDef(argsBuf: ParsedArgs): string {
   const argsDef = [];
   for (let i = 0; i < argsBuf.length; ++i) {
     if (!argsBuf[i].splat) {
-      argsDef.push(escapeChars(argsBuf[i].name.name()));
+      argsDef.push(escapeChars(argsBuf[i].name.name));
     } else {
-      argsDef.push(`...${escapeChars(argsBuf[i].name.name())}`);
+      argsDef.push(`...${escapeChars(argsBuf[i].name.name)}`);
     }
   }
   return argsDef.join(",");
@@ -108,7 +108,7 @@ export function emitFunc(form: Form, context: Context): string {
   }
 
   if (name) {
-    return `(function ${escapeChars(name.name())}(${argsDef}){${buffer.join("; ")};})`;
+    return `(function ${escapeChars(name.name)}(${argsDef}){${buffer.join("; ")};})`;
   }
 
   return `(function(${argsDef}){${buffer.join("; ")};})`;

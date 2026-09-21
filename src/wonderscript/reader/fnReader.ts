@@ -9,7 +9,7 @@ const FIRST_SYM = Symbol.intern("%");
 
 const argNumber = (arg: Symbol): number | null => {
   if (FIRST_SYM.equals(arg)) return 1;
-  const name = arg.name();
+  const name = arg.name;
 
   const num = parseFloat(name.slice(1));
   if (!isInteger(num)) return null;
@@ -24,7 +24,7 @@ function collectArgs(body: unknown[]): Symbol[] {
   while (forms.length !== 0) {
     const form = forms.shift();
 
-    if (form instanceof Symbol && form.name().startsWith("%")) {
+    if (form instanceof Symbol && form.name.startsWith("%")) {
       args.push(form);
     } else if (isTaggedValue(form)) {
       for (let x of form) {

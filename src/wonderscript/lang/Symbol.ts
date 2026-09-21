@@ -64,11 +64,11 @@ export class Symbol<Name = string>
     return this.#meta != null;
   }
 
-  name(): Name {
+  get name(): Name {
     return this.#name;
   }
 
-  namespace(): string | Nil {
+  get namespace(): string | Nil {
     return this.#namespace;
   }
 
@@ -91,7 +91,7 @@ export class Symbol<Name = string>
   equals(other: any): boolean {
     if (!(other instanceof Symbol)) return false;
 
-    return this.#name === other.name() && this.#namespace === other.namespace();
+    return this.#name === other.name && this.#namespace === other.namespace;
   }
 
   hashCode(): number {

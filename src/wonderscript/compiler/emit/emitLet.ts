@@ -42,7 +42,7 @@ export function emitLet(form: Form, scope: Context): string {
     // TODO: should throw error for namespaced symbols
     env.define(binds[i], true);
 
-    const bind = escapeChars(binds[i].name());
+    const bind = escapeChars(binds[i].name);
     const val = emit(binds[i + 1], env);
     names.push([bind, val, env.isMutable(binds[i])]);
   }

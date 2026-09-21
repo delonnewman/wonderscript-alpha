@@ -121,7 +121,7 @@ export function emit(exp: Form, ctx: Context) {
     if (form.length === 0) {
       return EMPTY_ARRAY;
     } else if (form[0] instanceof Symbol) {
-      switch (form[0].name()) {
+      switch (form[0].name) {
         // special forms
         case DEF_SYM:
           return emitDef(form, ctx);

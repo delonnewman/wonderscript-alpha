@@ -44,12 +44,12 @@ export class Keyword<Name extends string = string>
     return this._symbol;
   }
 
-  name(): Name {
-    return this._symbol.name();
+  get name(): Name {
+    return this._symbol.name;
   }
 
-  namespace(): string | Nil {
-    return this._symbol.namespace();
+  get namespace(): string | Nil {
+    return this._symbol.namespace;
   }
 
   hasNamespace(): boolean {
@@ -90,9 +90,9 @@ export class Keyword<Name extends string = string>
 
   toJS(): string {
     if (this.hasNamespace()) {
-      return `wonderscript.lang.Keyword.intern(${JSON.stringify(this.name())}, ${JSON.stringify(this.namespace())})`;
+      return `wonderscript.lang.Keyword.intern(${JSON.stringify(this.name)}, ${JSON.stringify(this.namespace)})`;
     } else {
-      return `wonderscript.lang.Keyword.intern(${JSON.stringify(this.name())})`;
+      return `wonderscript.lang.Keyword.intern(${JSON.stringify(this.name)})`;
     }
   }
 }

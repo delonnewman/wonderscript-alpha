@@ -11,11 +11,11 @@ export function emitSlotName(slot: Form) {
     slot[0].equals(QUOTE_SYM) &&
     slot[1] instanceof Symbol
   ) {
-    slot = slot[1].name();
+    slot = slot[1].name;
   }
 
   if (slot instanceof Keyword) {
-    slot = slot.name();
+    slot = slot.name;
   }
 
   if (isString(slot)) {

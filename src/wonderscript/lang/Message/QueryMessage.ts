@@ -1,9 +1,10 @@
-import { isMessageForm, Message, Obj } from "../Message";
+import { isMessageForm, Message, Obj, RESPOND_TO_KW } from "../Message";
 import { Form } from "../../compiler/core";
 import { prStr } from "../../compiler";
 import { Context } from "../Context";
 import { emit } from "../../compiler/emit";
 import { BaseMessage } from "./BaseMessage";
+import { emitKeyword } from "../../compiler/emit/emitKeyword";
 
 export class QueryMessage extends BaseMessage {
   get query(): Message | Form {
@@ -34,6 +35,6 @@ export class QueryMessage extends BaseMessage {
       return `("${query.interned}" in ${code})`;
     }
 
-    return `wonderscript.lang.Message.send(${emit(obj, ctx)}, [${emit(query as Form, ctx)}])`;
+    return `wonderscript.lang.Message.send(${emit(obj, ctx)}, [${emitKeyword(RESPOND_TO_KW)}, ${emit(query as Form, ctx)}])`;
   }
 }

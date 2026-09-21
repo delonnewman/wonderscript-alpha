@@ -22,28 +22,28 @@ export function emitSymbol(s: Symbol, context: Context): string {
   }
 
   if (s.hasNamespace()) {
-    let ctx = context.lookup(Symbol.intern(s.namespace()));
+    let ctx = context.lookup(Symbol.intern(s.namespace));
     if (ctx == null) {
       // console.error(prStr(s), context);
       throw new CompilerError(
-        `Unknown namespace: ${prStr(s.namespace())}`,
+        `Unknown namespace: ${prStr(s.namespace)}`,
         ctx
       );
     }
 
-    let ns = ctx.get(Symbol.intern(s.namespace())) as Namespace | undefined;
-    if (ns === undefined || ns.module[escapeChars(s.name())] === undefined) {
+    let ns = ctx.get(Symbol.intern(s.namespace)) as Namespace | undefined;
+    if (ns === undefined || ns.module[escapeChars(s.name)] === undefined) {
       throw new CompilerError(
-        `Undefined variable: ${prStr(s.name())} in namespace: ${prStr(s.namespace())}`,
+        `Undefined variable: ${prStr(s.name)} in namespace: ${prStr(s.namespace)}`,
         ctx
       );
     }
 
-    return `${ns.name}.${escapeChars(s.name())}`;
+    return `${ns.name}.${escapeChars(s.name)}`;
   }
 
   let ctx = context.lookup(s);
-  let s_ = escapeChars(s.name());
+  let s_ = escapeChars(s.name);
   if (ctx !== null) {
     return s_;
   }

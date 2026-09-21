@@ -1,8 +1,8 @@
 import { Nil } from "./Nil";
 
 export interface Named<Name = string> {
-  name(): Name;
-  namespace(): string | Nil;
+  name: Name;
+  namespace: string | Nil;
   hasNamespace(): boolean;
 }
 

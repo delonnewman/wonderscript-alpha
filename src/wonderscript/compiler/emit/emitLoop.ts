@@ -30,7 +30,7 @@ export function emitLoop(form: Form[], scope: Context): string {
       throw new CompilerError("Invalid binding name", env);
     env.define(binds[i], true);
 
-    const bind = escapeChars(binds[i].name());
+    const bind = escapeChars(binds[i].name);
     names.push(bind);
   }
   buffer.push(names.join(", "));

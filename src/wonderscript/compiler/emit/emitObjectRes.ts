@@ -24,12 +24,12 @@ export function emitObjectRes(form: Form, env: Context): string {
   if (isTaggedValue(prop)) {
     const [method, ...args] = prop;
 
-    const name = escapeChars(method.name());
+    const name = escapeChars(method.name);
     return `(${emit(obj, env)}).${name}(${map((x) => emit(x, env), args).join(", ")})`;
   }
 
   if (prop instanceof Symbol) {
-    const name = prop.name();
+    const name = prop.name;
     if (name.startsWith("-")) {
       return str("(", emit(obj, env), ").", escapeChars(name.slice(1)));
     } else {

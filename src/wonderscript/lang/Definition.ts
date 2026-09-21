@@ -40,12 +40,12 @@ export class Definition implements Meta, Named, Reference {
     return this._symbol;
   }
 
-  name(): string {
-    return this._symbol.name();
+  get name(): string {
+    return this._symbol.name;
   }
 
-  namespace(): string | Nil {
-    return this._symbol.namespace();
+  get namespace(): string | Nil {
+    return this._symbol.namespace;
   }
 
   hasNamespace(): boolean {
