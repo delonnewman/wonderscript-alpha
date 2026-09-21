@@ -4,7 +4,7 @@ import { Form } from "../compiler/core";
 import { Context } from "./Context";
 import { QueryMessage } from "./Message/QueryMessage";
 import { JSPropMessage } from "./javascript/JSPropMessage";
-import { JSSetPropMessage } from "./Message/JSSetPropMessage";
+import { JSSetPropMessage } from "./javascript/JSSetPropMessage";
 import { JSMethodMessage } from "./javascript/JSMethodMessage";
 import { BaseMessage } from "./Message/BaseMessage";
 import { BoundMessage } from "./Message/BoundMessage";

@@ -1,4 +1,4 @@
-import { JSMethodMessage } from "../javascript/JSMethodMessage";
+import { JSMethodMessage } from "./JSMethodMessage";
 import { Keyword } from "../Keyword";
 import { escapeChars } from "../../compiler/utils";
 import { MessageForm, Obj } from "../Message";
