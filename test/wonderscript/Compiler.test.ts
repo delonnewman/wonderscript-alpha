@@ -3,6 +3,14 @@ import { Compiler } from "../../src/wonderscript";
 
 describe("Compiler", () => {
   const Global = {
+    Greeter: (class {
+      greet_0() {
+        return "Hello!";
+      }
+      greet_1(name: string) {
+        return `Hello ${name}!`;
+      }
+    }),
     global: {
       console: {
         log: (..._: unknown[]) => {},
@@ -21,6 +29,30 @@ describe("Compiler", () => {
       output = subject.evalString("(send js/global :js.prop/hey)");
 
       expect(output).toBe("You");
+    });
+
+    describe("primitive messages", () => {
+      const examples: [string, unknown][] = [
+        ["(1 js/type)", "number"],
+        ['("hey" js/type)', "string"],
+        ['("hey" js/equiv? "hey")', true],
+        ['("hey" js/identical? "hey")', true],
+        [
+          '(def Greeter (fn* () ((js* "this") js/set! :name "John"))) ((Greeter js/new) js.prop/name)',
+          "John",
+        ],
+        [
+          "(def Greeter (fn* ())) ((Greeter js/new) js/instance? Greeter)",
+          true,
+        ],
+      ];
+
+      examples.forEach(([form, expected]) => {
+        test(`${form} => ${expected}`, () => {
+          const output = subject.evalString(form);
+          expect(output).toBe(expected);
+        });
+      });
     });
 
     describe("method query", () => {

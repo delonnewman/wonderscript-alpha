@@ -1,4 +1,3 @@
-import { UnaryMessage } from "./Message/UnaryMessage";
 import { Context } from "./Context";
 import { Form } from "../compiler/core";
 import { emit } from "../compiler/emit";
@@ -7,35 +6,26 @@ import { MessageForm } from "./Message";
 import { Vector } from "./Vector";
 import { prStr } from "../compiler";
 import { BaseMessage } from "./Message/BaseMessage";
+import { JSTypeMessage } from "./javascript/JSTypeMessage";
+import { Keyword } from "./Keyword";
+import { Symbol } from "./Symbol";
+import { emitClassInit } from "../compiler/emit/emitClassInit";
+import { map } from "./runtime";
 
-export type PrimitiveMessage = typeof JSTypeMessage
-
-export class JSTypeMessage extends UnaryMessage {
-  static parse(msg: MessageForm) {
-    if (msg instanceof Array || msg instanceof Vector) {
-      return new JSTypeMessage('typeof', 'js', msg.slice(1));
-    }
-
-    throw new Error(`invalid message: ${prStr(msg)}`);
-  }
-
-  sendTo(obj: Record<string, unknown>): unknown {
-    return typeof obj;
-  }
-
-  toJS(ctx: Context, obj: Form): string {
-    return `typeof ${emit(obj, ctx)}`;
-  }
-}
+export * from "./javascript/JSTypeMessage"
 
 interface Constructor {
   (...args: unknown[]): void;
 }
 
 export class JSNewMessage extends BaseMessage {
+  static SIMPLE = new JSNewMessage('new', 'js');
+
   static parse(msg: MessageForm) {
     if (msg instanceof Array || msg instanceof Vector) {
-      return new JSTypeMessage("new", "js", msg.slice(1));
+      return new this("new", "js", msg.slice(1));
+    } else if (msg instanceof Symbol || msg instanceof Keyword || typeof msg === "string") {
+      return this.SIMPLE;
     }
 
     throw new Error(`invalid message: ${prStr(msg)}`);
@@ -46,14 +36,15 @@ export class JSNewMessage extends BaseMessage {
   }
 
   toJS(ctx: Context, obj: Form): string {
-    return `typeof ${emit(obj, ctx)}`;
+    const args = this.args.map((arg) => emit(arg, ctx));
+    return `new ${emit(obj, ctx)}(${args.join(", ")})`;
   }
 }
 
 export class JSEquivMessage extends BinaryMessage {
   static parse(msg: MessageForm) {
     if (msg instanceof Array || msg instanceof Vector) {
-      return new JSTypeMessage("equiv?", "js", msg.slice(1));
+      return new this("equiv?", "js", msg.slice(1));
     }
 
     throw new Error(`invalid message: ${prStr(msg)}`);
@@ -71,7 +62,7 @@ export class JSEquivMessage extends BinaryMessage {
 export class JSIdenticalMessage extends BinaryMessage {
   static parse(msg: MessageForm) {
     if (msg instanceof Array || msg instanceof Vector) {
-      return new JSTypeMessage("identical?", "js", msg.slice(1));
+      return new this("identical?", "js", msg.slice(1));
     }
 
     throw new Error(`invalid message: ${prStr(msg)}`);
@@ -89,7 +80,7 @@ export class JSIdenticalMessage extends BinaryMessage {
 export class JSInstanceOfMessage extends BinaryMessage {
   static parse(msg: MessageForm) {
     if (msg instanceof Array || msg instanceof Vector) {
-      return new JSTypeMessage("instance?", "js", msg.slice(1));
+      return new this("instance?", "js", msg.slice(1));
     }
 
     throw new Error(`invalid message: ${prStr(msg)}`);

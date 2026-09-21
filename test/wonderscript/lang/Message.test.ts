@@ -1,5 +1,5 @@
 import { expect, test, it, describe } from "bun:test";
-import { Keyword, Message } from "../../../src/wonderscript/lang";
+import { Keyword, Message, Symbol } from "../../../src/wonderscript/lang";
 import { JSPropMessage } from "../../../src/wonderscript/lang/javascript/JSPropMessage";
 import { prStr } from "../../../src/wonderscript/compiler";
 import { BaseMessage } from "../../../src/wonderscript/lang/Message/BaseMessage";
@@ -81,19 +81,26 @@ describe("Message", () => {
     });
   });
 
-  const examples = [
+  const examples: [Message, unknown, unknown][] = [
     [
       Message.build([
         Keyword.intern("prop", "js"),
         Keyword.intern("prototype"),
         Keyword.intern("toString"),
-      ]).sendTo(Object),
+      ]),
+      Object,
       Object.prototype.toString,
     ],
+    [
+      Message.build(Symbol.intern('type', 'js')),
+      1,
+      "number",
+    ]
   ];
 
-  examples.forEach(([actual, expected]) => {
-    test(`${prStr(actual)} => ${expected}`, () => {
+  examples.forEach(([msg, subject, expected]) => {
+    test(`(${prStr(subject)} ${prStr(msg)}) => ${expected}`, () => {
+      const actual = msg.sendTo(subject);
       expect(actual).toBe(expected);
     });
   });

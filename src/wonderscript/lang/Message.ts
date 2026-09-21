@@ -17,8 +17,9 @@ import {
 } from "./javascript";
 import { pt } from "../util";
 
-export type MessageForm =
-  string | Keyword | Symbol | [Keyword | Symbol, ...unknown[]] | Vector<unknown>;
+export type SimpleMessageForm = string | Keyword | Symbol;
+export type CompoundMessageForm = [Keyword | Symbol, ...unknown[]] | Vector<unknown>;
+export type MessageForm = SimpleMessageForm | CompoundMessageForm;
 
 export type Obj = {
   [key: string]: unknown;
@@ -63,7 +64,7 @@ export type ParsableMessage = {
 }
 
 const PRIMITIVE_MESSAGES = new Map<string, unknown>([
-  ["js/typeof", JSTypeMessage],
+  ["js/type", JSTypeMessage],
   ["js/equiv?", JSEquivMessage],
   ["js/identical?", JSIdenticalMessage],
   ["js/instance?", JSInstanceOfMessage],
@@ -87,7 +88,7 @@ export const Message = {
       return this.compound(msg);
     }
 
-    if (msg instanceof Keyword || typeof msg === "string") {
+    if (msg instanceof Keyword || msg instanceof Symbol || typeof msg === "string") {
       return this.simple(msg);
     }
 
@@ -96,7 +97,7 @@ export const Message = {
     );
   },
 
-  compound(msg: [Keyword | Symbol, ...unknown[]] | Vector): Message {
+  compound(msg: CompoundMessageForm): Message {
     if (msg.length === 0) {
       throw new Error(`invalid arguments expected at least 1, got 0 instead`);
     }
@@ -128,14 +129,24 @@ export const Message = {
     return new BaseMessage(name, ns, msg.slice(1));
   },
 
-  simple(msg: Keyword | Symbol | string): Message {
+  simple(msg: SimpleMessageForm): Message {
     if (msg instanceof Keyword || msg instanceof Symbol) {
-      if (msg.namespace === "js.prop") {
+      const name = msg.name;
+      const ns = msg.namespace;
+
+      const m = PRIMITIVE_MESSAGES.get(namedHash(name, ns));
+      if (m !== undefined &&
+        typeof (m as { parse: (msg: MessageForm) => Message }).parse === "function"
+      ) {
+        return (m as { parse: (msg: MessageForm) => Message }).parse(msg);
+      }
+
+      if (ns === "js.prop") {
         return new JSPropMessage("prop", "js", [msg.name]);
       }
 
-      if (msg.namespace === "js") {
-        return new JSMethodMessage(msg.name, msg.namespace);
+      if (ns === "js") {
+        return new JSMethodMessage(msg.name, ns);
       }
 
       return new BaseMessage(msg.name, msg.namespace);
