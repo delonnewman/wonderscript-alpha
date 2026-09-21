@@ -1,8 +1,5 @@
-import { BaseMessage } from "./BaseMessage";
-import { UnaryMessage } from "./UnaryMessage";
-
-export class JSPrimitiveMessage extends BaseMessage {
-}
+import { BaseMessage } from "./Message/BaseMessage";
+import { UnaryMessage } from "./Message/UnaryMessage";
 
 export class JSTypeMessage extends UnaryMessage {
   sendTo(obj: Record<string, unknown>): unknown {
