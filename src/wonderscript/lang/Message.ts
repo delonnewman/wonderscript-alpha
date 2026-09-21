@@ -8,7 +8,6 @@ import { JSSetPropMessage } from "./Message/JSSetPropMessage";
 import { JSMethodMessage } from "./Message/JSMethodMessage";
 import { BaseMessage } from "./Message/BaseMessage";
 import { BoundMessage } from "./Message/BoundMessage";
-import { pt } from "../util";
 
 export type MessageForm =
   string | Keyword | [Keyword, ...unknown[]] | Vector<unknown>;
