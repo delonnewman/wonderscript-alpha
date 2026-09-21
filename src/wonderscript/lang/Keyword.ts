@@ -89,10 +89,10 @@ export class Keyword<Name extends string = string>
   }
 
   toJS(): string {
-    if (this.hasNamespace()) {
-      return `wonderscript.lang.Keyword.intern(${JSON.stringify(this.name)}, ${JSON.stringify(this.namespace)})`;
-    } else {
+    if (this.namespace == null) {
       return `wonderscript.lang.Keyword.intern(${JSON.stringify(this.name)})`;
+    } else {
+      return `wonderscript.lang.Keyword.intern(${JSON.stringify(this.name)}, ${JSON.stringify(this.namespace)})`;
     }
   }
 }
