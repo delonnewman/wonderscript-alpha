@@ -1,5 +1,5 @@
 import { prStr } from "../compiler";
-import { Keyword, Vector, Named, Nil } from "../lang";
+import { Keyword, Vector, Named, Nil, Symbol } from "../lang";
 import { Form } from "../compiler/core";
 import { Context } from "./Context";
 import { QueryMessage } from "./Message/QueryMessage";
@@ -48,9 +48,7 @@ export function isMessageForm(form: unknown): form is MessageForm {
   );
 }
 
-export const JS_DIG_KW = Keyword.intern("prop", "js");
 export const RESPOND_TO_KW = Keyword.intern("respond-to?");
-export const JS_PROP_SET = Keyword.intern("set!", "js");
 
 export const Message = {
   send(obj: Record<string, unknown>, msg: MessageForm): unknown {
@@ -82,7 +80,7 @@ export const Message = {
 
     let name: string, ns: string | undefined;
     const tag = msg[0];
-    if (tag instanceof Keyword) {
+    if (tag instanceof Keyword || tag instanceof Symbol) {
       name = tag.name;
       ns = tag.namespace;
     } else if (typeof tag === "string") {
@@ -124,8 +122,8 @@ export const Message = {
     return new BaseMessage(name, ns, msg.slice(1));
   },
 
-  simple(msg: Keyword | string): Message {
-    if (msg instanceof Keyword) {
+  simple(msg: Keyword | Symbol | string): Message {
+    if (msg instanceof Keyword || msg instanceof Symbol) {
       if (msg.namespace === "js.prop") {
         return new JSPropMessage("prop", "js", [msg.name]);
       }
