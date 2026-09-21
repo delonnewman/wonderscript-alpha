@@ -5,15 +5,11 @@ import { Form, isTaggedValue, TaggedValue } from "../core";
 import { prStr } from "../prStr";
 import { Symbol } from "../../lang/Symbol";
 import {
-  JS_DIG_KW,
-  JS_PROP_SET,
   Keyword,
   Message,
-  RESPOND_TO_KW,
   Vector,
 } from "../../lang";
 import { CompilerError } from "../CompilerError";
-import { emitSlotName } from "./slots";
 
 export const SEND_SYM = Symbol.intern(SEND_STR);
 
