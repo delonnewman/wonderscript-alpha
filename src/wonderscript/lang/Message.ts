@@ -5,7 +5,7 @@ import { Context } from "./Context";
 import { QueryMessage } from "./Message/QueryMessage";
 import { JSPropMessage } from "./Message/JSPropMessage";
 import { JSSetPropMessage } from "./Message/JSSetPropMessage";
-import { JSMethodMessage } from "./Message/JSMethodMessage";
+import { JSMethodMessage } from "./javascript/JSMethodMessage";
 import { BaseMessage } from "./Message/BaseMessage";
 import { BoundMessage } from "./Message/BoundMessage";
 import {
