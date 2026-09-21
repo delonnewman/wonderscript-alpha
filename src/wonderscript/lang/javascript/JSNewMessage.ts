@@ -4,15 +4,15 @@ import { prStr } from "../../compiler/prStr";
 import { Context } from "../Context";
 import { Form } from "../../compiler/core";
 import { emit } from "../../compiler/emit";
-import { BaseMessage } from "../Message/BaseMessage";
 import { Keyword } from "../Keyword";
 import { Symbol } from "../Symbol";
+import { JSMethodMessage } from "./JSMethodMessage";
 
 interface Constructor {
   (...args: unknown[]): void;
 }
 
-export class JSNewMessage extends BaseMessage {
+export class JSNewMessage extends JSMethodMessage {
   static SIMPLE = new JSNewMessage("new", "js");
 
   static parse(msg: MessageForm) {

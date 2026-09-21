@@ -2,7 +2,7 @@ import { expect, test, it, describe } from "bun:test";
 import { Keyword, Message, Symbol } from "../../../src/wonderscript/lang";
 import { JSPropMessage } from "../../../src/wonderscript/lang/javascript/JSPropMessage";
 import { prStr } from "../../../src/wonderscript/compiler";
-import { BaseMessage } from "../../../src/wonderscript/lang/Message/BaseMessage";
+import { ArgListMessage } from "../../../src/wonderscript/lang/Message/ArgListMessage";
 
 declare global {
   interface Object {
@@ -18,22 +18,22 @@ var Object: Object = globalThis.Object;
 
 describe("Message", () => {
   it("has a name", () => {
-    const msg = new BaseMessage("to_s");
+    const msg = new ArgListMessage("to_s");
     expect(msg.name).toBe("to_s");
   });
 
   it("may have a namespace", () => {
-    const msg = new BaseMessage("toString", "js");
+    const msg = new ArgListMessage("toString", "js");
     expect(msg.namespace).toBe("js");
   });
 
   it("has args", () => {
-    const msg = new BaseMessage("+", undefined, [1]);
+    const msg = new ArgListMessage("+", undefined, [1]);
     expect(msg.args).toEqual([1]);
   });
 
   it("interns it's name and arity", () => {
-    const msg = new BaseMessage("add", undefined, [1]);
+    const msg = new ArgListMessage("add", undefined, [1]);
     expect(msg.interned).toBe("add_1");
   });
 

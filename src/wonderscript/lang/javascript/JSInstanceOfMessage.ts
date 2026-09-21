@@ -9,7 +9,7 @@ import { emit } from "../../compiler/emit";
 export class JSInstanceOfMessage extends BinaryMessage {
   static parse(msg: MessageForm) {
     if (msg instanceof Array || msg instanceof Vector) {
-      return new this("instance?", "js", msg.slice(1));
+      return new this("instance?", "js", msg[1]);
     }
 
     throw new Error(`invalid message: ${prStr(msg)}`);

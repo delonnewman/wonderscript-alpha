@@ -9,10 +9,14 @@ import { emit } from "../../compiler/emit";
 export class JSIdenticalMessage extends BinaryMessage {
   static parse(msg: MessageForm) {
     if (msg instanceof Array || msg instanceof Vector) {
-      return new this("identical?", "js", msg.slice(1));
+      return new this("identical?", "js", msg[1]);
     }
 
     throw new Error(`invalid message: ${prStr(msg)}`);
+  }
+
+  get ident() {
+    return this.name;
   }
 
   sendTo(obj: Record<string, unknown>): unknown {

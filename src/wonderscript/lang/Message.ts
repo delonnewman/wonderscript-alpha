@@ -15,19 +15,25 @@ import {
   JSMethodMessage,
   JSSetPropMessage
 } from "./javascript";
+import { UnaryMessage } from "./Message/UnaryMessage";
+import { ArgListMessage } from "./Message/ArgListMessage";
 
 export type SimpleMessageForm = string | Keyword | Symbol;
 export type CompoundMessageForm = [Keyword | Symbol, ...unknown[]] | Vector<unknown>;
 export type MessageForm = SimpleMessageForm | CompoundMessageForm;
+
+export const EMPTY_ARRAY = Object.freeze([]);
+export const EMPTY_OBJ = Object.freeze({});
 
 export type Obj = {
   [key: string]: unknown;
 };
 
 export type MessageArgs = unknown[] | readonly unknown[] | Vector;
+export type MessageFlags = Partial<{ withinQuery: boolean }>;
 
 export interface Envelope {
-  sendTo(obj: Obj): unknown;
+  sendTo(obj: unknown): unknown;
 }
 
 export interface CompilableMessage {
@@ -43,7 +49,6 @@ export interface Message extends Named, Envelope, CompilableMessage {
 
   withinQuery(): Message;
   isWithinQuery(): boolean;
-  hasSplatArgs(): boolean;
   bind(obj: Obj): BoundMessage;
 }
 
@@ -125,7 +130,7 @@ export const Message = {
       return new JSMethodMessage(name, ns, msg.slice(1));
     }
 
-    return new BaseMessage(name, ns, msg.slice(1));
+    return new ArgListMessage(name, ns, msg.slice(1));
   },
 
   simple(msg: SimpleMessageForm): Message {
@@ -148,11 +153,11 @@ export const Message = {
         return new JSMethodMessage(msg.name, ns);
       }
 
-      return new BaseMessage(msg.name, msg.namespace);
+      return new UnaryMessage(msg.name, msg.namespace);
     }
 
     if (typeof msg === "string") {
-      return new BaseMessage(msg);
+      return new UnaryMessage(msg);
     }
 
     throw new Error(
@@ -160,3 +165,12 @@ export const Message = {
     );
   },
 };
+
+// @ts-ignore
+Message.send_2 = Message.send;
+
+// @ts-ignore
+Message._DASH__GT_js_2 = Message.toJS;
+
+// @ts-ignore
+Message.build_1 = Message.build;

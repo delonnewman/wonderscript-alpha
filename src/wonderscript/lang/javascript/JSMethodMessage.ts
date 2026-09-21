@@ -1,6 +1,6 @@
-import { BaseMessage } from "../Message/BaseMessage";
+import { ArgListMessage } from "../Message/ArgListMessage";
 
-export class JSMethodMessage extends BaseMessage {
+export class JSMethodMessage extends ArgListMessage {
   get ident(): string {
     return this.name;
   }

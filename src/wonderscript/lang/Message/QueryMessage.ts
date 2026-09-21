@@ -12,11 +12,12 @@ import { emit } from "../../compiler/emit";
 import { BaseMessage } from "./BaseMessage";
 import { emitKeyword } from "../../compiler/emit/emitKeyword";
 import { Vector } from "../Vector";
+import { BinaryMessage } from "./BinaryMessage";
 
-export class QueryMessage extends BaseMessage {
+export class QueryMessage extends BinaryMessage {
   static parse(msg: MessageForm) {
     if (msg instanceof Array || msg instanceof Vector) {
-      return new QueryMessage('respond-to?', undefined, msg.slice(1));
+      return new QueryMessage('respond-to?', undefined, msg[1]);
     }
 
     throw new Error(`invalid message form: ${prStr(msg)}`);

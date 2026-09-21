@@ -43,7 +43,7 @@ export class JSSetPropMessage extends JSMethodMessage {
     if (typeof key === "string") {
       return `${emit(obj, ctx)}.${this.key}=${emit(this.value as Form, ctx)}`;
     } else {
-      return `wonderscript.lang.Message.send(${emit(obj, ctx)}, [${this.keyword().toJS()}, ${emit(key as Form, ctx)}, ${emit(this.value as Form, ctx)}])`;
+      return `wonderscript.lang.Message.send(${emit(obj, ctx)}, [${this.toKeyword().toJS()}, ${emit(key as Form, ctx)}, ${emit(this.value as Form, ctx)}])`;
     }
   }
 }

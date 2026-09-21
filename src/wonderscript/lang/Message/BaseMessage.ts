@@ -1,20 +1,33 @@
-import { Message, MessageArgs, MessageForm, Obj } from "../Message";
+import {
+  Message,
+  MessageArgs,
+  MessageFlags,
+  MessageForm,
+  Obj,
+} from "../Message";
 import { escapeChars } from "../../compiler/utils";
 import { Keyword } from "../Keyword";
+import { Symbol } from "../Symbol";
 import { prStr } from "../../compiler";
 import { Vector } from "../Vector";
 import { BoundMessage } from "./BoundMessage";
 import { Context } from "../Context";
 import { Form } from "../../compiler/core";
-import { emit } from "../../compiler/emit";
 
-const EMPTY_ARRAY = Object.freeze([]);
+const EMPTY_OBJ = Object.freeze({});
 
-export class BaseMessage implements Message {
+interface MessageConstructor {
+  (
+    name: string,
+    namespace?: string,
+    flags?: { withinQuery?: boolean }
+  ): void;
+  parse(msg: MessageForm): Message;
+}
+
+export abstract class BaseMessage implements Message {
   #name: string;
   #namespace?: string;
-  #args: MessageArgs;
-  #ident: string;
   #withinQuery: boolean;
 
   static parse(msg: MessageForm): Message {
@@ -24,15 +37,15 @@ export class BaseMessage implements Message {
   constructor(
     name: string,
     namespace?: string,
-    args: MessageArgs = EMPTY_ARRAY,
-    flags: { withinQuery?: boolean } = {}
+    flags: MessageFlags = EMPTY_OBJ
   ) {
     this.#name = name;
     this.#namespace = namespace;
-    this.#args = Array.from(args);
     this.#withinQuery = flags?.withinQuery ?? false;
-    Object.freeze(this);
   }
+
+  abstract get args(): MessageArgs;
+  abstract get arity(): number;
 
   get name() {
     return this.#name;
@@ -43,19 +56,11 @@ export class BaseMessage implements Message {
   }
 
   get ident(): string {
-    return this.#ident = `${this.name}_${this.arity}`;
+    return `${this.name}_${this.arity}`;
   }
 
   get interned(): string {
     return escapeChars(this.ident);
-  }
-
-  get arity(): number {
-    return this.#args.length;
-  }
-
-  get args() {
-    return this.#args;
   }
 
   isWithinQuery(): boolean {
@@ -67,57 +72,37 @@ export class BaseMessage implements Message {
       return this;
     }
 
-    return new (this.constructor as typeof BaseMessage)(
+    return new (this.constructor as MessageConstructor)(
       this.name,
       this.namespace,
-      this.args,
       {
         withinQuery: true,
       }
     );
   }
 
-  keyword() {
+  toKeyword() {
     return Keyword.intern(this.name, this.namespace);
+  }
+
+  toSymbol() {
+    return Symbol.intern(this.name, this.namespace);
   }
 
   toString() {
     if (this.args.length === 0) {
-      return prStr(Keyword.intern(this.name, this.namespace));
+      return prStr(this.toKeyword());
     }
 
     return prStr(
-      new Vector(Keyword.intern(this.name, this.namespace), ...this.args)
+      new Vector(this.toKeyword(), ...this.args)
     );
-  }
-
-  withArgs(args: unknown[]) {
-    return new (this.constructor as typeof BaseMessage)(
-      this.name,
-      this.namespace,
-      args
-    );
-  }
-
-  hasSplatArgs() {
-    return this.arity < 0;
   }
 
   bind(obj: Obj): BoundMessage {
     return new BoundMessage(this, obj);
   }
 
-  sendTo(obj: Obj): unknown {
-    const fn = obj[this.interned];
-    if (typeof fn === "function") {
-      return fn.apply(obj, this.args);
-    }
-
-    throw new Error(`unknown message ${this}`);
-  }
-
-  toJS(ctx: Context, obj: Form): string {
-    const args = this.args.map((it) => emit(it, ctx));
-    return `${emit(obj, ctx)}.${this.interned}(${args.join(", ")})`;
-  }
+  abstract toJS(ctx: Context, obj: Form): string;
+  abstract sendTo(obj: Obj): unknown;
 }

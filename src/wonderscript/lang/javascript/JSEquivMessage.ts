@@ -9,10 +9,14 @@ import { emit } from "../../compiler/emit";
 export class JSEquivMessage extends BinaryMessage {
   static parse(msg: MessageForm) {
     if (msg instanceof Array || msg instanceof Vector) {
-      return new this("equiv?", "js", msg.slice(1));
+      return new this("equiv?", "js", msg[1]);
     }
 
     throw new Error(`invalid message: ${prStr(msg)}`);
+  }
+
+  get ident() {
+    return this.name;
   }
 
   sendTo(obj: Record<string, unknown>): unknown {

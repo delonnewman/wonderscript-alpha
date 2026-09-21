@@ -6,10 +6,10 @@ import { Context } from "../Context";
 import { Form } from "../../compiler/core";
 import { emitSlotName } from "../../compiler/emit/slots";
 import { emit } from "../../compiler/emit";
-import { BaseMessage } from "../Message/BaseMessage";
 import { Vector } from "../Vector";
+import { JSMethodMessage } from "./JSMethodMessage";
 
-export class JSPropMessage extends BaseMessage {
+export class JSPropMessage extends JSMethodMessage {
   static parse(msg: MessageForm): JSPropMessage {
     if (msg instanceof Array || msg instanceof Vector) {
       return new this('prop', 'js', msg.slice(1))
