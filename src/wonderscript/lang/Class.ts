@@ -1,10 +1,15 @@
-import { Named } from "./Named";
+import { Named, namespace, name } from "./Named";
 import { Nil } from "./Nil";
+import { Keyword } from "./Keyword";
+import { Symbol } from "./Symbol";
+import { Message } from "./Message";
 
 export class Class implements Named {
   #name: string;
   #namespace: string | Nil;
   #methods: Record<string, unknown>;
+  #messages: Message[];
+  #subclasses: Class[];
 
   constructor(name: string, namespace: string | Nil) {
     this.#name = name;
@@ -23,27 +28,38 @@ export class Class implements Named {
     return this.#namespace != null;
   }
 
-  defineMethod(name: string, method: unknown) {
-    this.#methods[name] = method;
-  }
-
-  get methods(): Record<string, unknown> {
-    return this.#methods;
-  }
-
-  methodNames(): string[] {
-    return Object.keys(this.#methods);
+  defineMethod(msg: Message, method: unknown) {
+    this.#messages.push(msg);
+    this.#methods[msg.interned] = method;
   }
 
   hasMethod(name: string): boolean {
     return this.#methods[name] !== undefined;
   }
 
-  method(name: string): unknown {
+  findMethod(name: string): unknown {
     const method = this.#methods[name];
     if (method !== undefined) return method;
 
     throw new Error(`unknown method ${name}`);
+  }
+
+  get subclasses() {
+    return Array.from(this.#subclasses);
+  }
+
+  subclass(subclassName: string | Keyword | Symbol) {
+    const ns = namespace(subclassName);
+    const nm = name(subclassName);
+
+    const subclass = new Class(nm, ns);
+    this.#subclasses.push(subclass);
+
+    return subclass;
+  }
+
+  get messages(): Message[] {
+    return Array.from(this.#messages);
   }
 }
 
@@ -62,10 +78,16 @@ Class.prototype.namespace_QEST_0 = Class.prototype.hasNamespace;
 Class.prototype.define_DASH_method_2 = Class.prototype.defineMethod;
 
 // @ts-ignore
-Class.prototype.method_1 = Class.prototype.method;
+Class.prototype.find_DASH_method_1 = Class.prototype.findMethod;
 
 // @ts-ignore
 Class.prototype.method_QEST_1 = Class.prototype.hasMethod;
 
 // @ts-ignore
-Class.prototype.method_DASH_names = Class.prototype.methodNames;
+Class.prototype.messages_0 = Class.prototype.messages;
+
+// @ts-ignore
+Class.prototype.subclasses_0 = Class.prototype.subclasses;
+
+// @ts-ignore
+Class.prototype.subclass_1 = Class.prototype.subclass;
