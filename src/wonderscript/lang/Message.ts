@@ -1,5 +1,5 @@
 import { prStr } from "../compiler";
-import { Keyword, Vector } from "../lang";
+import { Keyword, Vector, Named, Nil } from "../lang";
 import { Form } from "../compiler/core";
 import { Context } from "./Context";
 import { QueryMessage } from "./Message/QueryMessage";
@@ -27,9 +27,9 @@ export interface CompilableMessage {
   toJS(ctx: Context, obj: Form): string;
 }
 
-export interface Message extends Envelope, CompilableMessage {
+export interface Message extends Named, Envelope, CompilableMessage {
   readonly name: string;
-  readonly namespace?: string;
+  readonly namespace: string | Nil;
   readonly args: MessageArgs;
   readonly interned: string;
   readonly arity: number;
