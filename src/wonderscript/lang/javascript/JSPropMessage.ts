@@ -6,7 +6,7 @@ import { Context } from "../Context";
 import { Form } from "../../compiler/core";
 import { emitSlotName } from "../../compiler/emit/slots";
 import { emit } from "../../compiler/emit";
-import { BaseMessage } from "./BaseMessage";
+import { BaseMessage } from "../Message/BaseMessage";
 import { Vector } from "../Vector";
 
 export class JSPropMessage extends BaseMessage {

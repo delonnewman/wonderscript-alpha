@@ -1,6 +1,6 @@
 import { expect, test, it, describe } from "bun:test";
 import { Keyword, Message } from "../../../src/wonderscript/lang";
-import { JSPropMessage } from "../../../src/wonderscript/lang/Message/JSPropMessage";
+import { JSPropMessage } from "../../../src/wonderscript/lang/javascript/JSPropMessage";
 import { prStr } from "../../../src/wonderscript/compiler";
 import { BaseMessage } from "../../../src/wonderscript/lang/Message/BaseMessage";
 

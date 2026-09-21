@@ -3,7 +3,7 @@ import { Keyword, Vector, Named, Nil, Symbol, namedHash } from "../lang";
 import { Form } from "../compiler/core";
 import { Context } from "./Context";
 import { QueryMessage } from "./Message/QueryMessage";
-import { JSPropMessage } from "./Message/JSPropMessage";
+import { JSPropMessage } from "./javascript/JSPropMessage";
 import { JSSetPropMessage } from "./Message/JSSetPropMessage";
 import { JSMethodMessage } from "./javascript/JSMethodMessage";
 import { BaseMessage } from "./Message/BaseMessage";
