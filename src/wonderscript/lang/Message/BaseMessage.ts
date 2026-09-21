@@ -7,7 +7,6 @@ import { BoundMessage } from "./BoundMessage";
 import { Context } from "../Context";
 import { Form } from "../../compiler/core";
 import { emit } from "../../compiler/emit";
-import { pt } from "../../util";
 
 const EMPTY_ARRAY = Object.freeze([]);
 
