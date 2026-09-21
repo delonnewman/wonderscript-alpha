@@ -14,6 +14,8 @@ dist/wonderscript/core.ws.js: dist/wonderscript
 dist/wonderscript/core.ws.min.js: dist/wonderscript/core.ws.js
 	$(UGLIFY) dist/wonderscript/core.ws.js > dist/wonderscript/core.ws.min.js
 
+core: dist/wonderscript.js
+
 dist/wonderscript.js:
 	$(ROLLUP) -c
 
@@ -45,4 +47,4 @@ prettier:
 tools:
 	brew bundle check || brew bundle install
 
-.PHONY: all clean deps test[unit] test[spec] test prettier tools
+.PHONY: all clean deps test[unit] test[spec] test prettier tools core
