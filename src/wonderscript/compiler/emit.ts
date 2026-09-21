@@ -98,6 +98,7 @@ import { emitVector } from "./emit/emitVector";
 import { emitIf } from "./emit/emitIf";
 import { emitSend } from "./emit/emitSend";
 import { CompilerError } from "./CompilerError";
+import { emitInternedSend } from "./emit/emitInternedSend";
 
 export function emit(exp: Form, ctx: Context) {
   const form = macroexpand(exp, ctx);
@@ -204,10 +205,12 @@ export function emit(exp: Form, ctx: Context) {
         case ALENGTH_SYM:
           return emitArrayLength(form, ctx);
         default:
-          return emitFuncApplication(form, ctx);
+          // return emitFuncApplication(form, ctx);
+          return emitInternedSend(form, ctx);
       }
     } else {
-      return emitFuncApplication(form, ctx);
+      // return emitFuncApplication(form, ctx);
+      return emitInternedSend(form, ctx);
     }
   } else if (form instanceof Vector) {
     return emitVector(form, ctx);
