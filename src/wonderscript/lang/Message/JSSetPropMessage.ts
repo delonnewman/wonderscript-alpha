@@ -1,12 +1,22 @@
 import { JSMethodMessage } from "./JSMethodMessage";
 import { Keyword } from "../Keyword";
 import { escapeChars } from "../../compiler/utils";
-import { Obj } from "../Message";
+import { MessageForm, Obj } from "../Message";
 import { Context } from "../Context";
 import { Form } from "../../compiler/core";
 import { emit } from "../../compiler/emit";
+import { Vector } from "../Vector";
+import { prStr } from "../../compiler";
 
 export class JSSetPropMessage extends JSMethodMessage {
+  static parse(msg: MessageForm) {
+    if (msg instanceof Array || msg instanceof Vector) {
+      return new JSSetPropMessage('set!', 'js', msg.slice(1));
+    }
+
+    throw new Error(`invalid message form: ${prStr(msg)}`);
+  }
+
   get key(): unknown {
     const key = this.args[0];
 

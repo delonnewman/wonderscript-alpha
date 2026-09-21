@@ -1,4 +1,4 @@
-import { Message, MessageArgs, Obj } from "../Message";
+import { Message, MessageArgs, MessageForm, Obj } from "../Message";
 import { escapeChars } from "../../compiler/utils";
 import { Keyword } from "../Keyword";
 import { prStr } from "../../compiler";
@@ -17,6 +17,10 @@ export class BaseMessage implements Message {
   #ident: string;
   #withinQuery: boolean;
 
+  static parse(msg: MessageForm): Message {
+    throw new Error("Not implemented");
+  }
+
   constructor(
     name: string,
     namespace?: string,
@@ -26,7 +30,6 @@ export class BaseMessage implements Message {
     this.#name = name;
     this.#namespace = namespace;
     this.#args = Array.from(args);
-    this.#ident = namespace === "js" ? name : `${name}_${args.length}`;
     this.#withinQuery = flags?.withinQuery ?? false;
     Object.freeze(this);
   }
@@ -40,7 +43,7 @@ export class BaseMessage implements Message {
   }
 
   get ident(): string {
-    return this.#ident;
+    return this.#ident = `${this.name}_${this.arity}`;
   }
 
   get interned(): string {

@@ -1,12 +1,27 @@
-import { isMessageForm, Message, Obj, RESPOND_TO_KW } from "../Message";
+import {
+  isMessageForm,
+  Message,
+  MessageForm,
+  Obj,
+  RESPOND_TO_KW,
+} from "../Message";
 import { Form } from "../../compiler/core";
 import { prStr } from "../../compiler";
 import { Context } from "../Context";
 import { emit } from "../../compiler/emit";
 import { BaseMessage } from "./BaseMessage";
 import { emitKeyword } from "../../compiler/emit/emitKeyword";
+import { Vector } from "../Vector";
 
 export class QueryMessage extends BaseMessage {
+  static parse(msg: MessageForm) {
+    if (msg instanceof Array || msg instanceof Vector) {
+      return new QueryMessage('respond-to?', undefined, msg.slice(1));
+    }
+
+    throw new Error(`invalid message form: ${prStr(msg)}`);
+  }
+
   get query(): Message | Form {
     if (isMessageForm(this.args[0])) {
       return Message.build(this.args[0]).withinQuery();

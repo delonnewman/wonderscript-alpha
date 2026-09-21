@@ -1,4 +1,4 @@
-import { MessageArgs, Obj } from "../Message";
+import { MessageArgs, MessageForm, Obj } from "../Message";
 import { Keyword } from "../Keyword";
 import { escapeChars } from "../../compiler/utils";
 import { prStr } from "../../compiler";
@@ -7,8 +7,17 @@ import { Form } from "../../compiler/core";
 import { emitSlotName } from "../../compiler/emit/slots";
 import { emit } from "../../compiler/emit";
 import { BaseMessage } from "./BaseMessage";
+import { Vector } from "../Vector";
 
 export class JSPropMessage extends BaseMessage {
+  static parse(msg: MessageForm): JSPropMessage {
+    if (msg instanceof Array || msg instanceof Vector) {
+      return new this('prop', 'js', msg.slice(1))
+    }
+
+    throw new Error(`invalid message form: ${prStr(msg)}`);
+  }
+
   get interned() {
     const args = super.args;
     const last = args[args.length - 1];

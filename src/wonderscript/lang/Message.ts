@@ -1,5 +1,5 @@
 import { prStr } from "../compiler";
-import { Keyword, Vector, Named, Nil, Symbol } from "../lang";
+import { Keyword, Vector, Named, Nil, Symbol, namedHash } from "../lang";
 import { Form } from "../compiler/core";
 import { Context } from "./Context";
 import { QueryMessage } from "./Message/QueryMessage";
@@ -8,9 +8,17 @@ import { JSSetPropMessage } from "./Message/JSSetPropMessage";
 import { JSMethodMessage } from "./Message/JSMethodMessage";
 import { BaseMessage } from "./Message/BaseMessage";
 import { BoundMessage } from "./Message/BoundMessage";
+import {
+  JSEquivMessage,
+  JSIdenticalMessage,
+  JSInstanceOfMessage,
+  JSNewMessage,
+  JSTypeMessage,
+} from "./javascript";
+import { pt } from "../util";
 
 export type MessageForm =
-  string | Keyword | [Keyword, ...unknown[]] | Vector<unknown>;
+  string | Keyword | Symbol | [Keyword | Symbol, ...unknown[]] | Vector<unknown>;
 
 export type Obj = {
   [key: string]: unknown;
@@ -50,6 +58,21 @@ export function isMessageForm(form: unknown): form is MessageForm {
 
 export const RESPOND_TO_KW = Keyword.intern("respond-to?");
 
+export type ParsableMessage = {
+  parse(msg: MessageForm): Message
+}
+
+const PRIMITIVE_MESSAGES = new Map<string, unknown>([
+  ["js/typeof", JSTypeMessage],
+  ["js/equiv?", JSEquivMessage],
+  ["js/identical?", JSIdenticalMessage],
+  ["js/instance?", JSInstanceOfMessage],
+  ["js/set!", JSSetPropMessage],
+  ["js/prop", JSPropMessage],
+  ["js/new", JSNewMessage],
+  ["respond-to?", QueryMessage],
+]);
+
 export const Message = {
   send(obj: Record<string, unknown>, msg: MessageForm): unknown {
     return this.build(msg).sendTo(obj);
@@ -73,7 +96,7 @@ export const Message = {
     );
   },
 
-  compound(msg: unknown[] | Vector): Message {
+  compound(msg: [Keyword | Symbol, ...unknown[]] | Vector): Message {
     if (msg.length === 0) {
       throw new Error(`invalid arguments expected at least 1, got 0 instead`);
     }
@@ -81,41 +104,24 @@ export const Message = {
     let name: string, ns: string | undefined;
     const tag = msg[0];
     if (tag instanceof Keyword || tag instanceof Symbol) {
-      name = tag.name;
-      ns = tag.namespace;
+      name = tag.name
+      ns = tag.namespace
     } else if (typeof tag === "string") {
-      name = tag;
+      name = tag
     } else {
       throw new Error(
         `invalid tag expected keyword or string, got ${prStr(tag)} instead`
       );
     }
 
-    if (name === "respond-to?") {
-      return new QueryMessage(name, ns, msg.slice(1));
+    const m = PRIMITIVE_MESSAGES.get(namedHash(name, ns));
+    if (m !== undefined &&
+      typeof (m as { parse: (msg: MessageForm) => Message }).parse === "function"
+    ) {
+      return (m as { parse: (msg: MessageForm) => Message }).parse(msg);
     }
 
-    if (ns === "js") {
-      if (name === "prop") {
-        if (msg.length < 2) {
-          throw new Error(
-            `invalid arguments expected at least 2, got ${msg.length} instead`
-          );
-        }
-
-        return new JSPropMessage(name, ns, msg.slice(1));
-      }
-
-      if (name === "set!") {
-        if (msg.length < 2) {
-          throw new Error(
-            `invalid arguments expected at least 2, got ${msg.length} instead`
-          );
-        }
-
-        return new JSSetPropMessage(name, ns, msg.slice(1));
-      }
-
+    if (ns == 'js') {
       return new JSMethodMessage(name, ns, msg.slice(1));
     }
 
