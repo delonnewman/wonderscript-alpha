@@ -3,10 +3,10 @@ import { escapeChars } from "./utils";
 import { CORE_NS, CURRENT_NS } from "./vars";
 import { Symbol } from "../lang/Symbol";
 import { MetaData } from "../lang/Meta";
-import { Namespace } from "../lang";
+import { hasNamespace, Namespace } from "../lang";
 
 export function findDefinitionMetaData(s: Symbol, env?: Context): MetaData {
-  if (s.hasNamespace() && env) {
+  if (hasNamespace(s) && env) {
     const scope = env.lookup(Symbol.intern(s.namespace));
     if (scope === null) return null;
 
