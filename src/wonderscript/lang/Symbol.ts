@@ -9,7 +9,7 @@ import { stringHash } from "./utils";
 
 const SLASH = "/";
 
-export class Symbol<Name = string>
+export class Symbol<Name extends string = string>
   implements Named<Name>, Meta, Invokable, Comparable, Value
 {
   readonly #name: Name;
@@ -29,7 +29,7 @@ export class Symbol<Name = string>
     return this.intern(name, ns);
   }
 
-  static intern<Name = string>(
+  static intern<Name extends string = string>(
     name: Name,
     namespace?: string,
     meta?: MetaData
