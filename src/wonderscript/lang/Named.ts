@@ -3,7 +3,6 @@ import { Nil } from "./Nil";
 export interface Named<Name extends string = string> {
   name: Name;
   namespace: string | Nil;
-  hasNamespace(): boolean; // TODO: remove
 }
 
 export function namedHash<Name extends string = string>(
