@@ -3,14 +3,6 @@ import { Compiler } from "../../src/wonderscript";
 
 describe("Compiler", () => {
   const Global = {
-    Greeter: (class {
-      greet_0() {
-        return "Hello!";
-      }
-      greet_1(name: string) {
-        return `Hello ${name}!`;
-      }
-    }),
     global: {
       console: {
         log: (..._: unknown[]) => {},

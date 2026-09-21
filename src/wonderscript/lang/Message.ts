@@ -3,9 +3,6 @@ import { Keyword, Vector, Named, Nil, Symbol, namedHash } from "../lang";
 import { Form } from "../compiler/core";
 import { Context } from "./Context";
 import { QueryMessage } from "./Message/QueryMessage";
-import { JSPropMessage } from "./javascript/JSPropMessage";
-import { JSSetPropMessage } from "./javascript/JSSetPropMessage";
-import { JSMethodMessage } from "./javascript/JSMethodMessage";
 import { BaseMessage } from "./Message/BaseMessage";
 import { BoundMessage } from "./Message/BoundMessage";
 import {
@@ -14,8 +11,10 @@ import {
   JSInstanceOfMessage,
   JSNewMessage,
   JSTypeMessage,
+  JSPropMessage,
+  JSMethodMessage,
+  JSSetPropMessage
 } from "./javascript";
-import { pt } from "../util";
 
 export type SimpleMessageForm = string | Keyword | Symbol;
 export type CompoundMessageForm = [Keyword | Symbol, ...unknown[]] | Vector<unknown>;
