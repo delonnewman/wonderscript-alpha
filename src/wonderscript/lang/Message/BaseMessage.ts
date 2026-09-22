@@ -44,7 +44,7 @@ export abstract class BaseMessage implements Message {
     this.#withinQuery = flags?.withinQuery ?? false;
   }
 
-  abstract get args(): MessageArgs;
+  abstract get args(): unknown;
   abstract get arity(): number;
 
   get name() {
@@ -87,16 +87,6 @@ export abstract class BaseMessage implements Message {
 
   toSymbol() {
     return Symbol.intern(this.name, this.namespace);
-  }
-
-  toString() {
-    if (this.args.length === 0) {
-      return prStr(this.toKeyword());
-    }
-
-    return prStr(
-      new Vector(this.toKeyword(), ...this.args)
-    );
   }
 
   bind(obj: Obj): BoundMessage {

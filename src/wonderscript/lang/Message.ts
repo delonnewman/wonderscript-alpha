@@ -3,7 +3,6 @@ import { Keyword, Vector, Named, Nil, Symbol, namedHash } from "../lang";
 import { Form } from "../compiler/core";
 import { Context } from "./Context";
 import { QueryMessage } from "./Message/QueryMessage";
-import { BaseMessage } from "./Message/BaseMessage";
 import { BoundMessage } from "./Message/BoundMessage";
 import {
   JSEquivMessage,
@@ -43,7 +42,7 @@ export interface CompilableMessage {
 export interface Message extends Named, Envelope, CompilableMessage {
   readonly name: string;
   readonly namespace: string | Nil;
-  readonly args: MessageArgs;
+  readonly args: unknown;
   readonly interned: string;
   readonly arity: number;
 

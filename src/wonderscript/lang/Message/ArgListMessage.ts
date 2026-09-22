@@ -8,6 +8,9 @@ import {
 import { Context } from "../Context";
 import { Form } from "../../compiler/core";
 import { emit } from "../../compiler/emit";
+import { BoundMessage } from "./BoundMessage";
+import { prStr } from "../../compiler";
+import { Vector } from "../Vector";
 
 const EMPTY_ARRAY = Object.freeze([]);
 const EMPTY_OBJ = Object.freeze({});
@@ -52,6 +55,14 @@ export class ArgListMessage extends BaseMessage {
         withinQuery: true,
       }
     );
+  }
+
+  toString() {
+    if (this.args.length === 0) {
+      return prStr(this.toKeyword());
+    }
+
+    return prStr(new Vector(this.toKeyword(), ...this.args));
   }
 
   sendTo(obj: unknown): unknown {
