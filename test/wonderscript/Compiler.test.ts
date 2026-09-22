@@ -1,5 +1,6 @@
 import { expect, test, describe } from "bun:test";
 import { Compiler } from "../../src/wonderscript";
+import { prStr } from "../../src/wonderscript/compiler";
 
 describe("Compiler", () => {
   const Global = {
@@ -13,14 +14,19 @@ describe("Compiler", () => {
   const subject = new Compiler("node", "node", Global);
 
   describe("send", () => {
-    test("property access", () => {
-      let output = subject.evalString("(send js/global :js.prop/hey)");
-      expect(output).toBeUndefined();
+    describe("property access", () => {
+      const examples: [string, unknown][] = [
+        ["(js/global js/set! :a 1) (js/global js/prop :a)", 1],
+        ["(js/global js/set! :b 2) (js/global js.prop/b)", 2],
+        ["((js/global js/prop :console :log) js/type)", "function"],
+      ];
 
-      subject.evalString('(send js/global [:js/set! :hey "You"])');
-      output = subject.evalString("(send js/global :js.prop/hey)");
-
-      expect(output).toBe("You");
+      examples.forEach(([form, expected]) => {
+        test(`${form} => ${prStr(expected)}`, () => {
+          const output = subject.evalString(form);
+          expect(output).toBe(expected);
+        });
+      });
     });
 
     describe("primitive messages", () => {
