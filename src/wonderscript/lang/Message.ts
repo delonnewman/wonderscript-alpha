@@ -14,7 +14,6 @@ import {
   JSMethodMessage,
   JSSetPropMessage
 } from "./javascript";
-import { UnaryMessage } from "./Message/UnaryMessage";
 import { ArgListMessage } from "./Message/ArgListMessage";
 
 export type SimpleMessageForm = string | Keyword | Symbol;
@@ -152,11 +151,11 @@ export const Message = {
         return new JSMethodMessage(msg.name, ns);
       }
 
-      return new UnaryMessage(msg.name, msg.namespace);
+      return new ArgListMessage(msg.name, msg.namespace);
     }
 
     if (typeof msg === "string") {
-      return new UnaryMessage(msg);
+      return new ArgListMessage(msg);
     }
 
     throw new Error(

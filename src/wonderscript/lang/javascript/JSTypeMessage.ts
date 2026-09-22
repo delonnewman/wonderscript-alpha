@@ -1,10 +1,10 @@
 import { MessageForm } from "../Message";
 import { Context } from "../Context";
 import { Form } from "../../compiler/core";
-import { UnaryMessage } from "../Message/UnaryMessage";
 import { emit } from "../../compiler/emit";
+import { ArgListMessage } from "../Message/ArgListMessage";
 
-export class JSTypeMessage extends UnaryMessage {
+export class JSTypeMessage extends ArgListMessage {
   static INSTANCE = new JSTypeMessage("typeof", "js");
 
   static parse(_: MessageForm) {
