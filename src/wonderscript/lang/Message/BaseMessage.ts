@@ -94,5 +94,5 @@ export abstract class BaseMessage implements Message {
   }
 
   abstract toJS(ctx: Context, obj: Form): string;
-  abstract sendTo(obj: Obj): unknown;
+  abstract sendTo(obj: unknown): unknown;
 }

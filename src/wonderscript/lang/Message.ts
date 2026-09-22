@@ -15,6 +15,11 @@ import {
   JSSetPropMessage
 } from "./javascript";
 import { ArgListMessage } from "./Message/ArgListMessage";
+import { BinaryMessage } from "./Message/BinaryMessage";
+import { JSOrMessage } from "./javascript/JSOrMessage";
+import { UnaryMessage } from "./Message/UnaryMessage";
+import { JSAndMessage } from "./javascript/JSAndMessage";
+import { JSNotMessage } from "./javascript/JSNotMessage";
 
 export type SimpleMessageForm = string | Keyword | Symbol;
 export type CompoundMessageForm = [Keyword | Symbol, ...unknown[]] | Vector<unknown>;
@@ -74,6 +79,18 @@ const PRIMITIVE_MESSAGES = new Map<string, unknown>([
   ["js/prop", JSPropMessage],
   ["js/new", JSNewMessage],
   ["respond-to?", QueryMessage],
+  ["+", BinaryMessage],
+  ["-", BinaryMessage],
+  ["*", BinaryMessage],
+  ["/", BinaryMessage],
+  ["%", BinaryMessage],
+  ["<", BinaryMessage],
+  [">", BinaryMessage],
+  [">=", BinaryMessage],
+  ["<=", BinaryMessage],
+  ['or', JSOrMessage],
+  ['and', JSAndMessage],
+  ['not', JSNotMessage],
 ]);
 
 export const Message = {

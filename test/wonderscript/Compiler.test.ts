@@ -25,6 +25,18 @@ describe("Compiler", () => {
 
     describe("primitive messages", () => {
       const examples: [string, unknown][] = [
+        ["(1 + 5)", 6],
+        ["(4 - 5)", -1],
+        ["(4 * 5)", 20],
+        ["(4 / 5)", 4 / 5],
+        ["(4 % 5)", 4 % 5],
+        ["(4 < 5)", true],
+        ["(4 <= 5)", true],
+        ["(4 > 5)", false],
+        ["(4 >= 5)", false],
+        ["(true not)", false],
+        ["(true and false)", false],
+        ["(true or false)", true],
         ["(1 js/type)", "number"],
         ['("hey" js/type)', "string"],
         ['("hey" js/equiv? "hey")', true],
