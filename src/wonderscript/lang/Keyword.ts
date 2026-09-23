@@ -1,6 +1,5 @@
 import { Named, namedHash } from "./Named";
 import { Symbol } from "./Symbol";
-import { Nil } from "./Nil";
 import { Invokable } from "./Invokable";
 import { Comparable } from "./Comparable";
 import { Value } from "./Value";
@@ -48,7 +47,7 @@ export class Keyword<Name extends string = string>
     return this._symbol.name;
   }
 
-  get namespace(): string | Nil {
+  get namespace(): string | null | undefined {
     return this._symbol.namespace;
   }
 

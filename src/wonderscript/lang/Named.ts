@@ -1,8 +1,6 @@
-import { Nil } from "./Nil";
-
 export interface Named<Name extends string = string> {
   name: Name;
-  namespace: string | Nil;
+  namespace: string | null | undefined;
 }
 
 export function namedHash<Name extends string = string>(

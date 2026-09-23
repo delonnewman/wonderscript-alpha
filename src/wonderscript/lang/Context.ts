@@ -1,4 +1,3 @@
-import { Nil } from "./Nil";
 import { Symbol } from "./Symbol";
 import { MetaData } from "./Meta";
 import { Keyword } from "./Keyword";
@@ -23,7 +22,7 @@ type Params = {
 export class Context {
   private readonly vars: Vars;
   private readonly varMeta: VarMeta;
-  readonly parent: Context | Nil;
+  readonly parent: Context | null | undefined;
   private _isRecursive: boolean;
   private currentSource: string;
   private currentLine: number;
@@ -77,7 +76,7 @@ export class Context {
 
   stacktrace(): StackTrace {
     const frames = [this.stackframe()];
-    let ctx: Context | Nil = this.parent;
+    let ctx: Context | null | undefined = this.parent;
     while (ctx) {
       frames.push(ctx.stackframe());
       ctx = ctx.parent;
@@ -121,7 +120,7 @@ export class Context {
     return this.varMeta.get(name);
   }
 
-  lookup(name: Symbol): Context | Nil {
+  lookup(name: Symbol): Context | null | undefined {
     if (this.has(name)) {
       return this;
     }

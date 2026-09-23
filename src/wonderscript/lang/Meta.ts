@@ -1,10 +1,9 @@
 import { Keyword } from "./Keyword";
-import { Nil } from "./Nil";
 
 export type MetaData = Map<Keyword, any>;
 
 export interface Meta {
-  meta(): MetaData | Nil;
+  meta(): MetaData | null | undefined;
   hasMeta(): boolean;
   withMeta(data: MetaData): Meta;
 }

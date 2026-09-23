@@ -1,5 +1,4 @@
 import { Named, namespace, name } from "./Named";
-import { Nil } from "./Nil";
 import { Keyword } from "./Keyword";
 import { Symbol } from "./Symbol";
 import { Message } from "./Message";
@@ -37,7 +36,7 @@ export class Class implements Named, Message {
     return klass;
   }
 
-  constructor(name: string, namespace: string | Nil) {
+  constructor(name: string, namespace: string | null | undefined) {
     this.#name = name;
     this.#namespace = namespace;
   }
@@ -55,11 +54,11 @@ export class Class implements Named, Message {
   }
 
   get interned() {
-    if (this.namespace === null) {
-      return this.name;
+    if (this.#namespace == null) {
+      return this.#name;
     }
 
-    return `${this.namespace}$${this.name}`;
+    return `${this.#namespace}$${this.#name}`;
   }
 
   defineMethod(msg: Message, method: MethodFn) {
@@ -101,44 +100,3 @@ export class Class implements Named, Message {
     return Array.from(this.#messages);
   }
 }
-
-// Interned method aliases
-
-// @ts-ignore
-Class.from_DASH_js_1 = Class.fromJS;
-
-// @ts-ignore
-Class.prototype.send_2 = Class.prototype.send;
-
-// @ts-ignore
-Class.prototype.allocate_0 = Class.prototype.allocate;
-
-// @ts-ignore
-Class.prototype.interned_0 = Class.prototype.interned;
-
-// @ts-ignore
-Class.prototype.name_0 = Class.prototype.name;
-
-// @ts-ignore
-Class.prototype.namespace_0 = Class.prototype.namespace;
-
-// @ts-ignore
-Class.prototype.namespace_QEST_0 = Class.prototype.hasNamespace;
-
-// @ts-ignore
-Class.prototype.define_DASH_method_2 = Class.prototype.defineMethod;
-
-// @ts-ignore
-Class.prototype.find_DASH_method_1 = Class.prototype.findMethod;
-
-// @ts-ignore
-Class.prototype.method_QEST_1 = Class.prototype.hasMethod;
-
-// @ts-ignore
-Class.prototype.messages_0 = Class.prototype.messages;
-
-// @ts-ignore
-Class.prototype.subclasses_0 = Class.prototype.subclasses;
-
-// @ts-ignore
-Class.prototype.subclass_1 = Class.prototype.subclass;

@@ -1,6 +1,5 @@
 import { Named } from "./Named";
 import { Meta, MetaData } from "./Meta";
-import { Nil } from "./Nil";
 import { Invokable } from "./Invokable";
 import { Comparable, Order } from "./Comparable";
 import { merge } from "./merge";
@@ -68,7 +67,7 @@ export class Symbol<Name extends string = string>
     return this.#name;
   }
 
-  get namespace(): string | Nil {
+  get namespace(): string | null | undefined {
     return this.#namespace;
   }
 

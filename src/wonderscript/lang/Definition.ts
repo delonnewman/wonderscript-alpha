@@ -1,7 +1,6 @@
 import { Meta, MetaData } from "./Meta";
 import { Symbol } from "./Symbol";
 import { Named } from "./Named";
-import { Nil } from "./Nil";
 import { Keyword } from "./Keyword";
 import { merge } from "./runtime";
 import { Reference, Watcher } from "./Reference";
@@ -44,7 +43,7 @@ export class Definition implements Meta, Named, Reference {
     return this._symbol.name;
   }
 
-  get namespace(): string | Nil {
+  get namespace(): string | null | undefined {
     return this._symbol.namespace;
   }
 
@@ -52,7 +51,7 @@ export class Definition implements Meta, Named, Reference {
     return this._symbol.hasNamespace();
   }
 
-  meta(): MetaData | Nil {
+  meta(): MetaData | null | undefined {
     return this._meta;
   }
 
@@ -120,7 +119,7 @@ export class Definition implements Meta, Named, Reference {
     return this._watchers[key] != null;
   }
 
-  documentation(): string | Nil {
+  documentation(): string | null | undefined {
     return this._meta?.get(DOC_KW);
   }
 
@@ -128,11 +127,11 @@ export class Definition implements Meta, Named, Reference {
     return this.documentation() != null;
   }
 
-  added(): string | Nil {
+  added(): string | null | undefined {
     return this._meta?.get(ADDED_KW);
   }
 
-  signature(): any | Nil {
+  signature(): any | null | undefined {
     return this._meta?.get(SIGNATURE_KW);
   }
 
