@@ -1,23 +1,24 @@
 import { Meta, MetaData } from "./Meta";
 import { Nil } from "./Nil";
-import { First, isSequence, Next, Sequence } from "./Seq";
+import { First, isSequence, Sequence } from "./Seq";
 import { Sequenceable } from "./Sequenceable";
 import { merge, reduce } from "./runtime";
 import { Value } from "./Value";
 import { hashCode, hashCombine } from "./utils";
+import { pt } from "../util";
 
 const HASH_SEED: number = 4221954417;
 
-export class List implements Meta, Sequence, Sequenceable, Value {
+export class List<T = unknown> implements Meta, Sequence, Sequenceable, Value {
   static EMPTY = new this(null, null);
 
-  readonly #first: First;
-  readonly #next: List | Nil;
+  readonly #first: First<T>;
+  readonly #next: List<T> | Nil;
   readonly #count: number;
   readonly #meta: MetaData | Nil;
   #hashCode: number | null;
 
-  constructor(first: First, next: List | Nil, count = 0, meta?: MetaData) {
+  constructor(first: First<T>, next: List<T> | Nil, count = 0, meta?: MetaData) {
     this.#first = first;
     this.#next = next;
     this.#count = count;
@@ -33,14 +34,14 @@ export class List implements Meta, Sequence, Sequenceable, Value {
     return this.count() === 0;
   }
 
-  cons(val: unknown): List {
+  cons(val: T): List<T> {
     if (this.isEmpty()) {
       return new List(val, null, 1);
     }
     return new List(val, this, this.#count + 1);
   }
 
-  seq(): List {
+  seq(): List<T> {
     return this;
   }
 
@@ -48,7 +49,7 @@ export class List implements Meta, Sequence, Sequenceable, Value {
     return this.#meta;
   }
 
-  withMeta(data: MetaData): List {
+  withMeta(data: MetaData): List<T> {
     return new List(
       this.#first,
       this.#next,
@@ -61,11 +62,11 @@ export class List implements Meta, Sequence, Sequenceable, Value {
     return this.#meta != null;
   }
 
-  first(): First {
+  first(): First<T> {
     return this.#first;
   }
 
-  next(): List | Nil {
+  next(): List<T> | Nil {
     return this.#next;
   }
 
@@ -73,7 +74,7 @@ export class List implements Meta, Sequence, Sequenceable, Value {
     return this.#count;
   }
 
-  equals(other: List): boolean {
+  equals(other: List<T>): boolean {
     if (!isSequence(other)) return false;
     // TODO: generalize to isCounted add counted interface
     if (other instanceof List && this.count() !== other.count()) {
@@ -81,11 +82,15 @@ export class List implements Meta, Sequence, Sequenceable, Value {
     }
 
     let x = this.first();
-    let xs: List = this;
+    let xs: List<T> = this;
     let y = other.first();
     let ys = other;
 
     while (xs != null && ys != null) {
+      // pt('x', x);
+      // pt('xs', xs);
+      // pt('y', y);
+      // pt('ys', ys);
       if (x !== y) return false; // TODO: toplevel equals needs to be accessible here
       x = xs.first();
       y = ys.first();
