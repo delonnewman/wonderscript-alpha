@@ -2,6 +2,7 @@ import { Message } from "./Message";
 import { Named } from "./Named";
 import { Class } from "./Class";
 import { UnaryMessage } from "./Message/UnaryMessage";
+import { ObjectPool, ObjectType } from "./Object";
 
 export class PrimitiveType extends Class implements Named, Message {
   #interned: string;
@@ -14,6 +15,10 @@ export class PrimitiveType extends Class implements Named, Message {
 
   get interned() {
     return this.#interned;
+  }
+
+  allocate() {
+    return ObjectPool.allocate(this, ObjectType.VALUE);
   }
 
   static valueType(value: unknown): Class {
@@ -31,7 +36,7 @@ export class PrimitiveType extends Class implements Named, Message {
       return String;
     }
 
-    if (type === 'number') {
+    if (type === "number") {
       return Float;
     }
 
@@ -48,19 +53,19 @@ export const NilClass = new PrimitiveType('Nil', 'wonderscript.lang');
 NilClass.defineMethod(new UnaryMessage('to_s'), () => '');
 NilClass.defineMethod(new UnaryMessage("true?"), () => False);
 NilClass.defineMethod(new UnaryMessage("false?"), () => True);
-export const Nil = NilClass.allocate();
+export const Nil = null;
 
 export const TrueClass = new PrimitiveType('True', 'wonderscript.lang');
 TrueClass.defineMethod(new UnaryMessage("to_s"), () => "true");
 TrueClass.defineMethod(new UnaryMessage("true?"), () => True);
 TrueClass.defineMethod(new UnaryMessage("false?"), () => False);
-export const True = TrueClass.allocate();
+export const True = true;
 
 export const FalseClass = new PrimitiveType('False', 'wonderscript.lang');
 FalseClass.defineMethod(new UnaryMessage("to_s"), () => "false");
 FalseClass.defineMethod(new UnaryMessage("true?"), () => False);
 FalseClass.defineMethod(new UnaryMessage("false?"), () => True);
-export const False = FalseClass.allocate();
+export const False = false;
 
 export const Float = new PrimitiveType('Float', 'wonderscript.lang');
 Float.defineMethod(new UnaryMessage("to_s"), (self: number) => `${self}`);

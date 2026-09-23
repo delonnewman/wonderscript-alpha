@@ -4,7 +4,7 @@ import { Keyword } from "./Keyword";
 import { Symbol } from "./Symbol";
 import { Message } from "./Message";
 import { JSMethodMessage } from "./javascript/JSMethodMessage";
-import { ObjectPool } from "./Object";
+import { ObjectPool, ObjectType } from "./Object";
 
 export type MethodFn = (self: unknown, ...args: unknown[]) => unknown;
 export type JSClass = Function & {
@@ -43,7 +43,7 @@ export class Class implements Named, Message {
   }
 
   allocate() {
-    return ObjectPool.allocate(this);
+    return ObjectPool.allocate(this, ObjectType.REF);
   }
 
   get name() {

@@ -4,7 +4,6 @@ import { isString } from "../js";
 import { Vector } from "./Vector";
 import { prStr } from "../compiler/prStr";
 import { isValue, Value } from "./Value";
-import { Nil } from "../lang";
 
 export const stringHash = (function () {
   const SEED = Math.random() * 10000;
@@ -22,7 +21,7 @@ const ARRAY_SEED = 2477418380;
 const MAP_SEED = 2930956514;
 const SET_SEED = 3268899600;
 
-export function hashCode(form: Form | Value | Nil): number {
+export function hashCode(form: Form | Value | undefined | null): number {
   if (form == null) return 0;
 
   if (typeof form === "number") {
