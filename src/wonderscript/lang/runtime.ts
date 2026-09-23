@@ -2,7 +2,6 @@ import { Seq, first, next } from "./Seq";
 import { isArrayLike } from "../js";
 import { isMeta, Meta } from "./Meta";
 import { Keyword } from "./Keyword";
-import { List } from "./List";
 import { Vector } from "./Vector";
 
 export { hashCode } from "./utils";
@@ -116,16 +115,6 @@ export function partition<T = unknown>(
   }
 
   return Object.freeze(a) as [Array<T>];
-}
-
-export function list(...args: unknown[]): List {
-  let xs = List.EMPTY;
-
-  for (let i = args.length - 1; i >= 0; i--) {
-    xs = xs.cons(args[i]);
-  }
-
-  return xs;
 }
 
 export function meta(obj: Meta): Map<Keyword, unknown> {

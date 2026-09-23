@@ -14,7 +14,6 @@ export * from "./lang/Seq";
 export * from "./lang/Sequenceable";
 export * from "./lang/Symbol";
 export * from "./lang/Keyword";
-export * from "./lang/List";
 export * from "./lang/Namespace";
 export * from "./lang/runtime";
 export * from "./lang/Vector";
@@ -26,7 +25,6 @@ globalThis.wonderscript ??= {};
 globalThis.wonderscript.lang = {
   Symbol,
   Keyword,
-  List,
   Namespace,
   Vector,
   Module,

@@ -3,7 +3,6 @@ import { isArrayLike } from "../js/ArrayLike";
 import { map } from "../lang/runtime";
 import { Symbol } from "../lang/Symbol";
 import { Keyword } from "../lang/Keyword";
-import { List } from "../lang/List";
 import { Vector } from "../lang/Vector";
 
 const EMPTY_LIST = "()";
@@ -31,15 +30,6 @@ export function prStr(form: unknown): string {
     Object.prototype.toString.call(form) === "[object String]"
   ) {
     return JSON.stringify(form);
-  }
-
-  if (form instanceof List) {
-    if (form.count() === 0) {
-      return EMPTY_LIST;
-    }
-
-    const parts = map(prStr, form);
-    return `(${parts.join(" ")})`;
   }
 
   if (Array.isArray(form)) {
