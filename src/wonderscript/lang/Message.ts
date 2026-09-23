@@ -3,7 +3,6 @@ import { Keyword, Vector, Named, Nil, Symbol, namedHash } from "../lang";
 import { Form } from "../compiler/core";
 import { Context } from "./Context";
 import { QueryMessage } from "./Message/QueryMessage";
-import { BoundMessage } from "./Message/BoundMessage";
 import {
   JSEquivMessage,
   JSIdenticalMessage,
