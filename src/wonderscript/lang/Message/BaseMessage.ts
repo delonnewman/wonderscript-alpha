@@ -1,4 +1,6 @@
 import {
+  CompilableMessage,
+  Envelope,
   Message,
   MessageArgs,
   MessageFlags,
@@ -25,7 +27,7 @@ interface MessageConstructor {
   parse(msg: MessageForm): Message;
 }
 
-export abstract class BaseMessage implements Message {
+export abstract class BaseMessage implements Message, Envelope, CompilableMessage {
   #name: string;
   #namespace?: string;
   #withinQuery: boolean;

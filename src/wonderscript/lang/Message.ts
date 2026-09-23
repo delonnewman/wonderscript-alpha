@@ -17,7 +17,6 @@ import {
 import { ArgListMessage } from "./Message/ArgListMessage";
 import { BinaryMessage } from "./Message/BinaryMessage";
 import { JSOrMessage } from "./javascript/JSOrMessage";
-import { UnaryMessage } from "./Message/UnaryMessage";
 import { JSAndMessage } from "./javascript/JSAndMessage";
 import { JSNotMessage } from "./javascript/JSNotMessage";
 
@@ -43,16 +42,8 @@ export interface CompilableMessage {
   toJS(ctx: Context, obj: Form): string;
 }
 
-export interface Message extends Named, Envelope, CompilableMessage {
-  readonly name: string;
-  readonly namespace: string | Nil;
-  readonly args: unknown;
+export interface Message {
   readonly interned: string;
-  readonly arity: number;
-
-  withinQuery(): Message;
-  isWithinQuery(): boolean;
-  bind(obj: Obj): BoundMessage;
 }
 
 export function isMessageForm(form: unknown): form is MessageForm {
