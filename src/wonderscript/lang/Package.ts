@@ -5,7 +5,7 @@ import { merge } from "./merge";
 
 export type DefinitionMap = Map<Symbol, Definition>;
 
-export class Module {
+export class Package {
   readonly name: Symbol;
   #definitions: DefinitionMap;
 
@@ -22,17 +22,17 @@ export class Module {
     return Array.from(this.#definitions.values());
   }
 
-  addDefinition(def: Definition): Module {
+  addDefinition(def: Definition): Package {
     this.#definitions.set(def.symbol().withoutMeta(), def);
 
     return this;
   }
 
-  importSymbol(name: Symbol, value: unknown, meta?: MetaData): Module {
+  importSymbol(name: Symbol, value: unknown, meta?: MetaData): Package {
     return this.addDefinition(new Definition(name, value, meta));
   }
 
-  importAlienSymbol(name: string, value: unknown, meta?: MetaData): Module {
+  importAlienSymbol(name: string, value: unknown, meta?: MetaData): Package {
     return this.importSymbol(
       Symbol.intern(name),
       value,
@@ -40,7 +40,7 @@ export class Module {
     );
   }
 
-  importAlienModule(module: object): Module {
+  importAlienModule(module: object): Package {
     Object.entries(module).forEach(([name, value]) => {
       this.importAlienSymbol(name, value);
     });
@@ -61,6 +61,6 @@ export class Module {
   }
 
   toString() {
-    return `#<Module ${this.name}>`;
+    return `#<Package ${this.name}>`;
   }
 }

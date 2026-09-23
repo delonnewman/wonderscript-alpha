@@ -2,15 +2,20 @@ import { Message } from "./Message";
 import { Named } from "./Named";
 import { Class } from "./Class";
 import { UnaryMessage } from "./Message/UnaryMessage";
-import { ObjectPool, ObjectType } from "./Object";
+import { ObjectPool, ObjectType, ObjectValue } from "./Object";
+import { Package } from "./Package";
+import { Array } from "./Array";
+import { Hash } from "./Hash";
+import { Set } from "./Set";
+import { Keyword } from "./Keyword";
+import { Symbol } from "./Symbol";
 
 export class PrimitiveType extends Class implements Named, Message {
   #interned: string;
 
-  constructor(name: string, namespace?: string) {
-    super(name, namespace);
+  constructor(obj: ObjectValue, name: string, namespace?: string) {
+    super(obj, name, namespace);
     this.#interned = name;
-    Object.freeze(this);
   }
 
   get interned() {
@@ -42,37 +47,48 @@ export class PrimitiveType extends Class implements Named, Message {
 
     if (type === "object") {
       // TODO: it will probably make sense to cache type objects
-      return Class.fromJS(value.constructor);
+      return Class.fromJSConstructor(value.constructor);
     }
 
     throw new Error(`unknown type for ${value}`);
   }
 }
 
-export const NilClass = new PrimitiveType('Nil', 'wonderscript.lang');
+export const NilClass = PrimitiveType.create('Nil', 'wonderscript.lang');
 NilClass.defineMethod(new UnaryMessage('to_s'), () => '');
 NilClass.defineMethod(new UnaryMessage("true?"), () => False);
 NilClass.defineMethod(new UnaryMessage("false?"), () => True);
 export const Nil = null;
 
-export const TrueClass = new PrimitiveType('True', 'wonderscript.lang');
+export const TrueClass = PrimitiveType.create('True', 'wonderscript.lang');
 TrueClass.defineMethod(new UnaryMessage("to_s"), () => "true");
 TrueClass.defineMethod(new UnaryMessage("true?"), () => True);
 TrueClass.defineMethod(new UnaryMessage("false?"), () => False);
 export const True = true;
 
-export const FalseClass = new PrimitiveType('False', 'wonderscript.lang');
+export const FalseClass = PrimitiveType.create('False', 'wonderscript.lang');
 FalseClass.defineMethod(new UnaryMessage("to_s"), () => "false");
 FalseClass.defineMethod(new UnaryMessage("true?"), () => False);
 FalseClass.defineMethod(new UnaryMessage("false?"), () => True);
 export const False = false;
 
-export const Float = new PrimitiveType('Float', 'wonderscript.lang');
+export const Float = PrimitiveType.create('Float', 'wonderscript.lang');
 Float.defineMethod(new UnaryMessage("to_s"), (self: number) => `${self}`);
 Float.defineMethod(new UnaryMessage("true?"), () => True);
 Float.defineMethod(new UnaryMessage("false?"), () => False);
 
-export const String = new PrimitiveType('String', 'wonderscript.lang');
+export const String = PrimitiveType.create('String', 'wonderscript.lang');
 String.defineMethod(new UnaryMessage("to_s"), (self: string) => self);
 String.defineMethod(new UnaryMessage("true?"), () => True);
 String.defineMethod(new UnaryMessage("false?"), () => False);
+
+export const JSObject = Class.fromJSSingleton(Object, "Object", "js");
+export const JSFunction = Class.fromJSSingleton(Function, "Function", "js");
+export const JSMath = Class.fromJSSingleton(Math, "Math", "js");
+export const ClassPackage = Class.fromJSConstructor(Package, 'wonderscript.lang')
+
+export const ClassArray = Class.fromJSConstructor(Array, 'wonderscript.lang');
+export const ClassHash = Class.fromJSConstructor(Hash, "wonderscript.lang");
+export const ClassSet = Class.fromJSConstructor(Set, "wonderscript.lang");
+export const ClassKeyword = Class.fromJSConstructor(Keyword, "wonderscript.lang");
+export const ClassSymbol = Class.fromJSConstructor(Symbol, "wonderscript.lang");

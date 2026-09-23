@@ -2,13 +2,17 @@ import { Named, namespace, name } from "./Named";
 import { Keyword } from "./Keyword";
 import { Symbol } from "./Symbol";
 import { Message } from "./Message";
-import { JSMethodMessage } from "./javascript/JSMethodMessage";
-import { ObjectPool, ObjectType } from "./Object";
+import { ObjectPool, ObjectType, ObjectValue } from "./Object";
+import { ArgListMessage } from "./Message/ArgListMessage";
 
 export type MethodFn = (self: unknown, ...args: unknown[]) => unknown;
-export type JSClass = Function & {
+
+export type JSClass = {
   $ws$Class?: Class;
 };
+
+export type JSConstructor = Function & JSClass;
+export type JSObject = Object & JSClass;
 
 export class Class implements Named, Message {
   #name: string;
@@ -17,16 +21,16 @@ export class Class implements Named, Message {
   #messages: Message[] = [];
   #subclasses: Class[] = [];
 
-  static fromJS(constructor: JSClass) {
+  static fromJSConstructor(constructor: JSConstructor, namespace = 'js') {
     if (constructor.$ws$Class) return constructor.$ws$Class;
 
-    const klass = new this(constructor.name, "js");
+    const klass = this.create(constructor.name, namespace);
 
     const table = constructor.prototype as Record<string, Function>;
     const methods = Object.getOwnPropertyNames(constructor.prototype);
     for (const method of methods) {
       klass.defineMethod(
-        new JSMethodMessage(method, 'js'),
+        new ArgListMessage(method, klass.namespace),
         (self, ...args) => table[method].apply(self, args)
       );
     }
@@ -36,7 +40,31 @@ export class Class implements Named, Message {
     return klass;
   }
 
-  constructor(name: string, namespace: string | null | undefined) {
+  static fromJSSingleton(object: JSObject, name: string, namespace = 'js') {
+    if (object.$ws$Class) return object.$ws$Class;
+
+    const klass = this.create(name, namespace);
+
+    const table = object as Record<string, Function>;
+    const methods = Object.getOwnPropertyNames(object);
+    for (const method of methods) {
+      klass.defineMethod(
+        new ArgListMessage(method, klass.namespace),
+        (self, ...args) => table[method].apply(self, args)
+      );
+    }
+
+    object.$ws$Class = klass;
+
+    return klass;
+  }
+
+  static create(name: string, namespace?: string) {
+    const obj = ObjectPool.allocate(ClassClass);
+    return new this(obj, name, namespace);
+  }
+
+  constructor(object: ObjectValue, name: string, namespace: string | null | undefined) {
     this.#name = name;
     this.#namespace = namespace;
   }
@@ -90,7 +118,7 @@ export class Class implements Named, Message {
     const ns = namespace(subclassName);
     const nm = name(subclassName);
 
-    const subclass = new Class(nm, ns);
+    const subclass = Class.create(nm, ns);
     this.#subclasses.push(subclass);
 
     return subclass;
@@ -100,3 +128,5 @@ export class Class implements Named, Message {
     return Array.from(this.#messages);
   }
 }
+
+export const ClassClass = Class.fromJSConstructor(Class, 'wonderscript.lang');

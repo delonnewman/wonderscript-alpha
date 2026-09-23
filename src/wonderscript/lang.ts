@@ -3,7 +3,7 @@ import { Keyword } from "./lang/Keyword";
 import { Namespace } from "./lang/Namespace";
 import { Vector } from "./lang/Vector";
 import { Definition } from "./lang/Definition";
-import { Module } from "./lang/Module";
+import { Package } from "./lang/Package";
 import { Message } from "./lang/Message";
 import { ObjectPool } from "./lang/Object";
 import { Class } from "./lang/Class";
@@ -27,7 +27,7 @@ export * from "./lang/Keyword";
 export * from "./lang/Namespace";
 export * from "./lang/runtime";
 export * from "./lang/Vector";
-export * from "./lang/Module";
+export * from "./lang/Package";
 export * from "./lang/Definition";
 export * from "./lang/Message";
 export * from "./lang/Class";
@@ -40,7 +40,7 @@ globalThis.wonderscript.lang = {
   Keyword,
   Namespace,
   Vector,
-  Module,
+  Module: Package,
   Definition,
   Message,
   Class,
