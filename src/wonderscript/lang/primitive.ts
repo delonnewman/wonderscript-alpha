@@ -54,23 +54,23 @@ export class PrimitiveType extends Class implements Named, Message {
   }
 }
 
+export const Nil = null;
 export const NilClass = PrimitiveType.create('Nil', 'wonderscript.lang');
 NilClass.defineMethod(new UnaryMessage('to_s'), () => '');
 NilClass.defineMethod(new UnaryMessage("true?"), () => False);
 NilClass.defineMethod(new UnaryMessage("false?"), () => True);
-export const Nil = null;
 
+export const True = true;
 export const TrueClass = PrimitiveType.create('True', 'wonderscript.lang');
 TrueClass.defineMethod(new UnaryMessage("to_s"), () => "true");
 TrueClass.defineMethod(new UnaryMessage("true?"), () => True);
 TrueClass.defineMethod(new UnaryMessage("false?"), () => False);
-export const True = true;
 
+export const False = false;
 export const FalseClass = PrimitiveType.create('False', 'wonderscript.lang');
 FalseClass.defineMethod(new UnaryMessage("to_s"), () => "false");
 FalseClass.defineMethod(new UnaryMessage("true?"), () => False);
 FalseClass.defineMethod(new UnaryMessage("false?"), () => True);
-export const False = false;
 
 export const Float = PrimitiveType.create('Float', 'wonderscript.lang');
 Float.defineMethod(new UnaryMessage("to_s"), (self: number) => `${self}`);
@@ -85,6 +85,7 @@ String.defineMethod(new UnaryMessage("false?"), () => False);
 export const JSObject = Class.fromJSSingleton(Object, "Object", "js");
 export const JSFunction = Class.fromJSSingleton(Function, "Function", "js");
 export const JSMath = Class.fromJSSingleton(Math, "Math", "js");
+export const JSConsole = Class.fromJSSingleton(console, "console", "js");
 export const ClassPackage = Class.fromJSConstructor(Package, 'wonderscript.lang')
 
 export const ClassArray = Class.fromJSConstructor(Array, 'wonderscript.lang');
