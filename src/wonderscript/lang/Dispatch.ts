@@ -65,7 +65,7 @@ export class Dialog implements SequentialDispatch {
   }
 }
 
-export class Statement implements Message, Dispatch {
+export class Action implements Message, Dispatch {
   #object: ObjectRef;
   #message: Message;
 
@@ -97,30 +97,64 @@ export class Statement implements Message, Dispatch {
   }
 }
 
+class Binding {
+  #name: Symbol;
+  #action: Action;
+
+  constructor(name: Symbol, action: Action) {
+    this.#name = name;
+    this.#action = action;
+  }
+
+  get action() {
+    return this.#action;
+  }
+
+  get name() {
+    return this.#name;
+  }
+}
+
 export class Script implements SequentialDispatch {
-  #statements: Statement[];
+  #actions: Action[];
+  #bindings: Binding[];
+  #result: unknown;
 
-  static bind(obj: ObjectValue, msg: Message) {
-    return new this().then(new Statement(obj, msg));
+  constructor(actions: Action[] = [], bindings: Binding[] = []) {
+    this.#actions = actions;
+    this.#bindings = bindings;
   }
 
-  get statements() {
-    return this.#statements;
+  get result() {
+    return this.#result;
   }
 
-  constructor(statements: Statement[] = []) {
-    this.#statements = statements;
+  get actions() {
+    return Array.from(this.#actions);
   }
 
-  then(statement: Statement) {
-    this.#statements.push(statement);
+  get bindings() {
+    return Array.from(this.#bindings);
+  }
+
+  bind(name: Symbol, action: Action) {
+    this.#bindings.push(new Binding(name, action));
+    return this;
+  }
+
+  then(action: Action) {
+    this.#actions.push(action);
     return this;
   }
 
   dispatch(ctx: Context) {
-    for (const statement of this.#statements) {
-      statement.dispatch(ctx);
+    for (const binding of this.#bindings) {
+      ctx.define(binding.name, binding.action.dispatch(ctx));
     }
+    for (const action of this.#actions.slice(0, this.#actions.length - 1)) {
+      action.dispatch(ctx);
+    }
+    this.#result = this.#actions[this.#actions.length - 1].dispatch(ctx);
     return this;
   }
 }
