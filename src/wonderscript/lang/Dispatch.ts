@@ -97,7 +97,7 @@ export class Action implements Message, Dispatch {
   }
 }
 
-class Binding {
+export class Binding {
   #name: Symbol;
   #action: Action;
 
