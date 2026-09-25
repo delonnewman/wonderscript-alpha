@@ -1,5 +1,5 @@
 import { expect, test, describe } from "bun:test";
-import { readString } from "../../../src/wonderscript/reader/readString";
+import { readString } from "../../../src/wonderscript/reader";
 import {
   ARRAY_SYM,
   QUOTE_SYM,

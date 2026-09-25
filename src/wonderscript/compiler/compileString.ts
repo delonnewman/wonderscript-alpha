@@ -1,4 +1,4 @@
-import { readString, ReadForm } from "../reader/readString";
+import { readString, ReadForm } from "../reader";
 import { emit } from "./emit";
 import { Form, isTaggedValue } from "./core";
 import { macroexpand } from "./macroexpand";

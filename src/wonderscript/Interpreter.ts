@@ -1,4 +1,4 @@
-import { readString } from "./reader/readString";
+import { readString } from "./reader";
 import { PrimitiveType } from "./lang/PrimitiveType";
 import { UnaryMessage } from "./lang/Message/UnaryMessage";
 import { Class } from "./lang/Class";
