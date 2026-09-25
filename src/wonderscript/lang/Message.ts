@@ -1,5 +1,5 @@
 import { prStr } from "../compiler";
-import { Keyword, Vector, Named, Nil, Symbol, namedHash } from "../lang";
+import { Keyword, Vector, Symbol, namedHash } from "../lang";
 import { Form } from "../compiler/core";
 import { Context } from "./Context";
 import { QueryMessage } from "./Message/QueryMessage";
