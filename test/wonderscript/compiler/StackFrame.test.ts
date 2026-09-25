@@ -1,3 +1,4 @@
+// @ts-ignore
 import { expect, test, describe } from "bun:test";
 import { StackFrame } from "../../../src/wonderscript/compiler/StackFrame";
 

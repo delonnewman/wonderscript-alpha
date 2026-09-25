@@ -1,3 +1,4 @@
+// @ts-ignore
 import { expect, describe, it } from "bun:test";
 import { Context } from "../../../src/wonderscript/lang/Context";
 import { Symbol } from "../../../src/wonderscript/lang/Symbol";

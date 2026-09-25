@@ -1,3 +1,4 @@
+// @ts-ignore
 import { expect, test, describe } from "bun:test";
 import { Compiler } from "../../src/wonderscript";
 import { prStr } from "../../src/wonderscript/compiler";

@@ -1,3 +1,4 @@
+// @ts-ignore
 import { expect, test, describe } from "bun:test";
 import { partition, reduce } from "../../src/wonderscript/lang/runtime";
 
@@ -44,7 +45,7 @@ describe("Runtime functions", () => {
     });
 
     test("without init", () => {
-      const sum = reduce((a, b) => a + b, [1, 2, 3]);
+      const sum = reduce<number, number>((a, b) => a + b, [1, 2, 3]);
       expect(sum).toEqual(6);
     });
   });
