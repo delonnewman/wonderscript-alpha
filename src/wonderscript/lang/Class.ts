@@ -12,7 +12,7 @@ export type JSClass = {
 };
 
 export type JSConstructor = Function & JSClass;
-export type JSObject = Object & JSClass;
+export type JSSingleton = Object & JSClass;
 
 export class Class implements Named, Message {
   #name: string;
@@ -40,7 +40,7 @@ export class Class implements Named, Message {
     return klass;
   }
 
-  static fromJSSingleton(object: JSObject, name: string, namespace = 'js') {
+  static fromJSSingleton(object: JSSingleton, name: string, namespace = 'js') {
     if (object.$ws$Class) return object.$ws$Class;
 
     const klass = this.create(name, namespace);
