@@ -18,6 +18,7 @@ import { UncaughtThrowError } from "./wonderscript/lang/UncaughtThrowError";
 import { Platform } from "./wonderscript/compiler/platforms";
 
 export * from "./wonderscript/lang";
+export * from './wonderscript/Interpreter';
 
 export const JS_SYM = Symbol.intern("js");
 
