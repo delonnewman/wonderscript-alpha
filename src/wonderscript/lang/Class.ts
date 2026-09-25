@@ -128,5 +128,3 @@ export class Class implements Named, Message {
     return Array.from(this.#messages);
   }
 }
-
-export const ClassClass = Class.fromJSConstructor(Class, 'wonderscript.lang');
