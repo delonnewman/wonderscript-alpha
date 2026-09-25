@@ -42,7 +42,7 @@ export class ArgListMessage extends BaseMessage {
     return this.#args;
   }
 
-  withinQuery(): Message {
+  withinQuery(): ArgListMessage {
     if (this.isWithinQuery()) {
       return this;
     }

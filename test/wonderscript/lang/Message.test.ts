@@ -1,8 +1,10 @@
+// @ts-ignore
 import { expect, test, it, describe } from "bun:test";
 import { Keyword, Message, Symbol } from "../../../src/wonderscript/lang";
 import { JSPropMessage } from "../../../src/wonderscript/lang/javascript/JSPropMessage";
 import { prStr } from "../../../src/wonderscript/compiler";
 import { ArgListMessage } from "../../../src/wonderscript/lang/Message/ArgListMessage";
+import { BaseMessage } from "../../../src/wonderscript/lang/Message/BaseMessage";
 
 declare global {
   interface Object {
@@ -81,7 +83,7 @@ describe("Message", () => {
     });
   });
 
-  const examples: [Message, unknown, unknown][] = [
+  const examples: [BaseMessage, unknown, unknown][] = [
     [
       Message.build([
         Keyword.intern("prop", "js"),

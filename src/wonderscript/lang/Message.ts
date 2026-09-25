@@ -18,6 +18,7 @@ import { BinaryMessage } from "./Message/BinaryMessage";
 import { JSOrMessage } from "./javascript/JSOrMessage";
 import { JSAndMessage } from "./javascript/JSAndMessage";
 import { JSNotMessage } from "./javascript/JSNotMessage";
+import { BaseMessage } from "./Message/BaseMessage";
 
 export type SimpleMessageForm = string | Keyword | Symbol;
 export type CompoundMessageForm = [Keyword | Symbol, ...unknown[]] | Vector<unknown>;
@@ -92,7 +93,7 @@ export const Message = {
     return this.build(msg).toJS(ctx, obj);
   },
 
-  build(msg: MessageForm): Message {
+  build(msg: MessageForm): BaseMessage {
     if (msg instanceof Vector || Array.isArray(msg)) {
       return this.compound(msg);
     }

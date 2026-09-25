@@ -69,7 +69,7 @@ export abstract class BaseMessage implements Message, Envelope, CompilableMessag
     return this.#withinQuery;
   }
 
-  withinQuery(): Message {
+  withinQuery(): BaseMessage {
     if (this.#withinQuery) {
       return this;
     }
