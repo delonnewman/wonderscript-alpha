@@ -28,17 +28,18 @@ export class Interpreter {
     this.#jsPkg = buildJSPackage();
   }
 
-  readString(input: string): unknown {
+  readString(input: string) {
     return readString(input);
   }
 
   analyzeString(input: string) {
     const forms = this.readString(input);
+    return forms;
   }
 }
 
 export function buildCorePackage(NilClass: PrimitiveType, TrueClass: PrimitiveType, FalseClass: PrimitiveType, Float: PrimitiveType, String: PrimitiveType) {
-  const pkg = new Package(Symbol.intern("WonderScript::Core"));
+  const pkg = new Package(Symbol.intern("wonderscript.core"));
 
   NilClass.defineMethod(new UnaryMessage("to_s"), () => "");
   NilClass.defineMethod(new UnaryMessage("true?"), () => false);
@@ -99,7 +100,7 @@ export function buildCorePackage(NilClass: PrimitiveType, TrueClass: PrimitiveTy
 }
 
 export function buildJSPackage() {
-  const pkg = new Package(Symbol.intern("WonderScript::JS"));
+  const pkg = new Package(Symbol.intern("js"));
 
   const JSObject = Class.fromJSSingleton(Object, "Object");
   pkg.importSymbol(Symbol.intern("JSObject"), JSObject);
