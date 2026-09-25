@@ -1,5 +1,5 @@
 import { Message } from "./Message";
-import { ObjectPool, ObjectValue } from "./Object";
+import { ObjectPool, ObjectValue } from "./ObjectPool";
 import { Symbol } from "./Symbol";
 import { Context } from "./Context";
 
@@ -18,7 +18,7 @@ import { Context } from "./Context";
 export type ObjectRef = ObjectValue | Symbol;
 
 export interface Dispatch {
-  dispatch(ctx: Context): unknown;
+  dispatch(pool: ObjectPool, ctx: Context): unknown;
 }
 
 export interface SequentialDispatch extends Dispatch {
@@ -50,9 +50,9 @@ export class Dialog implements SequentialDispatch {
     return new Dialog(this, msg);
   }
 
-  dispatch(ctx: Context): unknown {
+  dispatch(pool: ObjectPool, ctx: Context): unknown {
     if (this.subject instanceof Dialog) {
-      return this.subject.dispatch(ctx);
+      return this.subject.dispatch(pool, ctx);
     }
 
     let obj = this.subject;
@@ -61,7 +61,7 @@ export class Dialog implements SequentialDispatch {
     }
 
     // TODO: will want to evaluate any variables in compound messages
-    return ObjectPool.class(obj as ObjectValue).send(obj, this.message);
+    return pool.class(obj as ObjectValue).send(obj, this.message);
   }
 }
 
@@ -86,14 +86,14 @@ export class Action implements Message, Dispatch {
     return this.#message;
   }
 
-  dispatch(ctx: Context) {
+  dispatch(pool: ObjectPool, ctx: Context) {
     let obj = this.object;
     if (this.object instanceof Symbol) {
       obj = ctx.lookup(this.object).get(this.object) as ObjectValue;
     }
 
     // TODO: will want to evaluate any variables in compound messages
-    return ObjectPool.class(obj as ObjectValue).send(obj, this.message);
+    return pool.class(obj as ObjectValue).send(obj, this.message);
   }
 }
 
@@ -147,14 +147,14 @@ export class Script implements SequentialDispatch {
     return this;
   }
 
-  dispatch(ctx: Context) {
+  dispatch(pool: ObjectPool, ctx: Context) {
     for (const binding of this.#bindings) {
-      ctx.define(binding.name, binding.action.dispatch(ctx));
+      ctx.define(binding.name, binding.action.dispatch(pool, ctx));
     }
     for (const action of this.#actions.slice(0, this.#actions.length - 1)) {
-      action.dispatch(ctx);
+      action.dispatch(pool, ctx);
     }
-    this.#result = this.#actions[this.#actions.length - 1].dispatch(ctx);
+    this.#result = this.#actions[this.#actions.length - 1].dispatch(pool, ctx);
     return this;
   }
 }
