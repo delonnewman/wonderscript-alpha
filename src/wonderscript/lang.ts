@@ -19,7 +19,7 @@ export * from "./lang/Package";
 export * from "./lang/Definition";
 export * from "./lang/Message";
 export * from "./lang/Class";
-export * from "./lang/Object";
+export * from "./lang/ObjectPool";
 
 globalThis.wonderscript ??= {};
 globalThis.wonderscript.lang = {
