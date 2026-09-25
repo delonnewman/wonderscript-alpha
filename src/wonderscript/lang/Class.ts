@@ -2,7 +2,6 @@ import { Named, namespace, name } from "./Named";
 import { Keyword } from "./Keyword";
 import { Symbol } from "./Symbol";
 import { Message } from "./Message";
-import { ObjectPool, ObjectType, ObjectValue } from "./Object";
 import { ArgListMessage } from "./Message/ArgListMessage";
 
 export type MethodFn = (self: unknown, ...args: unknown[]) => unknown;
@@ -24,7 +23,7 @@ export class Class implements Named, Message {
   static fromJSConstructor(constructor: JSConstructor, namespace = 'js') {
     if (constructor.$ws$Class) return constructor.$ws$Class;
 
-    const klass = this.create(constructor.name, namespace);
+    const klass = new this(constructor.name, namespace);
 
     const table = constructor.prototype as Record<string, Function>;
     const methods = Object.getOwnPropertyNames(constructor.prototype);
@@ -43,7 +42,7 @@ export class Class implements Named, Message {
   static fromJSSingleton(object: JSSingleton, name: string, namespace = 'js') {
     if (object.$ws$Class) return object.$ws$Class;
 
-    const klass = this.create(name, namespace);
+    const klass = new this(name, namespace);
 
     const table = object as Record<string, Function>;
     const methods = Object.getOwnPropertyNames(object);
@@ -59,18 +58,9 @@ export class Class implements Named, Message {
     return klass;
   }
 
-  static create(name: string, namespace?: string) {
-    const obj = ObjectPool.allocate(ClassClass);
-    return new this(obj, name, namespace);
-  }
-
-  constructor(object: ObjectValue, name: string, namespace: string | null | undefined) {
+  constructor(name: string, namespace: string | null | undefined) {
     this.#name = name;
     this.#namespace = namespace;
-  }
-
-  allocate() {
-    return ObjectPool.allocate(this, ObjectType.REF);
   }
 
   get name() {
@@ -118,7 +108,7 @@ export class Class implements Named, Message {
     const ns = namespace(subclassName);
     const nm = name(subclassName);
 
-    const subclass = Class.create(nm, ns);
+    const subclass = new (this.constructor as typeof Class)(nm, ns);
     this.#subclasses.push(subclass);
 
     return subclass;
