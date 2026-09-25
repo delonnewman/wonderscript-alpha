@@ -9,7 +9,6 @@ import { findDefinitionMetaData } from "./findDefinitionMetaData";
 import { FN_SYM } from "./emit/emitFunc";
 import { LET_SYM } from "./emit/emitLet";
 import { LOOP_SYM } from "./emit/emitLoop";
-import { List } from "../lang/List";
 import { Vector } from "../lang/Vector";
 import {
   ArrayMutationForm,
@@ -35,7 +34,6 @@ export type Form =
   | Keyword
   | Map<Form, Form>
   | Set<Form>
-  | List
   | Vector<Form>
   | Form[]
   | readonly Form[]
