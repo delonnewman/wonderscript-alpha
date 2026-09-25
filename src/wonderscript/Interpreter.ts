@@ -1,5 +1,4 @@
 import { readString } from "./compiler/readString";
-import { Dispatch } from "./lang/Dispatch";
 import { PrimitiveType } from "./lang/PrimitiveType";
 import { UnaryMessage } from "./lang/Message/UnaryMessage";
 import { Class } from "./lang/Class";
@@ -15,54 +14,95 @@ export class Interpreter {
     return readString(input);
   }
 
-  analyzeString(input: string): Dispatch {
+  analyzeString(input: string) {
     const forms = this.readString(input);
   }
 }
 
-export const Nil = null;
-export const NilClass = PrimitiveType.create("Nil", "wonderscript.lang");
-NilClass.defineMethod(new UnaryMessage("to_s"), () => "");
-NilClass.defineMethod(new UnaryMessage("true?"), () => False);
-NilClass.defineMethod(new UnaryMessage("false?"), () => True);
+export function buildCorePackage() {
+  const pkg = new Package(Symbol.intern("WonderScript::Core"));
 
-export const True = true;
-export const TrueClass = PrimitiveType.create("True", "wonderscript.lang");
-TrueClass.defineMethod(new UnaryMessage("to_s"), () => "true");
-TrueClass.defineMethod(new UnaryMessage("true?"), () => True);
-TrueClass.defineMethod(new UnaryMessage("false?"), () => False);
+  const NilClass = new PrimitiveType("NilClass", "wonderscript.lang");
+  NilClass.defineMethod(new UnaryMessage("to_s"), () => "");
+  NilClass.defineMethod(new UnaryMessage("true?"), () => false);
+  NilClass.defineMethod(new UnaryMessage("false?"), () => true);
+  pkg.importSymbol(Symbol.intern("NilClass"), NilClass);
 
-export const False = false;
-export const FalseClass = PrimitiveType.create("False", "wonderscript.lang");
-FalseClass.defineMethod(new UnaryMessage("to_s"), () => "false");
-FalseClass.defineMethod(new UnaryMessage("true?"), () => False);
-FalseClass.defineMethod(new UnaryMessage("false?"), () => True);
+  const TrueClass = new PrimitiveType("TrueClass", "wonderscript.lang");
+  TrueClass.defineMethod(new UnaryMessage("to_s"), () => "true");
+  TrueClass.defineMethod(new UnaryMessage("true?"), () => true);
+  TrueClass.defineMethod(new UnaryMessage("false?"), () => false);
+  pkg.importSymbol(Symbol.intern("TrueClass"), TrueClass);
 
-export const Float = PrimitiveType.create("Float", "wonderscript.lang");
-Float.defineMethod(new UnaryMessage("to_s"), (self: number) => `${self}`);
-Float.defineMethod(new UnaryMessage("true?"), () => True);
-Float.defineMethod(new UnaryMessage("false?"), () => False);
+  const FalseClass = new PrimitiveType(
+    "FalseClass",
+    "wonderscript.lang"
+  );
+  FalseClass.defineMethod(new UnaryMessage("to_s"), () => "false");
+  FalseClass.defineMethod(new UnaryMessage("true?"), () => false);
+  FalseClass.defineMethod(new UnaryMessage("false?"), () => true);
+  pkg.importSymbol(Symbol.intern("FalseClass"), FalseClass);
 
-export const String = PrimitiveType.create("String", "wonderscript.lang");
-String.defineMethod(new UnaryMessage("to_s"), (self: string) => self);
-String.defineMethod(new UnaryMessage("true?"), () => True);
-String.defineMethod(new UnaryMessage("false?"), () => False);
+  const Float = new PrimitiveType("Float", "wonderscript.lang");
+  Float.defineMethod(new UnaryMessage("to_s"), (self: number) => `${self}`);
+  Float.defineMethod(new UnaryMessage("true?"), () => true);
+  Float.defineMethod(new UnaryMessage("false?"), () => false);
+  pkg.importSymbol(Symbol.intern("Float"), Float);
 
-export const JSObject = Class.fromJSSingleton(Object, "Object", "js");
-export const JSFunction = Class.fromJSSingleton(Function, "Function", "js");
-export const JSMath = Class.fromJSSingleton(Math, "Math", "js");
-export const JSConsole = Class.fromJSSingleton(console, "console", "js");
-export const ClassClass = Class.fromJSConstructor(Class, "wonderscript.lang");
-export const ClassPackage = Class.fromJSConstructor(
-  Package,
-  "wonderscript.lang"
-);
+  const String = new PrimitiveType("String", "wonderscript.lang");
+  String.defineMethod(new UnaryMessage("to_s"), (self: string) => self);
+  String.defineMethod(new UnaryMessage("true?"), () => true);
+  String.defineMethod(new UnaryMessage("false?"), () => false);
+  pkg.importSymbol(Symbol.intern("String"), String);
 
-export const ClassArray = Class.fromJSConstructor(Array, "wonderscript.lang");
-export const ClassHash = Class.fromJSConstructor(Hash, "wonderscript.lang");
-export const ClassSet = Class.fromJSConstructor(Set, "wonderscript.lang");
-export const ClassKeyword = Class.fromJSConstructor(
-  Keyword,
-  "wonderscript.lang"
-);
-export const ClassSymbol = Class.fromJSConstructor(Symbol, "wonderscript.lang");
+  const ClassArray = Class.fromJSConstructor(Array, "wonderscript.lang");
+  pkg.importSymbol(Symbol.intern("Array"), ClassArray);
+
+  const ClassHash = Class.fromJSConstructor(Hash, "wonderscript.lang");
+  pkg.importSymbol(Symbol.intern("Hash"), ClassHash);
+
+  const ClassSet = Class.fromJSConstructor(Set, "wonderscript.lang");
+  pkg.importSymbol(Symbol.intern("Set"), ClassSet);
+
+  const ClassKeyword = Class.fromJSConstructor(
+    Keyword,
+    "wonderscript.lang"
+  );
+  pkg.importSymbol(Symbol.intern("Keyword"), ClassKeyword);
+
+  const ClassSymbol = Class.fromJSConstructor(
+    Symbol,
+    "wonderscript.lang"
+  );
+  pkg.importSymbol(Symbol.intern("Symbol"), ClassSymbol);
+
+  const ClassClass = Class.fromJSConstructor(Class, "wonderscript.lang");
+  pkg.importSymbol(Symbol.intern("Class"), ClassClass);
+
+  const ClassPackage = Class.fromJSConstructor(
+    Package,
+    "wonderscript.lang"
+  );
+  pkg.importSymbol(Symbol.intern("Package"), ClassPackage);
+
+  return pkg;
+}
+
+export function buildJSPackage() {
+  const pkg = new Package(Symbol.intern("WonderScript::JS"));
+
+  const JSObject = Class.fromJSSingleton(Object, "Object");
+  pkg.importSymbol(Symbol.intern("JSObject"), JSObject);
+
+  const JSFunction = Class.fromJSConstructor(Function);
+  pkg.importSymbol(Symbol.intern("JSFunction"), JSFunction);
+
+  const JSMath = Class.fromJSSingleton(Math, "Math");
+  pkg.importSymbol(Symbol.intern("JSMath"), JSMath);
+
+  const JSConsole = Class.fromJSSingleton(console, "console");
+  pkg.importSymbol(Symbol.intern("JSConsole"), JSConsole);
+
+  return pkg;
+}
+
