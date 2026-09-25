@@ -8,8 +8,26 @@ import { Keyword } from "./lang/Keyword";
 import { Symbol } from "./lang/Symbol";
 import { Set } from "./lang/Set";
 import { Array } from "./lang/Array";
+import { ObjectPool } from "./lang/ObjectPool";
 
 export class Interpreter {
+  #pool: ObjectPool;
+  #corePkg: Package;
+  #jsPkg: Package;
+
+  constructor() {
+    const NilClass = new PrimitiveType("NilClass", "wonderscript.lang");
+    const TrueClass = new PrimitiveType("TrueClass", "wonderscript.lang");
+    const FalseClass = new PrimitiveType("FalseClass", "wonderscript.lang");
+    const Float = new PrimitiveType("Float", "wonderscript.lang");
+    const String = new PrimitiveType("String", "wonderscript.lang");
+
+    this.#pool = new ObjectPool(NilClass, TrueClass, FalseClass, Float, String);
+
+    this.#corePkg = buildCorePackage(NilClass, TrueClass, FalseClass, Float, String);
+    this.#jsPkg = buildJSPackage();
+  }
+
   readString(input: string): unknown {
     return readString(input);
   }
@@ -19,37 +37,29 @@ export class Interpreter {
   }
 }
 
-export function buildCorePackage() {
+export function buildCorePackage(NilClass: PrimitiveType, TrueClass: PrimitiveType, FalseClass: PrimitiveType, Float: PrimitiveType, String: PrimitiveType) {
   const pkg = new Package(Symbol.intern("WonderScript::Core"));
 
-  const NilClass = new PrimitiveType("NilClass", "wonderscript.lang");
   NilClass.defineMethod(new UnaryMessage("to_s"), () => "");
   NilClass.defineMethod(new UnaryMessage("true?"), () => false);
   NilClass.defineMethod(new UnaryMessage("false?"), () => true);
   pkg.importSymbol(Symbol.intern("NilClass"), NilClass);
 
-  const TrueClass = new PrimitiveType("TrueClass", "wonderscript.lang");
   TrueClass.defineMethod(new UnaryMessage("to_s"), () => "true");
   TrueClass.defineMethod(new UnaryMessage("true?"), () => true);
   TrueClass.defineMethod(new UnaryMessage("false?"), () => false);
   pkg.importSymbol(Symbol.intern("TrueClass"), TrueClass);
 
-  const FalseClass = new PrimitiveType(
-    "FalseClass",
-    "wonderscript.lang"
-  );
   FalseClass.defineMethod(new UnaryMessage("to_s"), () => "false");
   FalseClass.defineMethod(new UnaryMessage("true?"), () => false);
   FalseClass.defineMethod(new UnaryMessage("false?"), () => true);
   pkg.importSymbol(Symbol.intern("FalseClass"), FalseClass);
 
-  const Float = new PrimitiveType("Float", "wonderscript.lang");
   Float.defineMethod(new UnaryMessage("to_s"), (self: number) => `${self}`);
   Float.defineMethod(new UnaryMessage("true?"), () => true);
   Float.defineMethod(new UnaryMessage("false?"), () => false);
   pkg.importSymbol(Symbol.intern("Float"), Float);
 
-  const String = new PrimitiveType("String", "wonderscript.lang");
   String.defineMethod(new UnaryMessage("to_s"), (self: string) => self);
   String.defineMethod(new UnaryMessage("true?"), () => true);
   String.defineMethod(new UnaryMessage("false?"), () => false);
