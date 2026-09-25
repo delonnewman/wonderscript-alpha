@@ -16,6 +16,7 @@ import {
   PrimitiveType,
   True,
   TrueClass,
+  String,
 } from "./lang/primitive";
 
 export * from "./lang/Meta";
