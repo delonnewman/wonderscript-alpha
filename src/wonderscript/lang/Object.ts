@@ -1,5 +1,4 @@
 import { Class } from "./Class";
-import { FalseClass, Float, NilClass, String, TrueClass } from "./primitive";
 import { stringHash } from "./utils";
 
 export type ObjectValue = boolean | null | undefined | string | number;
@@ -19,12 +18,15 @@ export enum ObjectType {
   REF = 1 << 1,
 }
 
-const POOL: Class[] = [NilClass, TrueClass, FalseClass, Float, String];
 const TAG = "wso$";
 
-export type ObjectPool = typeof ObjectPool;
+export class ObjectPool {
+  #pool: Class[];
 
-export const ObjectPool = {
+  constructor(NilClass: Class, TrueClass: Class, FalseClass: Class, Float: Class, String: Class) {
+    this.#pool = [NilClass, TrueClass, FalseClass, Float, String];
+  }
+
   /**
    * Allocate a new object and return it.
    *
@@ -32,9 +34,9 @@ export const ObjectPool = {
    * @param type
    */
   allocate(klass: Class, type = ObjectType.REF) {
-    POOL.push(klass);
-    return `${TAG}$${POOL.length - 1}$${type}`;
-  },
+    this.#pool.push(klass);
+    return `${TAG}$${this.#pool.length - 1}$${type}`;
+  }
 
   /**
    * Return the id of the object.
@@ -64,7 +66,7 @@ export const ObjectPool = {
 
     const [_tag, id, _type] = object.split("$");
     return Number(id);
-  },
+  }
 
   /**
    * Return true if the value is a valid object, otherwise return false.
@@ -80,21 +82,21 @@ export const ObjectPool = {
     }
 
     return false;
-  },
+  }
 
   /**
    * Return the type of the object.
    *
    * @param object
    */
-  type(object: ObjectValue): ObjectType {
+  objectType(object: ObjectValue): ObjectType {
     if (typeof object !== 'string' || !object.startsWith(TAG)) {
       return ObjectType.VALUE;
     }
 
     const [_tag, _id, type] = object.split("$");
     return Number(type);
-  },
+  }
 
   /**
    * Return the class of the object.
@@ -103,18 +105,18 @@ export const ObjectPool = {
    */
   class(object: ObjectValue) {
     if (typeof object === 'number') {
-      return POOL[3];
+      return this.#pool[3];
     }
 
     if (typeof object === 'string') {
-      return POOL[4];
+      return this.#pool[4];
     }
 
     const id = this.id(object);
-    const klass = POOL[id];
+    const klass = this.#pool[id];
     if (klass === undefined) {
       throw new Error(`No class found for object ${object}`);
     }
     return klass;
-  },
-};
+  }
+}
