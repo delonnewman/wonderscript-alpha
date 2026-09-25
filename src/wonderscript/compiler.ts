@@ -6,7 +6,7 @@ export const compile = emit;
 
 export { evalString } from "./compiler/evalString";
 export { compileString } from "./compiler/compileString";
-export { readString } from "./compiler/readString";
+export { readString } from "./reader/readString";
 export { macroexpand } from "./compiler/macroexpand";
 export { prStr } from "./compiler/prStr";
 

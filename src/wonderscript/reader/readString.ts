@@ -1,6 +1,6 @@
-import { PushBackReader } from "../reader/PushBackReader";
-import { read } from "../reader/read";
-import { EOF, Form, isEOF } from "./core";
+import { PushBackReader } from "./PushBackReader";
+import { read } from "./read";
+import { EOF, Form, isEOF } from "../compiler/core";
 
 export type ReadForm = {
   form: Form;
