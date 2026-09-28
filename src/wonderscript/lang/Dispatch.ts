@@ -1,6 +1,5 @@
 import { Message } from "./Message";
-import { ObjectPool, ObjectValue } from "./ObjectPool";
-import { Symbol } from "./Symbol";
+import { ObjectPool } from "./ObjectPool";
 import { Context } from "./Context";
 
 export * from "./Dispatch/Action";
@@ -19,8 +18,6 @@ export * from "./Dispatch/Script";
  *      (js/console log a b)
  *      (a + b))
  */
-
-export type ObjectRef = ObjectValue | Symbol;
 
 export interface Dispatch {
   dispatch(pool: ObjectPool, ctx: Context): unknown;

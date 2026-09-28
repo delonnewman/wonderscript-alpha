@@ -1,16 +1,18 @@
 import { Class } from "./Class";
 import { stringHash } from "./utils";
+import { Keyword } from "./Keyword";
+import { Symbol } from "./Symbol";
 
-export type ObjectValue = boolean | null | undefined | string | number;
+export type ObjectValue = boolean | null | undefined | string | number | Keyword | Symbol;
 
 /**
  * Object value layout
  *
  * "wso$45$2"
- *    |  |  |
- *    |  |  +--- type
- *    |  +---- id
- *    +---- tag
+ *   |  |  |
+ *   |  |  +--- type
+ *   |  +---- id
+ *   +---- tag
  */
 
 export enum ObjectType {
@@ -20,11 +22,47 @@ export enum ObjectType {
 
 const TAG = "wso$";
 
+export type Foundation = {
+  NilClass: Class,
+  TrueClass: Class,
+  FalseClass: Class,
+  Float: Class,
+  String: Class,
+  Class: Class,
+  Keyword: Class,
+  Symbol: Class,
+}
+
 export class ObjectPool {
   #pool: Class[];
+  #foundation = {
+    NilClass: 0,
+    FalseClass: 1,
+    TrueClass: 2,
+    Float: 3,
+    String: 4,
+    Symbol: 5,
+    Class: 6,
+    Keyword: 7,
+  };
 
-  constructor(NilClass: Class, TrueClass: Class, FalseClass: Class, Float: Class, String: Class) {
-    this.#pool = [NilClass, TrueClass, FalseClass, Float, String];
+  constructor(foundation: Foundation) {
+    const pool = [];
+    for (const [klass, id] of Object.entries(this.#foundation)) {
+      const obj = foundation[klass as keyof Foundation];
+      if (obj === undefined) throw new Error(`Foundation class ${klass} is not provided`);
+      pool[id] = obj;
+    }
+    this.#pool = pool;
+  }
+
+  foundationClassId(klass: keyof Foundation) {
+    return this.#foundation[klass];
+  }
+
+  foundationClassObject(klass: keyof Foundation) {
+    const id = this.foundationClassId(klass);
+    return this.#pool[id];
   }
 
   /**
@@ -45,23 +83,27 @@ export class ObjectPool {
    */
   id(object: ObjectValue): number {
     if (object === null || object === undefined) {
-      return 0;
+      return this.foundationClassId('NilClass');
     }
 
     if (object === true) {
-      return 1;
+      return this.foundationClassId('TrueClass');
     }
 
     if (object === false) {
-      return 2;
+      return this.foundationClassId('FalseClass');
     }
 
-    if (typeof object === 'number') {
+    if (typeof object === "number") {
       return object;
     }
 
-    if (typeof object === 'string' && !object.startsWith(TAG)) {
+    if (typeof object === "string" && !object.startsWith(TAG)) {
       return stringHash(object);
+    }
+
+    if (object instanceof Keyword || object instanceof Symbol) {
+      return object.hashCode();
     }
 
     const [_tag, id, _type] = object.split("$");
@@ -76,12 +118,12 @@ export class ObjectPool {
   isObject(object: unknown): object is `wso$${number}$${number}` {
     if (object === null || object === undefined) return true;
 
-    if (typeof object === 'boolean' || typeof object === 'number') return true;
+    if (typeof object === "boolean" || typeof object === "number") return true;
     if (typeof object === "string" && object.startsWith(TAG)) {
       return true;
     }
 
-    return false;
+    return object instanceof Keyword || object instanceof Symbol;
   }
 
   /**
@@ -90,7 +132,7 @@ export class ObjectPool {
    * @param object
    */
   objectType(object: ObjectValue): ObjectType {
-    if (typeof object !== 'string' || !object.startsWith(TAG)) {
+    if (typeof object !== "string" || !object.startsWith(TAG)) {
       return ObjectType.VALUE;
     }
 
@@ -104,12 +146,12 @@ export class ObjectPool {
    * @param object
    */
   class(object: ObjectValue) {
-    if (typeof object === 'number') {
-      return this.#pool[3];
+    if (typeof object === "number") {
+      return this.foundationClassObject('Float');
     }
 
-    if (typeof object === 'string') {
-      return this.#pool[4];
+    if (typeof object === "string") {
+      return this.foundationClassObject('String');
     }
 
     const id = this.id(object);

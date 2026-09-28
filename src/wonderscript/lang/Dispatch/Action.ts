@@ -2,13 +2,13 @@ import { Message } from "../Message";
 import { ObjectPool, ObjectValue } from "../ObjectPool";
 import { Context } from "../Context";
 import { Symbol } from "../Symbol";
-import { Dispatch, ObjectRef } from "../Dispatch";
+import { Dispatch } from "../Dispatch";
 
 export class Action implements Message, Dispatch {
-  #object: ObjectRef;
+  #object: ObjectValue;
   #message: Message;
 
-  constructor(object: ObjectRef, message: Message) {
+  constructor(object: ObjectValue, message: Message) {
     this.#object = object;
     this.#message = message;
   }

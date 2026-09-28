@@ -27,7 +27,7 @@ export class Vector<T = unknown> {
     return new Vector(...Array.prototype.slice.apply(this, args));
   }
 
-  map<T>(...args: unknown[]): Vector {
+  map<T>(...args: unknown[]): Vector<T> {
     return new Vector<T>(...Array.prototype.map.apply(this, args));
   }
 

@@ -2,13 +2,13 @@ import { Message } from "../Message";
 import { ObjectPool, ObjectValue } from "../ObjectPool";
 import { Context } from "../Context";
 import { Symbol } from "../Symbol";
-import { Dispatch, ObjectRef, SequentialDispatch } from "../Dispatch";
+import { SequentialDispatch } from "../Dispatch";
 
 export class Dialog implements SequentialDispatch {
-  #subject: ObjectRef | Dialog;
+  #subject: ObjectValue | Dialog;
   #message: Message;
 
-  static bind(obj: ObjectRef, msg: Message) {
+  static bind(obj: ObjectValue, msg: Message) {
     return new this(obj, msg);
   }
 
@@ -20,7 +20,7 @@ export class Dialog implements SequentialDispatch {
     return this.#message;
   }
 
-  constructor(subject: ObjectRef | Dialog, message: Message) {
+  constructor(subject: ObjectValue | Dialog, message: Message) {
     this.#subject = subject;
     this.#message = message;
   }
