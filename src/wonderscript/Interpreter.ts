@@ -8,7 +8,8 @@ import { Keyword } from "./lang/Keyword";
 import { Symbol } from "./lang/Symbol";
 import { Set } from "./lang/Set";
 import { Array } from "./lang/Array";
-import { ObjectPool } from "./lang/ObjectPool";
+import { Foundation, ObjectPool } from "./lang/ObjectPool";
+import { Vector } from "./lang/Vector";
 
 export class Interpreter {
   #pool: ObjectPool;
@@ -21,10 +22,31 @@ export class Interpreter {
     const FalseClass = new PrimitiveType("FalseClass", "wonderscript.lang");
     const Float = new PrimitiveType("Float", "wonderscript.lang");
     const String = new PrimitiveType("String", "wonderscript.lang");
+    const ClassClass = Class.fromJSConstructor(Class, "wonderscript.lang");
+    const ClassArray = Class.fromJSConstructor(Array, "wonderscript.lang");
+    const ClassHash = Class.fromJSConstructor(Hash, "wonderscript.lang");
+    const ClassSet = Class.fromJSConstructor(Set, "wonderscript.lang");
+    const ClassKeyword = Class.fromJSConstructor(Keyword, "wonderscript.lang");
+    const ClassSymbol = Class.fromJSConstructor(Symbol, "wonderscript.lang");
+    const ClassVector = Class.fromJSConstructor(Vector, "wonderscript.lang");
 
-    this.#pool = new ObjectPool(NilClass, TrueClass, FalseClass, Float, String);
+    const foundation = {
+      NilClass,
+      TrueClass,
+      FalseClass,
+      Float,
+      String,
+      Symbol: ClassSymbol,
+      Class: ClassClass,
+      Keyword: ClassKeyword,
+      Array: ClassArray,
+      Hash: ClassHash,
+      Set: ClassSet,
+      Vector: ClassVector,
+    };
 
-    this.#corePkg = buildCorePackage(NilClass, TrueClass, FalseClass, Float, String);
+    this.#pool = new ObjectPool(foundation);
+    this.#corePkg = buildCorePackage(foundation);
     this.#jsPkg = buildJSPackage();
   }
 
@@ -38,57 +60,42 @@ export class Interpreter {
   }
 }
 
-export function buildCorePackage(NilClass: PrimitiveType, TrueClass: PrimitiveType, FalseClass: PrimitiveType, Float: PrimitiveType, String: PrimitiveType) {
+export function buildCorePackage(foundation: Foundation) {
   const pkg = new Package(Symbol.intern("wonderscript.core"));
 
-  NilClass.defineMethod(new UnaryMessage("to_s"), () => "");
-  NilClass.defineMethod(new UnaryMessage("true?"), () => false);
-  NilClass.defineMethod(new UnaryMessage("false?"), () => true);
-  pkg.importSymbol(Symbol.intern("NilClass"), NilClass);
+  foundation.NilClass.defineMethod(new UnaryMessage("to_s"), () => "");
+  foundation.NilClass.defineMethod(new UnaryMessage("true?"), () => false);
+  foundation.NilClass.defineMethod(new UnaryMessage("false?"), () => true);
+  pkg.importSymbol(Symbol.intern("NilClass"), foundation.NilClass);
 
-  TrueClass.defineMethod(new UnaryMessage("to_s"), () => "true");
-  TrueClass.defineMethod(new UnaryMessage("true?"), () => true);
-  TrueClass.defineMethod(new UnaryMessage("false?"), () => false);
-  pkg.importSymbol(Symbol.intern("TrueClass"), TrueClass);
+  foundation.TrueClass.defineMethod(new UnaryMessage("to_s"), () => "true");
+  foundation.TrueClass.defineMethod(new UnaryMessage("true?"), () => true);
+  foundation.TrueClass.defineMethod(new UnaryMessage("false?"), () => false);
+  pkg.importSymbol(Symbol.intern("TrueClass"), foundation.TrueClass);
 
-  FalseClass.defineMethod(new UnaryMessage("to_s"), () => "false");
-  FalseClass.defineMethod(new UnaryMessage("true?"), () => false);
-  FalseClass.defineMethod(new UnaryMessage("false?"), () => true);
-  pkg.importSymbol(Symbol.intern("FalseClass"), FalseClass);
+  foundation.FalseClass.defineMethod(new UnaryMessage("to_s"), () => "false");
+  foundation.FalseClass.defineMethod(new UnaryMessage("true?"), () => false);
+  foundation.FalseClass.defineMethod(new UnaryMessage("false?"), () => true);
+  pkg.importSymbol(Symbol.intern("FalseClass"), foundation.FalseClass);
 
-  Float.defineMethod(new UnaryMessage("to_s"), (self: number) => `${self}`);
-  Float.defineMethod(new UnaryMessage("true?"), () => true);
-  Float.defineMethod(new UnaryMessage("false?"), () => false);
-  pkg.importSymbol(Symbol.intern("Float"), Float);
+  foundation.Float.defineMethod(new UnaryMessage("to_s"), (self: number) => `${self}`);
+  foundation.Float.defineMethod(new UnaryMessage("true?"), () => true);
+  foundation.Float.defineMethod(new UnaryMessage("false?"), () => false);
+  pkg.importSymbol(Symbol.intern("Float"), foundation.Float);
 
-  String.defineMethod(new UnaryMessage("to_s"), (self: string) => self);
-  String.defineMethod(new UnaryMessage("true?"), () => true);
-  String.defineMethod(new UnaryMessage("false?"), () => false);
-  pkg.importSymbol(Symbol.intern("String"), String);
+  foundation.String.defineMethod(new UnaryMessage("to_s"), (self: string) => self);
+  foundation.String.defineMethod(new UnaryMessage("true?"), () => true);
+  foundation.String.defineMethod(new UnaryMessage("false?"), () => false);
+  pkg.importSymbol(Symbol.intern("String"), foundation.String);
 
-  const ClassArray = Class.fromJSConstructor(Array, "wonderscript.lang");
-  pkg.importSymbol(Symbol.intern("Array"), ClassArray);
-
-  const ClassHash = Class.fromJSConstructor(Hash, "wonderscript.lang");
-  pkg.importSymbol(Symbol.intern("Hash"), ClassHash);
-
-  const ClassSet = Class.fromJSConstructor(Set, "wonderscript.lang");
-  pkg.importSymbol(Symbol.intern("Set"), ClassSet);
-
-  const ClassKeyword = Class.fromJSConstructor(
-    Keyword,
-    "wonderscript.lang"
-  );
-  pkg.importSymbol(Symbol.intern("Keyword"), ClassKeyword);
-
-  const ClassSymbol = Class.fromJSConstructor(
-    Symbol,
-    "wonderscript.lang"
-  );
-  pkg.importSymbol(Symbol.intern("Symbol"), ClassSymbol);
+  pkg.importSymbol(Symbol.intern("Array"), foundation.Array);
+  pkg.importSymbol(Symbol.intern("Hash"), foundation.Hash);
+  pkg.importSymbol(Symbol.intern("Set"), foundation.Set);
+  pkg.importSymbol(Symbol.intern("Keyword"), foundation.Keyword);
+  pkg.importSymbol(Symbol.intern("Symbol"), foundation.Symbol);
 
   const ClassClass = Class.fromJSConstructor(Class, "wonderscript.lang");
-  pkg.importSymbol(Symbol.intern("Class"), ClassClass);
+  pkg.importSymbol(Symbol.intern("Class"), foundation.Class);
 
   const ClassPackage = Class.fromJSConstructor(
     Package,

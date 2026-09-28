@@ -1,4 +1,9 @@
-export class Vector<T = unknown> {
+import { hashCode, hashCombine } from "./utils";
+import { Hashable } from "./Value";
+
+const HASH_SEED = 7996369154561194;
+
+export class Vector<T = unknown> implements Hashable {
   readonly length: number;
 
   static fromArray<T = unknown>(array: T[]) {
@@ -41,6 +46,14 @@ export class Vector<T = unknown> {
 
   toArray() {
     return Array.prototype.slice.call(this);
+  }
+
+  hashCode() {
+    return Array.prototype.reduce.call(
+      this,
+      (n: number, x: number) => hashCombine(n, hashCode(x)),
+      HASH_SEED
+    );
   }
 
   prepend(value: T) {

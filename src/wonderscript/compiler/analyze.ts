@@ -25,15 +25,6 @@ export function isSelfEvaluating(form: Form): form is SelfEvaluating {
   );
 }
 
-export function isCollection(form: Form): form is Collection {
-  return (
-    form instanceof Array ||
-    form instanceof Hash ||
-    form instanceof Set ||
-    form instanceof Vector
-  );
-}
-
 export function analyze(form: Form): Syntax {
   if (isSelfEvaluating(form)) {
     return form;
@@ -56,13 +47,10 @@ export function analyze(form: Form): Syntax {
   }
 
   if (form.length === 0) {
-    return form;
+    return form as Array;
   }
 
-  if (!(form[0] instanceof Symbol)) {
-    return new Dialog(form[0], Message.build(form.slice(1) as MessageForm))
-  }
-
+  return new Dialog(analyze(form[0]), Message.build(form.slice(1).map(analyze) as MessageForm))
 }
 
 export function analyzeHash(form: Hash){

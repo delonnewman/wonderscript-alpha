@@ -2,8 +2,24 @@ import { Class } from "./Class";
 import { stringHash } from "./utils";
 import { Keyword } from "./Keyword";
 import { Symbol } from "./Symbol";
+import { Hash } from "./Hash";
+import { Vector } from "./Vector";
+import { Set } from "./Set";
+import { Array } from "./Array";
+import { isHashable } from "./Value";
 
-export type ObjectValue = boolean | null | undefined | string | number | Keyword | Symbol;
+export type ObjectValue =
+    boolean
+  | null
+  | undefined
+  | string
+  | number
+  | Keyword
+  | Symbol
+  | Array
+  | Hash
+  | Set
+  | Vector;
 
 /**
  * Object value layout
@@ -31,6 +47,10 @@ export type Foundation = {
   Class: Class,
   Keyword: Class,
   Symbol: Class,
+  Array: Class,
+  Hash: Class,
+  Set: Class,
+  Vector: Class,
 }
 
 export class ObjectPool {
@@ -44,13 +64,18 @@ export class ObjectPool {
     Symbol: 5,
     Class: 6,
     Keyword: 7,
+    Array: 8,
+    Hash: 9,
+    Set: 10,
+    Vector: 11,
   };
 
   constructor(foundation: Foundation) {
     const pool = [];
     for (const [klass, id] of Object.entries(this.#foundation)) {
       const obj = foundation[klass as keyof Foundation];
-      if (obj === undefined) throw new Error(`Foundation class ${klass} is not provided`);
+      if (obj === undefined)
+        throw new Error(`Foundation class ${klass} is not provided`);
       pool[id] = obj;
     }
     this.#pool = pool;
@@ -83,15 +108,15 @@ export class ObjectPool {
    */
   id(object: ObjectValue): number {
     if (object === null || object === undefined) {
-      return this.foundationClassId('NilClass');
+      return this.foundationClassId("NilClass");
     }
 
     if (object === true) {
-      return this.foundationClassId('TrueClass');
+      return this.foundationClassId("TrueClass");
     }
 
     if (object === false) {
-      return this.foundationClassId('FalseClass');
+      return this.foundationClassId("FalseClass");
     }
 
     if (typeof object === "number") {
@@ -102,7 +127,7 @@ export class ObjectPool {
       return stringHash(object);
     }
 
-    if (object instanceof Keyword || object instanceof Symbol) {
+    if (isHashable(object) || object instanceof Vector) {
       return object.hashCode();
     }
 
@@ -147,11 +172,11 @@ export class ObjectPool {
    */
   class(object: ObjectValue) {
     if (typeof object === "number") {
-      return this.foundationClassObject('Float');
+      return this.foundationClassObject("Float");
     }
 
     if (typeof object === "string") {
-      return this.foundationClassObject('String');
+      return this.foundationClassObject("String");
     }
 
     const id = this.id(object);

@@ -1,9 +1,8 @@
 import { murmurhash3_32_gc } from "./murmur";
 import { Form } from "../compiler/core";
 import { isString } from "../js";
-import { Vector } from "./Vector";
 import { prStr } from "../compiler/prStr";
-import { isValue, Value } from "./Value";
+import { isHashable, Value } from "./Value";
 
 export const stringHash = (function () {
   const SEED = Math.random() * 10000;
@@ -36,11 +35,11 @@ export function hashCode(form: Form | Value | undefined | null): number {
     return stringHash(form);
   }
 
-  if (isValue(form)) {
+  if (isHashable(form)) {
     return form.hashCode();
   }
 
-  if (Array.isArray(form) || form instanceof Vector) {
+  if (Array.isArray(form)) {
     return Array.prototype.reduce.call(
       form,
       (n: number, x: number) => hashCombine(n, hashCode(x)),

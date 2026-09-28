@@ -2,10 +2,10 @@ import { Message } from "../Message";
 import { ObjectPool, ObjectValue } from "../ObjectPool";
 import { Context } from "../Context";
 import { Symbol } from "../Symbol";
-import { SequentialDispatch } from "../Dispatch";
+import { Dispatch, SequentialDispatch } from "../Dispatch";
 
 export class Dialog implements SequentialDispatch {
-  #subject: ObjectValue | Dialog;
+  #subject: ObjectValue | Dispatch;
   #message: Message;
 
   static bind(obj: ObjectValue, msg: Message) {
@@ -20,7 +20,7 @@ export class Dialog implements SequentialDispatch {
     return this.#message;
   }
 
-  constructor(subject: ObjectValue | Dialog, message: Message) {
+  constructor(subject: ObjectValue | Dispatch, message: Message) {
     this.#subject = subject;
     this.#message = message;
   }
