@@ -1,13 +1,13 @@
-import { Form } from "./core";
-import { Dialog, Dispatch } from "../lang/Dispatch";
-import { Keyword } from "../lang/Keyword";
-import { Hash } from "../lang/Hash";
-import { Vector } from "../lang/Vector";
-import { Array } from "../lang/Array";
-import { Set } from "../lang/Set";
-import { Symbol } from "../lang/Symbol";
-import { prStr } from "./prStr";
-import { Message, MessageForm } from "../lang/Message";
+import { Form } from "./compiler/core";
+import { Dialog, Dispatch } from "./lang/Dispatch";
+import { Keyword } from "./lang/Keyword";
+import { Hash } from "./lang/Hash";
+import { Vector } from "./lang/Vector";
+import { Array } from "./lang/Array";
+import { Set } from "./lang/Set";
+import { Symbol } from "./lang/Symbol";
+import { prStr } from "./compiler/prStr";
+import { Message, MessageForm } from "./lang/Message";
 
 export type SelfEvaluating = number | string | null | undefined | boolean | Symbol | Keyword;
 export type Collection = Array | Hash | Set | Vector<Syntax>;
