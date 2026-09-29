@@ -11,7 +11,7 @@ import { Message, MessageForm } from "../lang/Message";
 
 export type SelfEvaluating = number | string | null | undefined | boolean | Symbol | Keyword;
 export type Collection = Array | Hash | Set | Vector<Syntax>;
-export type Syntax = Dispatch | Collection | SelfEvaluating;
+export type Syntax = Dispatch | Message | Collection | SelfEvaluating;
 
 export function isSelfEvaluating(form: Form): form is SelfEvaluating {
   return (
@@ -50,7 +50,11 @@ export function analyze(form: Form): Syntax {
     return form as Array;
   }
 
-  return new Dialog(analyze(form[0]), Message.build(form.slice(1).map(analyze) as MessageForm))
+  if (form[0] instanceof Symbol) {
+    return Message.build(form.map(analyze) as MessageForm);
+  }
+
+  return new Dialog(analyze(form[0]), analyze(form.slice(1)) as MessageForm);
 }
 
 export function analyzeHash(form: Hash){
