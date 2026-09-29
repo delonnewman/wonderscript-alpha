@@ -4,7 +4,7 @@ import { Symbol } from "./Symbol";
 import { Message } from "./Message";
 import { ArgListMessage } from "./Message/ArgListMessage";
 
-export type MethodFn = (self: unknown, ...args: unknown[]) => unknown;
+export type MethodFn = (self: unknown, msg: Message) => unknown;
 
 export type JSClass = {
   $ws$Class?: Class;
@@ -93,11 +93,6 @@ export class Class implements Named, Message {
     if (method !== undefined) return method;
 
     throw new Error(`unknown method ${msg}`);
-  }
-
-  send(value: unknown, msg: Message) {
-    const method = this.findMethod(msg);
-    return method(value);
   }
 
   get subclasses() {
