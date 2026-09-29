@@ -1,18 +1,19 @@
-import { Named } from "./Named";
+import { Named, NullableString } from "./Named";
 import { Meta, MetaData } from "./Meta";
 import { Invokable } from "./Invokable";
 import { Comparable, Order } from "./Comparable";
 import { merge } from "./merge";
 import { Value } from "./Value";
 import { stringHash } from "./utils";
+import { Message } from "./Message";
 
 const SLASH = "/";
 
-export class Symbol<Name extends string = string>
-  implements Named<Name>, Meta, Invokable, Comparable, Value
+export class Symbol<Name extends string = string, Namespace extends NullableString = NullableString>
+  implements Named<Name, Namespace>, Meta, Invokable, Comparable, Value, Message
 {
   readonly #name: Name;
-  readonly #namespace?: string;
+  readonly #namespace: Namespace;
   readonly #meta?: MetaData;
 
   static CACHE = new Map<String, Symbol>();
@@ -28,15 +29,15 @@ export class Symbol<Name extends string = string>
     return this.intern(name, ns);
   }
 
-  static intern<Name extends string = string>(
+  static intern<Name extends string = string, Namespace extends NullableString = NullableString>(
     name: Name,
-    namespace?: string,
+    namespace?: Namespace,
     meta?: MetaData
-  ): Symbol<Name> {
-    return new this<Name>(name, namespace, meta);
+  ): Symbol<Name, Namespace> {
+    return new this<Name, Namespace>(name, namespace, meta);
   }
 
-  constructor(name: Name, namespace?: string, meta?: MetaData) {
+  constructor(name: Name, namespace?: Namespace, meta?: MetaData) {
     this.#name = name;
     this.#namespace = namespace;
     this.#meta = meta;
@@ -47,15 +48,15 @@ export class Symbol<Name extends string = string>
     return this.#meta;
   }
 
-  withMeta(data: MetaData): Symbol<Name> {
-    return new Symbol<Name>(
+  withMeta(data: MetaData): Symbol<Name, Namespace> {
+    return new Symbol<Name, Namespace>(
       this.#name,
       this.#namespace,
       merge(this.#meta, data)
     );
   }
 
-  withoutMeta(): Symbol<Name> {
+  withoutMeta(): Symbol<Name, Namespace> {
     return this.withMeta(null);
   }
 
@@ -63,11 +64,19 @@ export class Symbol<Name extends string = string>
     return this.#meta != null;
   }
 
+  get interned() {
+    if (this.#namespace) {
+      return `${this.#namespace}_${this.#name}`;
+    }
+
+    return `${this.#name}`;
+  }
+
   get name(): Name {
     return this.#name;
   }
 
-  get namespace(): string | null | undefined {
+  get namespace(): Namespace {
     return this.#namespace;
   }
 
@@ -75,7 +84,7 @@ export class Symbol<Name extends string = string>
     return this.#namespace != null;
   }
 
-  cmp(other: Symbol): Order {
+  cmp(other: Symbol<Name, Namespace>): Order {
     if (!(other instanceof Symbol))
       throw new Error("cannot compare symbols to other values");
 
@@ -97,7 +106,7 @@ export class Symbol<Name extends string = string>
     return stringHash(`'${this.toString()}`);
   }
 
-  invoke(...args: Map<Symbol<Name>, unknown>[]): unknown {
+  invoke(...args: Map<Symbol<Name, Namespace>, unknown>[]): unknown {
     if (args.length === 0) return null;
 
     if (args.length === 1) {
