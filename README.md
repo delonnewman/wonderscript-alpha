@@ -328,6 +328,9 @@ Based on https://opendylan.org/documentation/intro-dylan/objects.html
 ;; Binary Operators
 (1 + 2) ;; 1 is sent the message '(+ 2)
 
+;; ArgList
+(js/console log "Hi" "There!")
+
 ;; Data
 (defclass Person
   (has name :key true)
