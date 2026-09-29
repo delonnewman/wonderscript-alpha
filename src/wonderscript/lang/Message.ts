@@ -107,7 +107,7 @@ export const Message = {
     );
   },
 
-  compound(msg: CompoundMessageForm): Message {
+  compound(msg: CompoundMessageForm): BaseMessage {
     if (msg.length === 0) {
       throw new Error(`invalid arguments expected at least 1, got 0 instead`);
     }
@@ -127,9 +127,9 @@ export const Message = {
 
     const m = PRIMITIVE_MESSAGES.get(namedHash(name, ns));
     if (m !== undefined &&
-      typeof (m as { parse: (msg: MessageForm) => Message }).parse === "function"
+      typeof (m as { parse: (msg: MessageForm) => BaseMessage }).parse === "function"
     ) {
-      return (m as { parse: (msg: MessageForm) => Message }).parse(msg);
+      return (m as { parse: (msg: MessageForm) => BaseMessage }).parse(msg);
     }
 
     if (ns == 'js') {
@@ -139,16 +139,16 @@ export const Message = {
     return new ArgListMessage(name, ns, msg.slice(1));
   },
 
-  simple(msg: SimpleMessageForm): Message {
+  simple(msg: SimpleMessageForm): BaseMessage {
     if (msg instanceof Keyword || msg instanceof Symbol) {
       const name = msg.name;
       const ns = msg.namespace;
 
       const m = PRIMITIVE_MESSAGES.get(namedHash(name, ns));
       if (m !== undefined &&
-        typeof (m as { parse: (msg: MessageForm) => Message }).parse === "function"
+        typeof (m as { parse: (msg: MessageForm) => BaseMessage }).parse === "function"
       ) {
-        return (m as { parse: (msg: MessageForm) => Message }).parse(msg);
+        return (m as { parse: (msg: MessageForm) => BaseMessage }).parse(msg);
       }
 
       if (ns === "js.prop") {
