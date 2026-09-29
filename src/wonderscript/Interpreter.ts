@@ -10,6 +10,8 @@ import { Set } from "./lang/Set";
 import { Array } from "./lang/Array";
 import { Foundation, ObjectPool } from "./lang/ObjectPool";
 import { Vector } from "./lang/Vector";
+import { BinaryMessage } from "./lang/Message/BinaryMessage";
+import { Form } from "./compiler/core";
 
 export class Interpreter {
   #pool: ObjectPool;
@@ -50,6 +52,8 @@ export class Interpreter {
     this.#jsPkg = buildJSPackage();
   }
 
+  get pool() { return this.#pool }
+
   readString(input: string) {
     return readString(input);
   }
@@ -60,32 +64,56 @@ export class Interpreter {
   }
 }
 
+const binaryMethod = (self: Form, msg: BinaryMessage) => msg.sendTo(self);
+
 export function buildCorePackage(foundation: Foundation) {
   const pkg = new Package(Symbol.intern("wonderscript.core"));
 
-  foundation.NilClass.defineMethod(new UnaryMessage("to_s"), () => "");
-  foundation.NilClass.defineMethod(new UnaryMessage("true?"), () => false);
-  foundation.NilClass.defineMethod(new UnaryMessage("false?"), () => true);
+  foundation.NilClass.defineMethod(Symbol.intern("to_s"), () => "");
+  foundation.NilClass.defineMethod(Symbol.intern("true?"), () => false);
+  foundation.NilClass.defineMethod(Symbol.intern("false?"), () => true);
   pkg.importSymbol(Symbol.intern("NilClass"), foundation.NilClass);
 
-  foundation.TrueClass.defineMethod(new UnaryMessage("to_s"), () => "true");
-  foundation.TrueClass.defineMethod(new UnaryMessage("true?"), () => true);
-  foundation.TrueClass.defineMethod(new UnaryMessage("false?"), () => false);
+  foundation.TrueClass.defineMethod(Symbol.intern("to_s"), () => "true");
+  foundation.TrueClass.defineMethod(Symbol.intern("true?"), () => true);
+  foundation.TrueClass.defineMethod(Symbol.intern("false?"), () => false);
   pkg.importSymbol(Symbol.intern("TrueClass"), foundation.TrueClass);
 
-  foundation.FalseClass.defineMethod(new UnaryMessage("to_s"), () => "false");
-  foundation.FalseClass.defineMethod(new UnaryMessage("true?"), () => false);
-  foundation.FalseClass.defineMethod(new UnaryMessage("false?"), () => true);
+  foundation.FalseClass.defineMethod(Symbol.intern("to_s"), () => "false");
+  foundation.FalseClass.defineMethod(Symbol.intern("true?"), () => false);
+  foundation.FalseClass.defineMethod(Symbol.intern("false?"), () => true);
   pkg.importSymbol(Symbol.intern("FalseClass"), foundation.FalseClass);
 
-  foundation.Float.defineMethod(new UnaryMessage("to_s"), (self: number) => `${self}`);
-  foundation.Float.defineMethod(new UnaryMessage("true?"), () => true);
-  foundation.Float.defineMethod(new UnaryMessage("false?"), () => false);
+  foundation.Float.defineMethod(Symbol.intern("to_s"), (self: number) => `${self}`);
+  foundation.Float.defineMethod(Symbol.intern("true?"), () => true);
+  foundation.Float.defineMethod(Symbol.intern("false?"), () => false);
+  foundation.Float.defineMethod(
+    new BinaryMessage("+", undefined, Symbol.intern('x')),
+    binaryMethod,
+  );
+  foundation.Float.defineMethod(
+    new BinaryMessage("-", undefined, Symbol.intern("x")),
+    binaryMethod
+  );
+  foundation.Float.defineMethod(
+    new BinaryMessage("*", undefined, Symbol.intern("x")),
+    binaryMethod
+  );
+  foundation.Float.defineMethod(
+    new BinaryMessage("/", undefined, Symbol.intern("x")),
+    binaryMethod
+  );
+  foundation.Float.defineMethod(
+    new BinaryMessage("%", undefined, Symbol.intern("x")),
+    binaryMethod
+  );
+  includeComparable(foundation.Float);
   pkg.importSymbol(Symbol.intern("Float"), foundation.Float);
 
-  foundation.String.defineMethod(new UnaryMessage("to_s"), (self: string) => self);
-  foundation.String.defineMethod(new UnaryMessage("true?"), () => true);
-  foundation.String.defineMethod(new UnaryMessage("false?"), () => false);
+  foundation.String.defineMethod(Symbol.intern("to_s"), (self: string) => self);
+  foundation.String.defineMethod(Symbol.intern("true?"), () => true);
+  foundation.String.defineMethod(Symbol.intern("false?"), () => false);
+  includeComparable(foundation.String);
   pkg.importSymbol(Symbol.intern("String"), foundation.String);
 
   pkg.importSymbol(Symbol.intern("Array"), foundation.Array);
@@ -104,6 +132,26 @@ export function buildCorePackage(foundation: Foundation) {
   pkg.importSymbol(Symbol.intern("Package"), ClassPackage);
 
   return pkg;
+}
+
+function includeComparable(klass: Class) {
+  // TODO: add <=> and ==
+  klass.defineMethod(
+    new BinaryMessage("<", undefined, Symbol.intern("x")),
+    binaryMethod,
+  );
+  klass.defineMethod(
+    new BinaryMessage(">", undefined, Symbol.intern("x")),
+    binaryMethod
+  );
+  klass.defineMethod(
+    new BinaryMessage(">=", undefined, Symbol.intern("x")),
+    binaryMethod
+  );
+  klass.defineMethod(
+    new BinaryMessage("<=", undefined, Symbol.intern("x")),
+    binaryMethod
+  );
 }
 
 export function buildJSPackage() {
