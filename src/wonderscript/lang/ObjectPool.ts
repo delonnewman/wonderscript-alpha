@@ -66,13 +66,21 @@ const FOUNDATION_MAP = {
   TrueClass: "Class",
   true: "TrueClass",
   Float: "Class",
+  FloatInstances: "Float",
   String: "Class",
+  StringInstances: "String",
   Symbol: "Class",
+  SymbolInstances: "Symbol",
   Keyword: "Class",
+  KeywordInstances: "Keyword",
   Array: "Class",
+  ArrayInstances: "Array",
   Hash: "Class",
+  HashInstances: "Hash",
   Set: "Class",
+  SetInstances: "Set",
   Vector: "Class",
+  VectorInstances: "Vector",
 };
 
 type FoundationMap = typeof FOUNDATION_MAP;
@@ -105,12 +113,12 @@ export class ObjectPool {
     return this.#pool;
   }
 
-  foundationObjectId(name: FoundationObjectName) {
-    return this.#foundation.get(name);
+  foundationObjectId(object: FoundationObjectName) {
+    return this.#foundation.get(object);
   }
 
-  foundationClassObject(klass: FoundationClassName) {
-    const id = this.foundationObjectId(klass);
+  foundationClassObject(object: FoundationObjectName) {
+    const id = this.foundationObjectId(object);
     return this.#pool[id];
   }
 
@@ -207,35 +215,35 @@ export class ObjectPool {
    */
   class(object: ObjectValue) {
     if (typeof object === "number") {
-      return this.foundationClassObject("Float");
+      return this.foundationClassObject("FloatInstances");
     }
 
     if (typeof object === "string") {
-      return this.foundationClassObject("String");
+      return this.foundationClassObject("StringInstances");
     }
 
     if (object instanceof Keyword) {
-      return this.foundationClassObject("Keyword");
+      return this.foundationClassObject("KeywordInstances");
     }
 
     if (object instanceof Symbol) {
-      return this.foundationClassObject("Symbol");
+      return this.foundationClassObject("SymbolInstances");
     }
 
     if (object instanceof Array) {
-      return this.foundationClassObject("Array");
+      return this.foundationClassObject("ArrayInstances");
     }
 
     if (object instanceof Hash) {
-      return this.foundationClassObject("Hash");
+      return this.foundationClassObject("HashInstances");
     }
 
     if (object instanceof Set) {
-      return this.foundationClassObject("Set");
+      return this.foundationClassObject("SetInstances");
     }
 
     if (object instanceof Vector) {
-      return this.foundationClassObject("Vector");
+      return this.foundationClassObject("VectorInstances");
     }
 
     const id = this.id(object);
