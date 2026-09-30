@@ -209,11 +209,36 @@ export class ObjectPool {
       return this.foundationClassObject("String");
     }
 
+    if (object instanceof Keyword) {
+      return this.foundationClassObject("Keyword");
+    }
+
+    if (object instanceof Symbol) {
+      return this.foundationClassObject("Symbol");
+    }
+
+    if (object instanceof Array) {
+      return this.foundationClassObject("Array");
+    }
+
+    if (object instanceof Hash) {
+      return this.foundationClassObject("Hash");
+    }
+
+    if (object instanceof Set) {
+      return this.foundationClassObject("Set");
+    }
+
+    if (object instanceof Vector) {
+      return this.foundationClassObject("Vector");
+    }
+
     const id = this.id(object);
     const klass = this.#pool[id];
     if (klass === undefined) {
       throw new Error(`No class found for object ${object}`);
     }
+
     return klass;
   }
 }
