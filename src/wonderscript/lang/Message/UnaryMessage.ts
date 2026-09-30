@@ -6,11 +6,14 @@ import { emit } from "../../compiler/emit";
 import { jsEval } from "../../compiler/jsEval";
 import { Symbol } from "../Symbol";
 import { Keyword } from "../Keyword";
-import { Vector } from "../Vector";
 
 const EMPTY_ARRAY = Object.freeze([]);
 
 export class UnaryMessage extends BaseMessage {
+  static jsOp(name: string) {
+    return new this(name, "js");
+  }
+
   static parse(msg: MessageForm): UnaryMessage {
     if (msg instanceof Symbol || msg instanceof Keyword) {
       return new this(msg.name, msg.namespace);

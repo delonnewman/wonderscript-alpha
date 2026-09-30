@@ -12,6 +12,10 @@ import { Keyword } from "../Keyword";
 import { Symbol } from "../Symbol";
 
 export class BinaryMessage extends BaseMessage {
+  static jsOp(name: string, other: Form) {
+    return new this(name, "js", other);
+  }
+
   static parse(msg: CompoundMessageForm): BinaryMessage {
     const [tag, other] = msg;
 
