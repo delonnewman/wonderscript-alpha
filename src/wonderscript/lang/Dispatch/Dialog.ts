@@ -2,11 +2,11 @@ import { Message } from "../Message";
 import { ObjectPool, ObjectValue } from "../ObjectPool";
 import { Context } from "../Context";
 import { Symbol } from "../Symbol";
-import { Dispatch, SequentialDispatch } from "../Dispatch";
+import { Dispatch, isDispatch, SequentialDispatch } from "../Dispatch";
 
 export class Dialog implements SequentialDispatch {
   #subject: ObjectValue | Dispatch;
-  #message: Message;
+  #message: Message | Dispatch;
 
   static bind(obj: ObjectValue, msg: Message) {
     return new this(obj, msg);
@@ -20,7 +20,7 @@ export class Dialog implements SequentialDispatch {
     return this.#message;
   }
 
-  constructor(subject: ObjectValue | Dispatch, message: Message) {
+  constructor(subject: ObjectValue | Dispatch, message: Message | Dispatch) {
     this.#subject = subject;
     this.#message = message;
   }
@@ -30,17 +30,20 @@ export class Dialog implements SequentialDispatch {
   }
 
   dispatch(pool: ObjectPool, ctx: Context): unknown {
-    if (this.subject instanceof Dialog) {
-      return this.subject.dispatch(pool, ctx);
-    }
-
     let obj = this.subject;
-    if (this.subject instanceof Symbol) {
-      obj = ctx.lookup(this.subject).get(this.subject) as ObjectValue;
+    if (isDispatch(obj)) {
+      obj = obj.dispatch(pool, ctx) as ObjectValue;
+    }
+    if (obj instanceof Symbol) {
+      obj = ctx.lookup(obj).get(obj) as ObjectValue;
     }
 
-    // TODO: will want to evaluate any variables in compound messages
-    return pool.class(obj as ObjectValue).send(obj, this.message);
+    let msg = this.message;
+    if (isDispatch(msg)) {
+      msg = msg.dispatch(pool, ctx) as Message;
+    }
+
+    return pool.send(obj, msg);
   }
 }
 

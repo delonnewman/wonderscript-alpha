@@ -27,4 +27,8 @@ export interface SequentialDispatch extends Dispatch {
   then(message: Message): Dispatch;
 }
 
+export function isDispatch(obj: unknown): obj is Dispatch {
+  return obj != null && typeof (obj as Dispatch).dispatch === "function";
+}
+
 // new Script().bind(1, Message.build([Symbol.intern("+"), 1])).then(Message.build([Symbol.intern('*'), 5])).return(new Context()); // => 10
