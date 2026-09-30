@@ -1,5 +1,5 @@
 import { Form } from "./core";
-import { Dialog, Dispatch } from "../lang/Dispatch";
+import { Dialog, Dispatch, Script } from "../lang/Dispatch";
 import { Keyword } from "../lang/Keyword";
 import { Hash } from "../lang/Hash";
 import { Vector } from "../lang/Vector";
@@ -8,6 +8,7 @@ import { Set } from "../lang/Set";
 import { Symbol } from "../lang/Symbol";
 import { prStr } from "./prStr";
 import { Message, MessageForm } from "../lang/Message";
+import { BEGIN_SYM, DEF_SYM, DO_SYM, LET_SYM, SET_SYM } from "./constants";
 
 export type SelfEvaluating = number | string | null | undefined | boolean | Symbol | Keyword;
 export type Collection = Array | Hash | Set | Vector<Syntax>;
@@ -48,6 +49,22 @@ export function analyze(form: Form): Syntax {
 
   if (form.length === 0) {
     return form as Array;
+  }
+
+  if (form[0] instanceof Symbol) {
+    switch (form[0].name) {
+      case DEF_SYM:
+        // send "define/2" message to current package
+        // return new Dialog(CURRENT_NS, new ArgListMessage("define", form[1], analyze(form[2])))
+      case LET_SYM:
+        // build Script object and dispatch
+      case BEGIN_SYM:
+        // build Script object and dispatch
+      case DO_SYM:
+        // build Script object and return
+      case SET_SYM:
+        // send "set/2" to the current environment
+    }
   }
 
   return new Dialog(analyze(form[0]), Message.build(form.slice(1).map(analyze) as MessageForm))
