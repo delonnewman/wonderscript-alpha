@@ -3,8 +3,6 @@ import {
   CompoundMessageForm,
   MessageArgs,
   MessageFlags,
-  MessageForm,
-  Obj,
 } from "../Message";
 import { Form } from "../../compiler/core";
 import { jsEval } from "../../compiler/jsEval";
@@ -12,7 +10,6 @@ import { Context } from "../Context";
 import { emit } from "../../compiler/emit";
 import { Keyword } from "../Keyword";
 import { Symbol } from "../Symbol";
-import { pt } from "../../util";
 
 export class BinaryMessage extends BaseMessage {
   static parse(msg: CompoundMessageForm): BinaryMessage {
@@ -55,6 +52,10 @@ export class BinaryMessage extends BaseMessage {
 
   get args(): MessageArgs {
     return [this.#other];
+  }
+
+  toString(): string {
+    return `(${this.interned} ${this.#other})`;
   }
 
   sendTo(obj: Form): unknown {

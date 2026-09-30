@@ -7,6 +7,9 @@ import { Vector } from "./Vector";
 import { Set } from "./Set";
 import { Array } from "./Array";
 import { isHashable } from "./Value";
+import { Message } from "./Message";
+
+export type ObjectRef = `wso$${number}$${number}`;
 
 export type ObjectValue =
     boolean
@@ -19,7 +22,8 @@ export type ObjectValue =
   | Array
   | Hash
   | Set
-  | Vector;
+  | Vector
+  | ObjectRef;
 
 /**
  * Object value layout
@@ -39,55 +43,81 @@ export enum ObjectType {
 const TAG = "wso$";
 
 export type Foundation = {
-  NilClass: Class,
-  TrueClass: Class,
-  FalseClass: Class,
-  Float: Class,
-  String: Class,
-  Class: Class,
-  Keyword: Class,
-  Symbol: Class,
-  Array: Class,
-  Hash: Class,
-  Set: Class,
-  Vector: Class,
+  Class: Class;
+  NilClass: Class;
+  FalseClass: Class;
+  TrueClass: Class;
+  Float: Class;
+  String: Class;
+  Symbol: Class;
+  Keyword: Class;
+  Array: Class;
+  Hash: Class;
+  Set: Class;
+  Vector: Class;
 }
+
+const FOUNDATION_MAP = {
+  Class: "Class",
+  NilClass: "Class",
+  nil: "NilClass",
+  FalseClass: "Class",
+  false: "FalseClass",
+  TrueClass: "Class",
+  true: "TrueClass",
+  Float: "Class",
+  String: "Class",
+  Symbol: "Class",
+  Keyword: "Class",
+  Array: "Class",
+  Hash: "Class",
+  Set: "Class",
+  Vector: "Class",
+};
+
+type FoundationMap = typeof FOUNDATION_MAP;
+type FoundationObjectName = keyof FoundationMap;
+type FoundationClassName = keyof Foundation;
 
 export class ObjectPool {
   #pool: Class[];
-  #foundation = {
-    NilClass: 0,
-    FalseClass: 1,
-    TrueClass: 2,
-    Float: 3,
-    String: 4,
-    Symbol: 5,
-    Class: 6,
-    Keyword: 7,
-    Array: 8,
-    Hash: 9,
-    Set: 10,
-    Vector: 11,
-  };
+  #foundation = new Map<FoundationObjectName, number>();
 
   constructor(foundation: Foundation) {
     const pool = [];
-    for (const [klass, id] of Object.entries(this.#foundation)) {
-      const obj = foundation[klass as keyof Foundation];
-      if (obj === undefined)
+    let id = 0;
+    for (const [obj, klass] of Object.entries(FOUNDATION_MAP) as [
+      FoundationObjectName,
+      FoundationClassName,
+    ][]) {
+      const klassObj = foundation[klass];
+      if (klassObj === undefined)
         throw new Error(`Foundation class ${klass} is not provided`);
-      pool[id] = obj;
+      this.#foundation.set(obj, id);
+      pool[id] = klassObj;
+      id++;
     }
+
     this.#pool = pool;
   }
 
-  foundationClassId(klass: keyof Foundation) {
-    return this.#foundation[klass];
+  get pool() {
+    return this.#pool;
   }
 
-  foundationClassObject(klass: keyof Foundation) {
-    const id = this.foundationClassId(klass);
+  foundationObjectId(name: FoundationObjectName) {
+    return this.#foundation.get(name);
+  }
+
+  foundationClassObject(klass: FoundationClassName) {
+    const id = this.foundationObjectId(klass);
     return this.#pool[id];
+  }
+
+  send(obj: ObjectValue, msg: Message) {
+    // TODO: will probably want to cache this for the interpreter and inline the method for the compilers
+    const method = this.class(obj).findMethod(msg);
+    return method(obj, msg);
   }
 
   /**
@@ -108,15 +138,15 @@ export class ObjectPool {
    */
   id(object: ObjectValue): number {
     if (object === null || object === undefined) {
-      return this.foundationClassId("NilClass");
+      return this.foundationObjectId("nil");
     }
 
     if (object === true) {
-      return this.foundationClassId("TrueClass");
+      return this.foundationObjectId("true");
     }
 
     if (object === false) {
-      return this.foundationClassId("FalseClass");
+      return this.foundationObjectId("false");
     }
 
     if (typeof object === "number") {
@@ -140,7 +170,7 @@ export class ObjectPool {
    *
    * @param object
    */
-  isObject(object: unknown): object is `wso$${number}$${number}` {
+  isObject(object: unknown): object is ObjectValue {
     if (object === null || object === undefined) return true;
 
     if (typeof object === "boolean" || typeof object === "number") return true;

@@ -1,18 +1,18 @@
-import { Form } from "./core";
-import { Dialog, Dispatch, Script } from "../lang/Dispatch";
-import { Keyword } from "../lang/Keyword";
-import { Hash } from "../lang/Hash";
-import { Vector } from "../lang/Vector";
-import { Array } from "../lang/Array";
-import { Set } from "../lang/Set";
-import { Symbol } from "../lang/Symbol";
-import { prStr } from "./prStr";
-import { Message, MessageForm } from "../lang/Message";
-import { BEGIN_SYM, DEF_SYM, DO_SYM, LET_SYM, SET_SYM } from "./constants";
+import { Form } from "./compiler/core";
+import { Dialog, Dispatch, Script } from "./lang/Dispatch";
+import { Keyword } from "./lang/Keyword";
+import { Hash } from "./lang/Hash";
+import { Vector } from "./lang/Vector";
+import { Array } from "./lang/Array";
+import { Set } from "./lang/Set";
+import { Symbol } from "./lang/Symbol";
+import { prStr } from "./compiler/prStr";
+import { Message, MessageForm } from "./lang/Message";
+import { BEGIN_SYM, DEF_SYM, DO_SYM, LET_SYM, SET_SYM } from "./compiler/constants";
 
 export type SelfEvaluating = number | string | null | undefined | boolean | Symbol | Keyword;
 export type Collection = Array | Hash | Set | Vector<Syntax>;
-export type Syntax = Dispatch | Collection | SelfEvaluating;
+export type Syntax = Dispatch | Message | Collection | SelfEvaluating;
 
 export function isSelfEvaluating(form: Form): form is SelfEvaluating {
   return (

@@ -319,6 +319,30 @@ Based on https://opendylan.org/documentation/intro-dylan/objects.html
     :default "Northern Motors"))
 ```
 
+# Message Passing
+
+``` clojure
+;; Unary Operators
+(true not) ;; true is sent the message 'not
+
+;; Binary Operators
+(1 + 2) ;; 1 is sent the message '(+ 2)
+
+;; ArgList
+(js/console log "Hi" "There!")
+
+;; Data
+(defclass Person
+  (has name :key true)
+  (has age :key true)
+
+  (method "Hi"
+    "How do you do?"))
+
+(def person (Person new :name "John" :age 32))
+(person "Hi") ; => "How do you do?"
+```
+
 # TODO
 
 - [ ] Add test suite

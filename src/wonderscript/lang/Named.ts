@@ -1,11 +1,13 @@
-export interface Named<Name extends string = string> {
+export type NullableString<T extends string = string> = T | null | undefined;
+
+export interface Named<Name extends string = string, Namespace extends NullableString = NullableString> {
   name: Name;
-  namespace: string | null | undefined;
+  namespace: Namespace;
 }
 
 export function namedHash<Name extends string = string>(
   name: Name,
-  namespace?: string
+  namespace?: NullableString
 ): string {
   if (namespace && name) {
     return `${namespace}/${name}`;

@@ -2,10 +2,9 @@ import { Context } from "../../lang/Context";
 import { Form, isMacro } from "../core";
 import { prStr } from "../prStr";
 import { Symbol } from "../../lang/Symbol";
-import {
-  Message,
-} from "../../lang";
+import { Message, MessageForm } from "../../lang";
 import { CompilerError } from "../CompilerError";
+import { BaseMessage } from "../../lang/Message/BaseMessage";
 
 export function emitInternedSend(form: Form[], ctx: Context): string {
   if (form[0] instanceof Symbol && isMacro(form[0])) {
@@ -21,7 +20,7 @@ export function emitInternedSend(form: Form[], ctx: Context): string {
     throw new Error(`malformed message dispatch ${prStr(form)}`)
   }
 
-  let m: Message;
+  let m: BaseMessage;
   if (msg.length == 1 && msg[0] instanceof Symbol) {
     m = Message.simple(msg[0]);
   } else {
