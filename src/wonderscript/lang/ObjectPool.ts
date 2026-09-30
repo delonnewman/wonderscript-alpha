@@ -178,7 +178,12 @@ export class ObjectPool {
       return true;
     }
 
-    return object instanceof Keyword || object instanceof Symbol;
+    return object instanceof Keyword ||
+      object instanceof Symbol ||
+      object instanceof Array ||
+      object instanceof Hash ||
+      object instanceof Set ||
+      object instanceof Vector;
   }
 
   /**
