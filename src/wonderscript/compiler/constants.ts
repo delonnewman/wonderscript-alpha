@@ -9,6 +9,7 @@ export const LOOP_SYM = "loop";
 export const RECUR_SYM = "recur";
 export const THROW_SYM = "throw";
 export const BEGIN_SYM = "begin";
+export const DO_SYM = "do";
 export const RESCUE_SYM = "rescue";
 export const ENSURE_SYM = "ensure";
 export const NEW_SYM = "new";

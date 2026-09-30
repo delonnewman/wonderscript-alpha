@@ -1,7 +1,7 @@
 import { SequentialDispatch } from "../Dispatch";
 import { Action } from "./Action";
 import { Binding } from "./Binding";
-import { ObjectPool } from "../ObjectPool";
+import { ObjectPool, ObjectValue } from "../ObjectPool";
 import { Context } from "../Context";
 import { Symbol } from "../Symbol";
 
@@ -27,7 +27,7 @@ export class Script implements SequentialDispatch {
     return Array.from(this.#bindings);
   }
 
-  bind(name: Symbol, action: Action) {
+  bind(name: Symbol, action: Action | ObjectValue) {
     this.#bindings.push(new Binding(name, action));
     return this;
   }
@@ -39,7 +39,7 @@ export class Script implements SequentialDispatch {
 
   dispatch(pool: ObjectPool, ctx: Context) {
     for (const binding of this.#bindings) {
-      ctx.define(binding.name, binding.action.dispatch(pool, ctx));
+      ctx.define(binding.name, binding.dispatch(pool, ctx));
     }
     for (const action of this.#actions.slice(0, this.#actions.length - 1)) {
       action.dispatch(pool, ctx);
