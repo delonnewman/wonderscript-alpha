@@ -1,5 +1,5 @@
 import { Form } from "./compiler/core";
-import { Dialog, Dispatch, Script } from "./lang/Dispatch";
+import { Dialog, DialogMessage, DialogSubject, Dispatch, Script } from "./lang/Dispatch";
 import { Keyword } from "./lang/Keyword";
 import { Hash } from "./lang/Hash";
 import { Vector } from "./lang/Vector";
@@ -67,7 +67,7 @@ export function analyze(form: Form): Syntax {
     }
   }
 
-  return new Dialog(analyze(form[0]), Message.build(form.slice(1).map(analyze) as MessageForm))
+  return new Dialog(analyze(form[0]) as DialogSubject, analyze(form.slice(1)) as DialogMessage)
 }
 
 export function analyzeHash(form: Hash){

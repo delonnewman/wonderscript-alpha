@@ -4,9 +4,12 @@ import { Context } from "../Context";
 import { Symbol } from "../Symbol";
 import { Dispatch, isDispatch, SequentialDispatch } from "../Dispatch";
 
+export type DialogSubject = ObjectValue | Dispatch;
+export type DialogMessage = Message | Dispatch;
+
 export class Dialog implements SequentialDispatch {
-  #subject: ObjectValue | Dispatch;
-  #message: Message | Dispatch;
+  #subject: DialogSubject;
+  #message: DialogMessage;
 
   static bind(obj: ObjectValue, msg: Message) {
     return new this(obj, msg);
@@ -20,12 +23,12 @@ export class Dialog implements SequentialDispatch {
     return this.#message;
   }
 
-  constructor(subject: ObjectValue | Dispatch, message: Message | Dispatch) {
+  constructor(subject: DialogSubject, message: DialogMessage) {
     this.#subject = subject;
     this.#message = message;
   }
 
-  then(msg: Message) {
+  then(msg: DialogMessage) {
     return new Dialog(this, msg);
   }
 
