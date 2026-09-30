@@ -92,7 +92,7 @@ export class Class implements Named, Message {
     const method = this.#methods[msg.interned];
     if (method !== undefined) return method;
 
-    throw new Error(`unknown method ${msg}`);
+    throw new Error(`unknown method ${msg} for class ${this}`);
   }
 
   get subclasses() {
@@ -111,5 +111,13 @@ export class Class implements Named, Message {
 
   get messages(): Message[] {
     return Array.from(this.#messages);
+  }
+
+  toString() {
+    if (this.namespace) {
+      return `${this.namespace}/${this.name}`;
+    }
+
+    return this.name;
   }
 }
