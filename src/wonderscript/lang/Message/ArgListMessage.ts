@@ -3,12 +3,10 @@ import {
   Message,
   MessageArgs,
   MessageFlags, MessageForm,
-  Obj,
 } from "../Message";
 import { Context } from "../Context";
 import { Form } from "../../compiler/core";
 import { emit } from "../../compiler/emit";
-import { BoundMessage } from "./BoundMessage";
 import { prStr } from "../../compiler";
 import { Vector } from "../Vector";
 
@@ -65,7 +63,7 @@ export class ArgListMessage extends BaseMessage {
     return prStr(new Vector(this.toKeyword(), ...this.args));
   }
 
-  sendTo(obj: unknown): unknown {
+  sendTo(obj: Record<string, unknown>): unknown {
     const fn = obj[this.interned];
     if (typeof fn === "function") {
       return fn.apply(obj, this.args);

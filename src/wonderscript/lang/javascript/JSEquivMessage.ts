@@ -19,7 +19,7 @@ export class JSEquivMessage extends BinaryMessage {
     return this.name;
   }
 
-  sendTo(obj: Record<string, unknown>): unknown {
+  sendTo(obj: unknown): unknown {
     return obj == this.args[0];
   }
 

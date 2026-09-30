@@ -15,7 +15,7 @@ export class JSInstanceOfMessage extends BinaryMessage {
     throw new Error(`invalid message: ${prStr(msg)}`);
   }
 
-  sendTo(obj: Record<string, unknown>): unknown {
+  sendTo(obj: unknown): unknown {
     return obj instanceof this.args[0];
   }
 
