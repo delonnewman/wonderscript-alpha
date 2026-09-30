@@ -12,6 +12,9 @@ import { Foundation, ObjectPool } from "./lang/ObjectPool";
 import { Vector } from "./lang/Vector";
 import { BinaryMessage } from "./lang/Message/BinaryMessage";
 import { Form } from "./compiler/core";
+import { analyze } from "./analyze";
+import { Context } from "./lang/Context";
+import { isDispatch } from "./lang/Dispatch";
 
 export class Interpreter {
   #pool: ObjectPool;
@@ -60,7 +63,13 @@ export class Interpreter {
 
   analyzeString(input: string) {
     const forms = this.readString(input);
-    return forms;
+    // TODO: pass line and column information to analyze
+    return forms.map(f => analyze(f.form))
+  }
+
+  evalString(input: string, ctx = new Context()) {
+    const forms = this.analyzeString(input);
+    return forms.map(f => isDispatch(f) ? f.dispatch(this.pool, ctx) : f);
   }
 }
 
