@@ -3,7 +3,7 @@ import { Symbol } from "./Symbol";
 import { MetaData } from "./Meta";
 import { merge } from "./merge";
 
-export type DefinitionMap = Map<Symbol, Definition>;
+export type DefinitionMap = Map<string, Definition>;
 
 export class Package {
   readonly name: Symbol;
@@ -11,7 +11,7 @@ export class Package {
 
   constructor(name: Symbol) {
     this.name = name;
-    this.#definitions = new Map<Symbol, Definition>();
+    this.#definitions = new Map<string, Definition>();
   }
 
   definitionMap(): DefinitionMap {
@@ -23,7 +23,7 @@ export class Package {
   }
 
   addDefinition(def: Definition): Package {
-    this.#definitions.set(def.symbol().withoutMeta(), def);
+    this.#definitions.set(def.symbol().name, def);
 
     return this;
   }
@@ -48,8 +48,13 @@ export class Package {
     return this;
   }
 
-  get(name: Symbol): Definition {
-    return this.#definitions.get(name);
+  get(symbol: Symbol): Definition {
+    const def = this.#definitions.get(symbol.name);
+    if (def == null) {
+      throw new Error(`undefined symbol ${symbol} in package ${this.name}`);
+    }
+
+    return def;
   }
 
   exports(): Definition[] {

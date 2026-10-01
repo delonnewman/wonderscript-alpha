@@ -1,14 +1,16 @@
 import { BaseMessage } from "./BaseMessage";
 import {
   Message,
-  MessageArgs,
-  MessageFlags, MessageForm,
+  MessageFlags,
+  MessageForm,
 } from "../Message";
 import { Context } from "../Context";
 import { Form } from "../../compiler/core";
 import { emit } from "../../compiler/emit";
 import { prStr } from "../../compiler";
 import { Vector } from "../Vector";
+import { Dispatch, isDispatch } from "../Dispatch";
+import { ObjectPool } from "../ObjectPool";
 
 const EMPTY_ARRAY = Object.freeze([]);
 const EMPTY_OBJ = Object.freeze({});
@@ -18,7 +20,10 @@ interface MessageConstructor {
   parse(msg: MessageForm): Message;
 }
 
-export class ArgListMessage extends BaseMessage {
+type MessageArg  = unknown | Dispatch | Form;
+type MessageArgs = MessageArg[] | readonly MessageArgs[] | Vector;
+
+export class ArgListMessage extends BaseMessage implements Dispatch {
   #args: MessageArgs;
 
   constructor(
@@ -70,6 +75,22 @@ export class ArgListMessage extends BaseMessage {
     }
 
     throw new Error(`unknown message ${this}`);
+  }
+
+  dispatch(pool: ObjectPool, ctx: Context): Message {
+    const dispatchedArgs = this.args.map((arg) => {
+      if (isDispatch(arg)) {
+        return arg.dispatch(pool, ctx);
+      }
+      return arg;
+    });
+
+    return new (this.constructor as MessageConstructor)(
+      this.name,
+      this.namespace,
+      dispatchedArgs,
+      { withinQuery: this.isWithinQuery() }
+    );
   }
 
   toJS(ctx: Context, obj: Form): string {

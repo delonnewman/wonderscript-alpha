@@ -18,8 +18,7 @@ import { isDispatch } from "./lang/Dispatch";
 
 export class Interpreter {
   #pool: ObjectPool;
-  #corePkg: Package;
-  #jsPkg: Package;
+  #ctx: Context = new Context();
 
   constructor() {
     const NilClass = new PrimitiveType("NilClass", "wonderscript.lang");
@@ -51,8 +50,10 @@ export class Interpreter {
     };
 
     this.#pool = new ObjectPool(foundation);
-    this.#corePkg = buildCorePackage(foundation);
-    this.#jsPkg = buildJSPackage();
+    const core = buildCorePackage(foundation);
+    const js = buildJSPackage();
+    this.#ctx.define(Symbol.intern("wonderscript.core"), core);
+    this.#ctx.define(Symbol.intern("js"), js);
   }
 
   get pool() { return this.#pool }
@@ -67,9 +68,9 @@ export class Interpreter {
     return forms.map(f => analyze(f.form))
   }
 
-  evalString(input: string, ctx = new Context()) {
+  evalString(input: string, ctx = this.#ctx) {
     const forms = this.analyzeString(input);
-    return forms.map(f => isDispatch(f) ? f.dispatch(this.pool, ctx) : f);
+    return forms.map(f => f.dispatch(this.pool, ctx));
   }
 }
 
@@ -130,8 +131,6 @@ export function buildCorePackage(foundation: Foundation) {
   pkg.importSymbol(Symbol.intern("Set"), foundation.Set);
   pkg.importSymbol(Symbol.intern("Keyword"), foundation.Keyword);
   pkg.importSymbol(Symbol.intern("Symbol"), foundation.Symbol);
-
-  const ClassClass = Class.fromJSConstructor(Class, "wonderscript.lang");
   pkg.importSymbol(Symbol.intern("Class"), foundation.Class);
 
   const ClassPackage = Class.fromJSConstructor(
@@ -167,16 +166,16 @@ export function buildJSPackage() {
   const pkg = new Package(Symbol.intern("js"));
 
   const JSObject = Class.fromJSSingleton(Object, "Object");
-  pkg.importSymbol(Symbol.intern("JSObject"), JSObject);
+  pkg.importSymbol(Symbol.intern("Object"), JSObject);
 
   const JSFunction = Class.fromJSConstructor(Function);
-  pkg.importSymbol(Symbol.intern("JSFunction"), JSFunction);
+  pkg.importSymbol(Symbol.intern("Function"), JSFunction);
 
   const JSMath = Class.fromJSSingleton(Math, "Math");
-  pkg.importSymbol(Symbol.intern("JSMath"), JSMath);
+  pkg.importSymbol(Symbol.intern("Math"), JSMath);
 
   const JSConsole = Class.fromJSSingleton(console, "console");
-  pkg.importSymbol(Symbol.intern("JSConsole"), JSConsole);
+  pkg.importSymbol(Symbol.intern("console"), JSConsole);
 
   return pkg;
 }

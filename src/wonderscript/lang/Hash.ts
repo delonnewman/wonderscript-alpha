@@ -1,5 +1,6 @@
 import { hashCode, hashCombine } from "./utils";
 import { Hashable } from "./Value";
+import { Form } from "../compiler/core";
 
 const HASH_SEED = 597172124171148;
 
