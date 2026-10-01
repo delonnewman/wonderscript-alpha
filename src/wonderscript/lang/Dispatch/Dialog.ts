@@ -38,7 +38,9 @@ export class Dialog implements SequentialDispatch {
       obj = obj.dispatch(pool, ctx) as ObjectValue;
     }
     if (obj instanceof Symbol) {
-      obj = ctx.lookup(obj).get(obj) as ObjectValue;
+      ctx = ctx.lookup(obj)
+      if (ctx == null) throw new Error(`undefined variable ${obj}`);
+      obj = ctx.get(obj) as ObjectValue;
     }
 
     let msg = this.message;
