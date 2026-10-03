@@ -72,6 +72,10 @@ export class Symbol<Name extends string = string, Namespace extends NullableStri
     return `${this.#name}`;
   }
 
+  get internings(): string[] {
+    return [this.interned];
+  }
+
   get name(): Name {
     return this.#name;
   }

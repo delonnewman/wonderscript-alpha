@@ -15,7 +15,7 @@ import { Dispatch, isDispatch } from "../Dispatch";
 import { ObjectPool } from "../ObjectPool";
 
 export class BinaryMessage extends BaseMessage implements Dispatch {
-  static jsOp(name: string, other: Form) {
+  static jsOp(name: string, other: Form | Dispatch) {
     return new this(name, "js", other);
   }
 
