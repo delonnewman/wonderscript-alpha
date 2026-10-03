@@ -343,29 +343,6 @@ Based on https://opendylan.org/documentation/intro-dylan/objects.html
 (person "Hi") ; => "How do you do?"
 ```
 
-# TODO
-
-- [ ] Add test suite
-- [ ] Remove Namespaces (use JS modules instead)
-- [ ] Add syntax objects & syntax quoting
-- [ ] Improve error reporting and stack traces
-- [ ] Add generic functions
-- [ ] Add protocols (implement protocols for existing objects/methods)
-- [ ] Implement browser-based IDE
-- [ ] Add abstractions for browser APIs
-- [ ] Add a database interface
-  - Datalog based by default
-  - Abstract over SQL and KV stores
-  - DBI-like interface for SQL stores
-- [ ] Implement ST or CL-like images called a "world" (a reified notion of static and dynamic state)
-  - [ ] Create new compilers based on "world" objects
-  - [ ] Create encoders for world objects so they can be persisted and transmitted
-- [x] Update JS
-  - [x] Make use of `let` and `const`
-  - [x] Make use of `class`
-  - [x] Refactor into modules
-  - [x] TypeScript
-
 # Author
 
 Delon Newman <contact@delonnewman.name>
