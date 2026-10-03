@@ -16,7 +16,7 @@ export class Symbol<Name extends string = string, Namespace extends NullableStri
   readonly #namespace: Namespace;
   readonly #meta?: MetaData;
 
-  static CACHE = new Map<String, Symbol>();
+  static CACHE = new Map<string, Symbol>();
 
   static parse(str: string): Symbol {
     if (str === SLASH) return this.intern(SLASH);
@@ -32,9 +32,17 @@ export class Symbol<Name extends string = string, Namespace extends NullableStri
   static intern<Name extends string = string, Namespace extends NullableString = NullableString>(
     name: Name,
     namespace?: Namespace,
-    meta?: MetaData
   ): Symbol<Name, Namespace> {
-    return new this<Name, Namespace>(name, namespace, meta);
+    const key = namespace ? `${namespace}/${name}` : name;
+
+    if (this.CACHE.has(key)) {
+      return this.CACHE.get(key) as Symbol<Name, Namespace>;
+    }
+
+    const sym = new this<Name, Namespace>(name, namespace);
+    this.CACHE.set(key, sym);
+
+    return sym;
   }
 
   constructor(name: Name, namespace?: Namespace, meta?: MetaData) {
