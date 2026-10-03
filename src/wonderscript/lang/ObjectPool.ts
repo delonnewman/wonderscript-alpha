@@ -88,6 +88,8 @@ type FoundationObjectName = keyof FoundationMap;
 type FoundationClassName = keyof Foundation;
 
 export class ObjectPool {
+  static METHOD_CACHE = new Map<string, Function>();
+
   #pool: Class[];
   #foundation = new Map<FoundationObjectName, number>();
 
@@ -123,8 +125,17 @@ export class ObjectPool {
   }
 
   send(obj: ObjectValue, msg: Message) {
-    // TODO: will probably want to cache this for the interpreter and inline the method for the compilers
-    const method = this.class(obj).findMethod(msg);
+    const klass = this.class(obj);
+    const cacheKey = `${klass.interned}$${msg.interned}`;
+
+    const cachedMethod = ObjectPool.METHOD_CACHE.get(cacheKey);
+    if (cachedMethod !== undefined) {
+      return cachedMethod(obj, msg);
+    }
+
+    const method = klass.findMethod(msg);
+    ObjectPool.METHOD_CACHE.set(`${klass.interned}$${msg.interned}`, method);
+
     return method(obj, msg);
   }
 
@@ -169,7 +180,7 @@ export class ObjectPool {
       return object.hashCode();
     }
 
-    const [_tag, id, _type] = object.split("$");
+    const [_tag, id, _type, _klass] = object.split("$");
     return Number(id);
   }
 
@@ -204,7 +215,7 @@ export class ObjectPool {
       return ObjectType.VALUE;
     }
 
-    const [_tag, _id, type] = object.split("$");
+    const [_tag, _id, type, _klass] = object.split("$");
     return Number(type);
   }
 
@@ -214,6 +225,14 @@ export class ObjectPool {
    * @param object
    */
   class(object: ObjectValue) {
+    if (object === null || object === undefined) {
+      return this.foundationClassObject("NilClass");
+    }
+
+    if (typeof object === "boolean") {
+      return object ? this.foundationClassObject("TrueClass") : this.foundationClassObject("FalseClass");
+    }
+
     if (typeof object === "number") {
       return this.foundationClassObject("FloatInstances");
     }
