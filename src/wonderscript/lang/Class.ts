@@ -76,7 +76,7 @@ export class Class implements Named, Message {
       return this.#name;
     }
 
-    return `${this.#namespace}$${this.#name}`;
+    return `${this.#namespace.replace('.', '_')}$_${this.#name}`;
   }
 
   defineMethod(msg: Message, method: MethodFn) {
