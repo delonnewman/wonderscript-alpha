@@ -46,7 +46,11 @@ export class BinaryMessage extends BaseMessage implements Dispatch {
   }
 
   get interned(): string {
-    return this.name;
+    return `${this.name}_1`;
+  }
+
+  get internings(): string[] {
+    return [this.interned];
   }
 
   get other() {
@@ -65,8 +69,8 @@ export class BinaryMessage extends BaseMessage implements Dispatch {
     return `(${this.interned} ${this.#other})`;
   }
 
-  sendTo(obj: Form): unknown {
-    return jsEval(this.toJS(new Context(), obj));
+  sendTo(obj: unknown): unknown {
+    return jsEval(this.toJS(new Context(), obj as Form));
   }
 
   dispatch(pool: ObjectPool, ctx: Context): Message {

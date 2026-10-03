@@ -65,6 +65,10 @@ export abstract class BaseMessage implements Message, Envelope, CompilableMessag
     return escapeChars(this.ident);
   }
 
+  get internings(): string[] {
+    return [this.interned];
+  }
+
   isWithinQuery(): boolean {
     return this.#withinQuery;
   }

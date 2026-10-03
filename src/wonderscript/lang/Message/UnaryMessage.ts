@@ -30,6 +30,10 @@ export class UnaryMessage extends BaseMessage {
     return this.name;
   }
 
+  get internings(): string[] {
+    return [this.interned];
+  }
+
   get arity(): number {
     return 0;
   }

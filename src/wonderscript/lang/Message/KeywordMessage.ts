@@ -33,6 +33,10 @@ export class KeywordMessage extends BaseMessage {
     return `${buffer.join("_")}`;
   }
 
+  get internings(): string[] {
+    return [this.interned];
+  }
+
   get args(): KeywordArgs {
     return this.#args;
   }

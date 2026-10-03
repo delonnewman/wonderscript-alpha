@@ -43,7 +43,10 @@ export interface CompilableMessage {
 }
 
 export interface Message {
+  // The template interning of the message
   readonly interned: string;
+  // A list of possible internings of the message, used for matching class methods
+  readonly internings: string[];
 }
 
 export function isMessageForm(form: unknown): form is MessageForm {

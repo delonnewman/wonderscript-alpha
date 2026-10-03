@@ -13,6 +13,7 @@ import { BaseMessage } from "./BaseMessage";
 import { emitKeyword } from "../../compiler/emit/emitKeyword";
 import { Vector } from "../Vector";
 import { BinaryMessage } from "./BinaryMessage";
+import { ArgListMessage } from "./ArgListMessage";
 
 export class QueryMessage extends BinaryMessage {
   static parse(msg: MessageForm) {
@@ -23,7 +24,7 @@ export class QueryMessage extends BinaryMessage {
     throw new Error(`invalid message form: ${prStr(msg)}`);
   }
 
-  get query(): Message | Form {
+  get query(): BaseMessage | Form {
     if (isMessageForm(this.args[0])) {
       return Message.build(this.args[0]).withinQuery();
     }
@@ -31,9 +32,9 @@ export class QueryMessage extends BinaryMessage {
     return this.args[0];
   }
 
-  sendTo(obj: Obj): boolean {
+  sendTo(obj: Record<string, unknown>): boolean {
     const query = this.query;
-    if (query instanceof BaseMessage) {
+    if (query instanceof ArgListMessage) {
       if (query.args.length > 0) {
         obj = query.sendTo(obj) as Obj;
       }
@@ -46,7 +47,7 @@ export class QueryMessage extends BinaryMessage {
 
   toJS(ctx: Context, obj: Form): string {
     const query = this.query;
-    if (query instanceof BaseMessage) {
+    if (query instanceof ArgListMessage) {
       const code = query.args.length ? query.toJS(ctx, obj) : emit(obj, ctx);
       return `("${query.interned}" in ${code})`;
     }

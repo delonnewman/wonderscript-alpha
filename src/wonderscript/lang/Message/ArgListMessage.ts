@@ -37,6 +37,14 @@ export class ArgListMessage extends BaseMessage implements Dispatch {
     Object.freeze(this);
   }
 
+  get interned(): string {
+    return `${this.name}_${this.arity}`;
+  }
+
+  get internings(): string[] {
+    return [this.interned, `${this.name}_splat`];
+  }
+
   get arity(): number {
     return this.#args.length;
   }
