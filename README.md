@@ -331,15 +331,23 @@ Based on https://opendylan.org/documentation/intro-dylan/objects.html
 ;; ArgList
 (js/console log "Hi" "There!")
 
+;; Keyword Args
+(Personel new :name "Jean Luc Picard" :rank "Captain")
+
 ;; Data
-(defclass Person
-  (has name :key true)
-  (has age :key true)
+(class Personel
+  (has ^:key name)
+  (has ^:key rank)
+
+  (method Str name)
+
+  (method (<=> other)
+    (rank <=> (other rank)))
 
   (method "Hi"
     "How do you do?"))
 
-(def person (Person new :name "John" :age 32))
+(def person (Person new :name "Geordi La Forge" :rank "Lt."))
 (person "Hi") ; => "How do you do?"
 ```
 
