@@ -98,21 +98,22 @@ that can also (optionally) be used as functions.
 
 Can be dispatched on any type and arbitrary Generic Functions
 
-## Modules
+## Packages
 
-The broadest context for state. With the macro forms `defconst` and `defvar` module level constants and dynamically
-scoped variables can be defined. By convention constants are spelled `$contstant`, and variables are spelled
-`*variable*`. Constants and variable can be accessed globally when scoped with the module name i.e. `$Module::constant`
-or `*Module::variable*`. By convention modules names are camel cased. All other definitions with in a module must be
-explicitly exported and imported to be used. Keywords that are prefixed with a `::` like `::keyword` are automatically
-expanded into `:Module::keyword`. Modules can be nested inner modules can be accessed with the same notation as other
-definitions i.e. `OuterModule::InnerModule`. Definitions specified with `def` and relatives, `defn`, `defmacro`,
-`defclass`, `deftype`, `defprotocol`, `defrecord` are namespaced by their module and private unless exported.
-Definitions can be exported with the `module` form, and imports can be specified with the `use` form. `use` with or
-without imports makes the modules and all shared definitions accessible (scoped by the module name).
+The broadest context for state. With the macro forms `const` and `var` package level constants and dynamically
+scoped variables can be defined. By convention constants are spelled `$constant`, and variables are spelled
+`*variable*`. Constants and variables are accessed globally when scoped with the package name i.e. `$Package::constant`
+or `*Package::variable*`. By convention package names are camel cased. ~~All other definitions with in a package must be
+explicitly exported and imported to be used.~~ Keywords that are prefixed with a `::` like `::keyword` are automatically
+expanded into `:Package::keyword`. ~~Packages can be nested. Inner modules can be accessed with the same notation as other
+definitions i.e. `OuterModule::InnerModule`.~~ Definitions specified with `def` and relatives, `defn`, `defmacro`,
+`defclass`, `deftype`, `defprotocol`, `defrecord` are namespaced by their package and public unless exported flagged as private.
+Without the private flag both a global and lexical name will be created with the private flag only a lexical name will be created.
+~~Definitions can be exported with the `module` form, and imports can be specified with the `use` form.~~ `use` with or
+without imports makes the package definitions accessible scoped by the package name.
 
 ```lisp
-(module Dragnet
+(package Dragnet
   (export View TemplateView PageView Button Link))
 
 (use Web
@@ -121,15 +122,15 @@ without imports makes the modules and all shared definitions accessible (scoped 
 
 Exports and shared symbols can also be specified with meta data on the symbol:
 
-```lisp
-(module Web)
+```clojure
+(package Web)
 
-(defn ^:export html
+(defn html
    (form) ...)
 
-(module Dragnet)
+(package Dragnet)
 
-(defclass View ...)
+(class View ...)
 ```
 
 ## Definition Meta Data
@@ -271,34 +272,34 @@ A collection of properties/shapes and doc strings
 # defclass
 
 ```clojure
-(defprotocol Invokable
+(protocol Invokable
   "The interface for all invokable objects"
   (invoke (*args)))
 
-(defprotocol Type
+(protocol Type
   (satisfies (object)))
 
-(defclass MethodSig
+(class MethodSig
   (has      Symbol name)
   (has-many Symbol arglist)
   (has?     String doc))
 
-(defclass Protocol :does Type
+(class Protocol :does Type
   (has-many? Protocol  ^:key protocols)
   (has-many  MethodSig ^:key signatures)
   (has?      String    ^:key doc))
 
-(defclass Method :does Invokable
+(class Method :does Invokable
   (has      Symbol name)
   (has?     String doc)
   (has-many Symbol arglist)
   (has-many Form   body))
 
-(defclass Property
+(class Property
   (has Symbol  name)
   (has Boolean required :default true))
 
-(defclass Class :does Type
+(class Class :does Type
   (has?      String   doc)
   (has-many? Protocol protocols)
   (has-many  Property properties)
@@ -308,11 +309,11 @@ A collection of properties/shapes and doc strings
 Based on https://opendylan.org/documentation/intro-dylan/objects.html
 
 ```clojure
-(defclass Vehicle
+(class Vehicle
   (has serial-owner)
   (has owner))
 
-(defclass Vehicle
+(class Vehicle
   (has  Integer serial-number :key :sn)
   (has? String  owner
     :key :owner ;; true would work just as well here
@@ -332,23 +333,41 @@ Based on https://opendylan.org/documentation/intro-dylan/objects.html
 (js/console log "Hi" "There!")
 
 ;; Keyword Args
-(Personel new :name "Jean Luc Picard" :rank "Captain")
+(Personnel new :name "Jean Luc Picard" :rank (Rank captain))
 
 ;; Data
-(class Personel
+(class Personnel
   (has ^:key name)
   (has ^:key rank)
 
-  (method Str name)
+  ((->Str) name)
 
-  (method (<=> other)
+  ((<=> ^Personnel other)
     (rank <=> (other rank)))
 
-  (method "Hi"
-    "How do you do?"))
+  ("Hi" "How do you do?"))
 
-(def person (Person new :name "Geordi La Forge" :rank "Lt."))
+(def person (Personnel new :name "Geordi La Forge" :rank (Rank lt)))
 (person "Hi") ; => "How do you do?"
+
+;; Singleton objects
+;; singleton objects are equivalent to lambda expressions
+(def greet (object ((quote (name)) "Hello " ~ name ~ "!"))
+;; or
+(object greet
+  ('(name) "Hello " ~ name ~ "!"))
+
+(greet "Data") ;; => "Hello Data!"
+
+(macroexpand '(fn (x) x)) ;; => (object ((quote (x)) x))
+(macroexpand '(fn ((x) x) ((x y) [x y])) ;; => (object ((quote (x)) x) ((quote (x y)) [x y]))
+
+(object Message
+  ((build msg) (wonderscript.core/Message build msg))
+  ((send obj msg) ((self build msg) sendTo obj)))
+  
+(Message build '(name)) ;; => #<Message ...>
+(Message send greet '("Guinan")) ;; => "Hello Guinan!"
 ```
 
 # Author
