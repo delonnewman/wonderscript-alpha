@@ -21,8 +21,8 @@ user> (reduce + (range 10))
 
 - `def`
 - `quote`
-- `cond`
-- `fn*` (a direct mapping of JS function semantics)
+- ~~`cond`~~
+- ~~`fn*` (a direct mapping of JS function semantics)~~
 - `set*` (a direct mapping of JS assignment semantics)
 - `js*`
 - `loop`
