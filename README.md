@@ -368,6 +368,22 @@ Based on https://opendylan.org/documentation/intro-dylan/objects.html
   
 (Message build '(name)) ;; => #<Message ...>
 (Message send greet '("Guinan")) ;; => "Hello Guinan!"
+
+;; Singleton objects also have equivalence with case statements
+(def x 1)
+((object
+  (1 "one")
+  (2 "two")
+  (3 "three")
+  ((dont-know ...)
+    "Don't know")) x) ;; => "one"
+
+(case x
+  (1 "one")
+  (2 "two")
+  (3 "three")
+  :else
+    "Don't know") ;; => "one"
 ```
 
 # Author
