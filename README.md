@@ -348,7 +348,7 @@ Based on https://opendylan.org/documentation/intro-dylan/objects.html
   ("Hi" "How do you do?"))
 
 (def person (Personnel new :name "Geordi La Forge" :rank (Rank lt)))
-(person "Hi") ; => "How do you do?"
+(person "Hi") ;; => "How do you do?"
 
 ;; Singleton objects
 ;; singleton objects are equivalent to lambda expressions
@@ -384,6 +384,12 @@ Based on https://opendylan.org/documentation/intro-dylan/objects.html
   (3 "three")
   :else
     "Don't know") ;; => "one"
+
+(object if
+  ('(predicate consequent) (predicate and consequent))
+  ('(predicate consequent alternate) ((predicate and consequent) or alternate)))
+
+(if true "Hi" "Bye") ;; => "Hi"
 ```
 
 # Author
