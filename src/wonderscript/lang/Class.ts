@@ -79,6 +79,10 @@ export class Class implements Named, Message {
     return `${this.#namespace.replace('.', '_')}$_${this.#name}`;
   }
 
+  get internings() {
+    return [this.interned];
+  }
+
   defineMethod(msg: Message, method: MethodFn) {
     this.#messages.push(msg);
     this.#methods[msg.interned] = method;
