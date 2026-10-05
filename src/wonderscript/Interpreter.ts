@@ -1,6 +1,5 @@
 import { readString } from "./reader";
 import { PrimitiveType } from "./lang/PrimitiveType";
-import { UnaryMessage } from "./lang/Message/UnaryMessage";
 import { Class } from "./lang/Class";
 import { Package } from "./lang/Package";
 import { Hash } from "./lang/Hash";
@@ -14,7 +13,6 @@ import { BinaryMessage } from "./lang/Message/BinaryMessage";
 import { Form } from "./compiler/core";
 import { analyze } from "./analyze";
 import { Context } from "./lang/Context";
-import { isDispatch } from "./lang/Dispatch";
 
 export class Interpreter {
   #pool: ObjectPool;
