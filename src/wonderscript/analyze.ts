@@ -1,9 +1,9 @@
 import { Form } from "./compiler/core";
 import {
+  Binding,
   Dialog,
   Dispatch,
-  DispatchMessage,
-  DispatchSubject,
+  DispatchSubject, Script,
 } from "./lang/Dispatch";
 import { Keyword } from "./lang/Keyword";
 import { Hash } from "./lang/Hash";
@@ -65,6 +65,10 @@ import { BinaryMessage } from "./lang/Message/BinaryMessage";
 import { ArgListMessage } from "./lang/Message/ArgListMessage";
 import { isReadForm, ReadForm } from "./reader";
 import { MetaData } from "./lang/Meta";
+import { Message, MessageForm } from "./lang/Message";
+import { partition } from "./lang/runtime";
+import { ObjectPool } from "./lang/ObjectPool";
+import { Context } from "./lang/Context";
 
 export type SelfEvaluating = number | string | null | undefined | boolean | Symbol | Keyword;
 
@@ -122,12 +126,17 @@ export function analyze(initForm: ReadForm | Form): Dispatch {
   if (form[1] instanceof Symbol) {
     switch (form[1].name) {
       case DEF_SYM:
-      // send "define/2" message to the specified object
-      // return new Dialog(form[1], new ArgListMessage("define", form[2], analyze(form[2])))
+        return new Dialog(
+          form[0],
+          new ArgListMessage(
+            "defineMethod",
+            undefined,
+            form.slice(2).map(analyze)
+          ))
       case BEGIN_SYM:
-      // build Script object and dispatch
+        return analyzeBlock(form, meta);
       case DO_SYM:
-      // build Script object and return
+        return analyzeBlock(form, meta, true);
       case PLUS_SYM:
       case MINUS_SYM:
       case DIV_SYM:
@@ -255,7 +264,7 @@ export function analyze(initForm: ReadForm | Form): Dispatch {
 
   return new Dialog(
     analyze(form[0]) as DispatchSubject,
-    analyze(form.slice(1)) as DispatchMessage,
+    Message.build(form.slice(1) as MessageForm),
     meta
   )
 }
@@ -268,4 +277,32 @@ export function analyzeHash(form: Map<Form, Form>) {
   }
 
   return new HashDispatch(hash);
+}
+
+export function analyzeBlock(form: unknown[], meta: MetaData | undefined, delay: boolean = false) {
+  const binds: Binding[] = [];
+  let restIdx = 1;
+
+  if (form[1] instanceof Vector) {
+    restIdx = 2;
+    const pairs = partition<Form>(2, form[1]);
+    for (const pair of pairs) {
+      if (pair[0] instanceof Symbol) {
+        binds.push(new Binding(pair[0], analyze(pair[1])));
+      }
+    }
+  }
+
+  const actions = form.slice(restIdx).map(analyze);
+  const script = new Script(actions, binds, meta);
+  if (!delay) {
+    return script;
+  }
+
+  return {
+    script,
+    dispatch(pool: ObjectPool, ctx: Context): unknown {
+      return this.script.dispatch(pool, ctx);
+    },
+  };
 }
