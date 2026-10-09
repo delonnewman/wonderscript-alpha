@@ -370,12 +370,12 @@ Based on https://opendylan.org/documentation/intro-dylan/objects.html
 (Message send greet '("Guinan")) ;; => "Hello Guinan!"
 
 ;; Singleton objects also have equivalence with case statements
-(def x 1)
-(let a-case (Object new))
-(def a-case 1 "one")
-(def a-case 2 "two")
-(def a-case 3 "three")
-(def a-case (dont-know ...) "Don't know")
+(let x 1) ;; let x = 1
+(let a-case (Object new)) ;; let a-case = Object new
+(def a-case 1 "one") ;; def a-case 1 = "one"
+(def a-case 2 "two") ;; def a-case 2 = "two"
+(def a-case 3 "three") ;; def a-case 3 = "three"
+(def a-case (dont-know ...) "Don't know") ;; def a-case dont-know(...) = "Don't know"
 (a-case x) ;; => "one"
 
 (case x
@@ -391,17 +391,20 @@ Based on https://opendylan.org/documentation/intro-dylan/objects.html
 (if true "Hi" "Bye") ;; => "Hi"
 
 ;; 'self' is the current script object
-(def 'fn '(name args *body)
+(def 'fn `(~name ~args ~@body)
   (do
     (let obj (Object new))
     (obj define args body)
     ((self bindings) define name obj)
     name))
 
-(def 'fn '(args *body) ('fn (gensym "fn") args body))
+(def 'fn `(~args ~@body) ('fn (gensym "fn") args body))
 
 (fn ident (x) x) ;; => 'ident
 (fn (x) (x + 1)) ;; => 'fn-38
+
+(def 'let `(~name ~value) ((self bindings) define name value))
+(let x 1)
 ```
 
 # Author
