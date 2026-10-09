@@ -1,5 +1,5 @@
 import { BaseMessage } from "./BaseMessage";
-import { MessageArgs, MessageForm, Obj } from "../Message";
+import { Message, MessageArgs, MessageForm, Obj } from "../Message";
 import { Context } from "../Context";
 import { Form } from "../../compiler/core";
 import { emit } from "../../compiler/emit";
@@ -39,6 +39,10 @@ export class UnaryMessage extends BaseMessage {
   }
 
   get args(): MessageArgs {
+    return EMPTY_ARRAY;
+  }
+
+  bindings(msg: Message) {
     return EMPTY_ARRAY;
   }
 

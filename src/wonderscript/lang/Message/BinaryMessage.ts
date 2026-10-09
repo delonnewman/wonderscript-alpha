@@ -1,6 +1,7 @@
 import { BaseMessage } from "./BaseMessage";
 import {
   CompoundMessageForm,
+  EMPTY_ARRAY,
   Message,
   MessageArgs,
   MessageFlags,
@@ -11,11 +12,11 @@ import { Context } from "../Context";
 import { emit } from "../../compiler/emit";
 import { Keyword } from "../Keyword";
 import { Symbol } from "../Symbol";
-import { Dispatch, isDispatch } from "../Dispatch";
-import { ObjectPool } from "../ObjectPool";
+import { Binding, Dispatch, isDispatch } from "../Dispatch";
+import { ObjectPool, ObjectValue } from "../ObjectPool";
 
 export class BinaryMessage extends BaseMessage implements Dispatch {
-  static jsOp(name: string, other: Form | Dispatch) {
+  static jsOp(name: string, other: ObjectValue | Dispatch) {
     return new this(name, "js", other);
   }
 
@@ -33,12 +34,12 @@ export class BinaryMessage extends BaseMessage implements Dispatch {
     return new this(name, ns, other);
   }
 
-  #other: Form | Dispatch;
+  #other: ObjectValue | Dispatch;
 
   constructor(
     name: string,
     namespace: string | undefined,
-    other: Form | Dispatch,
+    other: ObjectValue | Dispatch,
     flags: MessageFlags = {}
   ) {
     super(name, namespace, flags);
@@ -69,13 +70,26 @@ export class BinaryMessage extends BaseMessage implements Dispatch {
     return `(${this.interned} ${this.#other})`;
   }
 
+  bindings(msg: BinaryMessage): readonly Binding[] {
+    if (!(msg instanceof this.constructor)) {
+      throw new Error(`invalid message for bindings: ${msg}`);
+    }
+
+    if (!(this.other instanceof Symbol)) {
+      return EMPTY_ARRAY;
+    }
+
+    return Object.freeze([new Binding(this.other, msg.other)]);
+
+  }
+
   sendTo(obj: unknown): unknown {
     return jsEval(this.toJS(new Context(), obj as Form));
   }
 
   dispatch(pool: ObjectPool, ctx: Context): Message {
     if (isDispatch(this.other)) {
-      const other = this.other.dispatch(pool, ctx) as Form;
+      const other = this.other.dispatch(pool, ctx) as ObjectValue;
       return new (this.constructor as typeof BinaryMessage)(
         this.name,
         this.namespace,

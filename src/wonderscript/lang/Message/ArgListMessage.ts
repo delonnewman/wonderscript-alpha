@@ -9,8 +9,9 @@ import { Form } from "../../compiler/core";
 import { emit } from "../../compiler/emit";
 import { prStr } from "../../compiler";
 import { Vector } from "../Vector";
-import { Dispatch, isDispatch } from "../Dispatch";
+import { Binding, Dispatch, isDispatch } from "../Dispatch";
 import { ObjectPool } from "../ObjectPool";
+import { Symbol } from "../Symbol";
 
 const EMPTY_ARRAY = Object.freeze([]);
 const EMPTY_OBJ = Object.freeze({});
@@ -74,6 +75,29 @@ export class ArgListMessage extends BaseMessage implements Dispatch {
     }
 
     return prStr(new Vector(this.toKeyword(), ...this.args));
+  }
+
+  bindings(msg: Message): readonly Binding[] {
+    if (!(msg instanceof ArgListMessage)) {
+      throw new Error(`invalid message for bindings: ${msg}`);
+    }
+
+    const arity = this.arity;
+    if (!(arity === 0)) {
+      return EMPTY_ARRAY;
+    }
+
+    const binds: Binding[] = [];
+    for (let i = 0; i < arity; i++) {
+      const arg = this.args[i];
+      const msgArg = msg.args[i];
+
+      if (arg instanceof Symbol) {
+        binds.push(new Binding(arg, msgArg));
+      }
+    }
+
+    return Object.freeze(binds);
   }
 
   sendTo(obj: Record<string, unknown>): unknown {

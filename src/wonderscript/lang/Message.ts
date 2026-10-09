@@ -19,6 +19,8 @@ import { JSOrMessage } from "./javascript/JSOrMessage";
 import { JSAndMessage } from "./javascript/JSAndMessage";
 import { JSNotMessage } from "./javascript/JSNotMessage";
 import { BaseMessage } from "./Message/BaseMessage";
+import { UnaryMessage } from "./Message/UnaryMessage";
+import { Binding } from "./Dispatch/Binding";
 
 export type SimpleMessageForm = string | Keyword | Symbol;
 export type CompoundMessageForm = [Keyword | Symbol, ...unknown[]] | Vector<unknown>;
@@ -47,6 +49,8 @@ export interface Message {
   readonly interned: string;
   // A list of possible internings of the message, used for matching class methods
   readonly internings: string[];
+  // A list of bindings of symbols to values or dispatches
+  bindings(msg: Message): readonly Binding[];
 }
 
 export function isMessageForm(form: unknown): form is MessageForm {

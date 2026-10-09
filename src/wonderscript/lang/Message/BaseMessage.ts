@@ -2,19 +2,15 @@ import {
   CompilableMessage,
   Envelope,
   Message,
-  MessageArgs,
   MessageFlags,
   MessageForm,
-  Obj,
 } from "../Message";
 import { escapeChars } from "../../compiler/utils";
 import { Keyword } from "../Keyword";
 import { Symbol } from "../Symbol";
-import { prStr } from "../../compiler";
-import { Vector } from "../Vector";
-import { BoundMessage } from "./BoundMessage";
 import { Context } from "../Context";
 import { Form } from "../../compiler/core";
+import { Binding } from "../Dispatch/Binding";
 
 const EMPTY_OBJ = Object.freeze({});
 
@@ -95,10 +91,7 @@ export abstract class BaseMessage implements Message, Envelope, CompilableMessag
     return Symbol.intern(this.name, this.namespace);
   }
 
-  bind(obj: Obj): BoundMessage {
-    return new BoundMessage(this, obj);
-  }
-
+  abstract bindings(msg: Message): readonly Binding[];
   abstract toJS(ctx: Context, obj: Form): string;
   abstract sendTo(obj: unknown): unknown;
 }
