@@ -70,6 +70,8 @@ export class Dialog implements SequentialDispatch, Meta {
 
     // TODO: this could be a good place to implement an inline cache
     const method = pool.select(obj, msg);
+    ctx.define(Symbol.intern("self"), obj);
+
     const binds = method.message.bindings(msg);
     for (const bind of binds) {
       ctx.define(bind.name, bind.dispatch(pool, ctx));
