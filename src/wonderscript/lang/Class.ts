@@ -2,12 +2,9 @@ import { Named, namespace, name } from "./Named";
 import { Keyword } from "./Keyword";
 import { Symbol } from "./Symbol";
 import { EMPTY_ARRAY, Message } from "./Message";
-import { Dialog, Dispatch } from "./Dispatch";
+import { Dispatch } from "./Dispatch";
 import { Method } from "./Method";
 import { prStr } from "../compiler";
-import { ArgListMessage } from "./Message/ArgListMessage";
-import { Context } from "./Context";
-import { ObjectPool } from "./ObjectPool";
 
 export type MethodTable = Record<string, Method>;
 
@@ -62,7 +59,7 @@ export class Class implements Named, Message {
     const method = this.#methods[msg.interned];
     if (method !== undefined) return method;
 
-    throw new Error(`unknown method ${prStr(msg)} for class ${this}`);
+    throw new Error(`unknown method ${prStr(msg)} for an instance of ${this}`);
   }
 
   get subclasses() {
