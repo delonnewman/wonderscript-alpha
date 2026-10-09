@@ -123,20 +123,19 @@ export function analyze(initForm: ReadForm | Form): Dispatch {
     return new ArrayDispatch(form.map(analyze) as WSArray);
   }
 
-  if (form[1] instanceof Symbol) {
-    switch (form[1].name) {
+  if (form[0] instanceof Symbol) {
+    switch (form[0].name) {
       case DEF_SYM:
-        return new Dialog(
-          form[0],
-          new ArgListMessage(
-            "defineMethod",
-            undefined,
-            form.slice(2).map(analyze)
-          ))
+        return analyzeDef(form, meta);
       case BEGIN_SYM:
         return analyzeBlock(form, meta);
       case DO_SYM:
         return analyzeBlock(form, meta, true);
+    }
+  }
+
+  if (form[1] instanceof Symbol) {
+    switch (form[1].name) {
       case PLUS_SYM:
       case MINUS_SYM:
       case DIV_SYM:
@@ -305,4 +304,32 @@ export function analyzeBlock(form: unknown[], meta: MetaData | undefined, delay:
       return this.script.dispatch(pool, ctx);
     },
   };
+}
+
+// (def (self to_s) "Hi!")
+// (def (self "Hi") "Hi! How are you?")
+export function analyzeDef(form: unknown[], meta: MetaData | undefined): Dispatch {
+  if (form.length !== 3) {
+    throw new Error(`invalid def form expected 3 elements, got ${form.length} instead`);
+  }
+
+  const def = form[1];
+  const body = form[2];
+
+  if (!(def instanceof Array)) {
+    throw new Error(`invalid def form expected array, got ${prStr(def)} instead`);
+  }
+  const [obj, template] = def;
+
+  return new Dialog(
+    analyze(obj),
+    new ArgListMessage(
+      "defineMethod",
+      undefined,
+      [
+        template,
+        body,
+      ]
+    )
+  );
 }
