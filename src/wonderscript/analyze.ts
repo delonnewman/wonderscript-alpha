@@ -106,8 +106,8 @@ export function analyze(form: Form): Dispatch {
   if (form[1] instanceof Symbol) {
     switch (form[1].name) {
       case DEF_SYM:
-      // send "define/2" message to current package
-      // return new Dialog(CURRENT_NS, new ArgListMessage("define", form[1], analyze(form[2])))
+      // send "define/2" message to the specified object
+      // return new Dialog(form[1], new ArgListMessage("define", form[2], analyze(form[2])))
       case LET_SYM:
       // build Script object and dispatch
       case BEGIN_SYM:
