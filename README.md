@@ -385,8 +385,8 @@ Based on https://opendylan.org/documentation/intro-dylan/objects.html
   :else
     "Don't know") ;; => "one"
 
-(def 'if '(predicate consequent) (predicate and consequent))
-(def 'if '(predicate consequent alternate) ((predicate and consequent) or alternate))
+(def 'if `(~predicate ~consequent) (predicate and consequent))
+(def 'if `(~predicate ~consequent ~alternate) ((predicate and consequent) or alternate))
 
 (if true "Hi" "Bye") ;; => "Hi"
 
