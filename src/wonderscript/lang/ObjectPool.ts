@@ -88,7 +88,7 @@ type FoundationObjectName = keyof FoundationMap;
 type FoundationClassName = keyof Foundation;
 
 export class ObjectPool {
-  static METHOD_CACHE = new Map<string, Function>();
+  static METHOD_CACHE: Record<string, Function> = Object.create(null);
 
   #pool: Class[];
   #foundation = new Map<FoundationObjectName, number>();
@@ -128,13 +128,13 @@ export class ObjectPool {
     const klass = this.class(obj);
     const cacheKey = `${klass.interned}$${msg.interned}`;
 
-    const cachedMethod = ObjectPool.METHOD_CACHE.get(cacheKey);
+    const cachedMethod = ObjectPool.METHOD_CACHE[cacheKey];
     if (cachedMethod !== undefined) {
       return cachedMethod(obj, msg);
     }
 
     const method = klass.findMethod(msg);
-    ObjectPool.METHOD_CACHE.set(`${klass.interned}$${msg.interned}`, method);
+    ObjectPool.METHOD_CACHE[cacheKey] = method;
 
     return method(obj, msg);
   }
