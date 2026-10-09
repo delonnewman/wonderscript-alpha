@@ -47,7 +47,7 @@ export class BinaryMessage extends BaseMessage implements Dispatch {
   }
 
   get interned(): string {
-    return `${this.name}_1`;
+    return this.name;
   }
 
   get internings(): string[] {
