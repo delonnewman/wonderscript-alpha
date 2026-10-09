@@ -108,11 +108,13 @@ export function analyze(initForm: ReadForm | Form): Dispatch {
   }
 
   if (form instanceof WSSet || form instanceof Set) {
-    return new SetDispatch(new WSSet(Array.prototype.map.call(form, analyze)));
+    const array = Array.from(form).map(analyze)
+    return new SetDispatch(new WSSet(array));
   }
 
   if (form instanceof Vector) {
-    return new VectorDispatch(new Vector(Array.prototype.map.call(form, analyze)));
+    const array = Array.prototype.map.call(form, analyze);
+    return new VectorDispatch(new Vector(...array));
   }
 
   if (!WSArray.isArray(form) && !Array.isArray(form)) {
