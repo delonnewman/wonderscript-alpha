@@ -22,7 +22,7 @@ interface MessageConstructor {
 }
 
 type MessageArg  = unknown | Dispatch | Form;
-type MessageArgs = MessageArg[] | readonly MessageArgs[] | Vector;
+type MessageArgs = MessageArg[] | readonly MessageArg[] | Vector;
 
 export class ArgListMessage extends BaseMessage implements Dispatch {
   #args: MessageArgs;
