@@ -108,14 +108,10 @@ export function analyze(form: Form): Dispatch {
       case DEF_SYM:
       // send "define/2" message to the specified object
       // return new Dialog(form[1], new ArgListMessage("define", form[2], analyze(form[2])))
-      case LET_SYM:
-      // build Script object and dispatch
       case BEGIN_SYM:
       // build Script object and dispatch
       case DO_SYM:
       // build Script object and return
-      case SET_SYM:
-      // send "set/2" to the current environment
       case PLUS_SYM:
       case MINUS_SYM:
       case DIV_SYM:
@@ -153,10 +149,13 @@ export function analyze(form: Form): Dispatch {
           analyze(form[0]),
           analyze(form[2])
         );
+        // TODO: A message that is sent to js/Function objects
       case NEW_SYM:
         return Eval.unaryOp(NEW_SYM, analyze(form[0]));
+        // TODO: A message that is sent to js/Object objects
       case INSTANCE_SYM:
         return Eval.binaryOp(JS_INSTANCE, analyze(form[0]), analyze(form[2]));
+        // TODO: A message that is sent to js/Value objects
       case TYPE_SYM:
         return Eval.unaryOp(JS_TYPEOF, analyze(form[0]));
       default:

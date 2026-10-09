@@ -365,7 +365,7 @@ Based on https://opendylan.org/documentation/intro-dylan/objects.html
 (object Message
   ((build msg) (wonderscript.core/Message build msg))
   ((send obj msg) ((self build msg) sendTo obj)))
-  
+
 (Message build '(name)) ;; => #<Message ...>
 (Message send greet '("Guinan")) ;; => "Hello Guinan!"
 
@@ -405,6 +405,9 @@ Based on https://opendylan.org/documentation/intro-dylan/objects.html
 
 (def 'let `(~name ~value) ((self bindings) define name value))
 (let x 1)
+
+(def 'set! `(~name ~value) ((self bindings) set name value))
+(set! x 2) ;; will fail unless mutable
 ```
 
 # Author
