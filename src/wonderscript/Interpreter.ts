@@ -1,5 +1,4 @@
 import { readString } from "./reader";
-import { PrimitiveType } from "./lang/PrimitiveType";
 import { Class } from "./lang/Class";
 import { ObjectPool } from "./lang/ObjectPool";
 import { analyze } from "./analyze";
@@ -10,15 +9,11 @@ export class Interpreter {
   #ctx: Context = new Context();
 
   constructor() {
-    const NilClass = new PrimitiveType("NilClass", "wonderscript.lang");
-    const TrueClass = new PrimitiveType("TrueClass", "wonderscript.lang");
-    const FalseClass = new PrimitiveType("FalseClass", "wonderscript.lang");
-    const Numeric = new PrimitiveType("Numeric", "wonderscript.lang");
-    const String = new PrimitiveType("String", "wonderscript.lang");
-    const ClassClass = Class.fromJSConstructor(Class, "wonderscript.lang");
-    const JSObject = Class.fromJSSingleton(Object, "Object", "js");
-    const JSFunction = Class.fromJSConstructor(Function, "js");
-    const JSSymbol = Class.fromJSConstructor(Symbol, "js");
+    const NilClass = new Class("NilClass", "wonderscript.lang");
+    const TrueClass = new Class("TrueClass", "wonderscript.lang");
+    const FalseClass = new Class("FalseClass", "wonderscript.lang");
+    const Numeric = new Class("Numeric", "wonderscript.lang");
+    const String = new Class("String", "wonderscript.lang");
 
     const foundation = {
       null: NilClass,
@@ -27,10 +22,6 @@ export class Interpreter {
       false: FalseClass,
       number: Numeric,
       string: String,
-      object: JSObject,
-      function: JSFunction,
-      symbol: JSSymbol,
-      Class: ClassClass,
       Numeric,
       String,
       FalseClass,

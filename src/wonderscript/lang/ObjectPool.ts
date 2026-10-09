@@ -1,6 +1,7 @@
 import { Class } from "./Class";
 import { stringHash } from "./utils";
 import { Message } from "./Message";
+import { Method } from "./Method";
 
 export type ObjectRef = `wso$${number}$${number}`;
 
@@ -36,10 +37,11 @@ export type Foundation = {
   false: Class;
   number: Class;
   string: Class;
-  function: Class; // js/Function
-  object: Class; // js/Object
-  symbol: Class; // js/Symbol
-  Class: Class;
+  // TODO: add back
+  // function: Class; // js/Function
+  // object: Class; // js/Object
+  // symbol: Class; // js/Symbol
+  // Class: Class;
   Numeric: Class;
   String: Class;
   FalseClass: Class;
@@ -53,7 +55,7 @@ const FALSE_ID = 2;
 let CURRENT_ID = 3;
 
 export class ObjectPool {
-  static METHOD_CACHE: Record<string, Function> = Object.create(null);
+  static METHOD_CACHE: Record<string, Method> = Object.create(null);
 
   #pool: Record<string | number, Class>;
 
@@ -71,19 +73,19 @@ export class ObjectPool {
     return this.#pool;
   }
 
-  send(obj: ObjectValue, msg: Message) {
+  select(obj: ObjectValue, msg: Message) {
     const klass = this.class(obj);
     const cacheKey = `${klass.interned}$${msg.interned}`;
 
     const cachedMethod = ObjectPool.METHOD_CACHE[cacheKey];
     if (cachedMethod !== undefined) {
-      return cachedMethod(obj, msg);
+      return cachedMethod;
     }
 
     const method = klass.findMethod(msg);
     ObjectPool.METHOD_CACHE[cacheKey] = method;
 
-    return method(obj, msg);
+    return method;
   }
 
   newID() {

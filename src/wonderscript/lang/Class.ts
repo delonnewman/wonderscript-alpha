@@ -1,62 +1,16 @@
 import { Named, namespace, name } from "./Named";
 import { Keyword } from "./Keyword";
 import { Symbol } from "./Symbol";
-import { Message } from "./Message";
-import { ArgListMessage } from "./Message/ArgListMessage";
-
-export type MethodFn = (self: unknown, msg: Message) => unknown;
-
-export type JSClass = {
-  $ws$Class?: Class;
-};
-
-export type JSConstructor = Function & JSClass;
-export type JSSingleton = Object & JSClass;
+import { EMPTY_ARRAY, Message } from "./Message";
+import { Dispatch } from "./Dispatch";
+import { Method } from "./Method";
 
 export class Class implements Named, Message {
   #name: string;
   #namespace: string | undefined;
-  #methods: Record<string, MethodFn> = {};
+  #methods: Record<string, Method> = Object.create(null);
   #messages: Message[] = [];
   #subclasses: Class[] = [];
-
-  static fromJSConstructor(constructor: JSConstructor, namespace = 'js') {
-    if (constructor.$ws$Class) return constructor.$ws$Class;
-
-    const klass = new this(constructor.name, namespace);
-
-    const table = constructor.prototype as Record<string, Function>;
-    const methods = Object.getOwnPropertyNames(constructor.prototype);
-    for (const method of methods) {
-      klass.defineMethod(
-        new ArgListMessage(method, klass.namespace),
-        (self, ...args) => table[method].apply(self, args)
-      );
-    }
-
-    constructor.$ws$Class = klass;
-
-    return klass;
-  }
-
-  static fromJSSingleton(object: JSSingleton, name: string, namespace = 'js') {
-    if (object.$ws$Class) return object.$ws$Class;
-
-    const klass = new this(name, namespace);
-
-    const table = object as Record<string, Function>;
-    const methods = Object.getOwnPropertyNames(object);
-    for (const method of methods) {
-      klass.defineMethod(
-        new ArgListMessage(method, klass.namespace),
-        (self, ...args) => table[method].apply(self, args)
-      );
-    }
-
-    object.$ws$Class = klass;
-
-    return klass;
-  }
 
   constructor(name: string, namespace: string | null | undefined) {
     this.#name = name;
@@ -83,9 +37,14 @@ export class Class implements Named, Message {
     return [this.interned];
   }
 
-  defineMethod(msg: Message, method: MethodFn) {
+  bindings(_: Message) {
+    return EMPTY_ARRAY;
+  }
+
+  defineMethod(msg: Message, dispatch: Dispatch) {
     this.#messages.push(msg);
-    this.#methods[msg.interned] = method;
+    this.#methods[msg.interned] = new Method(msg, dispatch);
+    return msg;
   }
 
   hasMethod(name: string): boolean {
