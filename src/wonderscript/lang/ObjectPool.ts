@@ -110,9 +110,9 @@ export class ObjectPool {
    * @param type
    */
   allocate(klass: Class, type = ObjectType.REF) {
-    const id = this.newID();
-    this.#pool[id] = klass;
-    return `${TAG}$${id}$${type}`;
+    const obj = this.newObjectRef(type);
+    this.associateClass(obj, klass);
+    return obj;
   }
 
   /**
