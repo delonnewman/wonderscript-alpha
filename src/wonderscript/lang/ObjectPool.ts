@@ -1,12 +1,5 @@
 import { Class } from "./Class";
 import { stringHash } from "./utils";
-import { Keyword } from "./Keyword";
-import { Symbol } from "./Symbol";
-import { Hash } from "./Hash";
-import { Vector } from "./Vector";
-import { Set } from "./Set";
-import { Array } from "./Array";
-import { isHashable } from "./Value";
 import { Message } from "./Message";
 
 export type ObjectRef = `wso$${number}$${number}`;
@@ -17,12 +10,6 @@ export type ObjectValue =
   | undefined
   | string
   | number
-  | Keyword
-  | Symbol
-  | Array
-  | Hash
-  | Set
-  | Vector
   | ObjectRef;
 
 /**
@@ -43,69 +30,39 @@ export enum ObjectType {
 const TAG = "wso$";
 
 export type Foundation = {
+  null: Class;
+  undefined: Class;
+  true: Class;
+  false: Class;
+  number: Class;
+  string: Class;
+  bigint: Class;
+  function: Class; // js/Function
+  object: Class; // js/Object
+  symbol: Class; // js/Symbol
   Class: Class;
-  NilClass: Class;
+  Numeric: Class;
+  String: Class;
   FalseClass: Class;
   TrueClass: Class;
-  Float: Class;
-  String: Class;
-  Symbol: Class;
-  Keyword: Class;
-  Array: Class;
-  Hash: Class;
-  Set: Class;
-  Vector: Class;
+  NilClass: Class;
 }
 
-const FOUNDATION_MAP = {
-  Class: "Class",
-  NilClass: "Class",
-  nil: "NilClass",
-  FalseClass: "Class",
-  false: "FalseClass",
-  TrueClass: "Class",
-  true: "TrueClass",
-  Float: "Class",
-  FloatInstances: "Float",
-  String: "Class",
-  StringInstances: "String",
-  Symbol: "Class",
-  SymbolInstances: "Symbol",
-  Keyword: "Class",
-  KeywordInstances: "Keyword",
-  Array: "Class",
-  ArrayInstances: "Array",
-  Hash: "Class",
-  HashInstances: "Hash",
-  Set: "Class",
-  SetInstances: "Set",
-  Vector: "Class",
-  VectorInstances: "Vector",
-};
-
-type FoundationMap = typeof FOUNDATION_MAP;
-type FoundationObjectName = keyof FoundationMap;
-type FoundationClassName = keyof Foundation;
+const NIL_ID = 0;
+const TRUE_ID = 1;
+const FALSE_ID = 2;
+let CURRENT_ID = 3;
 
 export class ObjectPool {
   static METHOD_CACHE: Record<string, Function> = Object.create(null);
 
-  #pool: Class[];
-  #foundation = new Map<FoundationObjectName, number>();
+  #pool: Record<string | number, Class>;
 
   constructor(foundation: Foundation) {
-    const pool = [];
-    let id = 0;
-    for (const [obj, klass] of Object.entries(FOUNDATION_MAP) as [
-      FoundationObjectName,
-      FoundationClassName,
-    ][]) {
-      const klassObj = foundation[klass];
-      if (klassObj === undefined)
-        throw new Error(`Foundation class ${klass} is not provided`);
-      this.#foundation.set(obj, id);
-      pool[id] = klassObj;
-      id++;
+    const pool = Object.create(null);
+    const entries = Object.entries(foundation) as [keyof Foundation, Class][];
+    for (const [obj, klass] of entries) {
+      pool[obj] = klass;
     }
 
     this.#pool = pool;
@@ -113,15 +70,6 @@ export class ObjectPool {
 
   get pool() {
     return this.#pool;
-  }
-
-  foundationObjectId(object: FoundationObjectName) {
-    return this.#foundation.get(object);
-  }
-
-  foundationClassObject(object: FoundationObjectName) {
-    const id = this.foundationObjectId(object);
-    return this.#pool[id];
   }
 
   send(obj: ObjectValue, msg: Message) {
@@ -139,6 +87,23 @@ export class ObjectPool {
     return method(obj, msg);
   }
 
+  newID() {
+    return CURRENT_ID++;
+  }
+
+  newObjectRef(type: ObjectType) {
+    const id = this.newID();
+    return `${TAG}$${id}$${type}`;
+  }
+
+  associateClass(obj: ObjectValue, klass: Class) {
+    if (typeof obj === 'string' && obj.startsWith(TAG)) {
+      obj = this.id(obj);
+    }
+
+    this.#pool[`${obj}`] = klass;
+  }
+
   /**
    * Allocate a new object and return it.
    *
@@ -146,8 +111,9 @@ export class ObjectPool {
    * @param type
    */
   allocate(klass: Class, type = ObjectType.REF) {
-    this.#pool.push(klass);
-    return `${TAG}$${this.#pool.length - 1}$${type}`;
+    const id = this.newID();
+    this.#pool[id] = klass;
+    return `${TAG}$${id}$${type}`;
   }
 
   /**
@@ -157,15 +123,15 @@ export class ObjectPool {
    */
   id(object: ObjectValue): number {
     if (object === null || object === undefined) {
-      return this.foundationObjectId("nil");
+      return NIL_ID;
     }
 
     if (object === true) {
-      return this.foundationObjectId("true");
+      return TRUE_ID;
     }
 
     if (object === false) {
-      return this.foundationObjectId("false");
+      return FALSE_ID;
     }
 
     if (typeof object === "number") {
@@ -174,10 +140,6 @@ export class ObjectPool {
 
     if (typeof object === "string" && !object.startsWith(TAG)) {
       return stringHash(object);
-    }
-
-    if (isHashable(object) || object instanceof Vector) {
-      return object.hashCode();
     }
 
     const [_tag, id, _type, _klass] = object.split("$");
@@ -197,12 +159,7 @@ export class ObjectPool {
       return true;
     }
 
-    return object instanceof Keyword ||
-      object instanceof Symbol ||
-      object instanceof Array ||
-      object instanceof Hash ||
-      object instanceof Set ||
-      object instanceof Vector;
+    return false;
   }
 
   /**
@@ -225,48 +182,20 @@ export class ObjectPool {
    * @param object
    */
   class(object: ObjectValue) {
-    if (object === null || object === undefined) {
-      return this.foundationClassObject("NilClass");
+    if (typeof object === 'string' && object.startsWith(TAG)) {
+      const id = this.id(object);
+      const klass = this.#pool[id];
+      if (klass === undefined) {
+        throw new Error(`No class found for object ${object}`);
+      }
+
+      return klass;
     }
 
-    if (typeof object === "boolean") {
-      return object ? this.foundationClassObject("TrueClass") : this.foundationClassObject("FalseClass");
+    let klass = this.#pool[`${object}`];
+    if (klass === undefined) {
+      klass = this.#pool[`${typeof object}`];
     }
-
-    if (typeof object === "number") {
-      return this.foundationClassObject("FloatInstances");
-    }
-
-    if (typeof object === "string") {
-      return this.foundationClassObject("StringInstances");
-    }
-
-    if (object instanceof Keyword) {
-      return this.foundationClassObject("KeywordInstances");
-    }
-
-    if (object instanceof Symbol) {
-      return this.foundationClassObject("SymbolInstances");
-    }
-
-    if (object instanceof Array) {
-      return this.foundationClassObject("ArrayInstances");
-    }
-
-    if (object instanceof Hash) {
-      return this.foundationClassObject("HashInstances");
-    }
-
-    if (object instanceof Set) {
-      return this.foundationClassObject("SetInstances");
-    }
-
-    if (object instanceof Vector) {
-      return this.foundationClassObject("VectorInstances");
-    }
-
-    const id = this.id(object);
-    const klass = this.#pool[id];
     if (klass === undefined) {
       throw new Error(`No class found for object ${object}`);
     }
