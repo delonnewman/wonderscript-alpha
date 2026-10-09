@@ -1,14 +1,13 @@
-import { Action } from "./Action";
 import { Symbol } from "../Symbol";
 import { ObjectPool, ObjectValue } from "../ObjectPool";
 import { Context } from "../Context";
-import { Dispatch } from "../Dispatch";
+import { Dispatch, isDispatch } from "../Dispatch";
 
 export class Binding implements Dispatch {
   #name: Symbol;
-  #action: Action | ObjectValue;
+  #action: Dispatch | ObjectValue;
 
-  constructor(name: Symbol, action: Action | ObjectValue) {
+  constructor(name: Symbol, action: Dispatch | ObjectValue) {
     this.#name = name;
     this.#action = action;
   }
@@ -22,11 +21,10 @@ export class Binding implements Dispatch {
   }
 
   dispatch(pool: ObjectPool, ctx: Context) {
-    if (this.#action instanceof Action) {
+    if (isDispatch(this.#action)) {
       return this.#action.dispatch(pool, ctx);
     } else {
       return this.#action;
     }
   }
 }
-

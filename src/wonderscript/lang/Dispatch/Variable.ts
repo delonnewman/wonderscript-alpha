@@ -1,4 +1,4 @@
-import { ObjectPool, ObjectValue } from "../ObjectPool";
+import { ObjectPool } from "../ObjectPool";
 import { Context } from "../Context";
 import { Dispatch } from "../Dispatch";
 import { Symbol } from "../Symbol";
