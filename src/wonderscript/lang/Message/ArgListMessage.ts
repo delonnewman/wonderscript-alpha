@@ -71,10 +71,10 @@ export class ArgListMessage extends BaseMessage implements Dispatch {
 
   toString() {
     if (this.args.length === 0) {
-      return prStr(this.toKeyword());
+      return prStr(this.toSymbol());
     }
 
-    return prStr(new Vector(this.toKeyword(), ...this.args));
+    return prStr([this.toSymbol(), ...this.args]);
   }
 
   bindings(msg: Message): readonly Binding[] {
