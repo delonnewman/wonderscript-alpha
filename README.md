@@ -371,12 +371,12 @@ Based on https://opendylan.org/documentation/intro-dylan/objects.html
 
 ;; Singleton objects also have equivalence with case statements
 (def x 1)
-((object
-  (1 "one")
-  (2 "two")
-  (3 "three")
-  ((dont-know ...)
-    "Don't know")) x) ;; => "one"
+(let a-case (Object new))
+(def a-case 1 "one")
+(def a-case 2 "two")
+(def a-case 3 "three")
+(def a-case (dont-know ...) "Don't know")
+(a-case x) ;; => "one"
 
 (case x
   (1 "one")
@@ -385,11 +385,23 @@ Based on https://opendylan.org/documentation/intro-dylan/objects.html
   :else
     "Don't know") ;; => "one"
 
-(object if
-  ('(predicate consequent) (predicate and consequent))
-  ('(predicate consequent alternate) ((predicate and consequent) or alternate)))
+(def 'if '(predicate consequent) (predicate and consequent))
+(def 'if '(predicate consequent alternate) ((predicate and consequent) or alternate))
 
 (if true "Hi" "Bye") ;; => "Hi"
+
+;; 'self' is the current script object
+(def 'fn '(name args *body)
+  (do
+    (let obj (Object new))
+    (obj define args body)
+    ((self bindings) define name obj)
+    name))
+
+(def 'fn '(args *body) ('fn (gensym "fn") args body))
+
+(fn ident (x) x) ;; => 'ident
+(fn (x) (x + 1)) ;; => 'fn-38
 ```
 
 # Author
