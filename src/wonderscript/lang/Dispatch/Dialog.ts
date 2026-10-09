@@ -3,13 +3,16 @@ import { ObjectPool, ObjectValue } from "../ObjectPool";
 import { Context } from "../Context";
 import { Symbol } from "../Symbol";
 import { Dispatch, isDispatch, SequentialDispatch } from "../Dispatch";
+import { Meta, MetaData } from "../Meta";
+import { merge } from "../merge";
 
-export type DialogSubject = ObjectValue | Dispatch;
+export type DialogSubject = ObjectValue | Symbol | Dispatch;
 export type DialogMessage = Message | Dispatch;
 
-export class Dialog implements SequentialDispatch {
+export class Dialog implements SequentialDispatch, Meta {
   #subject: DialogSubject;
   #message: DialogMessage;
+  #meta: MetaData | undefined;
 
   static bind(obj: ObjectValue, msg: Message) {
     return new this(obj, msg);
@@ -23,9 +26,22 @@ export class Dialog implements SequentialDispatch {
     return this.#message;
   }
 
-  constructor(subject: DialogSubject, message: DialogMessage) {
+  constructor(subject: DialogSubject, message: DialogMessage, meta?: MetaData) {
     this.#subject = subject;
     this.#message = message;
+    this.#meta = meta;
+  }
+
+  meta() {
+    return this.#meta;
+  }
+
+  hasMeta(): boolean {
+    return this.#meta != null && this.#meta.size === 0;
+  }
+
+  withMeta(data: MetaData): Dialog  {
+    return new Dialog(this.#subject, this.#message, merge(this.#meta, data));
   }
 
   then(msg: DialogMessage) {
@@ -38,7 +54,7 @@ export class Dialog implements SequentialDispatch {
       obj = obj.dispatch(pool, ctx) as ObjectValue;
     }
     if (obj instanceof Symbol) {
-      ctx = ctx.lookup(obj)
+      ctx = ctx.lookup(obj);
       if (ctx == null) throw new Error(`undefined variable ${obj}`);
       obj = ctx.get(obj) as ObjectValue;
     }

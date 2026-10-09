@@ -49,8 +49,7 @@ export class Interpreter {
 
   analyzeString(input: string) {
     const forms = this.readString(input);
-    // TODO: pass line and column information to analyze
-    return forms.map(f => analyze(f.form))
+    return forms.map(analyze);
   }
 
   evalString(input: string, ctx = this.#ctx) {

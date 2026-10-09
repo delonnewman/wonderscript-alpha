@@ -11,6 +11,12 @@ export type ReadForm = {
   column: number;
 };
 
+export function isReadForm(obj: unknown): obj is ReadForm {
+  if (typeof obj !== "object" || obj === null) return false;
+
+  return "form" in obj && "line" in obj && "column" in obj;
+}
+
 export function readString(s: string): ReadForm[] {
   const r = new PushBackReader(s);
   const forms: ReadForm[] = [];

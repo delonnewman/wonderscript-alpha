@@ -60,6 +60,8 @@ import { ArrayDispatch } from "./lang/Dispatch/ArrayDispatch";
 import { UnaryMessage } from "./lang/Message/UnaryMessage";
 import { BinaryMessage } from "./lang/Message/BinaryMessage";
 import { ArgListMessage } from "./lang/Message/ArgListMessage";
+import { isReadForm, ReadForm } from "./reader";
+import { MetaData } from "./lang/Meta";
 
 export type SelfEvaluating = number | string | null | undefined | boolean | Symbol | Keyword;
 
@@ -74,7 +76,18 @@ export function isSelfEvaluating(form: Form): form is SelfEvaluating {
   );
 }
 
-export function analyze(form: Form): Dispatch {
+export function analyze(initForm: ReadForm | Form): Dispatch {
+  let meta: MetaData | undefined, form: Form;
+  if (isReadForm(initForm)) {
+    meta = new Map([
+      [Keyword.intern("line"), initForm.line],
+      [Keyword.intern("column"), initForm.column]
+    ]);
+    form = initForm.form;
+  } else {
+    form = initForm;
+  }
+
   if (isSelfEvaluating(form)) {
     return new Identity(form);
   }
@@ -124,51 +137,105 @@ export function analyze(form: Form): Dispatch {
       case GT_SYM:
       case LTQ_SYM:
       case GTQ_SYM:
-        return Eval.binaryOp(form[1].name, analyze(form[0]), analyze(form[2]));
+        return new Dialog(
+          analyze(form[0]) as DialogSubject,
+          BinaryMessage.jsOp(form[1].name, analyze(form[2])),
+          meta
+        )
       case MOD_SYM:
-        return Eval.binaryOp(JS_MOD, analyze(form[0]), analyze(form[2]));
+        return new Dialog(
+          analyze(form[0]) as DialogSubject,
+          BinaryMessage.jsOp(JS_MOD, analyze(form[2])),
+          meta
+        );
       case NOT_SYM:
-        return Eval.unaryOp(JS_NOT, analyze(form[0]));
+        return new Dialog(
+          analyze(form[0]) as DialogSubject,
+          UnaryMessage.jsOp(JS_NOT),
+          meta
+        );
       case AND_SYM:
-        return Eval.binaryOp(JS_AND, analyze(form[0]), analyze(form[2]));
+        return new Dialog(
+          analyze(form[0]) as DialogSubject,
+          BinaryMessage.jsOp(JS_AND, analyze(form[2])),
+          meta
+        );
       case OR_SYM:
-        return Eval.binaryOp(JS_OR, analyze(form[0]), analyze(form[2]));
+        return new Dialog(
+          analyze(form[0]) as DialogSubject,
+          BinaryMessage.jsOp(JS_OR, analyze(form[2])),
+          meta
+        );
       case BIT_NOT_SYM:
-        return Eval.unaryOp(JS_BIT_NOT, analyze(form[0]));
+        return new Dialog(
+          analyze(form[0]) as DialogSubject,
+          UnaryMessage.jsOp(JS_BIT_NOT),
+          meta
+        );
       case BIT_AND_SYM:
-        return Eval.binaryOp(JS_BIT_AND, analyze(form[0]), analyze(form[2]));
+        return new Dialog(
+          analyze(form[0]) as DialogSubject,
+          BinaryMessage.jsOp(JS_BIT_AND, analyze(form[2])),
+          meta
+        );
       case BIT_OR_SYM:
-        return Eval.binaryOp(JS_BIT_OR, analyze(form[0]), analyze(form[2]));
+        return new Dialog(
+          analyze(form[0]) as DialogSubject,
+          BinaryMessage.jsOp(JS_BIT_OR, analyze(form[2])),
+          meta
+        );
       case BIT_LSHIFT_SYM:
-        return Eval.binaryOp(JS_BIT_LSHIFT, analyze(form[0]), analyze(form[2]));
+        return new Dialog(
+          analyze(form[0]) as DialogSubject,
+          BinaryMessage.jsOp(JS_BIT_LSHIFT, analyze(form[2])),
+          meta
+        );
       case BIT_RSHIFT_SYM:
-        return Eval.binaryOp(JS_BIT_RSHIFT, analyze(form[0]), analyze(form[2]));
+        return new Dialog(
+          analyze(form[0]) as DialogSubject,
+          BinaryMessage.jsOp(JS_BIT_RSHIFT, analyze(form[2])),
+          meta
+        );
       case BIT_URSHIFT_SYM:
-        return Eval.binaryOp(
-          JS_BIT_URSHIFT,
-          analyze(form[0]),
-          analyze(form[2])
+        return new Dialog(
+          analyze(form[0]) as DialogSubject,
+          BinaryMessage.jsOp(JS_BIT_URSHIFT, analyze(form[2])),
+          meta
         );
         // TODO: A message that is sent to js/Function objects
       case NEW_SYM:
-        return Eval.unaryOp(NEW_SYM, analyze(form[0]));
+        return new Dialog(
+          analyze(form[0]) as DialogSubject,
+          UnaryMessage.jsOp(NEW_SYM),
+          meta
+        );
         // TODO: A message that is sent to js/Object objects
       case INSTANCE_SYM:
-        return Eval.binaryOp(JS_INSTANCE, analyze(form[0]), analyze(form[2]));
+        return new Dialog(
+          analyze(form[0]) as DialogSubject,
+          BinaryMessage.jsOp(JS_INSTANCE, analyze(form[2])),
+          meta
+        );
         // TODO: A message that is sent to js/Value objects
       case TYPE_SYM:
-        return Eval.unaryOp(JS_TYPEOF, analyze(form[0]));
+        return new Dialog(
+          analyze(form[0]) as DialogSubject,
+          UnaryMessage.jsOp(JS_TYPEOF),
+          meta
+        );
       default:
         if (form.length === 2) {
           return new Dialog(
             analyze(form[0]) as DialogSubject,
-            new UnaryMessage(form[1].name, form[1].namespace)
+            new UnaryMessage(form[1].name, form[1].namespace),
+            meta
           );
         }
         if (form.length === 3) {
           return new Dialog(
             analyze(form[0]) as DialogSubject,
-            new BinaryMessage(form[1].name, form[1].namespace, analyze(form[2]))
+            new BinaryMessage(form[1].name, form[1].namespace, analyze(form[2])),
+            meta
           );
         }
         return new Dialog(
@@ -177,12 +244,13 @@ export function analyze(form: Form): Dispatch {
             form[1].name,
             form[1].namespace,
             form.slice(2).map(analyze)
-          )
+          ),
+          meta
         );
     }
   }
 
-  return new Dialog(analyze(form[0]) as DialogSubject, analyze(form.slice(1)) as DialogMessage)
+  return new Dialog(analyze(form[0]) as DialogSubject, analyze(form.slice(1)) as DialogMessage, meta)
 }
 
 export function analyzeHash(form: Map<Form, Form>) {
