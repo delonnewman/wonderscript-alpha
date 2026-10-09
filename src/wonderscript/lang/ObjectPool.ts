@@ -36,7 +36,6 @@ export type Foundation = {
   false: Class;
   number: Class;
   string: Class;
-  bigint: Class;
   function: Class; // js/Function
   object: Class; // js/Object
   symbol: Class; // js/Symbol
