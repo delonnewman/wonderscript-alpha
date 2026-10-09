@@ -45,6 +45,10 @@ export class Interpreter {
 
   evalString(input: string, ctx = this.#ctx) {
     const forms = this.analyzeString(input);
-    return forms.map(f => f.dispatch(this.pool, ctx));
+    let result;
+    forms.forEach(f => {
+      result = f.dispatch(this.pool, ctx);
+    });
+    return result;
   }
 }
