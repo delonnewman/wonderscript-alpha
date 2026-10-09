@@ -1,5 +1,4 @@
 import { Dispatch } from "../Dispatch";
-import { Array } from "../Array";
 import { ObjectPool } from "../ObjectPool";
 import { Context } from "../Context";
 import { Vector } from "../Vector";
@@ -16,6 +15,6 @@ export class VectorDispatch implements Dispatch {
     for (const value of this.#vector) {
       result.push(value.dispatch(pool, ctx));
     }
-    return new Vector(result);
+    return new Vector(...result);
   }
 }
