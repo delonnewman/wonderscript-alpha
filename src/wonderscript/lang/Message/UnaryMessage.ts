@@ -53,4 +53,8 @@ export class UnaryMessage extends BaseMessage {
   toJS(ctx: Context, obj: Form): string {
     return `${this.interned}${emit(obj, ctx)}`;
   }
+
+  toString() {
+    return this.name;
+  }
 }
