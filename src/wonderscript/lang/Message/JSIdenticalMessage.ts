@@ -1,4 +1,4 @@
-import { BinaryMessage } from "../Message/BinaryMessage";
+import { BinaryMessage } from "./BinaryMessage";
 import { MessageForm } from "../Message";
 import { Vector } from "../Vector";
 import { prStr } from "../../compiler/prStr";
@@ -6,10 +6,10 @@ import { Context } from "../Context";
 import { Form } from "../../compiler/core";
 import { emit } from "../../compiler/emit";
 
-export class JSEquivMessage extends BinaryMessage {
+export class JSIdenticalMessage extends BinaryMessage {
   static parse(msg: MessageForm) {
     if (msg instanceof Array || msg instanceof Vector) {
-      return new this("equiv?", "js", msg[1]);
+      return new this("identical?", "js", msg[1]);
     }
 
     throw new Error(`invalid message: ${prStr(msg)}`);
@@ -20,11 +20,10 @@ export class JSEquivMessage extends BinaryMessage {
   }
 
   sendTo(obj: unknown): unknown {
-    return obj == this.args[0];
+    return obj === this.args[0];
   }
 
   toJS(ctx: Context, obj: Form): string {
-    return `(${emit(obj, ctx)}==${emit(this.args[0], ctx)})`;
+    return `(${emit(obj, ctx)}===${emit(this.args[0], ctx)})`;
   }
 }
-

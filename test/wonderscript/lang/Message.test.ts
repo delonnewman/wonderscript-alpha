@@ -1,7 +1,7 @@
 // @ts-ignore
 import { expect, test, it, describe } from "bun:test";
 import { Keyword, Message, Symbol } from "../../../src/wonderscript/lang";
-import { JSPropMessage } from "../../../src/wonderscript/lang/javascript/JSPropMessage";
+import { JSPropMessage } from "../../../src/wonderscript/lang/Message/JSPropMessage";
 import { prStr } from "../../../src/wonderscript/compiler";
 import { ArgListMessage } from "../../../src/wonderscript/lang/Message/ArgListMessage";
 import { BaseMessage } from "../../../src/wonderscript/lang/Message/BaseMessage";

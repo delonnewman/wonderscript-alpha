@@ -2,7 +2,7 @@ import { MessageForm } from "../Message";
 import { Context } from "../Context";
 import { Form } from "../../compiler/core";
 import { emit } from "../../compiler/emit";
-import { ArgListMessage } from "../Message/ArgListMessage";
+import { ArgListMessage } from "./ArgListMessage";
 
 export class JSTypeMessage extends ArgListMessage {
   static INSTANCE = new JSTypeMessage("typeof", "js");

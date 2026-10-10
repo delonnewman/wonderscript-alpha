@@ -1,4 +1,4 @@
-import { BinaryMessage } from "../Message/BinaryMessage";
+import { BinaryMessage } from "./BinaryMessage";
 import { MessageForm } from "../Message";
 import { Vector } from "../Vector";
 import { prStr } from "../../compiler";

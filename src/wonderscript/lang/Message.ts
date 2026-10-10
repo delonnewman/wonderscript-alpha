@@ -15,9 +15,9 @@ import {
 } from "./javascript";
 import { ArgListMessage } from "./Message/ArgListMessage";
 import { BinaryMessage } from "./Message/BinaryMessage";
-import { JSOrMessage } from "./javascript/JSOrMessage";
-import { JSAndMessage } from "./javascript/JSAndMessage";
-import { JSNotMessage } from "./javascript/JSNotMessage";
+import { JSOrMessage } from "./Message/JSOrMessage";
+import { JSAndMessage } from "./Message/JSAndMessage";
+import { JSNotMessage } from "./Message/JSNotMessage";
 import { BaseMessage } from "./Message/BaseMessage";
 import { UnaryMessage } from "./Message/UnaryMessage";
 import { Binding } from "./Dispatch/Binding";

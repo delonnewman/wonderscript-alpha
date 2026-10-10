@@ -1,4 +1,4 @@
-import { ArgListMessage } from "../Message/ArgListMessage";
+import { ArgListMessage } from "./ArgListMessage";
 
 export class JSMethodMessage extends ArgListMessage {
   get ident(): string {
