@@ -5,23 +5,6 @@ import { Keyword } from "./Keyword";
 import { merge } from "./runtime";
 import { Reference, Watcher } from "./Reference";
 
-export const MACRO_KW = Keyword.intern("macro");
-// the value will be a symbol, class, protocol, or function that is part of the type system
-export const TYPE_KW = Keyword.intern("type");
-export const DOC_KW = Keyword.intern("doc");
-export const ADDED_KW = Keyword.intern("added");
-export const CONST_KW = Keyword.intern("constant");
-export const VAR_KW = Keyword.intern("variable");
-// exported automatically with 'use'
-export const EXPORT_KW = Keyword.intern("export");
-// made palatable for the outside world
-export const EXTERNAL_KW = Keyword.intern("external");
-// a value from the outside world
-export const ALIEN_KW = Keyword.intern("alien");
-export const ALIAS_KW = Keyword.intern("alias");
-// the type signature of a value
-export const SIGNATURE_KW = Keyword.intern("signature");
-
 export class Definition implements Meta, Named, Reference {
   private readonly _symbol: Symbol;
   private _meta: MetaData;
@@ -120,7 +103,7 @@ export class Definition implements Meta, Named, Reference {
   }
 
   documentation(): string | null | undefined {
-    return this._meta?.get(DOC_KW);
+    return this._meta?.get(Keyword.intern("doc"));
   }
 
   isDocumented(): boolean {
@@ -128,42 +111,42 @@ export class Definition implements Meta, Named, Reference {
   }
 
   added(): string | null | undefined {
-    return this._meta?.get(ADDED_KW);
+    return this._meta?.get(Keyword.intern("added"));
   }
 
   signature(): any | null | undefined {
-    return this._meta?.get(SIGNATURE_KW);
+    return this._meta?.get(Keyword.intern("signature"));
   }
 
   isMacro(): boolean {
-    return this._meta?.get(MACRO_KW) === true;
+    return this._meta?.get(Keyword.intern("macro")) === true;
   }
 
   isType(): boolean {
-    return this._meta?.get(TYPE_KW) === true;
+    return this._meta?.get(Keyword.intern("type")) === true;
   }
 
   isConstant(): boolean {
-    return this._meta?.get(CONST_KW) === true;
+    return this._meta?.get(Keyword.intern("const")) === true;
   }
 
   isVariable(): boolean {
-    return this._meta?.get(VAR_KW) === true;
+    return this._meta?.get(Keyword.intern("var")) === true;
   }
 
   isExport(): boolean {
-    return this._meta?.get(EXPORT_KW) === true;
+    return this._meta?.get(Keyword.intern("export")) === true;
   }
 
   isExternal(): boolean {
-    return this._meta?.get(EXTERNAL_KW) === true;
+    return this._meta?.get(Keyword.intern("external")) === true;
   }
 
   isAlien(): boolean {
-    return this._meta?.get(ALIEN_KW) === true;
+    return this._meta?.get(Keyword.intern("alien")) === true;
   }
 
   isAlias(): boolean {
-    return this._meta?.get(ALIAS_KW) === true;
+    return this._meta?.get(Keyword.intern("alias")) === true;
   }
 }

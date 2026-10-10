@@ -1,7 +1,8 @@
-import { ALIEN_KW, Definition } from "./Definition";
+import { Definition } from "./Definition";
 import { Symbol } from "./Symbol";
 import { MetaData } from "./Meta";
 import { merge } from "./merge";
+import { Keyword } from "./Keyword";
 
 export type DefinitionMap = Map<string, Definition>;
 
@@ -36,7 +37,7 @@ export class Package {
     return this.importSymbol(
       Symbol.intern(name),
       value,
-      merge(meta, new Map([[ALIEN_KW, true]]))
+      merge(meta, new Map([[Keyword.intern("alien"), true]]))
     );
   }
 
