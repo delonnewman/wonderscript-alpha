@@ -8,29 +8,58 @@ import { prStr } from "../compiler";
 import { ArgListMessage } from "./Message/ArgListMessage";
 import { ObjectPool } from "./ObjectPool";
 import { Context } from "./Context";
+import { UnaryMessage } from "./Message/UnaryMessage";
 
 export type MethodTable = Record<string, Method>;
 
-const BASIC_MESSAGE = {
-  "define-method": new ArgListMessage("define-method", undefined, [
+const BASIC_MESSAGES = {
+  defineMethod: new ArgListMessage("define-method", undefined, [
     Symbol.intern("message"),
     Symbol.intern("dispatch"),
   ]),
+  subclass: new ArgListMessage("subclass", undefined, [
+    Symbol.intern("name"),
+  ]),
+  messages: new UnaryMessage("messages"),
 };
 
 const BASIC_METHODS: MethodTable = {
-  'define-method_2': new Method(
-    BASIC_MESSAGE['define-method'],
+  [BASIC_MESSAGES.messages.interned]: new Method(BASIC_MESSAGES.messages, {
+    dispatch(pool: ObjectPool, ctx: Context): unknown {
+      const self = ctx.get("self");
+      if (self == null) {
+        throw new Error(`expected 'self'`);
+      }
+
+      return (self as Class).messages;
+    },
+  }),
+  [BASIC_MESSAGES.subclass.interned]: new Method(BASIC_MESSAGES.subclass, {
+    dispatch(pool: ObjectPool, ctx: Context): unknown {
+      const self = ctx.get("self");
+      if (self == null) {
+        throw new Error(`expected 'self'`);
+      }
+
+      const name = ctx.get("name");
+      if (name == null) {
+        throw new Error("'name' is required");
+      }
+
+      return (self as Class).subclass(name as string | Keyword | Symbol);
+    },
+  }),
+  [BASIC_MESSAGES.defineMethod.interned]: new Method(
+    BASIC_MESSAGES.defineMethod,
     {
       dispatch(pool: ObjectPool, ctx: Context): unknown {
-        const self = ctx.get('self');
+        const self = ctx.get("self");
         if (self == null) {
           throw new Error(`expected 'self'`);
         }
 
-        const msg = ctx.get('message');
+        const msg = ctx.get("message");
         if (msg == null) {
-          console.error(ctx);
           throw new Error("'message' is required");
         }
 
@@ -39,10 +68,13 @@ const BASIC_METHODS: MethodTable = {
           throw new Error("'dispatch' is required");
         }
 
-        return (self as Class).defineMethod(msg as Message, dispatch as Dispatch)
+        return (self as Class).defineMethod(
+          msg as Message,
+          dispatch as Dispatch
+        );
       },
     }
-  )
+  ),
 };
 
 export class Class implements Named, Message {
@@ -55,7 +87,7 @@ export class Class implements Named, Message {
   constructor(name: string, namespace?: string | null | undefined, superclassMethods?: MethodTable) {
     this.#name = name;
     this.#namespace = namespace;
-    this.#messages = Object.values(BASIC_MESSAGE);
+    this.#messages = Object.values(BASIC_MESSAGES);
     this.#methods = Object.create(superclassMethods ?? BASIC_METHODS);
   }
 
