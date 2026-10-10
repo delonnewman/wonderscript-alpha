@@ -59,7 +59,8 @@ export class Script implements SequentialDispatch, Meta {
     for (const action of this.#actions.slice(0, this.#actions.length - 1)) {
       action.dispatch(pool, ctx);
     }
-    this.#result = this.#actions[this.#actions.length - 1].dispatch(pool, ctx);
-    return this;
+    const result = this.#actions[this.#actions.length - 1].dispatch(pool, ctx);
+    this.#result = result;
+    return result;
   }
 }

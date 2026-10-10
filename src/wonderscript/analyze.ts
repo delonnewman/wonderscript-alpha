@@ -130,7 +130,7 @@ export function analyze(initForm: ReadForm | Form): Dispatch {
       case DEF_SYM:
         return analyzeDef(form, meta);
       case BEGIN_SYM:
-        return analyzeBlock(form, meta);
+        return analyzeBlock(form, meta, false);
       case DO_SYM:
         return analyzeBlock(form, meta, true);
     }
@@ -280,7 +280,7 @@ export function analyzeHash(form: Map<Form, Form>) {
   return new HashDispatch(hash);
 }
 
-export function analyzeBlock(form: unknown[], meta: MetaData | undefined, delay: boolean = false) {
+export function analyzeBlock(form: unknown[], meta: MetaData | undefined, delay: boolean) {
   const binds: Binding[] = [];
   let restIdx = 1;
 
@@ -303,7 +303,7 @@ export function analyzeBlock(form: unknown[], meta: MetaData | undefined, delay:
   return {
     script,
     dispatch(pool: ObjectPool, ctx: Context): unknown {
-      return this.script.dispatch(pool, ctx);
+      return this.script;
     },
   };
 }
