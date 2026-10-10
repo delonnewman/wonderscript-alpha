@@ -72,11 +72,11 @@ export class Dialog implements SequentialDispatch, Meta {
     const method = pool.select(obj, msg);
     ctx.define(Symbol.intern("self"), obj);
 
-    const binds = method.message.bindings(msg);
+    const binds = method.bindings(msg);
     for (const bind of binds) {
       ctx.define(bind.name, bind.dispatch(pool, ctx));
     }
 
-    return method.dispatch.dispatch(pool, ctx);
+    return method.dispatch(pool, ctx);
   }
 }
