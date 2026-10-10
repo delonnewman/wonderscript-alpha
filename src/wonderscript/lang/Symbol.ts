@@ -6,8 +6,10 @@ import { merge } from "./merge";
 import { Value } from "./Value";
 import { stringHash } from "./utils";
 import { Message } from "./Message";
+import { Binding } from "./Dispatch/Binding";
 
 const SLASH = "/";
+const EMPTY_ARRAY = Object.freeze([]);
 
 export class Symbol<Name extends string = string, Namespace extends NullableString = NullableString>
   implements Named<Name, Namespace>, Meta, Invokable, Comparable, Value, Message
@@ -82,6 +84,10 @@ export class Symbol<Name extends string = string, Namespace extends NullableStri
 
   get internings(): string[] {
     return [this.interned];
+  }
+
+  bindings(_: Message): readonly Binding[] {
+    return EMPTY_ARRAY;
   }
 
   get name(): Name {
