@@ -18,6 +18,18 @@ export * from "./lang/Vector";
 export * from "./lang/Package";
 export * from "./lang/Definition";
 export * from "./lang/Message";
+export * from './lang/Message/UnaryMessage';
+export * from "./lang/Message/BinaryMessage";
+export * from "./lang/Message/ArgListMessage";
+export * from "./lang/Message/KeywordMessage";
+export * from "./lang/Dispatch";
+export * from "./lang/Dispatch/Binding";
+export * from "./lang/Dispatch/Dialog";
+export * from "./lang/Dispatch/Script";
+export * from "./lang/Dispatch/SetDispatch";
+export * from "./lang/Dispatch/VectorDispatch";
+export * from "./lang/Dispatch/ArrayDispatch";
+export * from "./lang/Dispatch/Identity";
 export * from "./lang/Class";
 export * from "./lang/ObjectPool";
 

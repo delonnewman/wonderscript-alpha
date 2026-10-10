@@ -5,20 +5,58 @@ import { EMPTY_ARRAY, Message } from "./Message";
 import { Dispatch } from "./Dispatch";
 import { Method } from "./Method";
 import { prStr } from "../compiler";
+import { ArgListMessage } from "./Message/ArgListMessage";
+import { ObjectPool } from "./ObjectPool";
+import { Context } from "./Context";
 
 export type MethodTable = Record<string, Method>;
+
+const BASIC_MESSAGE = {
+  "define-method": new ArgListMessage("define-method", undefined, [
+    Symbol.intern("message"),
+    Symbol.intern("dispatch"),
+  ]),
+};
+
+const BASIC_METHODS: MethodTable = {
+  'define-method_2': new Method(
+    BASIC_MESSAGE['define-method'],
+    {
+      dispatch(pool: ObjectPool, ctx: Context): unknown {
+        const self = ctx.get('self');
+        if (self == null) {
+          throw new Error(`expected 'self'`);
+        }
+
+        const msg = ctx.get('message');
+        if (msg == null) {
+          console.error(ctx);
+          throw new Error("'message' is required");
+        }
+
+        const dispatch = ctx.get("dispatch");
+        if (dispatch == null) {
+          throw new Error("'dispatch' is required");
+        }
+
+        return (self as Class).defineMethod(msg as Message, dispatch as Dispatch)
+      },
+    }
+  )
+};
 
 export class Class implements Named, Message {
   #name: string;
   #namespace: string | undefined;
   #methods: MethodTable;
-  #messages: Message[] = [];
+  #messages: Message[];
   #subclasses: Class[] = [];
 
   constructor(name: string, namespace?: string | null | undefined, superclassMethods?: MethodTable) {
     this.#name = name;
     this.#namespace = namespace;
-    this.#methods = Object.create(superclassMethods ?? null);
+    this.#messages = Object.values(BASIC_MESSAGE);
+    this.#methods = Object.create(superclassMethods ?? BASIC_METHODS);
   }
 
   get name() {
@@ -83,6 +121,10 @@ export class Class implements Named, Message {
 
   get messages(): Message[] {
     return Array.from(this.#messages);
+  }
+
+  get methods() {
+    return this.#methods;
   }
 
   toString() {
