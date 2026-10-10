@@ -4,6 +4,7 @@ import { Interpreter } from "../../src/wonderscript/Interpreter";
 import { prStr } from "../../src/wonderscript/compiler";
 import { Keyword } from "../../src/wonderscript/lang/Keyword";
 import { Vector } from "../../src/wonderscript/lang/Vector";
+import { Symbol } from "../../src/wonderscript/lang/Symbol";
 
 describe("Interpreter", () => {
   const subject = new Interpreter();
@@ -48,6 +49,8 @@ describe("Interpreter", () => {
 
   describe("special forms", () => {
     const examples: [string, unknown][] = [
+      ['(true class)', subject.pool.class(true)],
+      ["((true class) define-method 'to_s \"true\")", Symbol.intern("to_s")],
       ['(def (true to_s) "true") (true to_s)', "true"],
       ["(def (true not) false) (true not)", false],
       ["(begin 1 2 3)", 3],

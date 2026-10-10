@@ -41,7 +41,6 @@ import {
   JS_NOT,
   JS_OR,
   JS_TYPEOF,
-  LET_SYM,
   LT_SYM,
   LTQ_SYM,
   MINUS_SYM,
@@ -52,6 +51,7 @@ import {
   NOT_SYM,
   OR_SYM,
   PLUS_SYM,
+  QUOTE_SYM,
   TYPE_SYM,
 } from "./compiler/constants";
 import { Variable } from "./lang/Dispatch/Variable";
@@ -133,6 +133,8 @@ export function analyze(initForm: ReadForm | Form): Dispatch {
         return analyzeBlock(form, meta, false);
       case DO_SYM:
         return analyzeBlock(form, meta, true);
+      case QUOTE_SYM:
+        return new Identity(form[1]);
     }
   }
 
@@ -324,9 +326,9 @@ export function analyzeDef(form: unknown[], meta: MetaData | undefined): Dispatc
   const [obj, template] = def;
 
   return new Dialog(
-    analyze(obj),
+    new Dialog(analyze(obj), new UnaryMessage('class')),
     new ArgListMessage(
-      "defineMethod",
+      "define-method",
       undefined,
       [
         template,

@@ -1,19 +1,96 @@
 import { readString } from "./reader";
 import { Class } from "./lang/Class";
-import { ObjectPool } from "./lang/ObjectPool";
+import { ObjectPool, ObjectValue } from "./lang/ObjectPool";
 import { analyze } from "./analyze";
 import { Context } from "./lang/Context";
+import { JSConstructorClass } from "./lang/Class/JSConstructorClass";
+import { Symbol } from "./lang/Symbol";
+import { UnaryMessage } from "./lang/Message/UnaryMessage";
+import { JSSingletonClass } from "./lang/Class/JSSingletonClass";
+import { Dialog } from "./lang/Dispatch/Dialog";
+import { ArgListMessage } from "./lang/Message/ArgListMessage";
+import { Message } from "./lang/Message";
+import { Dispatch } from "./lang/Dispatch";
 
 export class Interpreter {
   #pool: ObjectPool;
   #ctx: Context = new Context();
 
   constructor() {
-    const NilClass = new Class("NilClass", "wonderscript.lang");
-    const TrueClass = new Class("TrueClass", "wonderscript.lang");
-    const FalseClass = new Class("FalseClass", "wonderscript.lang");
-    const Numeric = new Class("Numeric", "wonderscript.lang");
-    const String = new Class("String", "wonderscript.lang");
+    const Object = new Class("Object");
+    Object.defineMethod(
+      new UnaryMessage("class"),
+      {
+        dispatch(pool: ObjectPool, ctx: Context): unknown {
+          const self = ctx.get('self');
+          if (self == null) {
+            throw new Error(`expected 'self' in context ${ctx}`);
+          }
+
+          return pool.class(self as ObjectValue);
+        },
+      }
+    );
+    Object.defineMethod(new UnaryMessage("allocate"), {
+      dispatch(pool: ObjectPool, ctx: Context): unknown {
+        const self = ctx.get("self");
+        if (self == null) {
+          throw new Error(`expected 'self' in context ${ctx}`);
+        }
+
+        const klass = new Dialog(
+          self as ObjectValue,
+          new UnaryMessage("class")
+        ).dispatch(pool, ctx);
+
+        return pool.allocate(klass as Class);
+      },
+    });
+
+    const ClassClass = Object.subclass(Symbol.intern('Class'));
+    ClassClass.defineMethod(
+      new ArgListMessage(
+        "define-method",
+        undefined,
+        [
+          Symbol.intern('message'),
+          Symbol.intern('dispatch')
+        ]
+      ),
+      {
+        dispatch(pool: ObjectPool, ctx: Context): unknown {
+          const self = ctx.get('self');
+          if (self == null) {
+            throw new Error(`expected 'self'`);
+          }
+
+          const msg = ctx.get('message');
+          if (msg == null) {
+            throw new Error("'message' is required");
+          }
+
+          const dispatch = ctx.get("dispatch");
+          if (dispatch == null) {
+            throw new Error("'dispatch' is required");
+          }
+
+          console.error('self', self);
+          return (self as Class).defineMethod(msg as Message, dispatch as Dispatch)
+        },
+      }
+    );
+
+    const NilClass = Object.subclass(Symbol.intern('NilClass'));
+    NilClass.defineMethod(new UnaryMessage("inspect"), {
+      dispatch(pool: ObjectPool, ctx: Context): unknown {
+        return "nil";
+      },
+    });
+
+    const TrueClass = Object.subclass(Symbol.intern('TrueClass'));
+    const FalseClass = Object.subclass(Symbol.intern('FalseClass'));
+    const Numeric = Object.subclass(Symbol.intern('Numeric'));
+    const String = Object.subclass(Symbol.intern('String'));
 
     const foundation = {
       null: NilClass,

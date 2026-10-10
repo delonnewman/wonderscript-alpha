@@ -15,7 +15,7 @@ export class Class implements Named, Message {
   #messages: Message[] = [];
   #subclasses: Class[] = [];
 
-  constructor(name: string, namespace: string | null | undefined, superclassMethods?: MethodTable) {
+  constructor(name: string, namespace?: string | null | undefined, superclassMethods?: MethodTable) {
     this.#name = name;
     this.#namespace = namespace;
     this.#methods = Object.create(superclassMethods ?? null);
