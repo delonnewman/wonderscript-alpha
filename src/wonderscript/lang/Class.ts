@@ -70,7 +70,12 @@ export class Class implements Named, Message {
     const ns = namespace(subclassName);
     const nm = name(subclassName);
 
-    const subclass = new (this.constructor as typeof Class)(nm, ns, this.#methods);
+    const subclass = new (this.constructor as typeof Class)(
+      nm,
+      ns,
+      this.#methods
+    );
+
     this.#subclasses.push(subclass);
 
     return subclass;
