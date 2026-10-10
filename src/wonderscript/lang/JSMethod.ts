@@ -1,6 +1,6 @@
-import { EMPTY_ARRAY, Message } from "../Message";
-import { ObjectPool } from "../ObjectPool";
-import { Context } from "../Context";
+import { EMPTY_ARRAY, Message } from "./Message";
+import { ObjectPool } from "./ObjectPool";
+import { Context } from "./Context";
 
 export class JSMethod {
   static CACHE: Record<string, JSMethod> = Object.create(null);
