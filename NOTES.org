@@ -8,3 +8,54 @@ https://github.com/syntax-tree/estree-util-to-js
 
 * Object Model
 https://files.spritely.institute/docs/guile-goblins/0.17.0/What-is-Goblins_003f.html
+
+* Compiler
+** Data Representation
+- https://doc.guix.gnu.org/guile/latest/en/html_node/Faster-Integers.html
+- https://wiki.call-cc.org/man/4/Data%20representation
+- https://github.com/JeffBezanson/femtolisp/blob/master/flisp.h
+- NaN Boxing
+  - https://web.archive.org/web/20240223224706/https://sean.cm/a/nan-boxing
+  - https://github.com/zuiderkwast/nanbox
+  - https://albertnetymk.github.io/2016/08/06/nan_boxing/
+  - https://leonard.swiss/blog/nan-boxing/
+- https://darksi.de/6.smis-and-doubles/
+** Pointer Tagging
+- https://bernsteinbear.com/blog/small-objects/
+- (pointer tagging) https://bernsteinbear.com/assets/img/11-ghuloum.pdf
+- https://www.npopov.com/2012/02/02/Pointer-magic-for-efficient-dynamic-value-representations.html
+** Inline Caching
+- https://www.mgaudet.ca/technical/2018/6/5/an-inline-cache-isnt-just-a-cache
+- https://mrale.ph/blog/2015-01-11-whats-up-with-monomorphism.html
+- https://bernsteinbear.com/blog/inline-caching/
+- https://bernsteinbear.com/blog/inline-caching-quickening/
+- https://bibliography.selflanguage.org/_static/pics.pdf
+- https://blog.pyston.org/2016/06/30/baseline-jit-and-inline-caches/
+- https://jandemooij.nl/blog/cacheir/
+- https://richardartoul.github.io/jekyll/update/2015/04/26/hidden-classes.html
+** Stack Caching
+- https://dl.acm.org/doi/pdf/10.1145/207110.207165
+** Quickening
+- https://dl.acm.org/doi/10.5555/1883978.1884008
+- https://dl.acm.org/doi/abs/10.1145/1869631.1869633
+- https://arxiv.org/pdf/2109.02958
+** Basic Block Versioning
+- https://arxiv.org/pdf/1411.0352v2
+- https://arxiv.org/pdf/1507.02437
+- https://arxiv.org/pdf/1511.02956
+** Coroutines (and not coroutines)
+- https://ssw.jku.at/General/Staff/LS/coro/CoroIntroduction.pdf
+- https://facebook.github.io/regenerator/
+- https://github.com/JetBrains/kotlin/blob/894ba9ab809c400de048d43fa98f89087100fcbc/compiler/backend/src/org/jetbrains/kotlin/codegen/coroutines/coroutines-codegen.md
+- https://kotlinlang.org/spec/asynchronous-programming-with-coroutines.html#coroutine-state-machine
+- https://dl.acm.org/doi/pdf/10.1145/3486607.3486751?casa_token=HhJYg3t8opMAAAAA:mLO0yLTbR6TRIlffJAPCuRzuAUEFGvNJGRfJj7lUgnsCbUGvS7ISh2bkqD9581h8Mn6kjCQiDFxAXA
+- https://github.com/darsvador/generator
+** Other Language Implementations
+- https://sillycross.github.io/2022/11/22/2022-11-22/
+- https://dl.acm.org/doi/10.1145/800055.802040
+- https://dl.acm.org/doi/10.1145/800017.800542
+- http://i.stanford.edu/pub/cstr/reports/cs/tr/94/1520/CS-TR-94-1520.pdf
+- https://wiki.openjdk.org/spaces/HotSpot/pages/11829300/PerformanceTechniques
+- https://github.com/thlorenz/v8-perf/blob/master/compiler.md
+** Tools
+- https://github.com/Tachyon-Team/Tachyon/tree/master/source/backend/x86
