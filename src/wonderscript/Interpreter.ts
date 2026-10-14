@@ -52,9 +52,34 @@ export class Interpreter {
     });
 
     const TrueClass = Object.subclass(Symbol.intern('TrueClass'));
+    TrueClass.defineMethod(new UnaryMessage("inspect"), {
+      dispatch(_pool: ObjectPool, _ctx: Context): unknown {
+        return "true";
+      },
+    });
+
     const FalseClass = Object.subclass(Symbol.intern('FalseClass'));
+    FalseClass.defineMethod(new UnaryMessage("inspect"), {
+      dispatch(_pool: ObjectPool, _ctx: Context): unknown {
+        return "false";
+      },
+    });
+
     const Numeric = Object.subclass(Symbol.intern('Numeric'));
+    Numeric.defineMethod(new UnaryMessage("inspect"), {
+      dispatch(_pool: ObjectPool, ctx: Context): unknown {
+        const self = ctx.get("self");
+        return `#<Numeric ${self}>`;
+      },
+    });
+
     const String = Object.subclass(Symbol.intern('String'));
+    String.defineMethod(new UnaryMessage("inspect"), {
+      dispatch(_pool: ObjectPool, ctx: Context): unknown {
+        const self = ctx.get("self");
+        return `#<String ${JSON.stringify(self)}>`;
+      },
+    });
 
     const foundation = {
       null: NilClass,

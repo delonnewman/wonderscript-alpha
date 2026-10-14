@@ -92,4 +92,21 @@ describe("Interpreter", () => {
       });
     });
   });
+
+  describe("dynamic messages", () => {
+    const examples: [string, unknown][] = [
+      ["(true inspect)", "true"],
+      ["(false inspect)", "false"],
+      ["(nil inspect)", "nil"],
+      ["(1.2 inspect)", "#<Numeric 1.2>"],
+      ['("Hi!" inspect)', "#<String \"Hi!\">"]
+    ];
+
+    examples.forEach(([form, expected]) => {
+      test(`${form} => ${prStr(expected)}`, () => {
+        const output = subject.evalString(form);
+        expect(output).toBe(expected);
+      });
+    });
+  });
 });
