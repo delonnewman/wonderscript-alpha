@@ -19,4 +19,8 @@ export class Method {
   dispatch(pool: ObjectPool, ctx: Context): unknown {
     return this.#dispatch.dispatch(pool, ctx);
   }
+
+  toString() {
+    return `#<Method ${this.message} => ${this.#dispatch}>`;
+  }
 }

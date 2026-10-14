@@ -82,7 +82,11 @@ export function prStr(form: unknown): string {
 
   if (typeof form === "object") {
     const ctrName = Object.getPrototypeOf(form)?.constructor?.name ?? "object";
-    return `#js/${ctrName} ${form}`;
+    const str = `${form}`;
+    if (str.startsWith('#<')) {
+      return str;
+    }
+    return `#js/${ctrName} ${str}`;
   }
 
   return `${form}`;

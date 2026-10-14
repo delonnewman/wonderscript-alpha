@@ -55,6 +55,6 @@ export class UnaryMessage extends BaseMessage {
   }
 
   toString() {
-    return this.name;
+    return `#<UnaryMessage ${this.name}>`;
   }
 }
