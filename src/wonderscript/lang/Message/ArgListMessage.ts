@@ -83,7 +83,7 @@ export class ArgListMessage extends BaseMessage implements Dispatch {
     }
 
     const arity = this.arity;
-    if (!(arity === 0)) {
+    if (arity === 0) {
       return EMPTY_ARRAY;
     }
 
