@@ -67,7 +67,7 @@ export class BinaryMessage extends BaseMessage implements Dispatch {
   }
 
   toString(): string {
-    return `(${this.interned} ${this.#other})`;
+    return `#<BinaryMessage (${this.interned} ${this.#other})>`;
   }
 
   bindings(msg: BinaryMessage): readonly Binding[] {
