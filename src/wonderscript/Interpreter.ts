@@ -6,6 +6,7 @@ import { Context } from "./lang/Context";
 import { Symbol } from "./lang/Symbol";
 import { UnaryMessage } from "./lang/Message/UnaryMessage";
 import { Dialog } from "./lang/Dispatch/Dialog";
+import { BinaryMessage } from "./lang/Message/BinaryMessage";
 
 export class Interpreter {
   #pool: ObjectPool;
@@ -58,17 +59,86 @@ export class Interpreter {
       },
     });
 
-    const FalseClass = Object.subclass(Symbol.intern('FalseClass'));
+    const FalseClass = Object.subclass(Symbol.intern("FalseClass"));
     FalseClass.defineMethod(new UnaryMessage("inspect"), {
       dispatch(_pool: ObjectPool, _ctx: Context): unknown {
         return "false";
       },
     });
 
+    FalseClass.defineMethod(new UnaryMessage("!"), {
+      dispatch(pool: ObjectPool, ctx: Context): unknown {
+        const self = ctx.get("self");
+        if (self == null) {
+          throw new Error(`expected 'self' in context ${ctx}`);
+        }
+        return !self;
+      },
+    });
+
+    const NotMessage = new UnaryMessage("!");
+    const NotDispatch = {
+      dispatch(pool: ObjectPool, ctx: Context): unknown {
+        const self = ctx.get("self");
+        if (self == null) {
+          throw new Error(`expected 'self' in context ${ctx}`);
+        }
+
+        return !self;
+      },
+    };
+
+    FalseClass.defineMethod(NotMessage, NotDispatch);
+    TrueClass.defineMethod(NotMessage, NotDispatch);
+
+    const AndMessage = new BinaryMessage("&&", undefined, Symbol.intern("other"));
+    const AndDispatch = {
+      dispatch(pool: ObjectPool, ctx: Context): unknown {
+        const self = ctx.get("self");
+        if (self == null) {
+          throw new Error(`expected 'self' in context ${ctx}`);
+        }
+
+        const other = ctx.get("other");
+        if (other == null) {
+          throw new Error("'other' is required");
+        }
+
+        return self && other;
+      },
+    };
+
+    FalseClass.defineMethod(AndMessage, AndDispatch);
+    TrueClass.defineMethod(AndMessage, AndDispatch);
+
+    const OrMessage = new BinaryMessage("||", undefined, Symbol.intern("other"));
+    const OrDispatch = {
+      dispatch(pool: ObjectPool, ctx: Context): unknown {
+        const self = ctx.get("self");
+        if (self == null) {
+          throw new Error(`expected 'self' in context ${ctx}`);
+        }
+
+        const other = ctx.get("other");
+        if (other == null) {
+          throw new Error("'other' is required");
+        }
+
+        return self || other;
+      },
+    };
+
+    FalseClass.defineMethod(OrMessage, OrDispatch);
+    TrueClass.defineMethod(OrMessage, OrDispatch);
+
     const Numeric = Object.subclass(Symbol.intern('Numeric'));
     Numeric.defineMethod(new UnaryMessage("inspect"), {
       dispatch(_pool: ObjectPool, ctx: Context): unknown {
         const self = ctx.get("self");
+        if (self == null) {
+          throw new Error(`expected 'self' in context ${ctx}`);
+        }
+
         return `#<Numeric ${self}>`;
       },
     });
@@ -77,6 +147,10 @@ export class Interpreter {
     String.defineMethod(new UnaryMessage("inspect"), {
       dispatch(_pool: ObjectPool, ctx: Context): unknown {
         const self = ctx.get("self");
+        if (self == null) {
+          throw new Error(`expected 'self' in context ${ctx}`);
+        }
+
         return `#<String ${JSON.stringify(self)}>`;
       },
     });

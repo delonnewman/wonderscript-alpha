@@ -34,12 +34,12 @@ export class BinaryMessage extends BaseMessage implements Dispatch {
     return new this(name, ns, other);
   }
 
-  #other: ObjectValue | Dispatch;
+  #other: ObjectValue | Dispatch | Symbol;
 
   constructor(
     name: string,
     namespace: string | undefined,
-    other: ObjectValue | Dispatch,
+    other: ObjectValue | Dispatch | Symbol,
     flags: MessageFlags = {}
   ) {
     super(name, namespace, flags);

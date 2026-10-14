@@ -5,9 +5,9 @@ import { Dispatch, isDispatch } from "../Dispatch";
 
 export class Binding implements Dispatch {
   #name: Symbol;
-  #action: Dispatch | ObjectValue;
+  #action: Dispatch | ObjectValue | Symbol;
 
-  constructor(name: Symbol, action: Dispatch | ObjectValue) {
+  constructor(name: Symbol, action: Dispatch | ObjectValue | Symbol) {
     this.#name = name;
     this.#action = action;
   }
