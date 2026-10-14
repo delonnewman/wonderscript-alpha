@@ -143,6 +143,176 @@ export class Interpreter {
       },
     });
 
+    Numeric.defineMethod(
+      new BinaryMessage("+", undefined, Symbol.intern("other")),
+      {
+        dispatch(pool: ObjectPool, ctx: Context): unknown {
+          const self = ctx.get("self") as number;
+          if (self == null) {
+            throw new Error(`expected 'self' in context ${ctx}`);
+          }
+
+        const other = ctx.get("other") as number;
+        if (other == null) {
+          throw new Error("'other' is required");
+        }
+
+        return self + other;
+      },
+    });
+
+    Numeric.defineMethod(
+      new BinaryMessage("-", undefined, Symbol.intern("other")),
+      {
+        dispatch(pool: ObjectPool, ctx: Context): unknown {
+          const self = ctx.get("self") as number;
+          if (self == null) {
+            throw new Error(`expected 'self' in context ${ctx}`);
+          }
+
+          const other = ctx.get("other") as number;
+          if (other == null) {
+            throw new Error("'other' is required");
+          }
+
+          return self - other;
+        },
+      }
+    );
+
+    Numeric.defineMethod(
+      new BinaryMessage("*", undefined, Symbol.intern("other")),
+      {
+        dispatch(pool: ObjectPool, ctx: Context): unknown {
+          const self = ctx.get("self") as number;
+          if (self == null) {
+            throw new Error(`expected 'self' in context ${ctx}`);
+          }
+
+          const other = ctx.get("other") as number;
+          if (other == null) {
+            throw new Error("'other' is required");
+          }
+
+          return self * other;
+        },
+      }
+    );
+
+    Numeric.defineMethod(
+      new BinaryMessage("/", undefined, Symbol.intern("other")),
+      {
+        dispatch(pool: ObjectPool, ctx: Context): unknown {
+          const self = ctx.get("self") as number;
+          if (self == null) {
+            throw new Error(`expected 'self' in context ${ctx}`);
+          }
+
+          const other = ctx.get("other") as number;
+          if (other == null) {
+            throw new Error("'other' is required");
+          }
+
+          return self / other;
+        },
+      }
+    );
+
+    Numeric.defineMethod(
+      new BinaryMessage("%", undefined, Symbol.intern("other")),
+      {
+        dispatch(pool: ObjectPool, ctx: Context): unknown {
+          const self = ctx.get("self") as number;
+          if (self == null) {
+            throw new Error(`expected 'self' in context ${ctx}`);
+          }
+
+          const other = ctx.get("other") as number;
+          if (other == null) {
+            throw new Error("'other' is required");
+          }
+
+          return self % other;
+        },
+      }
+    );
+
+    Numeric.defineMethod(
+      new BinaryMessage(">", undefined, Symbol.intern("other")),
+      {
+        dispatch(pool: ObjectPool, ctx: Context): unknown {
+          const self = ctx.get("self") as number;
+          if (self == null) {
+            throw new Error(`expected 'self' in context ${ctx}`);
+          }
+
+          const other = ctx.get("other") as number;
+          if (other == null) {
+            throw new Error("'other' is required");
+          }
+
+          return self > other;
+        },
+      }
+    );
+
+    Numeric.defineMethod(
+      new BinaryMessage(">=", undefined, Symbol.intern("other")),
+      {
+        dispatch(pool: ObjectPool, ctx: Context): unknown {
+          const self = ctx.get("self") as number;
+          if (self == null) {
+            throw new Error(`expected 'self' in context ${ctx}`);
+          }
+
+          const other = ctx.get("other") as number;
+          if (other == null) {
+            throw new Error("'other' is required");
+          }
+
+          return self >= other;
+        },
+      }
+    );
+
+    Numeric.defineMethod(
+      new BinaryMessage("<", undefined, Symbol.intern("other")),
+      {
+        dispatch(pool: ObjectPool, ctx: Context): unknown {
+          const self = ctx.get("self") as number;
+          if (self == null) {
+            throw new Error(`expected 'self' in context ${ctx}`);
+          }
+
+          const other = ctx.get("other") as number;
+          if (other == null) {
+            throw new Error("'other' is required");
+          }
+
+          return self < other;
+        },
+      }
+    );
+
+    Numeric.defineMethod(
+      new BinaryMessage("<=", undefined, Symbol.intern("other")),
+      {
+        dispatch(pool: ObjectPool, ctx: Context): unknown {
+          const self = ctx.get("self") as number;
+          if (self == null) {
+            throw new Error(`expected 'self' in context ${ctx}`);
+          }
+
+          const other = ctx.get("other") as number;
+          if (other == null) {
+            throw new Error("'other' is required");
+          }
+
+          return self <= other;
+        },
+      }
+    );
+
     const String = Object.subclass(Symbol.intern('String'));
     String.defineMethod(new UnaryMessage("inspect"), {
       dispatch(_pool: ObjectPool, ctx: Context): unknown {
