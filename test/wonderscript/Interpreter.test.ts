@@ -5,6 +5,7 @@ import { prStr } from "../../src/wonderscript/compiler";
 import { Keyword } from "../../src/wonderscript/lang/Keyword";
 import { Vector } from "../../src/wonderscript/lang/Vector";
 import { Symbol } from "../../src/wonderscript/lang/Symbol";
+import { Class } from "../../src/wonderscript/lang/Class";
 
 describe("Interpreter", () => {
   const subject = new Interpreter();
@@ -50,7 +51,7 @@ describe("Interpreter", () => {
   describe("special forms", () => {
     const examples: [string, unknown][] = [
       ['(true class)', subject.pool.class(true)],
-      ["((true class) define-method 'to_s \"true\")", Symbol.intern("to_s")],
+      ["((false class) define-method 'to_s \"false\") (false to_s)", "false"],
       ['(def (true to_s) "true") (true to_s)', "true"],
       ["(def (true not) false) (true not)", false],
       ["(begin 1 2 3)", 3],
@@ -63,7 +64,15 @@ describe("Interpreter", () => {
       });
     });
 
-    test(`(do 1 2 3) => 3`, () => {
+    test('boolean classes', () => {
+      const trueClass = subject.pool.class(true) as Class;
+      const falseClass = subject.pool.class(false) as Class;
+
+      expect(trueClass.messages).toContain(Symbol.intern("to_s"));
+      expect(falseClass.messages).toContain(Symbol.intern("to_s"));
+    });
+
+    test(`((do 1 2 3) dispatch) => 3`, () => {
       const output = subject.evalString("(do 1 2 3)");
       expect(output.dispatch()).toBe(3);
     });
