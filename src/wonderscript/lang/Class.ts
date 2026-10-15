@@ -3,14 +3,16 @@ import { Keyword } from "./Keyword";
 import { Symbol } from "./Symbol";
 import { EMPTY_ARRAY, Message } from "./Message";
 import { Dispatch } from "./Dispatch";
-import { Method } from "./Method";
+import { IMethod, Method, MethodTable } from "./Method";
 import { prStr } from "../compiler";
 import { ArgListMessage } from "./Message/ArgListMessage";
 import { ObjectPool } from "./ObjectPool";
 import { Context } from "./Context";
 import { UnaryMessage } from "./Message/UnaryMessage";
+import { analyze } from "../analyze";
+import { Form } from "../compiler/core";
 
-export type MethodTable = Record<string, Method>;
+type DispatchTable = Record<string, IMethod>;
 
 const BASIC_MESSAGES = {
   defineMethod: new ArgListMessage("define-method", undefined, [
@@ -23,7 +25,7 @@ const BASIC_MESSAGES = {
   messages: new UnaryMessage("messages"),
 };
 
-const BASIC_METHODS: MethodTable = {
+const BASIC_METHODS: DispatchTable = {
   [BASIC_MESSAGES.messages.interned]: new Method(BASIC_MESSAGES.messages, {
     dispatch(pool: ObjectPool, ctx: Context): unknown {
       const self = ctx.get("self");
@@ -70,21 +72,21 @@ const BASIC_METHODS: MethodTable = {
 
         return (self as Class).defineMethod(
           msg as Message,
-          dispatch as Dispatch
+          analyze(dispatch as Form)
         );
       },
     }
   ),
 };
 
-export class Class implements Named, Message {
+export class Class implements Named, Message, MethodTable {
   #name: string;
   #namespace: string | undefined;
-  #methods: MethodTable;
+  #methods: DispatchTable;
   #messages: Message[];
   #subclasses: Class[] = [];
 
-  constructor(name: string, namespace?: string | null | undefined, superclassMethods?: MethodTable) {
+  constructor(name: string, namespace?: string | null | undefined, superclassMethods?: DispatchTable) {
     this.#name = name;
     this.#namespace = namespace;
     this.#messages = Object.values(BASIC_MESSAGES);
