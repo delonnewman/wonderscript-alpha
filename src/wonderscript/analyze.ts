@@ -69,6 +69,7 @@ import { Message, MessageForm } from "./lang/Message";
 import { partition } from "./lang/runtime";
 import { ObjectPool } from "./lang/ObjectPool";
 import { Context } from "./lang/Context";
+import { pt } from "./util";
 
 export type SelfEvaluating = number | string | null | undefined | boolean | Symbol | Keyword;
 
@@ -318,7 +319,7 @@ export function analyzeDef(form: unknown[], meta: MetaData | undefined): Dispatc
   }
 
   const def = form[1];
-  const body = form[2];
+  const body = form[2] as Form; // TODO: may want to make the rest of the array the body
 
   if (!(def instanceof Array)) {
     throw new Error(`invalid def form expected array, got ${prStr(def)} instead`);
@@ -331,8 +332,8 @@ export function analyzeDef(form: unknown[], meta: MetaData | undefined): Dispatc
       "define-method",
       undefined,
       [
-        template,
-        body,
+        new Identity(template),
+        analyze(body),
       ]
     )
   );
