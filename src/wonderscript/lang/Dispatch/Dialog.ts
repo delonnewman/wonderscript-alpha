@@ -52,6 +52,10 @@ export class Dialog implements SequentialDispatch, Meta {
     return new Dialog(this, msg);
   }
 
+  toString() {
+    return `#<Dialog ${this.#subject} => ${this.#message}>`;
+  }
+
   dispatch(pool: ObjectPool, ctx: Context): unknown {
     let obj = this.subject;
     if (isDispatch(obj)) {
