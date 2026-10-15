@@ -356,6 +356,7 @@ export class Interpreter {
   evalString(input: string, ctx = this.#ctx) {
     const forms = this.analyzeString(input);
     let result;
+    // TODO: construct a global script object and dispatch it
     forms.forEach(f => {
       result = f.dispatch(this.pool, ctx);
     });
