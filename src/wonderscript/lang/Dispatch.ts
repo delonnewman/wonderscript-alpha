@@ -2,8 +2,6 @@ import { Message } from "./Message";
 import { ObjectPool, ObjectValue } from "./ObjectPool";
 import { Context } from "./Context";
 import { Symbol } from "./Symbol";
-import { Meta, MetaData } from "./Meta";
-import { merge } from "./merge";
 
 export * from "./Dispatch/Binding";
 export * from "./Dispatch/Dialog";
