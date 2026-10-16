@@ -3,6 +3,7 @@ import { Binding, Dispatch } from "./Dispatch";
 import { ObjectPool, ObjectValue } from "./ObjectPool";
 import { Context } from "./Context";
 import { ArgListMessage } from "./Message/ArgListMessage";
+import { UnaryMessage } from "./Message/UnaryMessage";
 
 export interface MethodTable {
   get interned(): string; // for method caching
@@ -49,7 +50,7 @@ const JSMethodMixin: IMethod = {
 };
 
 export const JSMethod = {
-  bind(obj: ObjectValue, method: Function, msg: ArgListMessage): IMethod {
+  bind(obj: ObjectValue, method: Function, msg: ArgListMessage | UnaryMessage): IMethod {
     const args = msg.args;
     const bound = method.bind(obj, ...args);
     Object.assign(bound, JSMethodMixin);
@@ -63,10 +64,24 @@ export const JSClassMixin: MethodTable = {
   },
   findMethod(msg: Message): IMethod {
     if (msg instanceof ArgListMessage) {
-      const method = (this as any).prototype[msg.name];
-      if (typeof method === 'function') {
-        return JSMethod.bind(this, method, msg);
+      const prototype = (this as any).prototype;
+      if (msg.name in prototype && typeof prototype[msg.name] === 'function') {
+        return JSMethod.bind(this, prototype[msg.name], msg);
       }
+    }
+
+    if (msg instanceof UnaryMessage) {
+      const prototype = (this as any).prototype;
+      if (msg.name in prototype && typeof prototype[msg.name] === 'function') {
+        return JSMethod.bind(this, prototype[msg.name], msg);
+      }
+
+      const self = this;
+      const method = function() {
+        return (self as any)[msg.name]
+      };
+
+      return JSMethod.bind(this, method, msg);
     }
 
     throw new Error(`unknown method ${msg} for an instance of ${this}`);
