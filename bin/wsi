@@ -25,7 +25,7 @@ function interactive() {
         process.exit(0);
       } else {
         const res = wsi.evalString(input);
-        console.log("=> ", res);
+        console.log("=>", ws.prStr(res));
         rl.setPrompt("> ");
       }
     } catch (e) {

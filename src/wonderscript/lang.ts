@@ -32,6 +32,7 @@ export * from "./lang/Dispatch/ArrayDispatch";
 export * from "./lang/Dispatch/Identity";
 export * from "./lang/Class";
 export * from "./lang/ObjectPool";
+export * from './compiler/prStr';
 
 globalThis.wonderscript ??= {};
 globalThis.wonderscript.lang = {
