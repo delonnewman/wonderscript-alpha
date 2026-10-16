@@ -1,25 +1,38 @@
 import { readString } from "./reader";
-import { Class } from "./lang/Class";
 import { ObjectPool, ObjectValue } from "./lang/ObjectPool";
 import { analyze } from "./analyze";
 import { Context } from "./lang/Context";
-import { Symbol } from "./lang/Symbol";
 import { UnaryMessage } from "./lang/Message/UnaryMessage";
 import { Dialog } from "./lang/Dispatch/Dialog";
 import { BinaryMessage } from "./lang/Message/BinaryMessage";
+import { Class, Keyword, Symbol } from './core';
 
 export class Interpreter {
   #pool: ObjectPool;
   #ctx: Context = new Context();
 
   constructor() {
+    const NotMessage = new UnaryMessage("!");
+    const TruthyNotDispatch = {
+      dispatch(_pool: ObjectPool, ctx: Context): unknown {
+        const self = ctx.get("self");
+        if (self === undefined) {
+          throw new Error(`expected 'self' in context ${ctx}`);
+        }
+
+        return false;
+      },
+    };
+
     const Object = new Class("Object");
+    Object.defineMethod(NotMessage, TruthyNotDispatch);
+
     Object.defineMethod(
       new UnaryMessage("class"),
       {
         dispatch(pool: ObjectPool, ctx: Context): unknown {
           const self = ctx.get('self');
-          if (self == null) {
+          if (self === undefined) {
             throw new Error(`expected 'self' in context ${ctx}`);
           }
 
@@ -27,10 +40,11 @@ export class Interpreter {
         },
       }
     );
+
     Object.defineMethod(new UnaryMessage("allocate"), {
       dispatch(pool: ObjectPool, ctx: Context): unknown {
         const self = ctx.get("self");
-        if (self == null) {
+        if (self === undefined) {
           throw new Error(`expected 'self' in context ${ctx}`);
         }
 
@@ -43,14 +57,25 @@ export class Interpreter {
       },
     });
 
-    const ClassClass = Object.subclass(Symbol.intern('Class'));
-
     const NilClass = Object.subclass(Symbol.intern('NilClass'));
     NilClass.defineMethod(new UnaryMessage("inspect"), {
       dispatch(_pool: ObjectPool, _ctx: Context): unknown {
         return "nil";
       },
     });
+
+    const FalsyNotDispatch = {
+      dispatch(_pool: ObjectPool, ctx: Context): unknown {
+        const self = ctx.get("self");
+        if (self === undefined) {
+          throw new Error(`expected 'self' in context ${ctx}`);
+        }
+
+        return true;
+      },
+    };
+
+    NilClass.defineMethod(NotMessage, FalsyNotDispatch);
 
     const TrueClass = Object.subclass(Symbol.intern('TrueClass'));
     TrueClass.defineMethod(new UnaryMessage("inspect"), {
@@ -66,34 +91,11 @@ export class Interpreter {
       },
     });
 
-    FalseClass.defineMethod(new UnaryMessage("!"), {
-      dispatch(pool: ObjectPool, ctx: Context): unknown {
-        const self = ctx.get("self");
-        if (self == null) {
-          throw new Error(`expected 'self' in context ${ctx}`);
-        }
-        return !self;
-      },
-    });
-
-    const NotMessage = new UnaryMessage("!");
-    const NotDispatch = {
-      dispatch(pool: ObjectPool, ctx: Context): unknown {
-        const self = ctx.get("self");
-        if (self == null) {
-          throw new Error(`expected 'self' in context ${ctx}`);
-        }
-
-        return !self;
-      },
-    };
-
-    FalseClass.defineMethod(NotMessage, NotDispatch);
-    TrueClass.defineMethod(NotMessage, NotDispatch);
+    FalseClass.defineMethod(NotMessage, FalsyNotDispatch);
 
     const AndMessage = new BinaryMessage("&&", undefined, Symbol.intern("other"));
     const AndDispatch = {
-      dispatch(pool: ObjectPool, ctx: Context): unknown {
+      dispatch(_pool: ObjectPool, ctx: Context): unknown {
         const self = ctx.get("self");
         if (self == null) {
           throw new Error(`expected 'self' in context ${ctx}`);
@@ -113,7 +115,7 @@ export class Interpreter {
 
     const OrMessage = new BinaryMessage("||", undefined, Symbol.intern("other"));
     const OrDispatch = {
-      dispatch(pool: ObjectPool, ctx: Context): unknown {
+      dispatch(_pool: ObjectPool, ctx: Context): unknown {
         const self = ctx.get("self");
         if (self == null) {
           throw new Error(`expected 'self' in context ${ctx}`);
@@ -340,6 +342,13 @@ export class Interpreter {
     };
 
     this.#pool = new ObjectPool(foundation);
+
+    this.#ctx.define(Symbol.intern("Object"), Object);
+    this.#ctx.define(Symbol.intern('NilClass'), NilClass);
+    this.#ctx.define(Symbol.intern('TrueClass'), TrueClass);
+    this.#ctx.define(Symbol.intern('FalseClass'), FalseClass);
+    this.#ctx.define(Symbol.intern('Numeric'), Numeric);
+    this.#ctx.define(Symbol.intern('String'), String);
   }
 
   get pool() { return this.#pool }
