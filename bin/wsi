@@ -3,10 +3,8 @@ const fs = require("fs"),
   readline = require("readline");
 
 // load runtime and core library
-const wsc = require("../index.js");
-const NS = wonderscript.core["$package"];
-const prStr = wonderscript.core.pr_DASH_str;
-const str = wonderscript.core.str;
+const ws = require("../index.js");
+const wsi = new ws.Interpreter();
 
 function interactive() {
   const rl = readline.createInterface({
@@ -16,9 +14,7 @@ function interactive() {
     terminal: true,
   });
 
-  // NS.value = createNs('user');
-  // wonderscript.core.import('user', NS.value);
-  rl.setPrompt(str(NS.name, "> "));
+  rl.setPrompt("> ");
   rl.prompt();
 
   rl.on("line", function (line) {
@@ -28,9 +24,9 @@ function interactive() {
         console.log("Bye for now!");
         process.exit(0);
       } else {
-        const res = wsc.evalString(input);
-        console.log(str("=> ", prStr(res)));
-        rl.setPrompt(str(NS.name, "> "));
+        const res = wsi.evalString(input);
+        console.log("=> ", res);
+        rl.setPrompt("> ");
       }
     } catch (e) {
       console.error(e);
@@ -43,23 +39,4 @@ function interactive() {
   process.exitCode = 0;
 }
 
-if (process.argv.length >= 3) {
-  try {
-    wsc.loadFile([process.cwd(), process.argv[2]].join("/"));
-    process.exitCode = 0;
-  } catch (e) {
-    console.error(e);
-    process.exitCode = 1;
-  }
-} else {
-  let INTERATIVE = false;
-  setTimeout(() => {
-    interactive();
-    INTERACTIVE = true;
-  }, 1);
-  process.stdin.on("data", (chunk) => {
-    if (!INTERACTIVE) {
-      wsc.evalString(chunk.toString("utf8"));
-    }
-  });
-}
+interactive();
