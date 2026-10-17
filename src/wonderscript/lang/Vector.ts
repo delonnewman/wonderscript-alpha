@@ -6,6 +6,10 @@ const HASH_SEED = 7996369154561194;
 export class Vector<T = unknown> implements Hashable {
   readonly length: number;
 
+  static inspect() {
+    return this.name;
+  }
+
   static fromArray<T = unknown>(array: T[]) {
     return new this(...array);
   }
@@ -46,6 +50,15 @@ export class Vector<T = unknown> implements Hashable {
 
   toArray() {
     return Array.prototype.slice.call(this);
+  }
+
+  inspect() {
+    if (this.length === 0) {
+      return '[]';
+    }
+
+    const parts = Array.prototype.map.call(this, (x: unknown) => x.toString());
+    return `[${parts.join(" ")}]`;
   }
 
   hashCode() {

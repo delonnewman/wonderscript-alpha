@@ -37,4 +37,13 @@ export class Array extends globalThis.Array implements Hashable, Message {
   get internings(): string[] {
     return [this.interned, `${this.interned}_splat`];
   }
+
+  inspect() {
+    if (this.length === 0) {
+      return "()";
+    }
+
+    const parts = this.map((x: unknown) => x.toString());
+    return `(${parts.join(" ")})`;
+  }
 }
