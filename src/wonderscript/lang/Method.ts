@@ -68,6 +68,7 @@ export const JSMethod = {
   messages(obj: Object) {
     const messages: Message[] = [];
     const props = Object.getOwnPropertyNames(obj);
+    props.push(...Object.getOwnPropertyNames(Object.getPrototypeOf(obj)));
 
     for (const prop of props) {
       if (typeof obj[prop] === "function") {
@@ -104,6 +105,23 @@ export const JSMethod = {
     }
 
     if (msg instanceof UnaryMessage) {
+      if (msg.name in obj) {
+        if (typeof (obj as any)[msg.name] === "function") {
+          return this.bind(obj, (obj as any)[msg.name], msg);
+        }
+
+        const self = obj;
+        const method = function () {
+          return (self as any)[msg.name];
+        };
+
+        return this.bind(obj, method, msg);
+      }
+
+      if (msg.name === "inspect") {
+        return this.bind(obj, obj.toString, msg);
+      }
+
       if (msg.name === "class") {
         const method = function() {
           return Object.getPrototypeOf(this).constructor
@@ -121,19 +139,6 @@ export const JSMethod = {
 
       if (typeof obj === "function" && msg.name === "new") {
         return this.initMethod(obj, msg);
-      }
-
-      if (msg.name in obj) {
-        if (typeof (obj as any)[msg.name] === "function") {
-          return this.bind(obj, (obj as any)[msg.name], msg);
-        }
-
-        const self = obj;
-        const method = function () {
-          return (self as any)[msg.name];
-        };
-
-        return this.bind(obj, method, msg);
       }
     }
 

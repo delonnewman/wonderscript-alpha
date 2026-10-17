@@ -19,6 +19,7 @@ import { Platform } from "./wonderscript/compiler/platforms";
 
 export * from "./wonderscript/lang";
 export * from './wonderscript/Interpreter';
+export * from "./wonderscript/core";
 
 export const JS_SYM = Symbol.intern("js");
 

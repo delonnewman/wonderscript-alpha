@@ -27,6 +27,18 @@ export class Interpreter {
     const Object = new Class("Object");
     Object.defineMethod(NotMessage, TruthyNotDispatch);
 
+    Object.defineMethod(new UnaryMessage("inspect"), {
+      dispatch(pool: ObjectPool, ctx: Context): unknown {
+        const self = ctx.get("self");
+        if (self === undefined) {
+          throw new Error(`expected 'self' in context ${ctx}`);
+        }
+
+        const id = pool.id(self as ObjectValue);
+        return `#<Object ${id}>`;
+      },
+    });
+
     Object.defineMethod(
       new UnaryMessage("class"),
       {

@@ -25,7 +25,8 @@ function interactive() {
         process.exit(0);
       } else {
         const res = wsi.evalString(input);
-        console.log("=>", ws.prStr(res));
+        const str = wsi.pool.send(res, new ws.UnaryMessage('inspect'));
+        console.log("=>", str);
         rl.setPrompt("> ");
       }
     } catch (e) {

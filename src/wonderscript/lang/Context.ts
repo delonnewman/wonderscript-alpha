@@ -30,7 +30,7 @@ export class Context {
 
   constructor(parent?: Context, params: Params = {}) {
     this.parent = parent;
-    this.vars = params.vars ?? new Map();
+    this.vars = params.vars ?? new Map([['bindings', this]]);
     this.varMeta = params.varMeta ?? new Map();
     this._isRecursive = params.recursive ?? false;
     this.define(CTX_SYM, this);

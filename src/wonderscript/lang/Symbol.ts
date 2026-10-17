@@ -10,6 +10,7 @@ import { Binding } from "./Dispatch/Binding";
 
 const SLASH = "/";
 const EMPTY_ARRAY = Object.freeze([]);
+const CACHE = new Map<string, Symbol>();
 
 export class Symbol<Name extends string = string, Namespace extends NullableString = NullableString>
   implements Named<Name, Namespace>, Meta, Invokable, Comparable, Value, Message
@@ -18,7 +19,9 @@ export class Symbol<Name extends string = string, Namespace extends NullableStri
   readonly #namespace: Namespace;
   readonly #meta?: MetaData;
 
-  static CACHE = new Map<string, Symbol>();
+  static inspect() {
+    return 'Symbol';
+  }
 
   static parse(str: string): Symbol {
     if (str === SLASH) return this.intern(SLASH);
@@ -37,12 +40,12 @@ export class Symbol<Name extends string = string, Namespace extends NullableStri
   ): Symbol<Name, Namespace> {
     const key = namespace ? `${namespace}/${name}` : name;
 
-    if (this.CACHE.has(key)) {
-      return this.CACHE.get(key) as Symbol<Name, Namespace>;
+    if (CACHE.has(key)) {
+      return CACHE.get(key) as Symbol<Name, Namespace>;
     }
 
     const sym = new this<Name, Namespace>(name, namespace);
-    this.CACHE.set(key, sym);
+    CACHE.set(key, sym);
 
     return sym;
   }

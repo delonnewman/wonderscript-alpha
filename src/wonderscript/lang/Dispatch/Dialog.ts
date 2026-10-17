@@ -60,8 +60,7 @@ export class Dialog implements SequentialDispatch, Meta {
     let obj = this.subject;
     if (isDispatch(obj)) {
       obj = obj.dispatch(pool, ctx) as ObjectValue;
-    }
-    if (obj instanceof Symbol) {
+    } else if (obj instanceof Symbol) {
       ctx = ctx.lookup(obj);
       if (ctx == null) throw new Error(`undefined variable ${obj}`);
       obj = ctx.get(obj) as ObjectValue;

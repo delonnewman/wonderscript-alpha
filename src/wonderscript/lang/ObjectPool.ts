@@ -3,6 +3,8 @@ import { stringHash } from "./utils";
 import { Message } from "./Message";
 import { IMethod, JSMethod, JSMethodTable, MethodTable } from "./Method";
 import { pt } from "../util";
+import { Context } from "./Context";
+import { Symbol } from "./Symbol";
 
 export type ObjectRef = `wso$${number}$${number}`;
 
@@ -72,6 +74,11 @@ export class ObjectPool {
 
   get pool() {
     return this.#pool;
+  }
+
+  send(obj: ObjectValue | object | Function, msg: Message) {
+    const method = this.select(obj, msg);
+    return method.dispatch(this, new Context().define(Symbol.intern("self"), obj));
   }
 
   select(obj: ObjectValue | object | Function, msg: Message) {
