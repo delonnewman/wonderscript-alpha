@@ -161,6 +161,10 @@ export class Class implements Named, Message, MethodTable {
     return this.#methods;
   }
 
+  inspect() {
+    return this.toString();
+  }
+
   toString() {
     if (this.namespace) {
       return `${this.namespace}/${this.name}`;
