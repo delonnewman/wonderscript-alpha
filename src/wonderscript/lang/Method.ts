@@ -58,6 +58,13 @@ interface Constructor {
 }
 
 export const JSMethod = {
+  bind(obj: Object, method: Function, msg: ArgListMessage | UnaryMessage): IMethod {
+    const args = msg.args;
+    const bound = method.bind(obj, ...args);
+    Object.assign(bound, JSMethodMixin);
+    return bound;
+  },
+
   messages(obj: Object) {
     const messages: Message[] = [];
     const props = Object.getOwnPropertyNames(obj);
@@ -132,11 +139,4 @@ export const JSMethod = {
 
     throw new Error(`unknown method ${prStr(msg)} for ${obj}`);
   },
-
-  bind(obj: Object, method: Function, msg: ArgListMessage | UnaryMessage): IMethod {
-    const args = msg.args;
-    const bound = method.bind(obj, ...args);
-    Object.assign(bound, JSMethodMixin);
-    return bound;
-  }
 }
