@@ -343,6 +343,39 @@ export class Interpreter {
 
     this.#pool = new ObjectPool(foundation);
 
+    const JSClass = Object.subclass("JSClass");
+    JSClass.defineMethod(new UnaryMessage("inspect"), {
+      dispatch(pool: ObjectPool, ctx: Context): unknown {
+        return "#<JS>";
+      },
+    });
+
+    JSClass.defineMethod(new UnaryMessage("globalThis"), {
+      dispatch(pool: ObjectPool, ctx: Context): unknown {
+        return globalThis;
+      },
+    });
+
+    JSClass.defineMethod(new UnaryMessage("console"), {
+      dispatch(pool: ObjectPool, ctx: Context): unknown {
+        return globalThis.console;
+      },
+    });
+
+    JSClass.defineMethod(new UnaryMessage("Math"), {
+      dispatch(pool: ObjectPool, ctx: Context): unknown {
+        return globalThis.Math;
+      },
+    });
+
+    JSClass.defineMethod(new UnaryMessage("Object"), {
+      dispatch(pool: ObjectPool, ctx: Context): unknown {
+        return globalThis.Object;
+      },
+    });
+
+    const js = this.#pool.allocate(JSClass);
+    this.#ctx.define(Symbol.intern("JS"), js);
     this.#ctx.define(Symbol.intern("Object"), Object);
     this.#ctx.define(Symbol.intern('NilClass'), NilClass);
     this.#ctx.define(Symbol.intern('TrueClass'), TrueClass);

@@ -1,7 +1,8 @@
 import { Class } from "./Class";
 import { stringHash } from "./utils";
 import { Message } from "./Message";
-import { IMethod, MethodTable } from "./Method";
+import { IMethod, JSMethod, JSMethodTable, MethodTable } from "./Method";
+import { pt } from "../util";
 
 export type ObjectRef = `wso$${number}$${number}`;
 
@@ -73,8 +74,12 @@ export class ObjectPool {
     return this.#pool;
   }
 
-  select(obj: ObjectValue, msg: Message) {
-    const klass = this.methodTable(obj);
+  select(obj: ObjectValue | object, msg: Message) {
+    if (typeof obj === 'object' && obj !== null) {
+      return JSMethod.findMethod(obj, msg);
+    }
+
+    const klass = this.class(obj as ObjectValue);
     const cacheKey = `${klass.interned}$${msg.interned}`;
 
     const cachedMethod = ObjectPool.METHOD_CACHE[cacheKey];
@@ -175,17 +180,6 @@ export class ObjectPool {
 
     const [_tag, _id, type, _klass] = object.split("$");
     return Number(type);
-  }
-
-  methodTable(object: Object | ObjectValue): MethodTable {
-    if (typeof object === "object" && object !== null) {
-      const ctr = Object.getPrototypeOf(object).constructor;
-      if ("findMethod" in ctr) {
-        return ctr;
-      }
-    }
-
-    return this.class(object as ObjectValue);
   }
 
   /**
