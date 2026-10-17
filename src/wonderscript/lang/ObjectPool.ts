@@ -74,8 +74,8 @@ export class ObjectPool {
     return this.#pool;
   }
 
-  select(obj: ObjectValue | object, msg: Message) {
-    if (typeof obj === 'object' && obj !== null) {
+  select(obj: ObjectValue | object | Function, msg: Message) {
+    if (typeof obj == 'function' || (typeof obj === 'object' && obj !== null)) {
       return JSMethod.findMethod(obj, msg);
     }
 

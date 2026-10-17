@@ -53,12 +53,14 @@ const JSMethodMixin: IMethod = {
   }
 };
 
+interface Constructor {
+  (...args: any[]): void;
+}
+
 export const JSMethod = {
   messages(obj: Object) {
-    pt('obj', obj);
-    console.error(obj);
     const messages: Message[] = [];
-    const props = Object.keys(obj);
+    const props = Object.getOwnPropertyNames(obj);
 
     for (const prop of props) {
       if (typeof obj[prop] === "function") {
@@ -73,18 +75,45 @@ export const JSMethod = {
     return messages;
   },
 
+  initMethod(ctr: Function, msg: ArgListMessage | BinaryMessage | UnaryMessage) {
+    const method = function () {
+      return new (ctr as Constructor)()
+    };
+    const bound = method.bind(ctr, ...msg.args);
+
+    Object.assign(bound, JSMethodMixin);
+    return bound;
+  },
+
   findMethod(obj: Object, msg: Message): IMethod | undefined {
     if (msg instanceof ArgListMessage || msg instanceof BinaryMessage) {
       if (msg.name in obj && typeof (obj as any)[msg.name] === "function") {
         return this.bind(obj, (obj as any)[msg.name], msg);
       }
+
+      if (typeof obj === "function" && msg.name === "new") {
+        return this.initMethod(obj, msg);
+      }
     }
 
     if (msg instanceof UnaryMessage) {
-      if (msg.name === 'messages') {
+      if (msg.name === "class") {
+        const method = function() {
+          return Object.getPrototypeOf(this).constructor
+        };
+        const bound = method.bind(obj);
+        Object.assign(bound, JSMethodMixin);
+        return bound;
+      }
+
+      if (msg.name === "messages") {
         const bound = this.messages.bind(this, obj);
         Object.assign(bound, JSMethodMixin);
         return bound;
+      }
+
+      if (typeof obj === "function" && msg.name === "new") {
+        return this.initMethod(obj, msg);
       }
 
       if (msg.name in obj) {
