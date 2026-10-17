@@ -5,7 +5,7 @@ import { Context } from "./lang/Context";
 import { UnaryMessage } from "./lang/Message/UnaryMessage";
 import { Dialog } from "./lang/Dispatch/Dialog";
 import { BinaryMessage } from "./lang/Message/BinaryMessage";
-import { Class, Keyword, Symbol } from './core';
+import { Class, Keyword, Symbol, Array, Hash, Vector, Set } from './core';
 
 export class Interpreter {
   #pool: ObjectPool;
@@ -382,6 +382,12 @@ export class Interpreter {
     this.#ctx.define(Symbol.intern('FalseClass'), FalseClass);
     this.#ctx.define(Symbol.intern('Numeric'), Numeric);
     this.#ctx.define(Symbol.intern('String'), String);
+    this.#ctx.define(Symbol.intern("Symbol"), Symbol);
+    this.#ctx.define(Symbol.intern("Keyword"), Keyword);
+    this.#ctx.define(Symbol.intern('Array'), Array);
+    this.#ctx.define(Symbol.intern("Vector"), Vector);
+    this.#ctx.define(Symbol.intern("Hash"), Hash);
+    this.#ctx.define(Symbol.intern("Set"), Set);
   }
 
   get pool() { return this.#pool }
