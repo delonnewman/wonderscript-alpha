@@ -164,7 +164,7 @@ export class Interpreter {
           throw new Error(`expected 'self' in context ${ctx}`);
         }
 
-        return `#<Numeric ${self}>`;
+        return `${self}`;
       },
     });
 
@@ -346,7 +346,7 @@ export class Interpreter {
           throw new Error(`expected 'self' in context ${ctx}`);
         }
 
-        return `#<String ${JSON.stringify(self)}>`;
+        return JSON.stringify(self);
       },
     });
 
@@ -355,8 +355,8 @@ export class Interpreter {
       undefined: NilClass,
       true: TrueClass,
       false: FalseClass,
-      number: Numeric,
-      string: String,
+      type_string: String,
+      type_number: Numeric,
       Numeric,
       String,
       FalseClass,
@@ -394,6 +394,17 @@ export class Interpreter {
     JSClass.defineMethod(new UnaryMessage("Object"), {
       dispatch(pool: ObjectPool, ctx: Context): unknown {
         return globalThis.Object;
+      },
+    });
+
+    JSClass.defineMethod(new BinaryMessage("typeof", undefined, Symbol.intern("other")), {
+      dispatch(pool: ObjectPool, ctx: Context): unknown {
+        const other = ctx.get("other") as number;
+        if (other === undefined) {
+          throw new Error("'other' is required");
+        }
+
+        return typeof other;
       },
     });
 
