@@ -38,8 +38,8 @@ export type Foundation = {
   undefined: Class;
   true: Class;
   false: Class;
-  number: Class;
-  string: Class;
+  type_number: Class;
+  type_string: Class;
   // TODO: add back
   // function: Class; // js/Function
   // object: Class; // js/Object
@@ -207,7 +207,7 @@ export class ObjectPool {
 
     let klass = this.#pool[`${object}`];
     if (klass === undefined) {
-      klass = this.#pool[`${typeof object}`];
+      klass = this.#pool[`type_${typeof object}`];
     }
     if (klass === undefined) {
       throw new Error(`No class found for object ${object}`);
