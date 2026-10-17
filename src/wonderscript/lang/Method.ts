@@ -85,9 +85,9 @@ export const JSMethod = {
 
   initMethod(ctr: Function, msg: ArgListMessage | BinaryMessage | UnaryMessage) {
     const method = function () {
-      return new (ctr as Constructor)()
+      return new (ctr as Constructor)(...msg.args)
     };
-    const bound = method.bind(ctr, ...msg.args);
+    const bound = method.bind(ctr);
 
     Object.assign(bound, JSMethodMixin);
     return bound;
