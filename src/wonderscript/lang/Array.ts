@@ -7,6 +7,10 @@ import { Symbol } from "./Symbol";
 const HASH_SEED = 12294658982929121;
 
 export class Array extends globalThis.Array implements Hashable, Message {
+  static inspect() {
+    return this.name;
+  }
+
   hashCode() {
     let n = HASH_SEED;
     for (let entry of this) {
@@ -45,5 +49,9 @@ export class Array extends globalThis.Array implements Hashable, Message {
 
     const parts = this.map((x: unknown) => x.toString());
     return `(${parts.join(" ")})`;
+  }
+
+  toString() {
+    return this.inspect();
   }
 }
