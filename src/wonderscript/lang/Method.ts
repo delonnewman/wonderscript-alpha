@@ -102,6 +102,13 @@ export const JSMethod = {
       if (typeof obj === "function" && msg.name === "new") {
         return this.initMethod(obj, msg);
       }
+
+      if (msg.name === 'instanceof') {
+        const method = function (other) {
+          return this instanceof other;
+        };
+        return this.bind(obj, method, msg);
+      }
     }
 
     if (msg instanceof UnaryMessage) {

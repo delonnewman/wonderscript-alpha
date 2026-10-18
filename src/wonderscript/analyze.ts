@@ -218,13 +218,6 @@ export function analyze(initForm: ReadForm | Form): Dispatch {
           BinaryMessage.jsOp(JS_BIT_URSHIFT, analyze(form[2])),
           meta
         );
-        // TODO: A message that is sent to js/Object objects
-      case INSTANCE_SYM:
-        return new Dialog(
-          analyze(form[0]) as DispatchSubject,
-          BinaryMessage.jsOp(JS_INSTANCE, analyze(form[2])),
-          meta
-        );
       default:
         if (form.length === 2) {
           return new Dialog(
