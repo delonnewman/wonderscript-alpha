@@ -8,6 +8,10 @@ import { prStr } from "../compiler/prStr";
 import { Symbol } from "./Symbol";
 import { pt } from "../util";
 import { BinaryMessage } from "./Message/BinaryMessage";
+import { Array } from "./Array";
+import { Set } from "./Set";
+import { Vector } from "./Vector";
+import { Hash } from "./Hash";
 
 export interface MethodTable {
   get interned(): string; // for method caching
@@ -149,6 +153,16 @@ export const JSMethod = {
       }
     }
 
-    throw new Error(`unknown method ${prStr(msg)} for ${obj}`);
+    if ('interned' in msg && msg.interned in obj && typeof obj[msg.interned] === "function") {
+      const method = obj[msg.interned];
+      const bound = method.bind(obj);
+      Object.assign(bound, JSMethodMixin);
+      bound.dispatch = function(pool: ObjectPool, ctx: Context) {
+        return this(pool, ctx);
+      };
+      return bound;
+    }
+
+    throw new Error(`unknown method ${prStr(msg)}:${msg.interned} for ${obj}`);
   },
 }

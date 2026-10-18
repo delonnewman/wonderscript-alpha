@@ -7,8 +7,20 @@ import { Package } from "../Package";
 export class Variable implements Dispatch {
   #symbol: Symbol;
 
+  static inspect() {
+    return this.name;
+  }
+
   constructor(symbol: Symbol) {
     this.#symbol = symbol;
+  }
+
+  toString() {
+    return this.#symbol.toString();
+  }
+
+  inspect() {
+    return this.#symbol.toString();
   }
 
   dispatch(_pool: ObjectPool, ctx: Context): unknown {

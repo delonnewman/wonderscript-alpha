@@ -3,7 +3,7 @@ import {
   Binding,
   Dialog,
   Dispatch,
-  DispatchSubject, Script,
+  DispatchSubject, isDispatch, Script,
 } from "./lang/Dispatch";
 import { Keyword } from "./lang/Keyword";
 import { Hash } from "./lang/Hash";
@@ -122,7 +122,7 @@ export function analyze(initForm: ReadForm | Form): Dispatch {
     throw new Error(`unknown form: ${prStr(form)}`);
   }
 
-  if (form.length < 2) {
+  if (form.length < 1) {
     return new ArrayDispatch(form.map(analyze) as WSArray);
   }
 
@@ -245,9 +245,14 @@ export function analyze(initForm: ReadForm | Form): Dispatch {
     }
   }
 
+  const rest = form.slice(1);
+  const msg = rest.length > 0 && rest[0] instanceof Symbol
+    ? Message.build(rest as MessageForm)
+    : new WSArray(...rest);
+
   return new Dialog(
     analyze(form[0]) as DispatchSubject,
-    Message.build(form.slice(1) as MessageForm),
+    msg,
     meta
   )
 }
@@ -298,7 +303,9 @@ export function analyzeDef(form: unknown[], meta: MetaData | undefined): Dispatc
   }
 
   const def = form[1];
-  const body = form[2] as Form; // TODO: may want to make the rest of the array the body
+  // const body = form[2] as Form; // TODO: may want to make the rest of the array the body
+  const body = form.slice(2); //.map(analyze);
+  pt('body', body.map(analyze));
 
   if (!(def instanceof Array)) {
     throw new Error(`invalid def form expected array, got ${prStr(def)} instead`);
@@ -306,13 +313,13 @@ export function analyzeDef(form: unknown[], meta: MetaData | undefined): Dispatc
   const [obj, template] = def;
 
   return new Dialog(
-    new Dialog(analyze(obj), new UnaryMessage('class')),
+    analyze(obj),
     new ArgListMessage(
-      "define-method",
+      "defineMethod",
       undefined,
       [
         new Identity(template),
-        analyze(body),
+        new Script(body.map(analyze)),
       ]
     )
   );

@@ -131,7 +131,11 @@ export class Class implements Named, Message, MethodTable {
     const method = this.#methods[msg.interned];
     if (method !== undefined) return method;
 
-    throw new Error(`unknown method ${prStr(msg)} for an instance of ${this}`);
+    throw new Error(`unknown method ${prStr(msg)}:${msg.interned} for an instance of ${this}`);
+  }
+
+  aliasMethod(origMsg: Message, aliasMessage: Message) {
+    this.#methods[aliasMessage.interned] = this.findMethod(origMsg);
   }
 
   get subclasses() {

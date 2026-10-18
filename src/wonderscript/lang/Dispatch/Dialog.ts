@@ -14,6 +14,10 @@ export class Dialog implements SequentialDispatch, Meta {
   #message: DispatchMessage;
   #meta: MetaData | undefined;
 
+  static inspect() {
+    return this.name;
+  }
+
   constructor(
     subject: DispatchSubject,
     message: DispatchMessage,
@@ -22,6 +26,10 @@ export class Dialog implements SequentialDispatch, Meta {
     this.#subject = subject;
     this.#message = message;
     this.#meta = meta;
+  }
+
+  inspect() {
+    return this.toString();
   }
 
   get subject(): DispatchSubject {

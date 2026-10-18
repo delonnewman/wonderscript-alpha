@@ -12,10 +12,18 @@ export class Script implements SequentialDispatch, Meta {
   #result: unknown;
   #meta: MetaData | undefined;
 
+  static inspect() {
+    return this.name;
+  }
+
   constructor(actions: Dispatch[] = [], bindings: Binding[] = [], meta?: MetaData) {
     this.#actions = actions;
     this.#bindings = bindings;
     this.#meta = meta;
+  }
+
+  inspect() {
+    return `#<Script ${this.#actions.join(' ')}>`;
   }
 
   meta() {
@@ -62,5 +70,9 @@ export class Script implements SequentialDispatch, Meta {
     const result = this.#actions[this.#actions.length - 1].dispatch(pool, ctx);
     this.#result = result;
     return result;
+  }
+
+  array_0(pool: ObjectPool, ctx: Context) {
+    return this.dispatch(pool, ctx);
   }
 }
