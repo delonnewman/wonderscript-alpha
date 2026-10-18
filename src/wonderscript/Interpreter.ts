@@ -19,6 +19,7 @@ import {
 import { KeywordMessage } from "./lang/Message/KeywordMessage";
 import { Platform } from "./compiler/platforms";
 import fs from "fs";
+import { Form } from "./compiler/core";
 
 export class Interpreter {
   #pool: ObjectPool;
@@ -498,6 +499,10 @@ export class Interpreter {
       result = f.dispatch(this.pool, this.#ctx);
     });
     return result;
+  }
+
+  eval(input: Form) {
+    return analyze(input).dispatch(this.pool, this.#ctx);
   }
 
   loadFile(path: string) {
