@@ -4,7 +4,7 @@ const fs = require("fs"),
 
 // load runtime and core library
 const ws = require("../index.js");
-const wsi = new ws.Interpreter();
+const wsi = new ws.Interpreter("node", global);
 
 function interactive() {
   const rl = readline.createInterface({

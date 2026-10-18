@@ -17,12 +17,19 @@ import {
   Script,
 } from "./core";
 import { KeywordMessage } from "./lang/Message/KeywordMessage";
+import { Platform } from "./compiler/platforms";
+import fs from "fs";
 
 export class Interpreter {
   #pool: ObjectPool;
   #ctx: Context = new Context();
+  #platform: Platform;
+  #global: typeof globalThis;
 
-  constructor() {
+  constructor(platform: Platform, global: typeof globalThis) {
+    this.#platform = platform;
+    this.#global = global;
+
     const NotMessage = new UnaryMessage("!");
     const TruthyNotDispatch = {
       dispatch(_pool: ObjectPool, ctx: Context): unknown {
@@ -50,19 +57,16 @@ export class Interpreter {
       },
     });
 
-    Object.defineMethod(
-      new UnaryMessage("class"),
-      {
-        dispatch(pool: ObjectPool, ctx: Context): unknown {
-          const self = ctx.get('self');
-          if (self === undefined) {
-            throw new Error(`expected 'self' in context ${ctx}`);
-          }
+    Object.defineMethod(new UnaryMessage("class"), {
+      dispatch(pool: ObjectPool, ctx: Context): unknown {
+        const self = ctx.get("self");
+        if (self === undefined) {
+          throw new Error(`expected 'self' in context ${ctx}`);
+        }
 
-          return pool.class(self as ObjectValue);
-        },
-      }
-    );
+        return pool.class(self as ObjectValue);
+      },
+    });
 
     Object.defineMethod(new UnaryMessage("allocate"), {
       dispatch(pool: ObjectPool, ctx: Context): unknown {
@@ -80,7 +84,7 @@ export class Interpreter {
       },
     });
 
-    const NilClass = Object.subclass(Symbol.intern('NilClass'));
+    const NilClass = Object.subclass(Symbol.intern("NilClass"));
     NilClass.defineMethod(new UnaryMessage("inspect"), {
       dispatch(_pool: ObjectPool, _ctx: Context): unknown {
         return "nil";
@@ -100,7 +104,7 @@ export class Interpreter {
 
     NilClass.defineMethod(NotMessage, FalsyNotDispatch);
 
-    const TrueClass = Object.subclass(Symbol.intern('TrueClass'));
+    const TrueClass = Object.subclass(Symbol.intern("TrueClass"));
     TrueClass.defineMethod(new UnaryMessage("inspect"), {
       dispatch(_pool: ObjectPool, _ctx: Context): unknown {
         return "true";
@@ -116,7 +120,11 @@ export class Interpreter {
 
     FalseClass.defineMethod(NotMessage, FalsyNotDispatch);
 
-    const AndMessage = new BinaryMessage("&&", undefined, Symbol.intern("other"));
+    const AndMessage = new BinaryMessage(
+      "&&",
+      undefined,
+      Symbol.intern("other")
+    );
     const AndDispatch = {
       dispatch(_pool: ObjectPool, ctx: Context): unknown {
         const self = ctx.get("self");
@@ -136,7 +144,11 @@ export class Interpreter {
     FalseClass.defineMethod(AndMessage, AndDispatch);
     TrueClass.defineMethod(AndMessage, AndDispatch);
 
-    const OrMessage = new BinaryMessage("||", undefined, Symbol.intern("other"));
+    const OrMessage = new BinaryMessage(
+      "||",
+      undefined,
+      Symbol.intern("other")
+    );
     const OrDispatch = {
       dispatch(_pool: ObjectPool, ctx: Context): unknown {
         const self = ctx.get("self");
@@ -156,7 +168,7 @@ export class Interpreter {
     FalseClass.defineMethod(OrMessage, OrDispatch);
     TrueClass.defineMethod(OrMessage, OrDispatch);
 
-    const Numeric = Object.subclass(Symbol.intern('Numeric'));
+    const Numeric = Object.subclass(Symbol.intern("Numeric"));
     Numeric.defineMethod(new UnaryMessage("inspect"), {
       dispatch(_pool: ObjectPool, ctx: Context): unknown {
         const self = ctx.get("self");
@@ -177,14 +189,15 @@ export class Interpreter {
             throw new Error(`expected 'self' in context ${ctx}`);
           }
 
-        const other = ctx.get("other") as number;
-        if (other == null) {
-          throw new Error("'other' is required");
-        }
+          const other = ctx.get("other") as number;
+          if (other == null) {
+            throw new Error("'other' is required");
+          }
 
-        return self + other;
-      },
-    });
+          return self + other;
+        },
+      }
+    );
 
     Numeric.defineMethod(
       new BinaryMessage("-", undefined, Symbol.intern("other")),
@@ -338,7 +351,7 @@ export class Interpreter {
       }
     );
 
-    const String = Object.subclass(Symbol.intern('String'));
+    const String = Object.subclass(Symbol.intern("String"));
     String.defineMethod(new UnaryMessage("inspect"), {
       dispatch(_pool: ObjectPool, ctx: Context): unknown {
         const self = ctx.get("self");
@@ -373,52 +386,70 @@ export class Interpreter {
       },
     });
 
-    JSClass.defineMethod(new UnaryMessage("globalThis"), {
-      dispatch(pool: ObjectPool, ctx: Context): unknown {
-        return globalThis;
-      },
-    });
+    const self = this;
 
     JSClass.defineMethod(new UnaryMessage("console"), {
       dispatch(pool: ObjectPool, ctx: Context): unknown {
-        return globalThis.console;
+        return self.#global.console;
       },
     });
 
     JSClass.defineMethod(new UnaryMessage("Math"), {
       dispatch(pool: ObjectPool, ctx: Context): unknown {
-        return globalThis.Math;
+        return self.#global.Math;
       },
     });
 
     JSClass.defineMethod(new UnaryMessage("Object"), {
       dispatch(pool: ObjectPool, ctx: Context): unknown {
-        return globalThis.Object;
+        return self.#global.Object;
       },
     });
 
-    JSClass.defineMethod(new BinaryMessage("typeof", undefined, Symbol.intern("other")), {
+    JSClass.defineMethod(new UnaryMessage("Function"), {
       dispatch(pool: ObjectPool, ctx: Context): unknown {
-        const other = ctx.get("other") as number;
-        if (other === undefined) {
-          throw new Error("'other' is required");
-        }
-
-        return typeof other;
+        return self.#global.Function;
       },
     });
+
+    JSClass.defineMethod(new UnaryMessage("Array"), {
+      dispatch(pool: ObjectPool, ctx: Context): unknown {
+        return self.#global.Array;
+      },
+    });
+
+    JSClass.defineMethod(new UnaryMessage("globalThis"), {
+      dispatch(pool: ObjectPool, ctx: Context): unknown {
+        return self.#global;
+      },
+    });
+
+    JSClass.defineMethod(
+      new BinaryMessage("typeof", undefined, Symbol.intern("other")),
+      {
+        dispatch(pool: ObjectPool, ctx: Context): unknown {
+          const other = ctx.get("other");
+          if (other === undefined) {
+            throw new Error("'other' is required");
+          }
+
+          return typeof other;
+        },
+      }
+    );
 
     const js = this.#pool.allocate(JSClass);
     this.#ctx.define(Symbol.intern("JS"), js);
+    this.#ctx.define(Symbol.intern("WS"), this);
     this.#ctx.define(Symbol.intern("Object"), Object);
-    this.#ctx.define(Symbol.intern('NilClass'), NilClass);
-    this.#ctx.define(Symbol.intern('TrueClass'), TrueClass);
-    this.#ctx.define(Symbol.intern('FalseClass'), FalseClass);
-    this.#ctx.define(Symbol.intern('Numeric'), Numeric);
-    this.#ctx.define(Symbol.intern('String'), String);
+    this.#ctx.define(Symbol.intern("NilClass"), NilClass);
+    this.#ctx.define(Symbol.intern("TrueClass"), TrueClass);
+    this.#ctx.define(Symbol.intern("FalseClass"), FalseClass);
+    this.#ctx.define(Symbol.intern("Numeric"), Numeric);
+    this.#ctx.define(Symbol.intern("String"), String);
     this.#ctx.define(Symbol.intern("Symbol"), Symbol);
     this.#ctx.define(Symbol.intern("Keyword"), Keyword);
-    this.#ctx.define(Symbol.intern('Array'), Array);
+    this.#ctx.define(Symbol.intern("Array"), Array);
     this.#ctx.define(Symbol.intern("Vector"), Vector);
     this.#ctx.define(Symbol.intern("Hash"), Hash);
     this.#ctx.define(Symbol.intern("Set"), Set);
@@ -430,7 +461,25 @@ export class Interpreter {
     this.#ctx.define(Symbol.intern("Script"), Script);
   }
 
-  get pool() { return this.#pool }
+  get platform() {
+    return this.#platform;
+  }
+
+  get pool() {
+    return this.#pool;
+  }
+
+  inspect() {
+    return `#<Interpreter ${this.#platform}>`;
+  }
+
+  isNode(): boolean {
+    return this.#platform === Platform.Node;
+  }
+
+  isBrowser(): boolean {
+    return this.#platform === Platform.Browser;
+  }
 
   readString(input: string) {
     return readString(input);
@@ -441,13 +490,35 @@ export class Interpreter {
     return forms.map(analyze);
   }
 
-  evalString(input: string, ctx = this.#ctx) {
+  evalString(input: string) {
     const forms = this.analyzeString(input);
     let result;
     // TODO: construct a global script object and dispatch it
-    forms.forEach(f => {
-      result = f.dispatch(this.pool, ctx);
+    forms.forEach((f) => {
+      result = f.dispatch(this.pool, this.#ctx);
     });
     return result;
+  }
+
+  loadFile(path: string) {
+    if (this.isNode()) {
+      this.evalString(this.#slurp(path));
+    }
+
+    if (this.isBrowser()) {
+      this.#fetchFile(path).then((text) => this.evalString(text));
+    }
+
+    return this;
+  }
+
+  #slurp(path: string): string {
+    // @ts-ignore
+    const fs = require("fs");
+    return fs.readFileSync(path, "utf8");
+  }
+
+  #fetchFile(path: string): Promise<string> {
+    return fetch(path).then((res) => res.text());
   }
 }
