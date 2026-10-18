@@ -18,7 +18,6 @@ import {
 } from "./core";
 import { KeywordMessage } from "./lang/Message/KeywordMessage";
 import { Platform } from "./compiler/platforms";
-import fs from "fs";
 import { Form } from "./compiler/core";
 
 export class Interpreter {
@@ -30,6 +29,8 @@ export class Interpreter {
   constructor(platform: Platform, global: typeof globalThis) {
     this.#platform = platform;
     this.#global = global;
+
+    const self = this;
 
     const NotMessage = new UnaryMessage("!");
     const TruthyNotDispatch = {
@@ -69,21 +70,9 @@ export class Interpreter {
       },
     });
 
-    Object.defineMethod(new UnaryMessage("allocate"), {
-      dispatch(pool: ObjectPool, ctx: Context): unknown {
-        const self = ctx.get("self");
-        if (self === undefined) {
-          throw new Error(`expected 'self' in context ${ctx}`);
-        }
-
-        const klass = new Dialog(
-          self as ObjectValue,
-          new UnaryMessage("class")
-        ).dispatch(pool, ctx);
-
-        return pool.allocate(klass as Class);
-      },
-    });
+    (Class.prototype as any).allocate = function () {
+      return self.pool.allocate(this);
+    };
 
     const NilClass = Object.subclass(Symbol.intern("NilClass"));
     NilClass.defineMethod(new UnaryMessage("inspect"), {
@@ -386,8 +375,6 @@ export class Interpreter {
         return "#<JS>";
       },
     });
-
-    const self = this;
 
     JSClass.defineMethod(new UnaryMessage("console"), {
       dispatch(pool: ObjectPool, ctx: Context): unknown {
