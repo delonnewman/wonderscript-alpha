@@ -90,4 +90,8 @@ export class Dialog implements SequentialDispatch, Meta {
 
     return method.dispatch(pool, ctx);
   }
+
+  array_0(pool: ObjectPool, ctx: Context) {
+    return this.dispatch(pool, ctx);
+  }
 }
