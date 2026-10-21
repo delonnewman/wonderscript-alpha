@@ -107,8 +107,8 @@ describe("Interpreter", () => {
       ["(true inspect)", "true"],
       ["(false inspect)", "false"],
       ["(nil inspect)", "nil"],
-      ["(1.2 inspect)", "#<Numeric 1.2>"],
-      ['("Hi!" inspect)', "#<String \"Hi!\">"]
+      ["(1.2 inspect)", "1.2"],
+      ['("Hi!" inspect)', "\"Hi!\""]
     ];
 
     examples.forEach(([form, expected]) => {
