@@ -1,4 +1,4 @@
-; -*- mode: clojure -*-
+;; -*- mode: clojure -*-
 
 (def array (fn* (&args) args))
 
