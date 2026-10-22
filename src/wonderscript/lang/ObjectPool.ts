@@ -1,8 +1,7 @@
 import { Class } from "./Class";
 import { stringHash } from "./utils";
 import { Message } from "./Message";
-import { IMethod, JSMethod, JSMethodTable, MethodTable } from "./Method";
-import { pt } from "../util";
+import { IMethod, JSMethod } from "./Method";
 import { Context } from "./Context";
 import { Symbol } from "./Symbol";
 
@@ -45,11 +44,11 @@ export type Foundation = {
   // object: Class; // js/Object
   // symbol: Class; // js/Symbol
   // Class: Class;
-  Numeric: Class;
-  String: Class;
-  FalseClass: Class;
-  TrueClass: Class;
-  NilClass: Class;
+  // Numeric: Class;
+  // String: Class;
+  // FalseClass: Class;
+  // TrueClass: Class;
+  // NilClass: Class;
 }
 
 const NIL_ID = 0;
@@ -61,6 +60,7 @@ export class ObjectPool {
   static METHOD_CACHE: Record<string, IMethod> = Object.create(null);
 
   #pool: Record<string | number, Class>;
+  #values: Record<string | number, unknown>; // TODO: make a shapes index
 
   constructor(foundation: Foundation) {
     const pool = Object.create(null);
@@ -70,10 +70,32 @@ export class ObjectPool {
     }
 
     this.#pool = pool;
+    this.#values = Object.create(null);
   }
 
   get pool() {
     return this.#pool;
+  }
+
+  get values() {
+    return this.#values;
+  }
+
+  attribute_value_set(obj: ObjectValue, attribute: string, value: unknown) {
+    if (typeof obj === 'string' && obj.startsWith(TAG)) {
+      obj = this.id(obj);
+    }
+
+    this.#values[`${obj}$${attribute}`] = value;
+    return value;
+  }
+
+  attribute_value_get(obj: ObjectValue, attribute: string) {
+    if (typeof obj === 'string' && obj.startsWith(TAG)) {
+      obj = this.id(obj);
+    }
+
+    return this.#values[`${obj}$${attribute}`];
   }
 
   send(obj: ObjectValue | object | Function, msg: Message) {
@@ -82,6 +104,7 @@ export class ObjectPool {
   }
 
   select(obj: ObjectValue | object | Function, msg: Message) {
+    // pt('obj', obj);
     if (typeof obj == 'function' || (typeof obj === 'object' && obj !== null)) {
       return JSMethod.findMethod(obj, msg);
     }
@@ -106,7 +129,7 @@ export class ObjectPool {
 
   newObjectRef(type: ObjectType) {
     const id = this.newID();
-    return `${TAG}$${id}$${type}`;
+    return `${TAG}${id}$${type}`;
   }
 
   associateClass(obj: ObjectValue, klass: Class) {
@@ -198,6 +221,15 @@ export class ObjectPool {
     if (typeof object === 'string' && object.startsWith(TAG)) {
       const id = this.id(object);
       const klass = this.#pool[id];
+      if (klass === undefined) {
+        throw new Error(`No class found for object ${object}`);
+      }
+
+      return klass;
+    }
+
+    if (typeof object === "function") {
+      const klass = this.#pool[`${(object as Function).name}`];
       if (klass === undefined) {
         throw new Error(`No class found for object ${object}`);
       }

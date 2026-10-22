@@ -19,6 +19,9 @@ import {
 import { KeywordMessage } from "./lang/Message/KeywordMessage";
 import { Platform } from "./compiler/platforms";
 import { Form } from "./compiler/core";
+import { Message } from "./lang/Message";
+import { Dispatch } from "./lang/Dispatch";
+import { pt } from "./util";
 
 export class Interpreter {
   #pool: ObjectPool;
@@ -66,13 +69,15 @@ export class Interpreter {
           throw new Error(`expected 'self' in context ${ctx}`);
         }
 
-        return pool.class(self as ObjectValue);
+        const klass = pool.class(self as ObjectValue);
+        const classObj = ctx.get(klass.name);
+        if (classObj === undefined) {
+          throw new Error(`expected '${klass.name}' in context ${ctx}`);
+        }
+
+        return classObj;
       },
     });
-
-    (Class.prototype as any).allocate = function () {
-      return self.pool.allocate(this);
-    };
 
     const NilClass = Object.subclass(Symbol.intern("NilClass"));
     NilClass.defineMethod(new UnaryMessage("inspect"), {
@@ -360,11 +365,6 @@ export class Interpreter {
       false: FalseClass,
       type_string: String,
       type_number: Numeric,
-      Numeric,
-      String,
-      FalseClass,
-      TrueClass,
-      NilClass,
     };
 
     this.#pool = new ObjectPool(foundation);
@@ -426,27 +426,199 @@ export class Interpreter {
       }
     );
 
+    const ClassObject = Object.subclass(Symbol.intern("Class"));
+    ClassObject.defineMethod(new UnaryMessage("inspect"), {
+      dispatch(pool: ObjectPool, ctx: Context): unknown {
+        const self = ctx.get("self") as ObjectValue;
+        if (self === undefined) {
+          throw new Error(`expected 'self' in context ${ctx}`);
+        }
+
+        return pool.attribute_value_get(self, "name");
+      },
+    });
+
+    ClassObject.defineMethod(new UnaryMessage("allocate"), {
+      dispatch(pool: ObjectPool, ctx: Context): unknown {
+        const self = ctx.get("self") as ObjectValue;
+        if (self === undefined) {
+          throw new Error(`expected 'self' in context ${ctx}`);
+        }
+
+        const table = pool.attribute_value_get(self, "table");
+        return pool.allocate(table as Class);
+      },
+    });
+
+    ClassObject.defineMethod(new UnaryMessage("name"), {
+      dispatch(pool: ObjectPool, ctx: Context): unknown {
+        const self = ctx.get("self") as ObjectValue;
+        if (self === undefined) {
+          throw new Error(`expected 'self' in context ${ctx}`);
+        }
+
+        return pool.attribute_value_get(self, "name");
+      },
+    });
+
+    ClassObject.defineMethod(new UnaryMessage("instance-messages"), {
+      dispatch(pool: ObjectPool, ctx: Context): unknown {
+        const self = ctx.get("self") as ObjectValue;
+        if (self === undefined) {
+          throw new Error(`expected 'self' in context ${ctx}`);
+        }
+
+        const table = pool.attribute_value_get(self, "table") as Class;
+        return table.messages;
+      },
+    });
+
+    ClassObject.defineMethod(
+      new ArgListMessage("define-method", undefined, [
+        Symbol.intern("message"),
+        Symbol.intern("dispatch"),
+      ]),
+      {
+        dispatch(pool: ObjectPool, ctx: Context): unknown {
+          const self = ctx.get("self") as ObjectValue;
+          if (self === undefined) {
+            throw new Error(`expected 'self' in context ${ctx}`);
+          }
+
+          const msg = ctx.get('message') as Message;
+          if (msg === undefined) {
+            throw new Error(`expected 'message' in context ${ctx}`);
+          }
+
+          const dispatch = ctx.get("dispatch") as Dispatch;
+          if (dispatch === undefined) {
+            throw new Error(`expected 'dispatch' in context ${ctx}`);
+          }
+
+          const table = pool.attribute_value_get(self, "table") as Class;
+          return table.defineMethod(msg, dispatch);
+        },
+      }
+    );
+
+    ClassObject.defineMethod(new BinaryMessage("subclass", undefined,
+        Symbol.intern("name"),
+      ),
+      {
+        dispatch(pool: ObjectPool, ctx: Context): unknown {
+          const self = ctx.get("self") as ObjectValue;
+          if (self === undefined) {
+            throw new Error(`expected 'self' in context ${ctx}`);
+          }
+
+          const name = ctx.get("name") as string;
+          if (name === undefined) {
+            throw new Error(`expected 'name' in context ${ctx}`);
+          }
+
+          const table = pool.attribute_value_get(self, "table") as Class;
+          const subclassTable = table.subclass(name);
+          const subclassObject = pool.allocate(ClassObject);
+          pool.attribute_value_set(subclassObject, "name", name);
+          pool.attribute_value_set(subclassObject, "table", subclassTable);
+          return subclassObject;
+        }
+      }
+  )
+
+    const $Object = this.pool.allocate(ClassObject);
+    this.pool.attribute_value_set($Object, "name", "Object");
+    this.pool.attribute_value_set($Object, "table", Object);
+
+    const $NilClass = this.pool.allocate(ClassObject);
+    this.pool.attribute_value_set($NilClass, "name", "NilClass");
+    this.pool.attribute_value_set($NilClass, "table", NilClass);
+
+    const $TrueClass = this.pool.allocate(ClassObject);
+    this.pool.attribute_value_set($TrueClass, "name", "TrueClass");
+    this.pool.attribute_value_set($TrueClass, "table", TrueClass);
+
+    const $FalseClass = this.pool.allocate(ClassObject);
+    this.pool.attribute_value_set($FalseClass, "name", "FalseClass");
+    this.pool.attribute_value_set($FalseClass, "table", FalseClass);
+
+    const $Numeric = this.pool.allocate(ClassObject);
+    this.pool.attribute_value_set($Numeric, "name", "Numeric");
+    this.pool.attribute_value_set($Numeric, "table", Numeric);
+
+    const $String = this.pool.allocate(ClassObject);
+    this.pool.attribute_value_set($String, "name", "String");
+    this.pool.attribute_value_set($String, "table", String);
+
+    const $Symbol = this.pool.allocate(ClassObject);
+    this.pool.attribute_value_set($Symbol, "name", "Symbol");
+    this.pool.attribute_value_set($Symbol, "table", Symbol);
+
+    const $Keyword = this.pool.allocate(ClassObject);
+    this.pool.attribute_value_set($Keyword, "name", "Keyword");
+    this.pool.attribute_value_set($Keyword, "table", Keyword);
+
+    const $Array = this.pool.allocate(ClassObject);
+    this.pool.attribute_value_set($Array, "name", "Array");
+    this.pool.attribute_value_set($Array, "table", Array);
+
+    const $Vector = this.pool.allocate(ClassObject);
+    this.pool.attribute_value_set($Vector, "name", "Vector");
+    this.pool.attribute_value_set($Vector, "table", Vector);
+
+    const $Hash = this.pool.allocate(ClassObject);
+    this.pool.attribute_value_set($Hash, "name", "Hash");
+    this.pool.attribute_value_set($Hash, "table", Hash);
+
+    const $Set = this.pool.allocate(ClassObject);
+    this.pool.attribute_value_set($Set, "name", "Set");
+    this.pool.attribute_value_set($Set, "table", Set);
+
+    const $UnaryMessage = this.pool.allocate(ClassObject);
+    this.pool.attribute_value_set($UnaryMessage, "name", "UnaryMessage");
+    this.pool.attribute_value_set($UnaryMessage, "table", UnaryMessage);
+
+    const $BinaryMessage = this.pool.allocate(ClassObject);
+    this.pool.attribute_value_set($BinaryMessage, "name", "BinaryMessage");
+    this.pool.attribute_value_set($BinaryMessage, "table", BinaryMessage);
+
+    const $ArgListMessage = this.pool.allocate(ClassObject);
+    this.pool.attribute_value_set($ArgListMessage, "name", "ArgListMessage");
+    this.pool.attribute_value_set($ArgListMessage, "table", ArgListMessage);
+
+    const $KeywordMessage = this.pool.allocate(ClassObject);
+    this.pool.attribute_value_set($KeywordMessage, "name", "KeywordMessage");
+    this.pool.attribute_value_set($KeywordMessage, "table", KeywordMessage);
+
+    const $Dialog = this.pool.allocate(ClassObject);
+    this.pool.attribute_value_set($Dialog, "name", "Dialog");
+    this.pool.attribute_value_set($Dialog, "table", Dialog);
+
+    const $Script = this.pool.allocate(ClassObject);
+    this.pool.attribute_value_set($Script, "name", "Script");
+    this.pool.attribute_value_set($Script, "table", Script);
+
     const js = this.#pool.allocate(JSClass);
     this.#ctx.define(Symbol.intern("JS"), js);
     this.#ctx.define(Symbol.intern("WS"), this);
-    this.#ctx.define(Symbol.intern("Object"), Object);
-    this.#ctx.define(Symbol.intern("NilClass"), NilClass);
-    this.#ctx.define(Symbol.intern("TrueClass"), TrueClass);
-    this.#ctx.define(Symbol.intern("FalseClass"), FalseClass);
-    this.#ctx.define(Symbol.intern("Numeric"), Numeric);
-    this.#ctx.define(Symbol.intern("String"), String);
-    this.#ctx.define(Symbol.intern("Symbol"), Symbol);
-    this.#ctx.define(Symbol.intern("Keyword"), Keyword);
-    this.#ctx.define(Symbol.intern("Array"), Array);
-    this.#ctx.define(Symbol.intern("Vector"), Vector);
-    this.#ctx.define(Symbol.intern("Hash"), Hash);
-    this.#ctx.define(Symbol.intern("Set"), Set);
-    this.#ctx.define(Symbol.intern("UnaryMessage"), UnaryMessage);
-    this.#ctx.define(Symbol.intern("BinaryMessage"), BinaryMessage);
-    this.#ctx.define(Symbol.intern("ArgListMessage"), ArgListMessage);
-    this.#ctx.define(Symbol.intern("KeywordMessage"), KeywordMessage);
-    this.#ctx.define(Symbol.intern("Dialog"), Dialog);
-    this.#ctx.define(Symbol.intern("Script"), Script);
+    this.#ctx.define(Symbol.intern("Object"), $Object);
+    this.#ctx.define(Symbol.intern("NilClass"), $NilClass);
+    this.#ctx.define(Symbol.intern("TrueClass"), $TrueClass);
+    this.#ctx.define(Symbol.intern("FalseClass"), $FalseClass);
+    this.#ctx.define(Symbol.intern("Numeric"), $Numeric);
+    this.#ctx.define(Symbol.intern("String"), $String);
+    this.#ctx.define(Symbol.intern("Symbol"), $Symbol);
+    this.#ctx.define(Symbol.intern("Keyword"), $Keyword);
+    this.#ctx.define(Symbol.intern("Array"), $Array);
+    this.#ctx.define(Symbol.intern("Vector"), $Vector);
+    this.#ctx.define(Symbol.intern("Hash"), $Hash);
+    this.#ctx.define(Symbol.intern("Set"), $Set);
+    this.#ctx.define(Symbol.intern("UnaryMessage"), $UnaryMessage);
+    this.#ctx.define(Symbol.intern("BinaryMessage"), $BinaryMessage);
+    this.#ctx.define(Symbol.intern("ArgListMessage"), $ArgListMessage);
+    this.#ctx.define(Symbol.intern("KeywordMessage"), $KeywordMessage);
+    this.#ctx.define(Symbol.intern("Dialog"), $Dialog);
+    this.#ctx.define(Symbol.intern("Script"), $Script);
   }
 
   get platform() {

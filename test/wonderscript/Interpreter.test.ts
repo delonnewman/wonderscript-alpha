@@ -50,9 +50,9 @@ describe("Interpreter", () => {
 
   describe("special forms", () => {
     const examples: [string, unknown][] = [
-      ['(true class)', subject.pool.class(true)],
-      ["((false class) define-method 'to_s \"false\") (false to_s)", "false"],
-      ['(def (true to_s) "true") (true to_s)', "true"],
+      ['((true class) name)', "TrueClass"],
+      ["((false class) define-method 'to_s (do \"false\")) (false to_s)", "false"],
+      ['(def (true to_s) (do "true")) (true to_s)', "true"],
       ["(def (true not) false) (true not)", false],
       ["(begin 1 2 3)", 3],
     ];
@@ -107,8 +107,8 @@ describe("Interpreter", () => {
       ["(true inspect)", "true"],
       ["(false inspect)", "false"],
       ["(nil inspect)", "nil"],
-      ["(1.2 inspect)", "#<Numeric 1.2>"],
-      ['("Hi!" inspect)', "#<String \"Hi!\">"]
+      ["(1.2 inspect)", "1.2"],
+      ['("Hi!" inspect)', "\"Hi!\""]
     ];
 
     examples.forEach(([form, expected]) => {
