@@ -35,7 +35,7 @@ export class Interpreter {
 
     const self = this;
 
-    const NotMessage = new UnaryMessage("!");
+    const NotMessage = new UnaryMessage("not");
     const TruthyNotDispatch = {
       dispatch(_pool: ObjectPool, ctx: Context): unknown {
         const self = ctx.get("self");
@@ -127,7 +127,7 @@ export class Interpreter {
     FalseClass.defineMethod(NotMessage, FalsyNotDispatch);
 
     const AndMessage = new BinaryMessage(
-      "&&",
+      "and",
       undefined,
       Symbol.intern("other")
     );
@@ -151,7 +151,7 @@ export class Interpreter {
     TrueClass.defineMethod(AndMessage, AndDispatch);
 
     const OrMessage = new BinaryMessage(
-      "||",
+      "or",
       undefined,
       Symbol.intern("other")
     );
@@ -357,6 +357,26 @@ export class Interpreter {
       }
     );
 
+    Numeric.defineMethod(new BinaryMessage("<=>", undefined, Symbol.intern('other')),
+      {
+        dispatch(pool: ObjectPool, ctx: Context): unknown {
+          const self = ctx.get("self") as number;
+          if (self == null) {
+            throw new Error(`expected 'self' in context ${ctx}`);
+          }
+
+          const other = ctx.get("other") as number;
+          if (other == null) {
+            throw new Error("'other' is required");
+          }
+
+          if (self < other) return -1;
+          if (self > other) return 1;
+          return 0;
+        },
+      }
+    );
+
     const String = Object.subclass(Symbol.intern("String"));
     String.defineMethod(new UnaryMessage("inspect"), {
       dispatch(_pool: ObjectPool, ctx: Context): unknown {
@@ -436,6 +456,19 @@ export class Interpreter {
         },
       }
     );
+
+    JSClass.defineMethod(new ArgListMessage("+", undefined, [Symbol.intern("*args")]), {
+      dispatch(pool: ObjectPool, ctx: Context): unknown {
+        const args = ctx.get("args") as Array;
+        if (args === undefined) {
+          throw new Error("'args' is required");
+        }
+
+        let sum = 0;
+        for (const x of args) { sum += x }
+        return sum;
+      },
+    });
 
     const ClassObject = Object.subclass(Symbol.intern("Class"));
     ClassObject.defineMethod(new UnaryMessage("inspect"), {
@@ -609,8 +642,13 @@ export class Interpreter {
     this.pool.attribute_value_set($Script, "name", "Script");
     this.pool.attribute_value_set($Script, "table", Script);
 
+    const $JSClass = this.pool.allocate(ClassObject);
+    this.pool.attribute_value_set($JSClass, "name", "JSClass");
+    this.pool.attribute_value_set($JSClass, "table", JSClass);
+
     const js = this.#pool.allocate(JSClass);
     this.#ctx.define(Symbol.intern("JS"), js);
+    this.#ctx.define(Symbol.intern("JSClass"), $JSClass);
     this.#ctx.define(Symbol.intern("WS"), this);
     this.#ctx.define(Symbol.intern("Object"), $Object);
     this.#ctx.define(Symbol.intern("NilClass"), $NilClass);
