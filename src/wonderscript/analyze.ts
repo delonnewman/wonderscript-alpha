@@ -251,19 +251,15 @@ export function analyzeDef(form: unknown[], meta: MetaData | undefined): Dispatc
   const body = Block.fromActions(form.slice(2).map(analyze));
 
   if (!(def instanceof Array)) {
-    throw new Error(`invalid def form expected array, got ${prStr(def)} instead`);
+    throw new Error(`invalid def form expected an array, got ${prStr(def)} instead`);
   }
-  const [obj, template] = def;
 
+  const [obj, template] = def;
   return new Dialog(
     analyze(obj),
-    new ArgListMessage(
-      "define-method",
-      undefined,
-      [
-        new Identity(template),
-        body,
-      ]
-    )
+    new ArgListMessage("define-method", undefined, [
+      new Identity(template),
+      body,
+    ])
   );
 }
