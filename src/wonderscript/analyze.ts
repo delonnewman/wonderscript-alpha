@@ -41,11 +41,13 @@ import {
   JS_NOT,
   JS_OR,
   JS_TYPEOF,
+  LET_SYM,
   LT_SYM,
   LTQ_SYM,
   MINUS_SYM,
   MOD_SYM,
-  MULT_SYM, NEW_SYM,
+  MULT_SYM,
+  NEW_SYM,
   NOT_EQUIV_SYM,
   NOT_IDENTICAL_SYM,
   NOT_SYM,
@@ -130,8 +132,10 @@ export function analyze(initForm: ReadForm | Form): Dispatch {
     switch (form[0].name) {
       case DEF_SYM:
         return analyzeDef(form, meta);
+      case LET_SYM:
+        return analyzeLet(form, meta);
       case BEGIN_SYM:
-        return analyzeBlock(form, meta, false);
+        return analyzeBegin(form, meta);
       case DO_SYM:
         return analyzeBlock(form, meta, true);
       case QUOTE_SYM:
@@ -267,16 +271,43 @@ export function analyzeHash(form: Map<Form, Form>) {
   return new HashDispatch(hash);
 }
 
-export function analyzeBlock(form: unknown[], meta: MetaData | undefined, delay: boolean) {
+export function analyzeLet(form: unknown[], meta: MetaData | undefined) {
+  const binds: Binding[] = [];
+
+  if (form[1] instanceof Vector) {
+    const pairs = partition<Form>(2, form[1]);
+    for (const pair of pairs) {
+      if (pair[0] instanceof Symbol) {
+        binds.push(new Binding(pair[0], analyze(pair[1])));
+      }
+    }
+  } else {
+    throw new Error(`invalid let form expected vector, got ${prStr(form[1])} instead`);
+  }
+
+  const actions = form.slice(2).map(analyze);
+  return new Script(actions, binds, meta);
+}
+
+export function analyzeBegin(form: unknown[], meta: MetaData | undefined) {
+  const binds: Binding[] = [];
+  const actions = form.slice(1).map(analyze);
+  return new Script(actions, binds, meta);
+}
+
+export function analyzeBlock(
+  form: unknown[],
+  meta: MetaData | undefined,
+  delay: boolean
+) {
   const binds: Binding[] = [];
   let restIdx = 1;
 
   if (form[1] instanceof Vector) {
     restIdx = 2;
-    const pairs = partition<Form>(2, form[1]);
-    for (const pair of pairs) {
-      if (pair[0] instanceof Symbol) {
-        binds.push(new Binding(pair[0], analyze(pair[1])));
+    for (const sym of form[1]) {
+      if (sym instanceof Symbol) {
+        binds.push(new Binding(sym, null));
       }
     }
   }
