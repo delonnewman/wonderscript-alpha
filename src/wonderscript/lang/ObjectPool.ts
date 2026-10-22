@@ -4,6 +4,7 @@ import { Message } from "./Message";
 import { IMethod, JSMethod } from "./Method";
 import { Context } from "./Context";
 import { Symbol } from "./Symbol";
+import { pt } from "../util";
 
 export type ObjectRef = `wso$${number}$${number}`;
 
@@ -104,7 +105,6 @@ export class ObjectPool {
   }
 
   select(obj: ObjectValue | object | Function, msg: Message) {
-    // pt('obj', obj);
     if (typeof obj == 'function' || (typeof obj === 'object' && obj !== null)) {
       return JSMethod.findMethod(obj, msg);
     }
@@ -237,9 +237,9 @@ export class ObjectPool {
       return klass;
     }
 
-    let klass = this.#pool[`${object}`];
+    let klass = this.#pool[`type_${typeof object}`];
     if (klass === undefined) {
-      klass = this.#pool[`type_${typeof object}`];
+      klass = this.#pool[`${object}`];
     }
     if (klass === undefined) {
       throw new Error(`No class found for object ${object}`);

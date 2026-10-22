@@ -8,7 +8,7 @@ import { Symbol } from "../../src/wonderscript/lang/Symbol";
 import { Class } from "../../src/wonderscript/lang/Class";
 
 describe("Interpreter", () => {
-  const subject = new Interpreter();
+  const subject = new Interpreter("node", global);
 
   describe("self evaluating", () => {
     const examples: [string, unknown][] = [
@@ -52,8 +52,8 @@ describe("Interpreter", () => {
     const examples: [string, unknown][] = [
       ['((true class) name)', "TrueClass"],
       ["((false class) define-method 'to_s (do \"false\")) (false to_s)", "false"],
-      ['(def (true to_s) (do "true")) (true to_s)', "true"],
-      ["(def (true not) false) (true not)", false],
+      ['(def (TrueClass to_s) "true") (true to_s)', "true"],
+      ["(def (TrueClass not) false) (true not)", false],
       ["(begin 1 2 3)", 3],
     ];
 

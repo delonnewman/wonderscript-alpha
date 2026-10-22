@@ -21,7 +21,6 @@ describe("analyze", () => {
   examples.forEach(([example, expected]) => {
     test(`${prStr(example)} => ${prStr(expected)}`, () => {
       const result = analyze(example);
-      pt('result', result);
       expect(result).toEqual(expected);
     });
   });

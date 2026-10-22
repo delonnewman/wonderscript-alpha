@@ -72,6 +72,7 @@ import { partition } from "./lang/runtime";
 import { ObjectPool } from "./lang/ObjectPool";
 import { Context } from "./lang/Context";
 import { pt } from "./util";
+import { Block } from "./lang/Dispatch/Block";
 
 export type SelfEvaluating = number | string | null | undefined | boolean | Symbol | Keyword;
 
@@ -137,7 +138,7 @@ export function analyze(initForm: ReadForm | Form): Dispatch {
       case BEGIN_SYM:
         return analyzeBegin(form, meta);
       case DO_SYM:
-        return analyzeBlock(form, meta, true);
+        return analyzeBlock(form, meta);
       case QUOTE_SYM:
         return new Identity(form[1]);
     }
@@ -237,7 +238,8 @@ export function analyze(initForm: ReadForm | Form): Dispatch {
             meta
           );
         }
-        return new Dialog(
+        const args = form.slice(2).map(analyze);
+        const dialog = new Dialog(
           analyze(form[0]) as DispatchSubject,
           new ArgListMessage(
             form[1].name,
@@ -246,8 +248,9 @@ export function analyze(initForm: ReadForm | Form): Dispatch {
           ),
           meta
         );
+        return dialog;
+      }
     }
-  }
 
   const rest = form.slice(1);
   const msg = rest.length > 0 && rest[0] instanceof Symbol
@@ -295,11 +298,7 @@ export function analyzeBegin(form: unknown[], meta: MetaData | undefined) {
   return new Script(actions, binds, meta);
 }
 
-export function analyzeBlock(
-  form: unknown[],
-  meta: MetaData | undefined,
-  delay: boolean
-) {
+export function analyzeBlock(form: unknown[], meta: MetaData | undefined) {
   const binds: Binding[] = [];
   let restIdx = 1;
 
@@ -313,17 +312,7 @@ export function analyzeBlock(
   }
 
   const actions = form.slice(restIdx).map(analyze);
-  const script = new Script(actions, binds, meta);
-  if (!delay) {
-    return script;
-  }
-
-  return {
-    script,
-    dispatch(pool: ObjectPool, ctx: Context): unknown {
-      return this.script;
-    },
-  };
+  return Block.fromActions(actions, binds, meta);
 }
 
 // (def (self to_s) "Hi!")
@@ -334,9 +323,7 @@ export function analyzeDef(form: unknown[], meta: MetaData | undefined): Dispatc
   }
 
   const def = form[1];
-  // const body = form[2] as Form; // TODO: may want to make the rest of the array the body
-  const body = form.slice(2); //.map(analyze);
-  pt('body', body.map(analyze));
+  const body = Block.fromActions(form.slice(2).map(analyze));
 
   if (!(def instanceof Array)) {
     throw new Error(`invalid def form expected array, got ${prStr(def)} instead`);
@@ -346,11 +333,11 @@ export function analyzeDef(form: unknown[], meta: MetaData | undefined): Dispatc
   return new Dialog(
     analyze(obj),
     new ArgListMessage(
-      "defineMethod",
+      "define-method",
       undefined,
       [
         new Identity(template),
-        new Script(body.map(analyze)),
+        body,
       ]
     )
   );

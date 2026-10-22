@@ -5,92 +5,20 @@ import { EMPTY_ARRAY, Message } from "./Message";
 import { Dispatch } from "./Dispatch";
 import { IMethod, Method, MethodTable } from "./Method";
 import { prStr } from "../compiler";
-import { ArgListMessage } from "./Message/ArgListMessage";
-import { ObjectPool } from "./ObjectPool";
-import { Context } from "./Context";
-import { UnaryMessage } from "./Message/UnaryMessage";
-import { analyze } from "../analyze";
-import { Form } from "../compiler/core";
 
 type DispatchTable = Record<string, IMethod>;
-
-const BASIC_MESSAGES = {
-  defineMethod: new ArgListMessage("define-method", undefined, [
-    Symbol.intern("message"),
-    Symbol.intern("dispatch"),
-  ]),
-  subclass: new ArgListMessage("subclass", undefined, [
-    Symbol.intern("name"),
-  ]),
-  messages: new UnaryMessage("messages"),
-};
-
-const BASIC_METHODS: DispatchTable = {
-  [BASIC_MESSAGES.messages.interned]: new Method(BASIC_MESSAGES.messages, {
-    dispatch(pool: ObjectPool, ctx: Context): unknown {
-      const self = ctx.get("self");
-      if (self == null) {
-        throw new Error(`expected 'self'`);
-      }
-
-      return (self as Class).messages;
-    },
-  }),
-  [BASIC_MESSAGES.subclass.interned]: new Method(BASIC_MESSAGES.subclass, {
-    dispatch(pool: ObjectPool, ctx: Context): unknown {
-      const self = ctx.get("self");
-      if (self == null) {
-        throw new Error(`expected 'self'`);
-      }
-
-      const name = ctx.get("name");
-      if (name == null) {
-        throw new Error("'name' is required");
-      }
-
-      return (self as Class).subclass(name as string | Keyword | Symbol);
-    },
-  }),
-  [BASIC_MESSAGES.defineMethod.interned]: new Method(
-    BASIC_MESSAGES.defineMethod,
-    {
-      dispatch(pool: ObjectPool, ctx: Context): unknown {
-        const self = ctx.get("self");
-        if (self == null) {
-          throw new Error(`expected 'self'`);
-        }
-
-        const msg = ctx.get("message");
-        if (msg == null) {
-          throw new Error("'message' is required");
-        }
-
-        const dispatch = ctx.get("dispatch");
-        if (dispatch == null) {
-          throw new Error("'dispatch' is required");
-        }
-
-        return (self as Class).defineMethod(
-          msg as Message,
-          analyze(dispatch as Form)
-        );
-      },
-    }
-  ),
-};
 
 export class Class implements Named, Message, MethodTable {
   #name: string;
   #namespace: string | undefined;
   #methods: DispatchTable;
-  #messages: Message[];
+  #messages: Message[] = [];
   #subclasses: Class[] = [];
 
   constructor(name: string, namespace?: string | null | undefined, superclassMethods?: DispatchTable) {
     this.#name = name;
     this.#namespace = namespace;
-    this.#messages = Object.values(BASIC_MESSAGES);
-    this.#methods = Object.create(superclassMethods ?? BASIC_METHODS);
+    this.#methods = Object.create(superclassMethods ?? null);
   }
 
   get name() {

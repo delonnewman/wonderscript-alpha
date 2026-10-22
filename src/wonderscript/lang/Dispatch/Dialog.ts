@@ -8,6 +8,7 @@ import { ObjectPool, ObjectValue } from "../ObjectPool";
 import { Context } from "../Context";
 import { Symbol } from "../Symbol";
 import { Message } from "../Message";
+import { pt } from "../../util";
 
 export class Dialog implements SequentialDispatch, Meta {
   #subject: DispatchSubject;
@@ -85,7 +86,7 @@ export class Dialog implements SequentialDispatch, Meta {
 
     const binds = method.bindings(msg);
     for (const bind of binds) {
-      ctx.define(bind.name, bind.dispatch(pool, ctx));
+      ctx.define(bind.name, bind.action);
     }
 
     return method.dispatch(pool, ctx);

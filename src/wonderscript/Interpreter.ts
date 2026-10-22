@@ -660,8 +660,12 @@ export class Interpreter {
     return result;
   }
 
-  eval(input: Form) {
-    return analyze(input).dispatch(this.pool, this.#ctx);
+  eval(form: Form) {
+    return this.analyze(form).dispatch(this.pool, this.#ctx);
+  }
+
+  analyze(form: Form) {
+    return analyze(form);
   }
 
   loadFile(path: string) {
