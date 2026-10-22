@@ -145,112 +145,37 @@ export function analyze(initForm: ReadForm | Form): Dispatch {
   }
 
   if (form[1] instanceof Symbol) {
-    switch (form[1].name) {
-      case PLUS_SYM:
-      case MINUS_SYM:
-      case DIV_SYM:
-      case MULT_SYM:
-      case EQUIV_SYM:
-      case IDENTICAL_SYM:
-      case NOT_EQUIV_SYM:
-      case NOT_IDENTICAL_SYM:
-      case LT_SYM:
-      case GT_SYM:
-      case LTQ_SYM:
-      case GTQ_SYM:
-        return new Dialog(
-          analyze(form[0]) as DispatchSubject,
-          BinaryMessage.jsOp(form[1].name, analyze(form[2])),
-          meta
-        )
-      case MOD_SYM:
-        return new Dialog(
-          analyze(form[0]) as DispatchSubject,
-          BinaryMessage.jsOp(JS_MOD, analyze(form[2])),
-          meta
-        );
-      case NOT_SYM:
-        return new Dialog(
-          analyze(form[0]) as DispatchSubject,
-          UnaryMessage.jsOp(JS_NOT),
-          meta
-        );
-      case AND_SYM:
-        return new Dialog(
-          analyze(form[0]) as DispatchSubject,
-          BinaryMessage.jsOp(JS_AND, analyze(form[2])),
-          meta
-        );
-      case OR_SYM:
-        return new Dialog(
-          analyze(form[0]) as DispatchSubject,
-          BinaryMessage.jsOp(JS_OR, analyze(form[2])),
-          meta
-        );
-      case BIT_NOT_SYM:
-        return new Dialog(
-          analyze(form[0]) as DispatchSubject,
-          UnaryMessage.jsOp(JS_BIT_NOT),
-          meta
-        );
-      case BIT_AND_SYM:
-        return new Dialog(
-          analyze(form[0]) as DispatchSubject,
-          BinaryMessage.jsOp(JS_BIT_AND, analyze(form[2])),
-          meta
-        );
-      case BIT_OR_SYM:
-        return new Dialog(
-          analyze(form[0]) as DispatchSubject,
-          BinaryMessage.jsOp(JS_BIT_OR, analyze(form[2])),
-          meta
-        );
-      case BIT_LSHIFT_SYM:
-        return new Dialog(
-          analyze(form[0]) as DispatchSubject,
-          BinaryMessage.jsOp(JS_BIT_LSHIFT, analyze(form[2])),
-          meta
-        );
-      case BIT_RSHIFT_SYM:
-        return new Dialog(
-          analyze(form[0]) as DispatchSubject,
-          BinaryMessage.jsOp(JS_BIT_RSHIFT, analyze(form[2])),
-          meta
-        );
-      case BIT_URSHIFT_SYM:
-        return new Dialog(
-          analyze(form[0]) as DispatchSubject,
-          BinaryMessage.jsOp(JS_BIT_URSHIFT, analyze(form[2])),
-          meta
-        );
-      default:
-        if (form.length === 2) {
-          return new Dialog(
-            analyze(form[0]) as DispatchSubject,
-            new UnaryMessage(form[1].name, form[1].namespace),
-            meta
-          );
-        }
-        if (form.length === 3) {
-          return new Dialog(
-            analyze(form[0]) as DispatchSubject,
-            new BinaryMessage(form[1].name, form[1].namespace, analyze(form[2])),
-            meta
-          );
-        }
-        const args = form.slice(2).map(analyze);
-        const dialog = new Dialog(
-          analyze(form[0]) as DispatchSubject,
-          new ArgListMessage(
-            form[1].name,
-            form[1].namespace,
-            form.slice(2).map(analyze)
-          ),
-          meta
-        );
-        return dialog;
-      }
+    if (form.length === 2) {
+      return new Dialog(
+        analyze(form[0]) as DispatchSubject,
+        new UnaryMessage(form[1].name, form[1].namespace),
+        meta
+      );
     }
+
+    if (form.length === 3) {
+      return new Dialog(
+        analyze(form[0]) as DispatchSubject,
+        new BinaryMessage(
+          form[1].name,
+          form[1].namespace,
+          analyze(form[2])
+        ),
+        meta
+      );
+    }
+
+    const dialog = new Dialog(
+      analyze(form[0]) as DispatchSubject,
+      new ArgListMessage(
+        form[1].name,
+        form[1].namespace,
+        form.slice(2).map(analyze)
+      ),
+      meta
+    );
+    return dialog;
+  }
 
   const rest = form.slice(1);
   const msg = rest.length > 0 && rest[0] instanceof Symbol
