@@ -26,6 +26,7 @@ type MessageArgs = MessageArg[] | readonly MessageArg[] | Vector;
 
 export class ArgListMessage extends BaseMessage implements Dispatch {
   #args: MessageArgs;
+  #splat: boolean;
 
   constructor(
     name: string,
@@ -35,6 +36,7 @@ export class ArgListMessage extends BaseMessage implements Dispatch {
   ) {
     super(name, namespace, flags);
     this.#args = Array.from(args);
+    this.#splat = this.#args.some(it => it instanceof Symbol && it.name.startsWith('*'));
     Object.freeze(this);
   }
 
@@ -43,11 +45,19 @@ export class ArgListMessage extends BaseMessage implements Dispatch {
   }
 
   get internings(): string[] {
-    return [this.interned, `${this.name}_splat`];
+    if (!this.#splat) return [this.interned];
+
+    const internings = [];
+    for (let i = Math.abs(this.arity) - 1; i < 21; i++) {
+      internings.push(`${this.name}_${i}`);
+    }
+    internings.push( `${this.name}_splat`);
+
+    return internings;
   }
 
   get arity(): number {
-    return this.#args.length;
+    return this.#splat ? this.#args.length * -1 : this.#args.length;
   }
 
   get args() {
@@ -88,12 +98,18 @@ export class ArgListMessage extends BaseMessage implements Dispatch {
     }
 
     const binds: Binding[] = [];
-    for (let i = 0; i < arity; i++) {
+    for (let i = 0; i < Math.abs(arity); i++) {
       const arg = this.args[i];
       const msgArg = msg.args[i];
 
       if (arg instanceof Symbol) {
-        binds.push(new Binding(arg, msgArg));
+        if (arg.name.startsWith('*')) {
+          const name = Symbol.intern(arg.name.slice(1));
+          binds.push(new Binding(name, msg.args.slice(i) as Form[]));
+          break;
+        } else {
+          binds.push(new Binding(arg, msgArg));
+        }
       }
     }
 

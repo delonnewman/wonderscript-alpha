@@ -5,6 +5,7 @@ import { EMPTY_ARRAY, Message } from "./Message";
 import { Dispatch } from "./Dispatch";
 import { IMethod, Method, MethodTable } from "./Method";
 import { prStr } from "../compiler";
+import { BaseMessage } from "./Message/BaseMessage";
 
 type DispatchTable = Record<string, IMethod>;
 
@@ -47,7 +48,9 @@ export class Class implements Named, Message, MethodTable {
 
   defineMethod(msg: Message, dispatch: Dispatch) {
     this.#messages.push(msg);
-    this.#methods[msg.interned] = new Method(msg, dispatch);
+    for (const m of msg.internings) {
+      this.#methods[m] = new Method(msg, dispatch);
+    }
     return msg;
   }
 
@@ -56,8 +59,13 @@ export class Class implements Named, Message, MethodTable {
   }
 
   findMethod(msg: Message) {
-    const method = this.#methods[msg.interned];
+    let method = this.#methods[msg.interned];
     if (method !== undefined) return method;
+
+    if (msg instanceof BaseMessage) {
+      method = this.#methods[`${msg.name}_splat`];
+      if (method !== undefined) return method;
+    }
 
     throw new Error(`unknown method ${prStr(msg)}:${msg.interned} for an instance of ${this}`);
   }
