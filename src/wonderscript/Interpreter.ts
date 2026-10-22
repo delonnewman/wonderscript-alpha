@@ -35,7 +35,7 @@ export class Interpreter {
 
     const self = this;
 
-    const NotMessage = new UnaryMessage("not");
+    const NotMessage = new UnaryMessage("not", 'core');
     const TruthyNotDispatch = {
       dispatch(_pool: ObjectPool, ctx: Context): unknown {
         const self = ctx.get("self");
@@ -61,7 +61,7 @@ export class Interpreter {
       },
     });
 
-    Object.defineMethod(new UnaryMessage("inspect"), {
+    Object.defineMethod(new UnaryMessage("inspect", 'core'), {
       dispatch(pool: ObjectPool, ctx: Context): unknown {
         const self = ctx.get("self");
         if (self === undefined) {
@@ -73,7 +73,7 @@ export class Interpreter {
       },
     });
 
-    Object.defineMethod(new UnaryMessage("class"), {
+    Object.defineMethod(new UnaryMessage("class", 'core'), {
       dispatch(pool: ObjectPool, ctx: Context): unknown {
         const self = ctx.get("self");
         if (self === undefined) {
@@ -91,7 +91,7 @@ export class Interpreter {
     });
 
     const NilClass = Object.subclass(Symbol.intern("NilClass"));
-    NilClass.defineMethod(new UnaryMessage("inspect"), {
+    NilClass.defineMethod(new UnaryMessage("inspect", 'core'), {
       dispatch(_pool: ObjectPool, _ctx: Context): unknown {
         return "nil";
       },
@@ -111,14 +111,14 @@ export class Interpreter {
     NilClass.defineMethod(NotMessage, FalsyNotDispatch);
 
     const TrueClass = Object.subclass(Symbol.intern("TrueClass"));
-    TrueClass.defineMethod(new UnaryMessage("inspect"), {
+    TrueClass.defineMethod(new UnaryMessage("inspect", 'core'), {
       dispatch(_pool: ObjectPool, _ctx: Context): unknown {
         return "true";
       },
     });
 
     const FalseClass = Object.subclass(Symbol.intern("FalseClass"));
-    FalseClass.defineMethod(new UnaryMessage("inspect"), {
+    FalseClass.defineMethod(new UnaryMessage("inspect", 'core'), {
       dispatch(_pool: ObjectPool, _ctx: Context): unknown {
         return "false";
       },
@@ -128,7 +128,7 @@ export class Interpreter {
 
     const AndMessage = new BinaryMessage(
       "and",
-      undefined,
+      'core',
       Symbol.intern("other")
     );
     const AndDispatch = {
@@ -152,7 +152,7 @@ export class Interpreter {
 
     const OrMessage = new BinaryMessage(
       "or",
-      undefined,
+      'core',
       Symbol.intern("other")
     );
     const OrDispatch = {
@@ -175,7 +175,7 @@ export class Interpreter {
     TrueClass.defineMethod(OrMessage, OrDispatch);
 
     const Numeric = Object.subclass(Symbol.intern("Numeric"));
-    Numeric.defineMethod(new UnaryMessage("inspect"), {
+    Numeric.defineMethod(new UnaryMessage("inspect", 'core'), {
       dispatch(_pool: ObjectPool, ctx: Context): unknown {
         const self = ctx.get("self");
         if (self == null) {
@@ -187,7 +187,7 @@ export class Interpreter {
     });
 
     Numeric.defineMethod(
-      new BinaryMessage("+", undefined, Symbol.intern("other")),
+      new BinaryMessage("+", 'core', Symbol.intern("other")),
       {
         dispatch(pool: ObjectPool, ctx: Context): unknown {
           const self = ctx.get("self") as number;
@@ -206,7 +206,7 @@ export class Interpreter {
     );
 
     Numeric.defineMethod(
-      new BinaryMessage("-", undefined, Symbol.intern("other")),
+      new BinaryMessage("-", 'core', Symbol.intern("other")),
       {
         dispatch(pool: ObjectPool, ctx: Context): unknown {
           const self = ctx.get("self") as number;
@@ -225,7 +225,7 @@ export class Interpreter {
     );
 
     Numeric.defineMethod(
-      new BinaryMessage("*", undefined, Symbol.intern("other")),
+      new BinaryMessage("*", 'core', Symbol.intern("other")),
       {
         dispatch(pool: ObjectPool, ctx: Context): unknown {
           const self = ctx.get("self") as number;
@@ -244,7 +244,7 @@ export class Interpreter {
     );
 
     Numeric.defineMethod(
-      new BinaryMessage("/", undefined, Symbol.intern("other")),
+      new BinaryMessage("/", 'core', Symbol.intern("other")),
       {
         dispatch(pool: ObjectPool, ctx: Context): unknown {
           const self = ctx.get("self") as number;
@@ -263,7 +263,7 @@ export class Interpreter {
     );
 
     Numeric.defineMethod(
-      new BinaryMessage("%", undefined, Symbol.intern("other")),
+      new BinaryMessage("%", 'core', Symbol.intern("other")),
       {
         dispatch(pool: ObjectPool, ctx: Context): unknown {
           const self = ctx.get("self") as number;
@@ -282,7 +282,7 @@ export class Interpreter {
     );
 
     Numeric.defineMethod(
-      new BinaryMessage(">", undefined, Symbol.intern("other")),
+      new BinaryMessage(">", 'core', Symbol.intern("other")),
       {
         dispatch(pool: ObjectPool, ctx: Context): unknown {
           const self = ctx.get("self") as number;
@@ -301,7 +301,7 @@ export class Interpreter {
     );
 
     Numeric.defineMethod(
-      new BinaryMessage(">=", undefined, Symbol.intern("other")),
+      new BinaryMessage(">=", 'core', Symbol.intern("other")),
       {
         dispatch(pool: ObjectPool, ctx: Context): unknown {
           const self = ctx.get("self") as number;
@@ -320,7 +320,7 @@ export class Interpreter {
     );
 
     Numeric.defineMethod(
-      new BinaryMessage("<", undefined, Symbol.intern("other")),
+      new BinaryMessage("<", 'core', Symbol.intern("other")),
       {
         dispatch(pool: ObjectPool, ctx: Context): unknown {
           const self = ctx.get("self") as number;
@@ -339,7 +339,7 @@ export class Interpreter {
     );
 
     Numeric.defineMethod(
-      new BinaryMessage("<=", undefined, Symbol.intern("other")),
+      new BinaryMessage("<=", 'core', Symbol.intern("other")),
       {
         dispatch(pool: ObjectPool, ctx: Context): unknown {
           const self = ctx.get("self") as number;
@@ -357,7 +357,7 @@ export class Interpreter {
       }
     );
 
-    Numeric.defineMethod(new BinaryMessage("<=>", undefined, Symbol.intern('other')),
+    Numeric.defineMethod(new BinaryMessage("<=>", 'core', Symbol.intern('other')),
       {
         dispatch(pool: ObjectPool, ctx: Context): unknown {
           const self = ctx.get("self") as number;
@@ -378,7 +378,7 @@ export class Interpreter {
     );
 
     const String = Object.subclass(Symbol.intern("String"));
-    String.defineMethod(new UnaryMessage("inspect"), {
+    String.defineMethod(new UnaryMessage("inspect", 'core'), {
       dispatch(_pool: ObjectPool, ctx: Context): unknown {
         const self = ctx.get("self");
         if (self == null) {
@@ -388,6 +388,172 @@ export class Interpreter {
         return JSON.stringify(self);
       },
     });
+
+    String.defineMethod(new UnaryMessage("upcase", 'core'), {
+      dispatch(pool: ObjectPool, ctx: Context): unknown {
+        const self = ctx.get("self") as string;
+        if (self == null) {
+          throw new Error(`expected 'self' in context ${ctx}`);
+        }
+
+        return self.toUpperCase();
+      },
+    });
+
+    String.defineMethod(new UnaryMessage("downcase", 'core'), {
+      dispatch(pool: ObjectPool, ctx: Context): unknown {
+        const self = ctx.get("self") as string;
+        if (self == null) {
+          throw new Error(`expected 'self' in context ${ctx}`);
+        }
+
+        return self.toLowerCase();
+      },
+    });
+
+    String.defineMethod(new BinaryMessage("starts-with?", 'core', Symbol.intern('prefix')), {
+      dispatch(pool: ObjectPool, ctx: Context): unknown {
+        const self = ctx.get("self") as string;
+        if (self == null) {
+          throw new Error(`expected 'self' in context ${ctx}`);
+        }
+
+        const prefix = ctx.get("prefix") as string;
+        if (prefix == null) {
+          throw new Error(`expected 'prefix' in context ${ctx}`);
+        }
+
+        return self.startsWith(prefix);
+      },
+    });
+
+    String.defineMethod(
+      new BinaryMessage("ends-with?", "core", Symbol.intern("suffix")),
+      {
+        dispatch(pool: ObjectPool, ctx: Context): unknown {
+          const self = ctx.get("self") as string;
+          if (self == null) {
+            throw new Error(`expected 'self' in context ${ctx}`);
+          }
+
+          const suffix = ctx.get("suffix") as string;
+          if (suffix == null) {
+            throw new Error(`expected 'suffix' in context ${ctx}`);
+          }
+
+          return self.endsWith(suffix);
+        },
+      }
+    );
+
+    String.defineMethod(
+      new BinaryMessage("at", "core", Symbol.intern("index")),
+      {
+        dispatch(pool: ObjectPool, ctx: Context): unknown {
+          const self = ctx.get("self") as string;
+          if (self == null) {
+            throw new Error(`expected 'self' in context ${ctx}`);
+          }
+
+          const index = ctx.get("index") as number;
+          if (index == null) {
+            throw new Error(`expected 'index' in context ${ctx}`);
+          }
+
+          if (index < 0) {
+            return self[self.length + index];
+          }
+
+          return self[index];
+        },
+      }
+    );
+
+    String.defineMethod(
+      new BinaryMessage("slice", "core", Symbol.intern("start")),
+      {
+        dispatch(pool: ObjectPool, ctx: Context): unknown {
+          const self = ctx.get("self") as string;
+          if (self == null) {
+            throw new Error(`expected 'self' in context ${ctx}`);
+          }
+
+          const start = ctx.get("start") as number;
+          if (start == null) {
+            throw new Error(`expected 'start' in context ${ctx}`);
+          }
+
+          return self.slice(start);
+        },
+      }
+    );
+
+    String.defineMethod(
+      new ArgListMessage("slice", "core", [Symbol.intern("start"), Symbol.intern("end")]),
+      {
+        dispatch(pool: ObjectPool, ctx: Context): unknown {
+          const self = ctx.get("self") as string;
+          if (self == null) {
+            throw new Error(`expected 'self' in context ${ctx}`);
+          }
+
+          const start = ctx.get("start") as number;
+          if (start == null) {
+            throw new Error(`expected 'start' in context ${ctx}`);
+          }
+
+          const end = ctx.get("end") as number;
+          if (end == null) {
+            throw new Error(`expected 'end' in context ${ctx}`);
+          }
+
+          return self.slice(start, end);
+        },
+      }
+    );
+
+    String.defineMethod(
+      new BinaryMessage("split", "core", Symbol.intern("separator")),
+      {
+        dispatch(pool: ObjectPool, ctx: Context): unknown {
+          const self = ctx.get("self") as string;
+          if (self == null) {
+            throw new Error(`expected 'self' in context ${ctx}`);
+          }
+
+          const separator = ctx.get("separator") as string;
+          if (separator == null) {
+            throw new Error(`expected 'separator' in context ${ctx}`);
+          }
+
+          const array = self.split(separator);
+          global.Object.setPrototypeOf(array, Array.prototype);
+          return array;
+        },
+      }
+    );
+
+    String.defineMethod(
+      new BinaryMessage("codepoint-at", "core", Symbol.intern("index")),
+      {
+        dispatch(pool: ObjectPool, ctx: Context): unknown {
+          const self = ctx.get('self') as string;
+          if (self === undefined) {
+            throw new Error(`expected 'self' in context ${ctx}`);
+          }
+
+          const index = ctx.get('index') as number;
+          if (index === undefined) {
+            throw new Error(`expected 'index' in context ${ctx}`);
+          }
+
+          if (index < 0) {
+            return self.codePointAt(self.length + index);
+          }
+          return self.codePointAt(index);
+        },
+      }
+    );
 
     const foundation = {
       null: NilClass,
