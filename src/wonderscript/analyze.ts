@@ -145,13 +145,13 @@ export function analyze(initForm: ReadForm | Form): Dispatch {
   }
 
   if (form[1] instanceof Symbol) {
-    if (form.length === 2) {
-      return new Dialog(
-        analyze(form[0]) as DispatchSubject,
-        new UnaryMessage(form[1].name, form[1].namespace),
-        meta
-      );
-    }
+    // if (form.length === 2) {
+    //   return new Dialog(
+    //     analyze(form[0]) as DispatchSubject,
+    //     new UnaryMessage(form[1].name, form[1].namespace),
+    //     meta
+    //   );
+    // }
 
     if (form.length === 3) {
       return new Dialog(
@@ -255,10 +255,11 @@ export function analyzeDef(form: unknown[], meta: MetaData | undefined): Dispatc
   }
 
   const [obj, template] = def;
+  pt('template', template);
   return new Dialog(
     analyze(obj),
     new ArgListMessage("define-method", undefined, [
-      new Identity(template),
+      Message.build(template),
       body,
     ])
   );

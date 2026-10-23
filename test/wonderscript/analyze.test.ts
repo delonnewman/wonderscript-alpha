@@ -13,8 +13,8 @@ import { pt } from "../../src/wonderscript/util";
 describe("analyze", () => {
   const examples: [Form, unknown][] = [
     [
-      [Symbol.intern("def"), [true, Symbol.intern('to_s')], "true"],
-      new Dialog(new Dialog(new Identity(true), new UnaryMessage("class")), new ArgListMessage("define-method", undefined, [Symbol.intern("to_s"), "true"]))
+      [Symbol.intern("def"), [Symbol.intern('TrueClass'), Symbol.intern('to_s')], "true"],
+      new Dialog(Symbol.intern('TrueClass'), new ArgListMessage("define-method", undefined, [Symbol.intern("to_s"), "true"]))
     ]
   ];
 

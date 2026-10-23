@@ -992,54 +992,6 @@ export class Interpreter {
     this.pool.attribute_value_set($String, "name", "String");
     this.pool.attribute_value_set($String, "table", String);
 
-    const $Symbol = this.pool.allocate(ClassObject);
-    this.pool.attribute_value_set($Symbol, "name", "Symbol");
-    this.pool.attribute_value_set($Symbol, "table", Symbol);
-
-    const $Keyword = this.pool.allocate(ClassObject);
-    this.pool.attribute_value_set($Keyword, "name", "Keyword");
-    this.pool.attribute_value_set($Keyword, "table", Keyword);
-
-    const $Array = this.pool.allocate(ClassObject);
-    this.pool.attribute_value_set($Array, "name", "Array");
-    this.pool.attribute_value_set($Array, "table", Array);
-
-    const $Vector = this.pool.allocate(ClassObject);
-    this.pool.attribute_value_set($Vector, "name", "Vector");
-    this.pool.attribute_value_set($Vector, "table", Vector);
-
-    const $Hash = this.pool.allocate(ClassObject);
-    this.pool.attribute_value_set($Hash, "name", "Hash");
-    this.pool.attribute_value_set($Hash, "table", Hash);
-
-    const $Set = this.pool.allocate(ClassObject);
-    this.pool.attribute_value_set($Set, "name", "Set");
-    this.pool.attribute_value_set($Set, "table", Set);
-
-    const $UnaryMessage = this.pool.allocate(ClassObject);
-    this.pool.attribute_value_set($UnaryMessage, "name", "UnaryMessage");
-    this.pool.attribute_value_set($UnaryMessage, "table", UnaryMessage);
-
-    const $BinaryMessage = this.pool.allocate(ClassObject);
-    this.pool.attribute_value_set($BinaryMessage, "name", "BinaryMessage");
-    this.pool.attribute_value_set($BinaryMessage, "table", BinaryMessage);
-
-    const $ArgListMessage = this.pool.allocate(ClassObject);
-    this.pool.attribute_value_set($ArgListMessage, "name", "ArgListMessage");
-    this.pool.attribute_value_set($ArgListMessage, "table", ArgListMessage);
-
-    const $KeywordMessage = this.pool.allocate(ClassObject);
-    this.pool.attribute_value_set($KeywordMessage, "name", "KeywordMessage");
-    this.pool.attribute_value_set($KeywordMessage, "table", KeywordMessage);
-
-    const $Dialog = this.pool.allocate(ClassObject);
-    this.pool.attribute_value_set($Dialog, "name", "Dialog");
-    this.pool.attribute_value_set($Dialog, "table", Dialog);
-
-    const $Script = this.pool.allocate(ClassObject);
-    this.pool.attribute_value_set($Script, "name", "Script");
-    this.pool.attribute_value_set($Script, "table", Script);
-
     const $JSClass = this.pool.allocate(ClassObject);
     this.pool.attribute_value_set($JSClass, "name", "JSClass");
     this.pool.attribute_value_set($JSClass, "table", JSClass);
@@ -1054,18 +1006,18 @@ export class Interpreter {
     this.#ctx.define(Symbol.intern("FalseClass"), $FalseClass);
     this.#ctx.define(Symbol.intern("Numeric"), $Numeric);
     this.#ctx.define(Symbol.intern("String"), $String);
-    this.#ctx.define(Symbol.intern("Symbol"), $Symbol);
-    this.#ctx.define(Symbol.intern("Keyword"), $Keyword);
-    this.#ctx.define(Symbol.intern("Array"), $Array);
-    this.#ctx.define(Symbol.intern("Vector"), $Vector);
-    this.#ctx.define(Symbol.intern("Hash"), $Hash);
-    this.#ctx.define(Symbol.intern("Set"), $Set);
-    this.#ctx.define(Symbol.intern("UnaryMessage"), $UnaryMessage);
-    this.#ctx.define(Symbol.intern("BinaryMessage"), $BinaryMessage);
-    this.#ctx.define(Symbol.intern("ArgListMessage"), $ArgListMessage);
-    this.#ctx.define(Symbol.intern("KeywordMessage"), $KeywordMessage);
-    this.#ctx.define(Symbol.intern("Dialog"), $Dialog);
-    this.#ctx.define(Symbol.intern("Script"), $Script);
+    this.#ctx.define(Symbol.intern("Symbol"), Symbol);
+    this.#ctx.define(Symbol.intern("Keyword"), Keyword);
+    this.#ctx.define(Symbol.intern("Array"), Array);
+    this.#ctx.define(Symbol.intern("Vector"), Vector);
+    this.#ctx.define(Symbol.intern("Hash"), Hash);
+    this.#ctx.define(Symbol.intern("Set"), Set);
+    this.#ctx.define(Symbol.intern("UnaryMessage"), UnaryMessage);
+    this.#ctx.define(Symbol.intern("BinaryMessage"), BinaryMessage);
+    this.#ctx.define(Symbol.intern("ArgListMessage"), ArgListMessage);
+    this.#ctx.define(Symbol.intern("KeywordMessage"), KeywordMessage);
+    this.#ctx.define(Symbol.intern("Dialog"), Dialog);
+    this.#ctx.define(Symbol.intern("Script"), Script);
   }
 
   get platform() {
