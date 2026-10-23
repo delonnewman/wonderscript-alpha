@@ -50,10 +50,6 @@ export class BinaryMessage extends BaseMessage implements Dispatch {
     return this.name;
   }
 
-  get internings(): string[] {
-    return [this.interned];
-  }
-
   get other() {
     return this.#other;
   }

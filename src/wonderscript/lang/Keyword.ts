@@ -87,6 +87,10 @@ export class Keyword<Name extends string = string>
     return `:${this._symbol}`;
   }
 
+  ['to-str']() {
+    return this.toString();
+  }
+
   toJS(): string {
     if (this.namespace == null) {
       return `wonderscript.lang.Keyword.intern(${JSON.stringify(this.name)})`;

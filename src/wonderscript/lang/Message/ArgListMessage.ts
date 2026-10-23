@@ -45,12 +45,20 @@ export class ArgListMessage extends BaseMessage implements Dispatch {
   }
 
   get internings(): string[] {
-    if (!this.#splat) return [this.interned];
+    const ns = this.namespace;
+    if (!this.#splat) {
+      const internings = [`${this.name}_${this.arity}`];
+      if (ns) internings.push(`${ns}/${this.name}_${this.arity}`);
+      return internings;
+    }
 
     const internings = [];
     for (let i = Math.abs(this.arity) - 1; i < 21; i++) {
+      if (ns) internings.push(`${ns}/${this.name}_${i}`);
       internings.push(`${this.name}_${i}`);
     }
+
+    if (ns) internings.push(`${ns}/${this.name}_splat`);
     internings.push( `${this.name}_splat`);
 
     return internings;

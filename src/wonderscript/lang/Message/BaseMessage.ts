@@ -23,7 +23,9 @@ interface MessageConstructor {
   parse(msg: MessageForm): Message;
 }
 
-export abstract class BaseMessage implements Message, Envelope, CompilableMessage {
+export abstract class BaseMessage
+  implements Message, Envelope, CompilableMessage
+{
   #name: string;
   #namespace?: string;
   #withinQuery: boolean;
@@ -62,7 +64,11 @@ export abstract class BaseMessage implements Message, Envelope, CompilableMessag
   }
 
   get internings(): string[] {
-    return [this.interned];
+    const internings = [this.interned];
+    if (this.namespace) {
+      internings.push(`${this.namespace}/${this.name}`);
+    }
+    return internings;
   }
 
   isWithinQuery(): boolean {
