@@ -60,6 +60,8 @@ describe("Compiler", () => {
 
       examples.forEach(([form, expected]) => {
         test(`${form} => ${expected}`, () => {
+          const code = subject.compileString(form);
+          console.error('code', code);
           const output = subject.evalString(form);
           expect(output).toBe(expected);
         });

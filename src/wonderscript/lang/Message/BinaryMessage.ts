@@ -46,10 +46,6 @@ export class BinaryMessage extends BaseMessage implements Dispatch {
     this.#other = other;
   }
 
-  get interned(): string {
-    return this.name;
-  }
-
   get other() {
     return this.#other;
   }
@@ -63,7 +59,7 @@ export class BinaryMessage extends BaseMessage implements Dispatch {
   }
 
   toString(): string {
-    return `#<BinaryMessage (${this.interned} ${this.#other})>`;
+    return `#<BinaryMessage (${this.name} ${this.#other})>`;
   }
 
   bindings(msg: BinaryMessage): readonly Binding[] {
@@ -101,6 +97,6 @@ export class BinaryMessage extends BaseMessage implements Dispatch {
     if (isDispatch(this.other)) {
       throw new Error(`cannot emit dispatch in binary message: ${this}`);
     }
-    return `(${emit(obj, ctx)}${this.interned}${emit(this.other, ctx)})`;
+    return `(${emit(obj, ctx)}${this.name}${emit(this.other, ctx)})`;
   }
 }

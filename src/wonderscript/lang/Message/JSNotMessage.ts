@@ -1,7 +1,7 @@
 import { UnaryMessage } from "./UnaryMessage";
 
 export class JSNotMessage extends UnaryMessage {
-  get interned(): string {
+  get name(): string {
     return '!';
   }
 }

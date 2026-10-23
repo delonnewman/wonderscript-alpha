@@ -26,10 +26,6 @@ export class UnaryMessage extends BaseMessage {
     throw new Error(`invalid unary message: ${msg}`);
   }
 
-  get interned(): string {
-    return this.name;
-  }
-
   get arity(): number {
     return 0;
   }
@@ -47,7 +43,7 @@ export class UnaryMessage extends BaseMessage {
   }
 
   toJS(ctx: Context, obj: Form): string {
-    return `${this.interned}${emit(obj, ctx)}`;
+    return `${this.name}${emit(obj, ctx)}`;
   }
 
   toString() {
