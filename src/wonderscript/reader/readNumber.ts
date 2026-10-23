@@ -29,6 +29,18 @@ function matchNumber(s: string): number | null {
     s = s.replace(/_/g, "");
   }
 
+  if (s.startsWith("0b")) {
+    return parseInt(s.slice(2), 2);
+  }
+
+  if (s.startsWith("0o")) {
+    return parseInt(s.slice(2), 8);
+  }
+
+  if (s.startsWith("0x")) {
+    return parseInt(s.slice(2), 16);
+  }
+
   if (s.indexOf(".") === -1) {
     return parseInt(s, 10);
   }
