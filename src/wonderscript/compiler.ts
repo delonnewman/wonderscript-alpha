@@ -12,6 +12,5 @@ export { prStr } from "./compiler/prStr";
 
 export function evaluate(form: Form, scope: Context) {
   const code = emit(form, scope);
-  const result = jsEval(code);
-  return result;
+  return jsEval(code);
 }
