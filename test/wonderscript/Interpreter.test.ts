@@ -56,6 +56,8 @@ describe("Interpreter", () => {
       ['(def (TrueClass to_s) "true") (true to_s)', "true"],
       ["(def (TrueClass not) false) (true not)", false],
       ["(begin 1 2 3)", 3],
+      ["(let [x 1 y (x + 1)] (x * y))", 2],
+      ['((do 1 2 3))', 3]
     ];
 
     examples.forEach(([form, expected]) => {
